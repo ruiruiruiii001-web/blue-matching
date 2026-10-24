@@ -12,13 +12,17 @@ export default async function handler(req, res) {
   const { prompt } = req.body;
 
   try {
-    // 確実に互換性のある v1 エンドポイントと gemini-1.5-flash の組み合わせ
+    // v1betaエンドポイントかつ、現在最も互換性の高い指定方法
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+        body: JSON.stringify({
+          contents: [{
+            parts: [{ text: prompt }]
+          }]
+        })
       }
     );
 
