@@ -3,7 +3,8 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const apiKey = process.env.blue_matching_key || process.env.GEMINI_API_KEY;
+  // どの名前で登録されていても読み込めるように対応
+  const apiKey = process.env.Gemini_API_Key || process.env.GEMINI_API_KEY || process.env.blue_matching_key;
 
   if (!apiKey) {
     return res.status(500).json({ error: 'Vercelの環境変数が設定されていません。' });
