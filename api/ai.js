@@ -21,17 +21,36 @@ export default async function handler(req) {
       });
     }
 
-    // Googleが要求している最新の gemini-3.8-flash を指定しつつ、
-    // タイムアウトを防ぐため maxOutputTokens を 800 に制限して高速化
+    // 1. 固定モデル名を使わず、現在このAPIキーで使えるモデル一覧を自動取得する
+    const modelsRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+    const modelsData = await modelsRes.json();
+
+    if (modelsData.error) {
+      return new Response(JSON.stringify({ error: `API Key Error: ${modelsData.error.message}` }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    // generateContent が使えるモデルを上から順に自動で1つ選出する
+    const availableModel = modelsData.models?.find(m => 
+      m.supportedGenerationMethods?.includes('generateContent') &&
+      (m.name.includes('flash') || m.name.includes('pro'))
+    );
+
+    // 万が一見つからない場合のフォールバック
+    const modelPath = availableModel ? availableModel.name : 'models/gemini-1.5-flash';
+
+    // 2. 取得した正しいモデルパスを使ってストリーミングリクエストを実行
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:streamGenerateContent?alt=sse&key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/${modelPath}:streamGenerateContent?alt=sse&key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
           generationConfig: {
-            maxOutputTokens: 800,
+            maxOutputTokens: 600, // 504タイムアウトを防ぐため出力を軽量化
             temperature: 0.7,
           }
         }),
