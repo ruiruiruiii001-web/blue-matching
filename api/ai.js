@@ -15,38 +15,23 @@ export default async function handler(req) {
     const apiKey = process.env.Gemini_API_Key || process.env.GEMINI_API_KEY;
 
     if (!apiKey) {
-      return new Response(JSON.stringify({ error: 'Vercelの環境変数 "Gemini_API_Key" が設定されていません。' }), {
+      return new Response(JSON.stringify({ error: 'APIキーが設定されていません。' }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' },
       });
     }
 
-    // 1. 利用可能なモデルの一覧を取得して確実に動くモデルを自動選出
-    const modelsRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
-    const modelsData = await modelsRes.json();
-
-    let modelName = 'models/gemini-1.5-flash';
-    if (modelsData.models && Array.isArray(modelsData.models)) {
-      const available = modelsData.models.find(m => 
-        m.supportedGenerationMethods && 
-        m.supportedGenerationMethods.includes('generateContent') &&
-        (m.name.includes('flash') || m.name.includes('3.8'))
-      );
-      if (available) {
-        modelName = available.name;
-      }
-    }
-
-    // 2. ストリーミングリクエストを実行（高速化のため maxOutputTokens を設定）
+    // Googleが要求している最新の gemini-3.8-flash を指定しつつ、
+    // タイムアウトを防ぐため maxOutputTokens を 800 に制限して高速化
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/${modelName}:streamGenerateContent?alt=sse&key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:streamGenerateContent?alt=sse&key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
           generationConfig: {
-            maxOutputTokens: 800, // 生成文字数を絞り、レスポンス速度を大幅アップ
+            maxOutputTokens: 800,
             temperature: 0.7,
           }
         }),
