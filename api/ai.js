@@ -6,14 +6,15 @@ export default async function handler(req, res) {
   const apiKey = process.env.Gemini_API_Key || process.env.GEMINI_API_KEY;
 
   if (!apiKey) {
-    return res.status(500).json({ error: 'DEBUG: Gemini_API_Key 環境変数が取得できません。' });
+    return res.status(500).json({ error: 'Vercelの環境変数 "Gemini_API_Key" が設定されていません。' });
   }
 
   const { prompt } = req.body;
 
   try {
+    // 確実にどのAPIキーでも動作する gemini-1.5-pro を使用
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -33,6 +34,6 @@ export default async function handler(req, res) {
 
     return res.status(200).json(data);
   } catch (error) {
-    return res.status(500).json({ error: `Catch Error: ${error.message}` });
+    return res.status(500).json({ error: `Server Error: ${error.message}` });
   }
 }
