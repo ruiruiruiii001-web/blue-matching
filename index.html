@@ -155,13 +155,15 @@
       document.getElementById('placeholder').classList.add('hidden');
       document.getElementById('result').classList.add('hidden');
       document.getElementById('badge').classList.add('hidden');
-      document.getElementById('loading').classList.remove('hidden');
-      document.getElementById('loading').classList.add('flex');
+      document.getElementById('loading').classList.remove('flex');
+      document.getElementById('loading').classList.add('hidden');
 
       const promptText = `建設・現場職の採用コンサルタントとして以下のメモから求人票JSONを作成せよ。\n職種:${category}\nメモ:${notes}\n出力形式(JSONのみ): {"title":"","salary":"","support":"","positives":"","negatives":""}`;
 
+      document.getElementById('loading').classList.remove('hidden');
+      document.getElementById('loading').classList.add('flex');
+
       try {
-        // Vercelのサーバー（/api/generate）を呼び出す
         const response = await fetch('/api/generate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -170,11 +172,16 @@
 
         const data = await response.json();
 
-        if (data.error) {
-          throw new Error(data.error);
+        if (!response.ok || data.error) {
+          throw new Error(typeof data.error === 'string' ? data.error : JSON.stringify(data.error) || 'サーバーエラーが発生しました');
         }
 
-        let rawText = data.candidates[0].content.parts[0].text.replace(/```json/g, '').replace(/```/g, '').trim();
+        let candidateText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (!candidateText) {
+          throw new Error('Geminiからの応答データが空です。');
+        }
+
+        let rawText = candidateText.replace(/```json/g, '').replace(/```/g, '').trim();
         const res = JSON.parse(rawText);
 
         document.getElementById('resTitle').innerText = res.title;
@@ -188,7 +195,7 @@
         document.getElementById('result').classList.remove('hidden');
         document.getElementById('badge').classList.remove('hidden');
       } catch (err) {
-        alert('エラーが発生しました：' + (err.message || '通信エラー'));
+        alert('エラーが発生しました：\n' + err.message);
         document.getElementById('loading').classList.remove('flex');
         document.getElementById('placeholder').classList.remove('hidden');
       }
