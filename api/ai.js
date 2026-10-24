@@ -12,32 +12,9 @@ export default async function handler(req, res) {
   const { prompt } = req.body;
 
   try {
-    // 1. まず利用可能なモデル一覧を取得
-    const modelsResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`
-    );
-    const modelsData = await modelsResponse.json();
-
-    if (modelsData.error) {
-      return res.status(500).json({ error: `API Key Validation Error: ${modelsData.error.message}` });
-    }
-
-    // generateContentに対応しているモデルを自動検出
-    const validModel = modelsData.models?.find(m => 
-      m.supportedGenerationMethods?.includes('generateContent')
-    );
-
-    if (!validModel) {
-      return res.status(500).json({ 
-        error: '利用可能なGeminiモデルが見つかりませんでした。APIキーの権限を確認してください。',
-        availableModels: modelsData 
-      });
-    }
-
-    // 2. 検出された有効なモデル名で呼び出しを実行
-    const targetModel = validModel.name; // 例: "models/gemini-1.5-flash"
+    // Googleのエラーメッセージが指示している最新モデルを指定
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/${targetModel}:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -50,7 +27,7 @@ export default async function handler(req, res) {
     );
 
     const data = await response.json();
-
+    
     if (data.error) {
       return res.status(500).json({ error: `Gemini API Error: ${data.error.message}` });
     }
