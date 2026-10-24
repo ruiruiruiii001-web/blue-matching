@@ -12,9 +12,9 @@ export default async function handler(req, res) {
   const { prompt } = req.body;
 
   try {
-    // モデル名を安定している 'gemini-pro' に変更
+    // 最新の仕様に対応したエンドポイント（gemini-1.5-flash）
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -23,6 +23,11 @@ export default async function handler(req, res) {
     );
 
     const data = await response.json();
+    
+    if (data.error) {
+      return res.status(500).json({ error: data.error.message || 'Gemini APIエラー' });
+    }
+
     return res.status(200).json(data);
   } catch (error) {
     return res.status(500).json({ error: 'Gemini APIの呼び出しに失敗しました。' });
