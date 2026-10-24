@@ -1,5 +1,5 @@
 export const config = {
-  runtime: 'edge', // 高速なEdgeランタイムを使用してストリーミングを実現
+  runtime: 'edge',
 };
 
 export default async function handler(req) {
@@ -21,27 +21,30 @@ export default async function handler(req) {
       });
     }
 
-    // streamGenerateContent エンドポイントを使用してリアルタイム出力を行う
+    // gemini-1.5-flash を使用し、高速化のためのパラメータを追加
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:streamGenerateContent?alt=sse&key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:streamGenerateContent?alt=sse&key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+            maxOutputTokens: 1024, // 出力長を制限して高速化
+            temperature: 0.7,
+          }
         }),
       }
     );
 
     if (!response.ok) {
-      const errData = await response.json();
-      return new Response(JSON.stringify({ error: errData.error?.message || 'APIエラーが発生しました。' }), {
+      const errText = await response.text();
+      return new Response(JSON.stringify({ error: `Gemini API Error: ${errText}` }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' },
       });
     }
 
-    // ReadableStreamをそのままフロントエンドに転送
     const encoder = new TextEncoder();
     const decoder = new TextDecoder();
 
@@ -54,7 +57,6 @@ export default async function handler(req) {
             if (done) break;
             
             const chunk = decoder.decode(value, { stream: true });
-            // SSEの行からテキスト部分を抽出してクライアントへ流す
             const lines = chunk.split('\n');
             for (const line of lines) {
               if (line.startsWith('data: ')) {
