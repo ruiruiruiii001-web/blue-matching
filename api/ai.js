@@ -3,6 +3,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  // Vercelに設定されている各種環境変数を安全に取得
   const apiKey = process.env.Gemini_API_Key || process.env.GEMINI_API_KEY || process.env.blue_matching_key;
 
   if (!apiKey) {
@@ -17,7 +18,11 @@ export default async function handler(req, res) {
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+        body: JSON.stringify({
+          contents: [{
+            parts: [{ text: prompt }]
+          }]
+        })
       }
     );
 
