@@ -3,17 +3,15 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Vercelに設定されている各種環境変数を安全に取得
-  const apiKey = process.env.Gemini_API_Key || process.env.GEMINI_API_KEY || process.env.blue_matching_key;
+  const apiKey = process.env.Gemini_API_Key || process.env.GEMINI_API_KEY;
 
   if (!apiKey) {
-    return res.status(500).json({ error: 'Vercelの環境変数が設定されていません。' });
+    return res.status(500).json({ error: 'DEBUG: Gemini_API_Key 環境変数が取得できません。' });
   }
 
   const { prompt } = req.body;
 
   try {
-    // 安定性の高い v1 エンドポイントと gemini-1.5-flash を使用
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
       {
@@ -30,11 +28,11 @@ export default async function handler(req, res) {
     const data = await response.json();
     
     if (data.error) {
-      return res.status(500).json({ error: data.error.message || 'Gemini APIエラー' });
+      return res.status(500).json({ error: `Gemini API Error: ${data.error.message}` });
     }
 
     return res.status(200).json(data);
   } catch (error) {
-    return res.status(500).json({ error: 'Gemini APIの呼び出しに失敗しました。' });
+    return res.status(500).json({ error: `Catch Error: ${error.message}` });
   }
 }
