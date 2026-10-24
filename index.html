@@ -52,7 +52,7 @@
           </div>
         </div>
         <div class="mt-6">
-          <button onclick="generateRealJobPosting()" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold py-3.5 px-6 rounded-xl shadow transition-all flex items-center justify-center gap-2">
+          <button id="generateBtn" onclick="generateRealJobPosting()" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold py-3.5 px-6 rounded-xl shadow transition-all flex items-center justify-center gap-2">
             <i class="fa-solid fa-wand-magic-sparkles"></i> Geminiで求人票を一発作成
           </button>
         </div>
@@ -62,7 +62,7 @@
       <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 min-h-[400px]">
         <h2 class="text-lg font-bold text-slate-900 mb-4 flex items-center justify-between">
           <span><i class="fa-solid fa-eye text-sky-500"></i> 求人票プレビュー</span>
-          <span id="badge" class="hidden text-xs bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 rounded-full">公開準備完了</span>
+          <span id="badge" class="hidden text-xs bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 rounded-full">リアルタイム生成中...</span>
         </h2>
         <div id="placeholder" class="h-64 flex flex-col items-center justify-center text-slate-400 border-2 border-dashed border-slate-200 rounded-xl">
           <i class="fa-solid fa-microchip text-4xl mb-2 text-slate-300"></i>
@@ -70,21 +70,10 @@
         </div>
         <div id="loading" class="hidden h-64 flex-col items-center justify-center text-slate-600">
           <div class="w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mb-3"></div>
-          <p class="text-sm font-medium">Geminiが求人票を構築中...</p>
+          <p class="text-sm font-medium">Geminiに接続中...</p>
         </div>
-        <div id="result" class="hidden space-y-4 text-sm">
-          <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-xl">
-            <h3 id="resTitle" class="text-base font-bold text-slate-900"></h3>
-          </div>
-          <div class="grid grid-cols-2 gap-3">
-            <div class="bg-slate-50 p-3 rounded-xl border"><div class="text-xs text-slate-500">給与</div><div id="resSalary" class="font-bold text-emerald-600"></div></div>
-            <div class="bg-slate-50 p-3 rounded-xl border"><div class="text-xs text-slate-500">サポート</div><div id="resSupport" class="font-bold text-sky-600"></div></div>
-          </div>
-          <div class="border rounded-xl p-4 space-y-2 text-xs">
-            <div><span class="bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded">推し</span> <span id="resPositives"></span></div>
-            <div><span class="bg-rose-100 text-rose-800 font-bold px-1.5 py-0.5 rounded">大変</span> <span id="resNegatives"></span></div>
-          </div>
-        </div>
+        <!-- ストリーミングテキスト出力エリア -->
+        <div id="result" class="hidden whitespace-pre-wrap text-sm leading-relaxed text-slate-800 bg-slate-50 p-4 rounded-xl border border-slate-200 font-mono"></div>
       </div>
     </div>
 
@@ -146,51 +135,76 @@
       document.getElementById('tabJobseeker').className = !isEmp ? "px-6 py-3 rounded-xl font-bold text-sm bg-sky-500 text-white shadow-md flex items-center gap-2" : "px-6 py-3 rounded-xl font-bold text-sm bg-white text-slate-600 shadow-sm flex items-center gap-2";
     }
 
-    // 企業側：Gemini連携求人作成（新しい /api/ai エンドポイントを呼び出し）
+    // 企業側：Geminiストリーミング求人作成
     async function generateRealJobPosting() {
       const category = document.getElementById('jobCategory').value.trim() || '現場職';
       const notes = document.getElementById('rawNotes').value.trim();
       if (!notes) { alert('メモを入力してください！'); return; }
 
+      const generateBtn = document.getElementById('generateBtn');
+      generateBtn.disabled = true;
+      generateBtn.classList.add('opacity-50');
+
       document.getElementById('placeholder').classList.add('hidden');
       document.getElementById('result').classList.add('hidden');
+      document.getElementById('result').innerText = '';
       document.getElementById('badge').classList.add('hidden');
       document.getElementById('loading').classList.remove('hidden');
       document.getElementById('loading').classList.add('flex');
 
-      const promptText = `建設・現場職の採用コンサルタントとして以下のメモから求人票JSONを作成せよ。\n職種:${category}\nメモ:${notes}\n出力形式(JSONのみ): {"title":"","salary":"","support":"","positives":"","negatives":""}`;
+      const promptText = `あなたは現場職・建設業界に強いプロの採用コンサルタントです。
+以下のメモを基に、求職者にとって魅力的で分かりやすい求人票を作成してください。
+
+【職種】${category}
+【現場メモ】${notes}
+
+以下の構成で見やすく丁寧に出力してください：
+■ 職種タイトル
+■ 想定給料・手当
+■ 会社からのサポート体制
+■ この仕事の魅力・推しポイント
+■ 大変な点・求める心構え`;
 
       try {
-        // 新しいサーバーレス関数 '/api/ai' を呼び出す
         const response = await fetch('/api/ai', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ prompt: promptText })
         });
 
-        const data = await response.json();
-
-        if (data.error) {
-          throw new Error(data.error);
+        if (!response.ok) {
+          const err = await response.json();
+          throw new Error(err.error || '通信エラーが発生しました。');
         }
-
-        let rawText = data.candidates[0].content.parts[0].text.replace(/```json/g, '').replace(/```/g, '').trim();
-        const res = JSON.parse(rawText);
-
-        document.getElementById('resTitle').innerText = res.title;
-        document.getElementById('resSalary').innerText = res.salary;
-        document.getElementById('resSupport').innerText = res.support;
-        document.getElementById('resPositives').innerText = res.positives;
-        document.getElementById('resNegatives').innerText = res.negatives;
 
         document.getElementById('loading').classList.remove('flex');
         document.getElementById('loading').classList.add('hidden');
         document.getElementById('result').classList.remove('hidden');
         document.getElementById('badge').classList.remove('hidden');
+
+        // ストリーミングデータを1文字ずつ画面に追加
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        const resultDiv = document.getElementById('result');
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          const text = decoder.decode(value, { stream: true });
+          resultDiv.innerText += text;
+        }
+
+        document.getElementById('badge').innerText = '作成完了';
+        document.getElementById('badge').className = 'text-xs bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 rounded-full';
+
       } catch (err) {
         alert('エラーが発生しました：' + (err.message || '通信エラー'));
         document.getElementById('loading').classList.remove('flex');
+        document.getElementById('loading').classList.add('hidden');
         document.getElementById('placeholder').classList.remove('hidden');
+      } finally {
+        generateBtn.disabled = false;
+        generateBtn.classList.remove('opacity-50');
       }
     }
 
