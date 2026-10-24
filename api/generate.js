@@ -12,9 +12,9 @@ export default async function handler(req, res) {
   const { prompt } = req.body;
 
   try {
-    // 最新の仕様に対応したエンドポイント（gemini-1.5-flash）
+    // バージョンを v1 に変更し、確実に動く形に修正
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
