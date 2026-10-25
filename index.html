@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI ブルーカラー求人マッチング</title>
+  <title>現場特化型 求人・採用管理プラットフォーム</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
@@ -12,56 +12,61 @@
   <!-- ヘッダー -->
   <header class="bg-blue-600 text-white shadow">
     <div class="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
-      <h1 class="text-xl font-bold">現場特化型 AI求人マッチング</h1>
-      <span class="text-sm bg-blue-700 px-3 py-1 rounded-full">求人作成 & マッチングプラットフォーム</span>
+      <h1 class="text-xl font-bold">現場特化型 求人テンプレートメーカー</h1>
+      <span class="text-sm bg-blue-700 px-3 py-1 rounded-full">穴埋め式かんたん作成</span>
     </div>
   </header>
 
-  <!-- API制限（429）時のインフォメーションバナー -->
-  <div id="rateLimitBanner" class="max-w-5xl mx-auto px-4 mt-4 hidden">
-    <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded shadow-sm flex items-start justify-between">
-      <div>
-        <h3 class="font-bold text-amber-800 text-sm">⚠️ 無料枠のAPIリクエスト制限（429）に達しています</h3>
-        <p id="rateLimitText" class="text-xs text-amber-700 mt-1">ただいま1日の制限回数を超過中です。制限がリセットされるまでしばらくお待ちいただくか、時間をおいてお試しください。</p>
-      </div>
-      <button onclick="document.getElementById('rateLimitBanner').classList.add('hidden')" class="text-amber-500 hover:text-amber-700 font-bold text-sm">✕</button>
-    </div>
-  </div>
-
   <main class="max-w-5xl mx-auto px-4 py-8 grid grid-cols-1 md:grid-cols-2 gap-8">
     
-    <!-- 左側：求人票生成フォーム -->
+    <!-- 左側：テンプレート穴埋めフォーム -->
     <section class="bg-white p-6 rounded-lg shadow-md h-fit">
-      <h2 class="text-lg font-bold mb-4 border-b pb-2 text-blue-600">1. AI求人票作成（企業向け）</h2>
+      <h2 class="text-lg font-bold mb-4 border-b pb-2 text-blue-600">1. 求人票テンプレート入力</h2>
       
       <div class="space-y-4">
         <div>
-          <label class="block text-sm font-medium mb-1">職種・仕事内容の概要</label>
-          <input type="text" id="jobTitle" placeholder="例: 引越しスタッフ、建築現場の施工管理" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+          <label class="block text-sm font-medium mb-1">職種名</label>
+          <input type="text" id="jobTitle" placeholder="例: 建築現場の施工管理スタッフ" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium mb-1">募集人数</label>
+            <input type="number" id="jobCapacity" placeholder="例: 3" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none text-sm" min="1" value="1">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">勤務地・エリア</label>
+            <input type="text" id="jobLocation" placeholder="例: 東京都内および近郊" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+          </div>
         </div>
 
         <div>
-          <label class="block text-sm font-medium mb-1">募集人数</label>
-          <input type="number" id="jobCapacity" placeholder="例: 3" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none" min="1" value="1">
+          <label class="block text-sm font-medium mb-1">給与条件（月給・日給など）</label>
+          <input type="text" id="jobSalary" placeholder="例: 月給 300,000円 〜 450,000円" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none text-sm">
         </div>
 
         <div>
-          <label class="block text-sm font-medium mb-1">給与条件や特徴</label>
-          <input type="text" id="jobCondition" placeholder="例: 週休2日制初任給30万円、未経験歓迎" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+          <label class="block text-sm font-medium mb-1">主な仕事内容</label>
+          <textarea id="jobDuties" rows="2" placeholder="例: 現場での資材管理、安全確認、簡単な軽作業など。" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none text-sm"></textarea>
         </div>
 
-        <button id="generateBtn" onclick="generateJobOffer()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded transition shadow">
-          Geminiで求人票を生成する
+        <div>
+          <label class="block text-sm font-medium mb-1">アピールポイント・福利厚生</label>
+          <input type="text" id="jobPerks" placeholder="例: 未経験歓迎 / 資格取得支援あり / 寮完備" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+        </div>
+
+        <button onclick="previewTemplate()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded transition shadow text-sm">
+          テンプレートをプレビューする
         </button>
       </div>
 
-      <!-- 生成結果エリア -->
+      <!-- 生成・プレビュー結果エリア -->
       <div id="resultContainer" class="mt-6 hidden">
-        <h3 class="text-md font-semibold mb-2 text-gray-700">生成された求人票プレビュー</h3>
-        <div id="resultText" class="p-4 bg-gray-50 border rounded text-sm whitespace-pre-wrap leading-relaxed min-h-[150px]"></div>
+        <h3 class="text-md font-semibold mb-2 text-gray-700">完成プレビュー</h3>
+        <div id="resultText" class="p-4 bg-gray-50 border rounded text-xs whitespace-pre-wrap leading-relaxed min-h-[140px] text-gray-700 font-mono"></div>
         
-        <button id="publishBtn" onclick="publishJob()" class="w-full mt-3 bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded transition shadow">
-          📌 この求人を掲載する
+        <button onclick="publishJob()" class="w-full mt-3 bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded transition shadow text-sm">
+          📌 この求人を一覧に掲載する
         </button>
       </div>
     </section>
@@ -85,7 +90,7 @@
 
   </main>
 
-  <!-- 求人詳細 & AIマッチング診断モーダル -->
+  <!-- 求人詳細モーダル -->
   <div id="jobModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 p-4">
     <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 relative">
       
@@ -96,7 +101,7 @@
       <div class="border-b pb-3 mb-4">
         <div class="flex justify-between items-center mb-2">
           <span id="modalCapacityBadge" class="inline-block bg-blue-100 text-blue-800 text-xs px-2.5 py-0.5 rounded font-semibold"></span>
-          <!-- 採用人数・ステータス調整ボタン -->
+          <!-- 採用人数調整ボタン -->
           <div class="space-x-1">
             <button onclick="adjustCapacity(-1)" class="bg-gray-200 hover:bg-gray-300 text-gray-700 text-xs px-2 py-1 rounded">人数 -1</button>
             <button onclick="adjustCapacity(1)" class="bg-gray-200 hover:bg-gray-300 text-gray-700 text-xs px-2 py-1 rounded">人数 +1</button>
@@ -109,25 +114,7 @@
       <!-- 求人本文 -->
       <div class="mb-6">
         <h3 class="text-sm font-bold text-gray-700 mb-2">【求人詳細】</h3>
-        <div id="modalContent" class="p-4 bg-gray-50 border rounded text-sm whitespace-pre-wrap leading-relaxed text-gray-700"></div>
-      </div>
-
-      <!-- 求職者向け AIマッチング診断セクション -->
-      <div class="border-t pt-4 bg-blue-50 p-4 rounded-lg">
-        <h3 class="text-md font-bold text-blue-900 mb-2">⚡ この求人とのAIマッチング診断</h3>
-        <p class="text-xs text-gray-600 mb-3">あなたの経験や希望条件を入力すると、AIがこの求人との適合度を診断します。</p>
-
-        <textarea id="userProfile" rows="3" placeholder="例: 20代男性、普通免許あり、体力には自信があります。夜勤なし希望です。" class="w-full border rounded p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none mb-3"></textarea>
-
-        <button id="matchBtn" onclick="runMatching()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 rounded transition shadow text-sm">
-          AIで適合度を診断する
-        </button>
-
-        <!-- 診断結果表示エリア -->
-        <div id="matchResult" class="mt-4 p-3 bg-white border border-indigo-200 rounded hidden">
-          <h4 class="font-bold text-indigo-900 text-sm mb-1">【診断結果】</h4>
-          <div id="matchResultText" class="text-xs text-gray-700 whitespace-pre-wrap leading-relaxed"></div>
-        </div>
+        <div id="modalContent" class="p-4 bg-gray-50 border rounded text-xs whitespace-pre-wrap leading-relaxed text-gray-700 font-mono"></div>
       </div>
 
     </div>
@@ -141,72 +128,43 @@
       renderJobList();
     });
 
-    // 1. AI求人票生成
-    async function generateJobOffer() {
+    // テンプレートから求人票テキストを組み立てる
+    function previewTemplate() {
       const title = document.getElementById("jobTitle").value.trim();
       const capacity = document.getElementById("jobCapacity").value.trim() || "1";
-      const condition = document.getElementById("jobCondition").value.trim();
-      const btn = document.getElementById("generateBtn");
-      const resultContainer = document.getElementById("resultContainer");
-      const resultText = document.getElementById("resultText");
+      const location = document.getElementById("jobLocation").value.trim() || "指定なし";
+      const salary = document.getElementById("jobSalary").value.trim() || "要相談";
+      const duties = document.getElementById("jobDuties").value.trim() || "特になし";
+      const perks = document.getElementById("jobPerks").value.trim() || "特になし";
 
       if (!title) {
-        alert("職種・仕事内容を入力してください。");
+        alert("職種名を入力してください。");
         return;
       }
 
-      btn.disabled = true;
-      btn.innerText = "Geminiに接続中...";
-      resultContainer.classList.add("hidden");
-      document.getElementById("rateLimitBanner").classList.add("hidden");
+      currentGeneratedText = `【職種】
+${title}
 
-      const prompt = `以下の条件をもとに、現場求職者に響く魅力的な求人票テキストを作成してください。\n【職種】${title}\n【募集人数】${capacity}名\n【条件・特徴】${condition}`;
+【仕事内容】
+${duties}
 
-      try {
-        const response = await fetch("/api/ai", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ prompt })
-        });
+【給与条件】
+${salary}
 
-        const responseText = await response.text();
-        let data;
-        try {
-          data = JSON.parse(responseText);
-        } catch (e) {
-          throw new Error("サーバー側で一時的なエラーが発生しました。");
-        }
+【勤務地】
+${location}
 
-        if (!response.ok) {
-          if (response.status === 429) {
-            showRateLimitBanner(data.error);
-          }
-          throw new Error(data.error || "通信エラーが発生しました。");
-        }
+【アピールポイント・待遇】
+${perks}
 
-        currentGeneratedText = data.result;
-        resultText.innerText = currentGeneratedText;
-        resultContainer.classList.remove("hidden");
+----------------------------------------
+ご応募お待ちしております！`;
 
-      } catch (error) {
-        if (!error.message.includes("429")) {
-          alert("エラーが発生しました: " + error.message);
-        }
-      } finally {
-        btn.disabled = false;
-        btn.innerText = "Geminiで求人票を生成する";
-      }
+      document.getElementById("resultText").innerText = currentGeneratedText;
+      document.getElementById("resultContainer").classList.remove("hidden");
     }
 
-    // 429エラー専用バナー表示
-    function showRateLimitBanner(errorMsg) {
-      const banner = document.getElementById("rateLimitBanner");
-      const text = document.getElementById("rateLimitText");
-      text.innerText = "API制限に達しました: " + errorMsg;
-      banner.classList.remove("hidden");
-    }
-
-    // 2. 求人を掲載（LocalStorageに保存）
+    // 求人を掲載（LocalStorageに保存）
     function publishJob() {
       const title = document.getElementById("jobTitle").value.trim() || "求人募集";
       const capacity = parseInt(document.getElementById("jobCapacity").value) || 1;
@@ -226,13 +184,17 @@
 
       renderJobList();
 
+      // フォームリセット
       document.getElementById("jobTitle").value = "";
       document.getElementById("jobCapacity").value = "1";
-      document.getElementById("jobCondition").value = "";
+      document.getElementById("jobLocation").value = "";
+      document.getElementById("jobSalary").value = "";
+      document.getElementById("jobDuties").value = "";
+      document.getElementById("jobPerks").value = "";
       document.getElementById("resultContainer").classList.add("hidden");
       currentGeneratedText = "";
 
-      alert("求人一覧に掲載しました！");
+      alert("求人を一覧に掲載しました！");
     }
 
     function getSavedJobs() {
@@ -240,7 +202,7 @@
       return saved ? JSON.parse(saved) : [];
     }
 
-    // 3. 求人カード一覧の表示（検索フィルター対応）
+    // 求人カード一覧の表示（検索フィルター対応）
     function renderJobList() {
       const jobList = document.getElementById("jobList");
       const jobCount = document.getElementById("jobCount");
@@ -273,7 +235,7 @@
           </span>
           <p class="text-xs text-gray-600 line-clamp-2 mb-3 whitespace-pre-wrap">${escapeHtml(job.content)}</p>
           <div class="flex justify-between items-center border-t pt-2 mt-2">
-            <span class="text-xs text-blue-600 font-semibold hover:underline">詳細・AI診断を見る →</span>
+            <span class="text-xs text-blue-600 font-semibold hover:underline">詳細を見る →</span>
             <button onclick="event.stopPropagation(); deleteJob(${job.id})" class="text-xs text-red-500 hover:text-red-700 px-2 py-1 rounded">
               削除
             </button>
@@ -282,22 +244,20 @@
       `).join("");
     }
 
-    // 4. モーダル表示制御 & 人数調整
+    // モーダル表示制御 & 人数調整
     function openModal(id) {
       const jobs = getSavedJobs();
       selectedJob = jobs.find(j => j.id === id);
       if (!selectedJob) return;
 
       updateModalUI();
-      document.getElementById("userProfile").value = "";
-      document.getElementById("matchResult").classList.add("hidden");
       document.getElementById("jobModal").classList.remove("hidden");
     }
 
     function updateModalUI() {
       if (!selectedJob) return;
       document.getElementById("modalTitle").innerText = selectedJob.title;
-      document.getElementById("modalCapacityBadge.innerText" || "modalCapacityBadge").innerText = `残り募集人数: ${selectedJob.capacity} 名`;
+      document.getElementById("modalCapacityBadge").innerText = `残り募集人数: ${selectedJob.capacity} 名`;
       document.getElementById("modalDate").innerText = `掲載日: ${selectedJob.date}`;
       document.getElementById("modalContent").innerText = selectedJob.content;
     }
@@ -306,12 +266,10 @@
       if (!selectedJob) return;
       selectedJob.capacity = Math.max(0, selectedJob.capacity + amount);
       
-      // LocalStorageを更新
       let jobs = getSavedJobs();
       jobs = jobs.map(j => j.id === selectedJob.id ? selectedJob : j);
       localStorage.setItem("published_jobs", JSON.stringify(jobs));
 
-      // 画面更新
       updateModalUI();
       renderJobList();
     }
@@ -321,71 +279,7 @@
       selectedJob = null;
     }
 
-    // 5. 求職者向け AIマッチング診断処理
-    async function runMatching() {
-      const userProfile = document.getElementById("userProfile").value.trim();
-      const matchBtn = document.getElementById("matchBtn");
-      const matchResult = document.getElementById("matchResult");
-      const matchResultText = document.getElementById("matchResultText");
-
-      if (!userProfile) {
-        alert("あなたの経験やアピールポイントを入力してください。");
-        return;
-      }
-
-      if (!selectedJob) return;
-
-      matchBtn.disabled = true;
-      matchBtn.innerText = "AIがマッチング診断中...";
-      matchResult.classList.add("hidden");
-
-      const prompt = `以下の求人内容と求職者プロフィールを照らし合わせ、マッチング診断を行ってください。
-
-【求人内容】
-職種: ${selectedJob.title}
-募集人数: ${selectedJob.capacity}名
-本文:
-${selectedJob.content}
-
-【求職者プロフィール】
-${userProfile}
-
-【出力形式】
-1. 適合度スコア（例: 適合度 85%）
-2. マッチしている点・アピールできる強み（箇条書き）
-3. 懸念点や事前に確認しておくべきポイント（箇条書き）`;
-
-      try {
-        const response = await fetch("/api/ai", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ prompt })
-        });
-
-        const responseText = await response.text();
-        let data;
-        try {
-          data = JSON.parse(responseText);
-        } catch (e) {
-          throw new Error("診断中に通信エラーが発生しました。");
-        }
-
-        if (!response.ok) {
-          throw new Error(data.error || "通信エラーが発生しました。");
-        }
-
-        matchResultText.innerText = data.result;
-        matchResult.classList.remove("hidden");
-
-      } catch (error) {
-        alert("エラーが発生しました: " + error.message);
-      } finally {
-        matchBtn.disabled = false;
-        matchBtn.innerText = "AIで適合度を診断する";
-      }
-    }
-
-    // 6. 削除処理
+    // 削除処理
     function deleteJob(id) {
       if (!confirm("この求人を削除してもよろしいですか？")) return;
       let jobs = getSavedJobs();
