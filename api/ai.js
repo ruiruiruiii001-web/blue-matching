@@ -1,13 +1,7 @@
-import Anthropic from '@anthropic-ai/sdk';
-
-// Vercel Edge Runtime を使う場合の設定（もし通常のServerlessにする場合はこの行を削除してください）
+// Vercel Edge Runtime を使用
 export const config = {
   runtime: 'edge',
 };
-
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
 
 export default async function handler(req) {
   if (req.method !== 'POST') {
@@ -27,15 +21,36 @@ export default async function handler(req) {
       });
     }
 
-    // Claude API リクエスト
-    // max_tokens を短め（例: 400）にすることで、タイムアウト（10〜15秒の壁）を確実に回避します
-    const response = await anthropic.messages.create({
-      model: 'claude-3-5-haiku-20241007', // より高速で軽量な Haiku モデルを使用するとさらにタイムアウトしにくくなります
-      max_tokens: 400,
-      messages: [{ role: 'user', content: prompt }],
+    const apiKey = process.env.ANTHROPIC_API_KEY;
+    if (!apiKey) {
+      return new Response(JSON.stringify({ error: 'APIキーが設定されていません。' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Anthropic API へ直接 fetch でリクエスト
+    const apiResponse = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-3-5-haiku-20241007',
+        max_tokens: 400,
+        messages: [{ role: 'user', content: prompt }],
+      }),
     });
 
-    const replyText = response.content[0].text;
+    if (!apiResponse.ok) {
+      const errorText = await apiResponse.text();
+      throw new Error(`Anthropic API Error: ${errorText}`);
+    }
+
+    const data = await apiResponse.json();
+    const replyText = data.content[0].text;
 
     return new Response(JSON.stringify({ result: replyText }), {
       status: 200,
