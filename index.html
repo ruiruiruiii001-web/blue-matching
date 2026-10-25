@@ -3,198 +3,197 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>現場特化型 求人＆応募管理プラットフォーム</title>
+  <title>現場直結！職人＆親方の求人マッチング</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 min-h-screen text-gray-800 pb-12">
+<body class="bg-gray-100 min-h-screen text-gray-800 pb-12 font-sans">
 
   <!-- ヘッダー -->
-  <header class="bg-blue-600 text-white shadow font-sans">
+  <header class="bg-orange-600 text-white shadow">
     <div class="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
-      <h1 class="text-xl font-bold tracking-wide">現場特化型 求人＆応募管理</h1>
-      <span class="text-xs bg-blue-700 px-3 py-1 rounded-full font-medium">テンプレート穴埋め式</span>
+      <div>
+        <h1 class="text-xl font-bold tracking-wide">👷 現場直結！マッチング</h1>
+        <p class="text-xs text-orange-100">めんどうなやり取りゼロ・現場特化型</p>
+      </div>
+      <span class="text-xs bg-orange-700 px-3 py-1 rounded-full font-bold">爆速採用</span>
     </div>
   </header>
 
-  <!-- タブ切替ナビゲーション -->
+  <!-- タブ切替 -->
   <div class="max-w-5xl mx-auto px-4 mt-6">
     <div class="flex border-b border-gray-300 bg-white rounded-t-lg shadow-sm">
-      <button id="tabEmployerBtn" onclick="switchTab('employer')" class="flex-1 py-3 font-bold text-sm border-b-2 border-blue-600 text-blue-600 focus:outline-none transition">
-        🏢 企業向け（求人作成・応募者管理）
+      <button id="tabEmployerBtn" onclick="switchTab('employer')" class="flex-1 py-3 font-bold text-sm border-b-2 border-orange-600 text-orange-600 focus:outline-none transition">
+        🏢 親方・企業向け（求人投稿）
       </button>
-      <button id="tabSeekerBtn" onclick="switchTab('seeker')" class="flex-1 py-3 font-bold text-sm border-b-2 border-transparent text-gray-500 hover:text-blue-600 focus:outline-none transition">
-        👷 求職者向け（Web履歴書・応募）
+      <button id="tabSeekerBtn" onclick="switchTab('seeker')" class="flex-1 py-3 font-bold text-sm border-b-2 border-transparent text-gray-500 hover:text-orange-600 focus:outline-none transition">
+        👷 職人・求職者向け（即戦力カード）
       </button>
     </div>
   </div>
 
   <main class="max-w-5xl mx-auto px-4 py-6 grid grid-cols-1 md:grid-cols-2 gap-8">
     
-    <!-- 左側①：企業向け 求人作成 & 応募者管理 -->
+    <!-- 左側①：親方・企業向け 求人作成 -->
     <section id="employerSection" class="space-y-6">
-      
-      <!-- 求人票作成フォーム -->
       <div class="bg-white p-6 rounded-lg shadow-md">
-        <h2 class="text-lg font-bold mb-4 border-b pb-2 text-blue-600">1. 求人票テンプレート入力</h2>
+        <h2 class="text-lg font-bold mb-4 border-b pb-2 text-orange-600">現場求人の穴埋め作成</h2>
         
         <div class="space-y-4">
           <div>
-            <label class="block text-sm font-medium mb-1">職種名</label>
-            <input type="text" id="jobTitle" placeholder="例: 建築現場の施工管理スタッフ" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+            <label class="block text-sm font-medium mb-1">職種・現場名</label>
+            <input type="text" id="jobTitle" placeholder="例: 解体現場の作業員・ダンプ運転手" class="w-full border rounded px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 outline-none">
           </div>
 
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-medium mb-1">募集人数</label>
-              <input type="number" id="jobCapacity" placeholder="例: 3" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none text-sm" min="1" value="1">
+              <input type="number" id="jobCapacity" value="2" class="w-full border rounded px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 outline-none" min="1">
             </div>
             <div>
-              <label class="block text-sm font-medium mb-1">勤務地・エリア</label>
-              <input type="text" id="jobLocation" placeholder="例: 東京都内および近郊" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+              <label class="block text-sm font-medium mb-1">給与（日給・月給）</label>
+              <input type="text" id="jobSalary" placeholder="例: 日給 15,000円〜" class="w-full border rounded px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 outline-none">
             </div>
           </div>
 
           <div>
-            <label class="block text-sm font-medium mb-1">給与条件（月給・日給など）</label>
-            <input type="text" id="jobSalary" placeholder="例: 月給 300,000円 〜 450,000円" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+            <label class="block text-sm font-medium mb-1">連絡用電話番号（SMS/LINE用）</label>
+            <input type="text" id="jobPhone" placeholder="例: 09012345678 (ハイフンなし)" class="w-full border rounded px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 outline-none">
+          </div>
+
+          <!-- 現場特化タグ選択 -->
+          <div>
+            <label class="block text-sm font-medium mb-1">現場アピールタグ（複数選択可）</label>
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="日払い・手渡しOK"> <span>💰 日払い・手渡し</span></label>
+              <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="現場直行直帰OK"> <span>🚗 現場直行直帰OK</span></label>
+              <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="マイカー・バイク通勤可"> <span>🅿️ マイカー通勤可</span></label>
+              <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="雨天時給料保証あり"> <span>☔️ 雨天給料保証</span></label>
+              <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="寮・社宅完備"> <span>🏠 寮・社宅あり</span></label>
+              <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="未経験・即日OK"> <span>⚡️ 即日・未経験OK</span></label>
+            </div>
           </div>
 
           <div>
-            <label class="block text-sm font-medium mb-1">主な仕事内容</label>
-            <textarea id="jobDuties" rows="2" placeholder="例: 現場での資材管理、安全確認、簡単な軽作業など。" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none text-sm"></textarea>
+            <label class="block text-sm font-medium mb-1">仕事内容の補足</label>
+            <textarea id="jobDuties" rows="2" placeholder="例: 都内の木造解体現場。資材の運び出しと簡単な手元作業です。" class="w-full border rounded px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 outline-none"></textarea>
           </div>
 
-          <div>
-            <label class="block text-sm font-medium mb-1">アピールポイント・待遇</label>
-            <input type="text" id="jobPerks" placeholder="例: 未経験歓迎 / 資格取得支援あり / 寮完備" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none text-sm">
-          </div>
-
-          <button onclick="previewTemplate()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded transition shadow text-sm">
-            求人票をプレビューする
-          </button>
-        </div>
-
-        <!-- プレビュー結果エリア -->
-        <div id="resultContainer" class="mt-6 hidden">
-          <h3 class="text-md font-semibold mb-2 text-gray-700">完成プレビュー</h3>
-          <div id="resultText" class="p-4 bg-gray-50 border rounded text-xs whitespace-pre-wrap leading-relaxed min-h-[140px] text-gray-700 font-mono"></div>
-          
-          <button onclick="publishJob()" class="w-full mt-3 bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded transition shadow text-sm">
-            📌 この求人を一覧に掲載する
+          <button onclick="publishJob()" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 rounded transition shadow text-sm">
+            🔥 この求人を今すぐ掲載する
           </button>
         </div>
       </div>
-
-      <!-- 応募者一覧カード -->
-      <div class="bg-white p-6 rounded-lg shadow-md">
-        <div class="flex justify-between items-center mb-4 border-b pb-2">
-          <h2 class="text-lg font-bold text-gray-800">2. 受信した応募者一覧</h2>
-          <span id="applicantCount" class="text-xs bg-indigo-100 text-indigo-800 px-2 py-1 rounded-full font-bold">0名</span>
-        </div>
-        <div id="applicantList" class="space-y-3 max-h-[300px] overflow-y-auto">
-          <!-- 応募者情報が追加されます -->
-        </div>
-      </div>
-
     </section>
 
-    <!-- 左側②：求職者向け Web履歴書・プロフィールフォーム -->
+    <!-- 左側②：職人向け 即戦力プロフィール -->
     <section id="seekerSection" class="bg-white p-6 rounded-lg shadow-md h-fit hidden">
-      <h2 class="text-lg font-bold mb-4 border-b pb-2 text-green-600">求職者プロフィール（簡易Web履歴書）</h2>
+      <h2 class="text-lg font-bold mb-4 border-b pb-2 text-green-600">職人Webカード（一発応募用）</h2>
       
       <div class="space-y-4">
-        <div>
-          <label class="block text-sm font-medium mb-1">お名前・ニックネーム</label>
-          <input type="text" id="seekerName" placeholder="例: 現場 太郎" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-green-500 outline-none text-sm">
-        </div>
-
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-sm font-medium mb-1">年齢</label>
-            <input type="number" id="seekerAge" placeholder="例: 25" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-green-500 outline-none text-sm">
+            <label class="block text-sm font-medium mb-1">お名前 / 通称</label>
+            <input type="text" id="seekerName" placeholder="例: 職人 太郎" class="w-full border rounded px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 outline-none">
           </div>
           <div>
-            <label class="block text-sm font-medium mb-1">連絡先（電話 / Email）</label>
-            <input type="text" id="seekerContact" placeholder="例: 090-XXXX-XXXX" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-green-500 outline-none text-sm">
+            <label class="block text-sm font-medium mb-1">携帯電話番号</label>
+            <input type="text" id="seekerPhone" placeholder="例: 090-XXXX-XXXX" class="w-full border rounded px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 outline-none">
           </div>
         </div>
 
+        <!-- 資格チェックボックス -->
         <div>
-          <label class="block text-sm font-medium mb-1">保有資格（該当するものを入力）</label>
-          <input type="text" id="seekerLicenses" placeholder="例: 普通自動車免許、玉掛け、中型免許" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-green-500 outline-none text-sm">
+          <label class="block text-sm font-medium mb-1">保有資格（該当するものをチェック）</label>
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="seekerLic" value="普通自動車免許"> <span>🚗 普通自動車免許</span></label>
+            <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="seekerLic" value="中型/大型免許"> <span>🚚 中型/大型免許</span></label>
+            <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="seekerLic" value="玉掛け/クレーン"> <span>🏗 玉掛け・クレーン</span></label>
+            <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="seekerLic" value="足場組み立て"> <span>🪜 足場組み立て</span></label>
+            <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="seekerLic" value="車両系建設機械"> <span>🚜 車両系建設機械</span></label>
+            <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="seekerLic" value="施工管理技士"> <span>📋 施工管理技士</span></label>
+          </div>
         </div>
 
-        <div>
-          <label class="block text-sm font-medium mb-1">これまでの現場経験・得意な業務</label>
-          <textarea id="seekerExp" rows="2" placeholder="例: 解体現場経験2年、内装クロス貼り、建築資材の搬入作業など。" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-green-500 outline-none text-sm"></textarea>
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium mb-1">希望条件（働き方・日払いなど）</label>
-          <input type="text" id="seekerPreference" placeholder="例: 即日勤務OK / 週4日希望 / 日払い希望" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-green-500 outline-none text-sm">
+        <!-- 即戦力メーター -->
+        <div class="bg-gray-50 p-3 rounded border space-y-3">
+          <p class="text-xs font-bold text-gray-700">💪 即戦力アピール</p>
+          <div class="grid grid-cols-2 gap-3 text-xs">
+            <div>
+              <label class="block font-medium mb-1">現場経験年数</label>
+              <select id="seekerExpYears" class="w-full border rounded p-1.5">
+                <option value="未経験（やる気あり）">未経験（やる気あり）</option>
+                <option value="1〜2年">1〜2年</option>
+                <option value="3〜5年（即戦力）">3〜5年（即戦力）</option>
+                <option value="5年以上（ベテラン）">5年以上（ベテラン）</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-medium mb-1">体力自信度</label>
+              <select id="seekerStamina" class="w-full border rounded p-1.5">
+                <option value="★★★★★ (自信あり)">★★★★★ (自信あり)</option>
+                <option value="★★★☆☆ (普通)">★★★☆☆ (普通)</option>
+              </select>
+            </div>
+          </div>
         </div>
 
         <button onclick="saveSeekerProfile()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 rounded transition shadow text-sm">
-          プロフィール情報を保存する
+          ✅ 職人プロフィールを保存する
         </button>
       </div>
 
       <div id="profileSavedMessage" class="mt-4 p-3 bg-green-50 border border-green-200 text-green-800 rounded text-xs hidden">
-        ✅ プロフィールが保存されました！右側の求人一覧からそのまま「詳細・応募を見る」で応募できます。
+        👍 保存完了！求人カードから「SMS/LINE直通応募」ができるようになりました！
       </div>
     </section>
 
-    <!-- 右側：掲載中の求人カード一覧 & 検索 -->
+    <!-- 右側：掲載中の現場求人一覧 -->
     <section class="bg-white p-6 rounded-lg shadow-md h-fit">
       <div class="flex justify-between items-center mb-4 border-b pb-2">
-        <h2 class="text-lg font-bold text-gray-800">掲載中の求人一覧</h2>
+        <h2 class="text-lg font-bold text-gray-800">募集中の現場一覧</h2>
         <span id="jobCount" class="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded-full">0件</span>
       </div>
 
-      <!-- キーワード検索バー -->
+      <!-- 検索バー -->
       <div class="mb-4">
-        <input type="text" id="searchKeyword" oninput="renderJobList()" placeholder="🔍 職種名やキーワードで検索..." class="w-full border rounded px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+        <input type="text" id="searchKeyword" oninput="renderJobList()" placeholder="🔍 タグや職種で検索 (例: 日払い, 玉掛け)..." class="w-full border rounded px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 outline-none">
       </div>
 
       <div id="jobList" class="space-y-4 max-h-[600px] overflow-y-auto pr-1">
-        <!-- カードが動的に追加されます -->
+        <!-- 求人カード -->
       </div>
     </section>
 
   </main>
 
-  <!-- 求人詳細 & 応募用モーダル -->
+  <!-- 求人詳細 & ワンタップ直通応募モーダル -->
   <div id="jobModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 p-4">
-    <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 relative">
+    <div class="bg-white rounded-lg shadow-xl max-w-xl w-full max-h-[90vh] overflow-y-auto p-6 relative">
       
-      <!-- 閉じるボタン -->
       <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl font-bold">✕</button>
 
-      <!-- モーダルヘッダー -->
       <div class="border-b pb-3 mb-4">
-        <div class="flex justify-between items-center mb-2">
-          <span id="modalCapacityBadge" class="inline-block bg-blue-100 text-blue-800 text-xs px-2.5 py-0.5 rounded font-semibold"></span>
-          <!-- 採用人数調整ボタン -->
-          <div class="space-x-1">
-            <button onclick="adjustCapacity(-1)" class="bg-gray-200 hover:bg-gray-300 text-gray-700 text-xs px-2 py-1 rounded">人数 -1</button>
-            <button onclick="adjustCapacity(1)" class="bg-gray-200 hover:bg-gray-300 text-gray-700 text-xs px-2 py-1 rounded">人数 +1</button>
-          </div>
-        </div>
+        <span id="modalCapacity" class="inline-block bg-orange-100 text-orange-800 text-xs px-2.5 py-0.5 rounded font-bold mb-2"></span>
         <h2 id="modalTitle" class="text-xl font-bold text-gray-800"></h2>
-        <p id="modalDate" class="text-xs text-gray-400 mt-1"></p>
+        <p id="modalSalary" class="text-sm font-bold text-red-600 mt-1"></p>
       </div>
 
-      <!-- 求人本文 -->
-      <div class="mb-6">
-        <h3 class="text-sm font-bold text-gray-700 mb-2">【求人詳細】</h3>
-        <div id="modalContent" class="p-4 bg-gray-50 border rounded text-xs whitespace-pre-wrap leading-relaxed text-gray-700 font-mono"></div>
-      </div>
+      <!-- タグ一覧 -->
+      <div id="modalTags" class="flex flex-wrap gap-1.5 mb-4"></div>
 
-      <!-- 応募ボタンセクション -->
-      <div class="border-t pt-4">
-        <button id="applyBtn" onclick="applyJob()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded transition shadow text-sm">
-          📩 保存したWeb履歴書でこの求人に応募する
+      <div class="mb-6 bg-gray-50 p-3 rounded border text-xs leading-relaxed text-gray-700 whitespace-pre-wrap" id="modalDuties"></div>
+
+      <!-- ワンタップ連絡アクションボタン -->
+      <div class="space-y-3 border-t pt-4">
+        <p class="text-xs font-bold text-center text-gray-600">＼ 面倒な履歴書不要！親方に直接連絡 ／</p>
+        
+        <button onclick="applyViaSMS()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded transition shadow text-sm flex items-center justify-center space-x-2">
+          <span>📱 SMS (ショートメッセージ) で直接応募</span>
+        </button>
+
+        <button onclick="applyViaPhone()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded transition shadow text-sm flex items-center justify-center space-x-2">
+          <span>📞 親方に直接電話をかける</span>
         </button>
       </div>
 
@@ -202,16 +201,13 @@
   </div>
 
   <script>
-    let currentGeneratedText = "";
     let selectedJob = null;
 
     document.addEventListener("DOMContentLoaded", () => {
       renderJobList();
-      renderApplicants();
       loadSeekerProfile();
     });
 
-    // タブ切替機能
     function switchTab(tab) {
       const employerSection = document.getElementById("employerSection");
       const seekerSection = document.getElementById("seekerSection");
@@ -221,8 +217,8 @@
       if (tab === 'employer') {
         employerSection.classList.remove("hidden");
         seekerSection.classList.add("hidden");
-        tabEmployerBtn.className = "flex-1 py-3 font-bold text-sm border-b-2 border-blue-600 text-blue-600 focus:outline-none transition";
-        tabSeekerBtn.className = "flex-1 py-3 font-bold text-sm border-b-2 border-transparent text-gray-500 hover:text-blue-600 focus:outline-none transition";
+        tabEmployerBtn.className = "flex-1 py-3 font-bold text-sm border-b-2 border-orange-600 text-orange-600 focus:outline-none transition";
+        tabSeekerBtn.className = "flex-1 py-3 font-bold text-sm border-b-2 border-transparent text-gray-500 hover:text-orange-600 focus:outline-none transition";
       } else {
         employerSection.classList.add("hidden");
         seekerSection.classList.remove("hidden");
@@ -231,53 +227,25 @@
       }
     }
 
-    // テンプレートから求人票テキストを組み立てる
-    function previewTemplate() {
+    // 求人投稿
+    function publishJob() {
       const title = document.getElementById("jobTitle").value.trim();
-      const capacity = document.getElementById("jobCapacity").value.trim() || "1";
-      const location = document.getElementById("jobLocation").value.trim() || "指定なし";
-      const salary = document.getElementById("jobSalary").value.trim() || "要相談";
-      const duties = document.getElementById("jobDuties").value.trim() || "特になし";
-      const perks = document.getElementById("jobPerks").value.trim() || "特になし";
+      const salary = document.getElementById("jobSalary").value.trim();
+      const phone = document.getElementById("jobPhone").value.trim();
+      const duties = document.getElementById("jobDuties").value.trim();
+      const capacity = parseInt(document.getElementById("jobCapacity").value) || 1;
 
-      if (!title) {
-        alert("職種名を入力してください。");
+      const checkedTags = Array.from(document.querySelectorAll('input[name="jobTag"]:checked')).map(cb => cb.value);
+
+      if (!title || !phone) {
+        alert("「職種名」と「連絡先電話番号」は必須項目です。");
         return;
       }
 
-      currentGeneratedText = `【職種】
-${title}
-
-【仕事内容】
-${duties}
-
-【給与条件】
-${salary}
-
-【勤務地】
-${location}
-
-【アピールポイント・待遇】
-${perks}
-
-----------------------------------------
-ご応募お待ちしております！`;
-
-      document.getElementById("resultText").innerText = currentGeneratedText;
-      document.getElementById("resultContainer").classList.remove("hidden");
-    }
-
-    // 求人を掲載（LocalStorageに保存）
-    function publishJob() {
-      const title = document.getElementById("jobTitle").value.trim() || "求人募集";
-      const capacity = parseInt(document.getElementById("jobCapacity").value) || 1;
-      if (!currentGeneratedText) return;
-
       const newJob = {
         id: Date.now(),
-        title: title,
-        capacity: capacity,
-        content: currentGeneratedText,
+        title, salary, phone, duties, capacity,
+        tags: checkedTags,
         date: new Date().toLocaleDateString("ja-JP")
       };
 
@@ -288,15 +256,12 @@ ${perks}
       renderJobList();
 
       document.getElementById("jobTitle").value = "";
-      document.getElementById("jobCapacity").value = "1";
-      document.getElementById("jobLocation").value = "";
       document.getElementById("jobSalary").value = "";
+      document.getElementById("jobPhone").value = "";
       document.getElementById("jobDuties").value = "";
-      document.getElementById("jobPerks").value = "";
-      document.getElementById("resultContainer").classList.add("hidden");
-      currentGeneratedText = "";
+      document.querySelectorAll('input[name="jobTag"]').forEach(cb => cb.checked = false);
 
-      alert("求人を一覧に掲載しました！");
+      alert("求人を投稿しました！");
     }
 
     function getSavedJobs() {
@@ -304,15 +269,16 @@ ${perks}
       return saved ? JSON.parse(saved) : [];
     }
 
-    // 求職者プロフィールの保存＆取得
+    // 求職者プロフィール保存
     function saveSeekerProfile() {
+      const checkedLic = Array.from(document.querySelectorAll('input[name="seekerLic"]:checked')).map(cb => cb.value);
+      
       const profile = {
         name: document.getElementById("seekerName").value.trim(),
-        age: document.getElementById("seekerAge").value.trim(),
-        contact: document.getElementById("seekerContact").value.trim(),
-        licenses: document.getElementById("seekerLicenses").value.trim(),
-        exp: document.getElementById("seekerExp").value.trim(),
-        preference: document.getElementById("seekerPreference").value.trim()
+        phone: document.getElementById("seekerPhone").value.trim(),
+        licenses: checkedLic,
+        expYears: document.getElementById("seekerExpYears").value,
+        stamina: document.getElementById("seekerStamina").value
       };
 
       if (!profile.name) {
@@ -329,86 +295,18 @@ ${perks}
       if (!saved) return;
       const profile = JSON.parse(saved);
       document.getElementById("seekerName").value = profile.name || "";
-      document.getElementById("seekerAge").value = profile.age || "";
-      document.getElementById("seekerContact").value = profile.contact || "";
-      document.getElementById("seekerLicenses").value = profile.licenses || "";
-      document.getElementById("seekerExp").value = profile.exp || "";
-      document.getElementById("seekerPreference").value = profile.preference || "";
-    }
+      document.getElementById("seekerPhone").value = profile.phone || "";
+      document.getElementById("seekerExpYears").value = profile.expYears || "未経験（やる気あり）";
+      document.getElementById("seekerStamina").value = profile.stamina || "★★★★★ (自信あり)";
 
-    // 応募処理
-    function applyJob() {
-      const saved = localStorage.getItem("seeker_profile");
-      if (!saved) {
-        alert("応募するには、まず「求職者向け（Web履歴書）」タブからプロフィールを登録・保存してください。");
-        switchTab('seeker');
-        closeModal();
-        return;
+      if (profile.licenses) {
+        document.querySelectorAll('input[name="seekerLic"]').forEach(cb => {
+          cb.checked = profile.licenses.includes(cb.value);
+        });
       }
-
-      const profile = JSON.parse(saved);
-      const applications = getSavedApplicants();
-
-      const newApplicant = {
-        id: Date.now(),
-        jobTitle: selectedJob.title,
-        applicantName: profile.name,
-        age: profile.age,
-        contact: profile.contact,
-        licenses: profile.licenses,
-        exp: profile.exp,
-        preference: profile.preference,
-        date: new Date().toLocaleDateString("ja-JP")
-      };
-
-      applications.unshift(newApplicant);
-      localStorage.setItem("job_applications", JSON.stringify(applications));
-
-      // 残り募集人数の自動調整（-1）
-      adjustCapacity(-1);
-
-      renderApplicants();
-      alert(`【応募完了】\n「${selectedJob.title}」へ応募しました！\n企業側の応募者一覧へ通知されました。`);
-      closeModal();
     }
 
-    function getSavedApplicants() {
-      const saved = localStorage.getItem("job_applications");
-      return saved ? JSON.parse(saved) : [];
-    }
-
-    // 応募者一覧のレンダリング
-    function renderApplicants() {
-      const applicantList = document.getElementById("applicantList");
-      const applicantCount = document.getElementById("applicantCount");
-      const applicants = getSavedApplicants();
-
-      applicantCount.innerText = `${applicants.length}名`;
-
-      if (applicants.length === 0) {
-        applicantList.innerHTML = `
-          <div class="text-center py-6 text-gray-400 text-xs">
-            まだ応募はありません。
-          </div>
-        `;
-        return;
-      }
-
-      applicantList.innerHTML = applicants.map(app => `
-        <div class="p-3 bg-gray-50 border rounded text-xs space-y-1">
-          <div class="flex justify-between font-bold text-gray-800">
-            <span>👤 ${escapeHtml(app.applicantName)} (${app.age || '不明'}歳)</span>
-            <span class="text-gray-400 font-normal">${app.date}</span>
-          </div>
-          <p class="text-blue-600 font-medium">応募求人: ${escapeHtml(app.jobTitle)}</p>
-          <p class="text-gray-600">📞 連絡先: ${escapeHtml(app.contact || '未入力')}</p>
-          <p class="text-gray-600">🪪 資格: ${escapeHtml(app.licenses || 'なし')}</p>
-          <p class="text-gray-600">🛠 経験: ${escapeHtml(app.exp || 'なし')}</p>
-        </div>
-      `).join("");
-    }
-
-    // 求人カード一覧の表示
+    // 求人リスト描画
     function renderJobList() {
       const jobList = document.getElementById("jobList");
       const jobCount = document.getElementById("jobCount");
@@ -416,68 +314,77 @@ ${perks}
       const jobs = getSavedJobs();
 
       const filteredJobs = jobs.filter(job => 
-        job.title.toLowerCase().includes(keyword) || job.content.toLowerCase().includes(keyword)
+        job.title.toLowerCase().includes(keyword) || 
+        job.tags.some(t => t.toLowerCase().includes(keyword))
       );
 
       jobCount.innerText = `${filteredJobs.length}件`;
 
       if (filteredJobs.length === 0) {
-        jobList.innerHTML = `
-          <div class="text-center py-8 text-gray-400 text-sm">
-            該当する求人はありません。
-          </div>
-        `;
+        jobList.innerHTML = `<div class="text-center py-8 text-gray-400 text-sm">該当する現場求人はありません。</div>`;
         return;
       }
 
       jobList.innerHTML = filteredJobs.map(job => `
-        <div onclick="openModal(${job.id})" class="border rounded-lg p-4 bg-white shadow-sm hover:shadow-md transition cursor-pointer relative border-l-4 ${job.capacity > 0 ? 'border-l-blue-500' : 'border-l-gray-400 opacity-75'}">
+        <div onclick="openModal(${job.id})" class="border rounded-lg p-4 bg-white shadow-sm hover:shadow-md transition cursor-pointer relative border-l-4 ${job.capacity > 0 ? 'border-l-orange-500' : 'border-l-gray-400 opacity-75'}">
           <div class="flex justify-between items-start mb-1">
             <h3 class="font-bold text-gray-800 text-base">${escapeHtml(job.title)}</h3>
             <span class="text-xs text-gray-400">${job.date}</span>
           </div>
-          <span class="inline-block ${job.capacity > 0 ? 'bg-blue-50 text-blue-700' : 'bg-gray-200 text-gray-700'} text-xs px-2 py-0.5 rounded font-medium mb-2">
-            ${job.capacity > 0 ? `残り募集人数: ${job.capacity}名` : '採用終了（満員）'}
-          </span>
-          <p class="text-xs text-gray-600 line-clamp-2 mb-3 whitespace-pre-wrap">${escapeHtml(job.content)}</p>
+          <p class="text-sm font-bold text-red-600 mb-2">${escapeHtml(job.salary || '給与応相談')}</p>
+          
+          <!-- タグ表示 -->
+          <div class="flex flex-wrap gap-1 mb-3">
+            ${job.tags.map(t => `<span class="bg-orange-50 text-orange-700 border border-orange-200 text-[10px] px-1.5 py-0.5 rounded font-medium">${escapeHtml(t)}</span>`).join("")}
+          </div>
+
           <div class="flex justify-between items-center border-t pt-2 mt-2">
-            <span class="text-xs text-blue-600 font-semibold hover:underline">詳細・応募を見る →</span>
-            <button onclick="event.stopPropagation(); deleteJob(${job.id})" class="text-xs text-red-500 hover:text-red-700 px-2 py-1 rounded">
-              削除
-            </button>
+            <span class="text-xs text-orange-600 font-bold hover:underline">📱 ワンタップ連絡・詳細 →</span>
+            <button onclick="event.stopPropagation(); deleteJob(${job.id})" class="text-xs text-red-500 px-2 py-1">削除</button>
           </div>
         </div>
       `).join("");
     }
 
-    // モーダル表示制御 & 人数調整
+    // モーダル表示
     function openModal(id) {
       const jobs = getSavedJobs();
       selectedJob = jobs.find(j => j.id === id);
       if (!selectedJob) return;
 
-      updateModalUI();
+      document.getElementById("modalTitle").innerText = selectedJob.title;
+      document.getElementById("modalSalary").innerText = selectedJob.salary || "給与応相談";
+      document.getElementById("modalCapacity").innerText = `残り募集: ${selectedJob.capacity} 名`;
+      document.getElementById("modalDuties").innerText = selectedJob.duties || "特記事項なし";
+
+      const tagsContainer = document.getElementById("modalTags");
+      tagsContainer.innerHTML = selectedJob.tags.map(t => `<span class="bg-orange-100 text-orange-800 text-xs px-2 py-0.5 rounded font-bold">${escapeHtml(t)}</span>`).join("");
+
       document.getElementById("jobModal").classList.remove("hidden");
     }
 
-    function updateModalUI() {
-      if (!selectedJob) return;
-      document.getElementById("modalTitle").innerText = selectedJob.title;
-      document.getElementById("modalCapacityBadge").innerText = `残り募集人数: ${selectedJob.capacity} 名`;
-      document.getElementById("modalDate").innerText = `掲載日: ${selectedJob.date}`;
-      document.getElementById("modalContent").innerText = selectedJob.content;
+    // SMS直通応募（アプリ立ち上げ）
+    function applyViaSMS() {
+      if (!selectedJob || !selectedJob.phone) return;
+
+      const saved = localStorage.getItem("seeker_profile");
+      let message = "";
+
+      if (saved) {
+        const p = JSON.parse(saved);
+        message = `【求人応募】${selectedJob.title}の募集を見て連絡しました。氏名:${p.name} / 経験:${p.expYears} / 資格:${p.licenses ? p.licenses.join(',') : 'なし'}。よろしくお願いします。`;
+      } else {
+        message = `【求人応募】${selectedJob.title}の募集を見て連絡しました。詳細をお伺いできますでしょうか？`;
+      }
+
+      // SMSアプリを立ち上げるURLスキーマ
+      window.location.href = `sms:${selectedJob.phone}?body=${encodeURIComponent(message)}`;
     }
 
-    function adjustCapacity(amount) {
-      if (!selectedJob) return;
-      selectedJob.capacity = Math.max(0, selectedJob.capacity + amount);
-      
-      let jobs = getSavedJobs();
-      jobs = jobs.map(j => j.id === selectedJob.id ? selectedJob : j);
-      localStorage.setItem("published_jobs", JSON.stringify(jobs));
-
-      updateModalUI();
-      renderJobList();
+    // 直接電話
+    function applyViaPhone() {
+      if (!selectedJob || !selectedJob.phone) return;
+      window.location.href = `tel:${selectedJob.phone}`;
     }
 
     function closeModal() {
@@ -486,9 +393,9 @@ ${perks}
     }
 
     function deleteJob(id) {
-      if (!confirm("この求人を削除してもよろしいですか？")) return;
+      if (!confirm("この求人を削除しますか？")) return;
       let jobs = getSavedJobs();
-      jobs = jobs.filter(job => job.id !== id);
+      jobs = jobs.filter(j => j.id !== id);
       localStorage.setItem("published_jobs", JSON.stringify(jobs));
       renderJobList();
       closeModal();
