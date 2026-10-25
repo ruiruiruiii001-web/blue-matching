@@ -21,7 +21,8 @@ export default async function handler(req) {
       });
     }
 
-    const apiKey = process.env.Gemini_API_Key;
+    // コード側を Vercel の環境変数名に合わせる
+    const apiKey = process.env.Gemini_API_Key || process.env.GEMINI_API_KEY;
     if (!apiKey) {
       return new Response(JSON.stringify({ error: 'GEMINI_API_KEY が設定されていません。' }), {
         status: 500,
@@ -29,9 +30,9 @@ export default async function handler(req) {
       });
     }
 
-    // Google Gemini API (gemini-1.5-flash) へ直接 fetch でリクエスト
+    // 正しいモデル名 (gemini-2.5-flash) を指定
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: {
