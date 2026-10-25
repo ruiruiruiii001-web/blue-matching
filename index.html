@@ -3,234 +3,201 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AIブルーワーカーマッチングプラットフォーム</title>
+  <title>AI ブルーカラー求人マッチング</title>
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap');
-    body { font-family: 'Noto Sans JP', sans-serif; }
-  </style>
 </head>
-<body class="bg-slate-100 text-slate-800 min-h-screen p-4 md:p-8">
+<body class="bg-gray-100 min-h-screen text-gray-800">
 
-  <div class="max-w-6xl mx-auto">
-    <!-- ヘッダー -->
-    <header class="mb-6 text-center">
-      <span class="bg-indigo-600 text-white font-bold px-3 py-1 rounded-full text-xs uppercase tracking-wider">AI Matching Platform</span>
-      <h1 class="text-2xl md:text-4xl font-black text-slate-900 mt-2">現場職特化 AIマッチングシステム</h1>
-      <p class="text-slate-600 text-sm mt-1">企業側（AI求人作成）と求職者側（AI対話応募）をワンストップで体験</p>
-    </header>
-
-    <!-- タブ切り替えボタン -->
-    <div class="flex justify-center mb-6 gap-4">
-      <button onclick="switchTab('employer')" id="tabEmployer" class="px-6 py-3 rounded-xl font-bold text-sm bg-amber-500 text-slate-900 shadow-md transition-all flex items-center gap-2">
-        <i class="fa-solid fa-building"></i> 企業向け：AI求人票メーカー
-      </button>
-      <button onclick="switchTab('jobseeker')" id="tabJobseeker" class="px-6 py-3 rounded-xl font-bold text-sm bg-white text-slate-600 shadow-sm transition-all flex items-center gap-2">
-        <i class="fa-solid fa-user-tie"></i> 求職者向け：AIかんたん応募
-      </button>
+  <!-- ヘッダー -->
+  <header class="bg-blue-600 text-white shadow">
+    <div class="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
+      <h1 class="text-xl font-bold">現場特化型 AI求人マッチング</h1>
+      <span class="text-sm bg-blue-700 px-3 py-1 rounded-full">企業・採用担当者向け</span>
     </div>
+  </header>
 
-    <!-- ================= 企業向け画面 ================= -->
-    <div id="viewEmployer" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-      <!-- 入力フォーム -->
-      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between">
+  <main class="max-w-5xl mx-auto px-4 py-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+    
+    <!-- 左側：求人票生成フォーム -->
+    <section class="bg-white p-6 rounded-lg shadow-md h-fit">
+      <h2 class="text-lg font-bold mb-4 border-b pb-2 text-blue-600">1. AI求人票作成</h2>
+      
+      <div class="space-y-4">
         <div>
-          <h2 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-            <i class="fa-solid fa-pen-to-square text-amber-500"></i>
-            現場の情報を雑に打ち込む
-          </h2>
-          <div class="space-y-4">
-            <div>
-              <label class="block text-xs font-bold text-slate-500 mb-1">職種・現場の種類</label>
-              <input type="text" id="jobCategory" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm" placeholder="例：足場鳶、2tドライバー、電気工事">
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-slate-500 mb-1">ざっくりとしたメモ・口語</label>
-              <textarea id="rawNotes" rows="6" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm" placeholder="例：完全未経験でも月30万スタート。夏は暑くてきついけど残業ほぼなし。"></textarea>
-            </div>
-          </div>
+          <label class="block text-sm font-medium mb-1">職種・仕事内容の概要</label>
+          <input type="text" id="jobTitle" placeholder="例: 建築現場の施工管理、ドライバー" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
         </div>
-        <div class="mt-6">
-          <button id="generateBtn" onclick="generateRealJobPosting()" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold py-3.5 px-6 rounded-xl shadow transition-all flex items-center justify-center gap-2">
-            <i class="fa-solid fa-wand-magic-sparkles"></i> Geminiで求人票を一発作成
-          </button>
-        </div>
-      </div>
 
-      <!-- 出力プレビュー -->
-      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 min-h-[400px]">
-        <h2 class="text-lg font-bold text-slate-900 mb-4 flex items-center justify-between">
-          <span><i class="fa-solid fa-eye text-sky-500"></i> 求人票プレビュー</span>
-          <span id="badge" class="hidden text-xs bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 rounded-full">リアルタイム生成中...</span>
-        </h2>
-        <div id="placeholder" class="h-64 flex flex-col items-center justify-center text-slate-400 border-2 border-dashed border-slate-200 rounded-xl">
-          <i class="fa-solid fa-microchip text-4xl mb-2 text-slate-300"></i>
-          <p class="text-sm">情報を入力してボタンを押してください</p>
-        </div>
-        <div id="loading" class="hidden h-64 flex-col items-center justify-center text-slate-600">
-          <div class="w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mb-3"></div>
-          <p class="text-sm font-medium">Geminiに接続中...</p>
-        </div>
-        <!-- ストリーミングテキスト出力エリア -->
-        <div id="result" class="hidden whitespace-pre-wrap text-sm leading-relaxed text-slate-800 bg-slate-50 p-4 rounded-xl border border-slate-200 font-mono"></div>
-      </div>
-    </div>
-
-    <!-- ================= 求職者向け画面 ================= -->
-    <div id="viewJobseeker" class="hidden grid grid-cols-1 md:grid-cols-2 gap-6">
-      <!-- チャット画面 -->
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col h-[520px]">
-        <div class="p-4 border-b bg-slate-50 rounded-t-2xl flex items-center gap-2">
-          <div class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></div>
-          <span class="font-bold text-sm text-slate-700">AIキャリアアドバイザー</span>
-        </div>
-        <div id="chatLog" class="p-4 flex-1 overflow-y-auto space-y-3 text-sm">
-          <div class="flex gap-2">
-            <div class="w-8 h-8 rounded-full bg-sky-500 text-white flex items-center justify-center text-xs font-bold shrink-0">AI</div>
-            <div class="bg-slate-100 p-3 rounded-2xl rounded-tl-none text-slate-800 max-w-[80%]">
-              こんにちは！どんなお仕事を探していますか？これまでのご経験や持っている免許（普通免許など）を教えてください！
-            </div>
-          </div>
-        </div>
-        <div class="p-3 border-t flex gap-2">
-          <input type="text" id="userInput" class="flex-1 p-2.5 bg-slate-50 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sky-500" placeholder="例：引っ越し屋2年、中型免許あり" onkeypress="if(event.key==='Enter') sendChatMessage()">
-          <button onclick="sendChatMessage()" class="bg-sky-500 hover:bg-sky-600 text-white font-bold px-4 py-2.5 rounded-xl">
-            <i class="fa-solid fa-paper-plane"></i>
-          </button>
-        </div>
-      </div>
-
-      <!-- 完成応募プロフィール -->
-      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between">
         <div>
-          <h2 class="text-base font-bold text-slate-900 mb-4 border-b pb-3 flex items-center gap-2">
-            <i class="fa-solid fa-id-card text-sky-500"></i> AI作成プロフィール（企業に届くカード）
-          </h2>
-          <div id="profilePlaceholder" class="h-64 flex flex-col items-center justify-center text-slate-400 border-2 border-dashed rounded-xl">
-            <i class="fa-solid fa-comments text-3xl mb-2 text-slate-300"></i>
-            <p class="text-xs">左のチャットで会話するとプロフィールが自動生成されます</p>
-          </div>
-          <div id="profileCard" class="hidden space-y-3 text-sm">
-            <div class="bg-slate-50 p-3 rounded-xl"><span class="text-xs font-bold text-slate-400 block">資格・スキル</span><span id="cardLicenses" class="font-bold text-slate-800"></span></div>
-            <div class="bg-slate-50 p-3 rounded-xl"><span class="text-xs font-bold text-slate-400 block">職務経験</span><span id="cardExp" class="text-slate-800"></span></div>
-            <div class="bg-sky-50 p-3 rounded-xl border border-sky-100"><span class="text-xs font-bold text-sky-600 block">AIによる強み分析</span><span id="cardPr" class="text-slate-800 font-medium text-xs"></span></div>
-          </div>
+          <label class="block text-sm font-medium mb-1">給与条件や特徴</label>
+          <input type="text" id="jobCondition" placeholder="例: 月給30万以上、未経験歓迎、残業少なめ" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
         </div>
-        <button id="applyBtn" onclick="alert('応募が完了しました！企業側にAIプロフィールが通知されます。')" class="hidden mt-4 w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-4 rounded-xl shadow flex items-center justify-center gap-2">
-          <i class="fa-solid fa-check"></i> このプロフィールでワンタップ応募する
+
+        <button id="generateBtn" onclick="generateJobOffer()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded transition shadow">
+          Geminiで求人票を生成する
         </button>
       </div>
-    </div>
 
-  </div>
+      <!-- 生成結果エリア -->
+      <div id="resultContainer" class="mt-6 hidden">
+        <h3 class="text-md font-semibold mb-2 text-gray-700">生成された求人票プレビュー</h3>
+        <div id="resultText" class="p-4 bg-gray-50 border rounded text-sm whitespace-pre-wrap leading-relaxed min-h-[150px]"></div>
+        
+        <!-- 掲載ボタン -->
+        <button id="publishBtn" onclick="publishJob()" class="w-full mt-3 bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded transition shadow">
+          📌 この求人を掲載する
+        </button>
+      </div>
+    </section>
+
+    <!-- 右側：掲載中の求人カード一覧 -->
+    <section class="bg-white p-6 rounded-lg shadow-md">
+      <div class="flex justify-between items-center mb-4 border-b pb-2">
+        <h2 class="text-lg font-bold text-gray-800">2. 掲載中の求人一覧</h2>
+        <span id="jobCount" class="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded-full">0件</span>
+      </div>
+
+      <!-- 求人カードが並ぶエリア -->
+      <div id="jobList" class="space-y-4 max-h-[600px] overflow-y-auto pr-1">
+        <!-- カードが動的に追加されます -->
+      </div>
+    </section>
+
+  </main>
 
   <script>
-    // タブ切り替え
-    function switchTab(target) {
-      const isEmp = target === 'employer';
-      document.getElementById('viewEmployer').classList.toggle('hidden', !isEmp);
-      document.getElementById('viewJobseeker').classList.toggle('hidden', isEmp);
-      document.getElementById('tabEmployer').className = isEmp ? "px-6 py-3 rounded-xl font-bold text-sm bg-amber-500 text-slate-900 shadow-md flex items-center gap-2" : "px-6 py-3 rounded-xl font-bold text-sm bg-white text-slate-600 shadow-sm flex items-center gap-2";
-      document.getElementById('tabJobseeker').className = !isEmp ? "px-6 py-3 rounded-xl font-bold text-sm bg-sky-500 text-white shadow-md flex items-center gap-2" : "px-6 py-3 rounded-xl font-bold text-sm bg-white text-slate-600 shadow-sm flex items-center gap-2";
-    }
+    let currentGeneratedText = "";
 
-    // 企業側：Geminiストリーミング求人作成
-    async function generateRealJobPosting() {
-      const category = document.getElementById('jobCategory').value.trim() || '現場職';
-      const notes = document.getElementById('rawNotes').value.trim();
-      if (!notes) { alert('メモを入力してください！'); return; }
+    // ページ読み込み時に保存された求人を表示
+    document.addEventListener("DOMContentLoaded", () => {
+      renderJobList();
+    });
 
-      const generateBtn = document.getElementById('generateBtn');
-      generateBtn.disabled = true;
-      generateBtn.classList.add('opacity-50');
+    // 1. AI求人票の生成処理
+    async function generateJobOffer() {
+      const title = document.getElementById("jobTitle").value.trim();
+      const condition = document.getElementById("jobCondition").value.trim();
+      const btn = document.getElementById("generateBtn");
+      const resultContainer = document.getElementById("resultContainer");
+      const resultText = document.getElementById("resultText");
 
-      document.getElementById('placeholder').classList.add('hidden');
-      document.getElementById('result').classList.add('hidden');
-      document.getElementById('result').innerText = '';
-      document.getElementById('badge').classList.add('hidden');
-      document.getElementById('loading').classList.remove('hidden');
-      document.getElementById('loading').classList.add('flex');
+      if (!title) {
+        alert("職種・仕事内容を入力してください。");
+        return;
+      }
 
-      const promptText = `あなたは現場職・建設業界に強いプロの採用コンサルタントです。
-以下のメモを基に、求職者にとって魅力的で分かりやすい求人票を作成してください。
+      btn.disabled = true;
+      btn.innerText = "Geminiに接続中...";
+      resultContainer.classList.add("hidden");
 
-【職種】${category}
-【現場メモ】${notes}
-
-以下の構成で見やすく丁寧に出力してください：
-■ 職種タイトル
-■ 想定給料・手当
-■ 会社からのサポート体制
-■ この仕事の魅力・推しポイント
-■ 大変な点・求める心構え`;
+      const prompt = `以下の条件をもとに、現場求職者に響く魅力的な求人票テキストを作成してください。\n【職種】${title}\n【条件・特徴】${condition}`;
 
       try {
-        const response = await fetch('/api/ai', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt: promptText })
+        const response = await fetch("/api/ai", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt })
         });
 
+        const data = await response.json();
+
         if (!response.ok) {
-          const err = await response.json();
-          throw new Error(err.error || '通信エラーが発生しました。');
+          throw new Error(data.error || "通信エラーが発生しました。");
         }
 
-        document.getElementById('loading').classList.remove('flex');
-        document.getElementById('loading').classList.add('hidden');
-        document.getElementById('result').classList.remove('hidden');
-        document.getElementById('badge').classList.remove('hidden');
+        currentGeneratedText = data.result;
+        resultText.innerText = currentGeneratedText;
+        resultContainer.classList.remove("hidden");
 
-        // ストリーミングデータを1文字ずつ画面に追加
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        const resultDiv = document.getElementById('result');
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          const text = decoder.decode(value, { stream: true });
-          resultDiv.innerText += text;
-        }
-
-        document.getElementById('badge').innerText = '作成完了';
-        document.getElementById('badge').className = 'text-xs bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 rounded-full';
-
-      } catch (err) {
-        alert('エラーが発生しました：' + (err.message || '通信エラー'));
-        document.getElementById('loading').classList.remove('flex');
-        document.getElementById('loading').classList.add('hidden');
-        document.getElementById('placeholder').classList.remove('hidden');
+      } catch (error) {
+        alert("エラーが発生しました: " + error.message);
       } finally {
-        generateBtn.disabled = false;
-        generateBtn.classList.remove('opacity-50');
+        btn.disabled = false;
+        btn.innerText = "Geminiで求人票を生成する";
       }
     }
 
-    // 求職者側：AIチャット応募機能
-    async function sendChatMessage() {
-      const input = document.getElementById('userInput');
-      const text = input.value.trim();
-      if (!text) return;
+    // 2. 生成した求人を掲載リスト（LocalStorage）に追加
+    function publishJob() {
+      const title = document.getElementById("jobTitle").value.trim() || "求人募集";
+      if (!currentGeneratedText) return;
 
-      const chatLog = document.getElementById('chatLog');
-      chatLog.innerHTML += `<div class="flex gap-2 justify-end"><div class="bg-sky-500 text-white p-3 rounded-2xl rounded-tr-none max-w-[80%]">${text}</div></div>`;
-      input.value = '';
-      chatLog.scrollTop = chatLog.scrollHeight;
+      const newJob = {
+        id: Date.now(),
+        title: title,
+        content: currentGeneratedText,
+        date: new Date().toLocaleDateString("ja-JP")
+      };
 
-      setTimeout(() => {
-        chatLog.innerHTML += `<div class="flex gap-2"><div class="w-8 h-8 rounded-full bg-sky-500 text-white flex items-center justify-center text-xs font-bold shrink-0">AI</div><div class="bg-slate-100 p-3 rounded-2xl rounded-tl-none text-slate-800 max-w-[80%]">ありがとうございます！プロフィールカードを自動作成しました。右側をご確認ください。</div></div>`;
-        chatLog.scrollTop = chatLog.scrollHeight;
+      const jobs = getSavedJobs();
+      jobs.unshift(newJob); // 最新を先頭に追加
+      localStorage.setItem("published_jobs", JSON.stringify(jobs));
 
-        document.getElementById('profilePlaceholder').classList.add('hidden');
-        document.getElementById('profileCard').classList.remove('hidden');
-        document.getElementById('applyBtn').classList.remove('hidden');
+      renderJobList();
 
-        document.getElementById('cardLicenses').innerText = text.includes('免許') ? '中型・普通自動車免許保有' : '普通自動車免許';
-        document.getElementById('cardExp').innerText = text;
-        document.getElementById('cardPr').innerText = '現場での実務経験があり、フットワークが軽く体力・責任感ともに優れた即戦力人材です。';
-      }, 1000);
+      // 入力フォームとプレビューをリセット
+      document.getElementById("jobTitle").value = "";
+      document.getElementById("jobCondition").value = "";
+      document.getElementById("resultContainer").classList.add("hidden");
+      currentGeneratedText = "";
+
+      alert("求人一覧に掲載しました！");
+    }
+
+    // 3. 保存されている求人データを取得
+    function getSavedJobs() {
+      const saved = localStorage.getItem("published_jobs");
+      return saved ? JSON.parse(saved) : [];
+    }
+
+    // 4. 求人カードの一覧描画
+    function renderJobList() {
+      const jobList = document.getElementById("jobList");
+      const jobCount = document.getElementById("jobCount");
+      const jobs = getSavedJobs();
+
+      jobCount.innerText = `${jobs.length}件`;
+
+      if (jobs.length === 0) {
+        jobList.innerHTML = `
+          <div class="text-center py-8 text-gray-400 text-sm">
+            掲載中の求人はありません。<br>左側のフォームから作成して掲載してみましょう。
+          </div>
+        `;
+        return;
+      }
+
+      jobList.innerHTML = jobs.map(job => `
+        <div class="border rounded-lg p-4 bg-white shadow-sm hover:shadow-md transition relative border-l-4 border-l-blue-500">
+          <div class="flex justify-between items-start mb-2">
+            <h3 class="font-bold text-gray-800 text-base">${escapeHtml(job.title)}</h3>
+            <span class="text-xs text-gray-400">${job.date}</span>
+          </div>
+          <p class="text-xs text-gray-600 line-clamp-3 mb-3 whitespace-pre-wrap">${escapeHtml(job.content)}</p>
+          <div class="flex justify-end gap-2 border-t pt-2 mt-2">
+            <button onclick="deleteJob(${job.id})" class="text-xs text-red-500 hover:text-red-700 px-2 py-1 rounded">
+              削除
+            </button>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    // 5. 求人の削除処理
+    function deleteJob(id) {
+      if (!confirm("この求人を削除してもよろしいですか？")) return;
+      let jobs = getSavedJobs();
+      jobs = jobs.filter(job => job.id !== id);
+      localStorage.setItem("published_jobs", JSON.stringify(jobs));
+      renderJobList();
+    }
+
+    // エスケープ処理（XSS対策）
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, (m) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      })[m]);
     }
   </script>
 </body>
