@@ -1,6 +1,13 @@
+import Anthropic from '@anthropic-ai/sdk';
+
+// Vercel Edge Runtime を使う場合の設定（もし通常のServerlessにする場合はこの行を削除してください）
 export const config = {
   runtime: 'edge',
 };
+
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
+});
 
 export default async function handler(req) {
   if (req.method !== 'POST') {
@@ -12,99 +19,32 @@ export default async function handler(req) {
 
   try {
     const { prompt } = await req.json();
-    const apiKey = process.env.Gemini_API_Key || process.env.GEMINI_API_KEY;
 
-    if (!apiKey) {
-      return new Response(JSON.stringify({ error: 'APIキーが設定されていません。' }), {
-        status: 500,
+    if (!prompt) {
+      return new Response(JSON.stringify({ error: 'プロンプトがありません。' }), {
+        status: 400,
         headers: { 'Content-Type': 'application/json' },
       });
     }
 
-    // 1. 固定モデル名を使わず、現在このAPIキーで使えるモデル一覧を自動取得する
-    const modelsRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
-    const modelsData = await modelsRes.json();
-
-    if (modelsData.error) {
-      return new Response(JSON.stringify({ error: `API Key Error: ${modelsData.error.message}` }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-
-    // generateContent が使えるモデルを上から順に自動で1つ選出する
-    const availableModel = modelsData.models?.find(m => 
-      m.supportedGenerationMethods?.includes('generateContent') &&
-      (m.name.includes('flash') || m.name.includes('pro'))
-    );
-
-    // 万が一見つからない場合のフォールバック
-    const modelPath = availableModel ? availableModel.name : 'models/gemini-1.5-flash';
-
-    // 2. 取得した正しいモデルパスを使ってストリーミングリクエストを実行
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/${modelPath}:streamGenerateContent?alt=sse&key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            maxOutputTokens: 600, // 504タイムアウトを防ぐため出力を軽量化
-            temperature: 0.7,
-          }
-        }),
-      }
-    );
-
-    if (!response.ok) {
-      const errText = await response.text();
-      return new Response(JSON.stringify({ error: `Gemini API Error: ${errText}` }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-
-    const encoder = new TextEncoder();
-    const decoder = new TextDecoder();
-
-    const readableStream = new ReadableStream({
-      async start(controller) {
-        const reader = response.body.getReader();
-        try {
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            
-            const chunk = decoder.decode(value, { stream: true });
-            const lines = chunk.split('\n');
-            for (const line of lines) {
-              if (line.startsWith('data: ')) {
-                const jsonStr = line.replace('data: ', '').trim();
-                if (jsonStr) {
-                  const parsed = JSON.parse(jsonStr);
-                  const text = parsed.candidates?.[0]?.content?.parts?.[0]?.text;
-                  if (text) {
-                    controller.enqueue(encoder.encode(text));
-                  }
-                }
-              }
-            }
-          }
-        } catch (err) {
-          controller.error(err);
-        } finally {
-          controller.close();
-        }
-      },
+    // Claude API リクエスト
+    // max_tokens を短め（例: 400）にすることで、タイムアウト（10〜15秒の壁）を確実に回避します
+    const response = await anthropic.messages.create({
+      model: 'claude-3-5-haiku-20241007', // より高速で軽量な Haiku モデルを使用するとさらにタイムアウトしにくくなります
+      max_tokens: 400,
+      messages: [{ role: 'user', content: prompt }],
     });
 
-    return new Response(readableStream, {
-      headers: { 'Content-Type': 'text/event-stream; charset=utf-8' },
+    const replyText = response.content[0].text;
+
+    return new Response(JSON.stringify({ result: replyText }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
     });
 
   } catch (error) {
-    return new Response(JSON.stringify({ error: `Server Error: ${error.message}` }), {
+    console.error('API Error:', error);
+    return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     });
