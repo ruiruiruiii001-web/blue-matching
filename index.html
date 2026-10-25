@@ -6,6 +6,8 @@
   <title>現場直結！職人＆親方の求人マッチング</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Supabase JS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="bg-gray-100 min-h-screen text-gray-800 pb-20 font-sans">
 
@@ -14,9 +16,9 @@
     <div class="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
       <div>
         <h1 class="text-xl font-bold tracking-wide">👷 現場直結！マッチング</h1>
-        <p class="text-xs text-orange-100">めんどうなやり取りゼロ・現場特化型</p>
+        <p class="text-xs text-orange-100">クラウド同期・現場特化型</p>
       </div>
-      <span class="text-xs bg-orange-700 px-3 py-1.5 rounded-full font-bold">決定版</span>
+      <span class="text-xs bg-orange-700 px-3 py-1.5 rounded-full font-bold">クラウド版</span>
     </div>
   </header>
 
@@ -37,7 +39,7 @@
     <!-- 左側①：親方・企業向け 求人作成 -->
     <section id="employerSection" class="space-y-6">
       <div class="bg-white p-6 rounded-lg shadow-md">
-        <h2 class="text-lg font-bold mb-4 border-b pb-2 text-orange-600">現場求人の穴埋め作成</h2>
+        <h2 class="text-lg font-bold mb-4 border-b pb-2 text-orange-600">現場求人のクラウド投稿</h2>
         
         <div class="space-y-4">
           <div>
@@ -92,7 +94,7 @@
           </div>
 
           <button onclick="publishJob()" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-3.5 rounded-lg transition shadow text-base">
-            🔥 この求人を今すぐ掲載する
+            🔥 クラウドに求人を今すぐ掲載する
           </button>
         </div>
       </div>
@@ -163,7 +165,7 @@
     <!-- 右側：掲載中の現場求人一覧 -->
     <section class="bg-white p-6 rounded-lg shadow-md h-fit">
       <div class="flex justify-between items-center mb-4 border-b pb-2">
-        <h2 class="text-lg font-bold text-gray-800">募集中の現場一覧</h2>
+        <h2 class="text-lg font-bold text-gray-800">募集中の現場一覧 (クラウド)</h2>
         <span id="jobCount" class="text-xs bg-gray-200 text-gray-700 px-2.5 py-1 rounded-full font-bold">0件</span>
       </div>
 
@@ -178,18 +180,6 @@
     </section>
 
   </main>
-
-  <!-- バックアップ・データ管理フッター -->
-  <footer class="max-w-5xl mx-auto px-4 mt-8">
-    <div class="bg-white p-4 rounded-lg shadow-sm border flex flex-wrap justify-between items-center text-xs text-gray-600 gap-3">
-      <span class="font-bold">💾 データ管理 (バックアップ)</span>
-      <div class="space-x-2">
-        <button onclick="exportData()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1.5 rounded font-medium">データをファイルに保存</button>
-        <button onclick="document.getElementById('importFile').click()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1.5 rounded font-medium">保存データから復元</button>
-        <input type="file" id="importFile" onchange="importData(event)" class="hidden" accept=".json">
-      </div>
-    </div>
-  </footer>
 
   <!-- 求人詳細 & ワンタップ直通応募モーダル -->
   <div id="jobModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 p-4">
@@ -229,10 +219,17 @@
   </div>
 
   <script>
+    // Supabase 設定
+    const SUPABASE_URL = 'https://qefqlbkqewvahtqzqmfp.supabase.co';
+    // ※通常のanonキーはeyJから始まりますが、お持ちのキーをそのままセットしています
+    const SUPABASE_KEY = 'sb_publishable_RljFK2XPFMXkP-_yoRQs6w_HK3F1k60'; 
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let cachedJobs = [];
     let selectedJob = null;
 
     document.addEventListener("DOMContentLoaded", () => {
-      renderJobList();
+      fetchJobs();
       loadSeekerProfile();
     });
 
@@ -255,8 +252,23 @@
       }
     }
 
-    // 求人投稿
-    function publishJob() {
+    // Supabaseから求人一覧を取得
+    async function fetchJobs() {
+      const { data, error } = await supabaseClient
+        .from('published_jobs')
+        .select('*')
+        .order('id', { ascending: false });
+
+      if (error) {
+        console.error("データ取得エラー:", error);
+        return;
+      }
+      cachedJobs = data || [];
+      renderJobList();
+    }
+
+    // 求人投稿（Supabaseへ保存）
+    async function publishJob() {
       const title = document.getElementById("jobTitle").value.trim();
       const salary = document.getElementById("jobSalary").value.trim();
       const phone = document.getElementById("jobPhone").value.trim();
@@ -272,17 +284,18 @@
       }
 
       const newJob = {
-        id: Date.now(),
         title, salary, phone, line, duties, capacity,
-        tags: checkedTags,
-        date: new Date().toLocaleDateString("ja-JP")
+        tags: checkedTags
       };
 
-      const jobs = getSavedJobs();
-      jobs.unshift(newJob);
-      localStorage.setItem("published_jobs", JSON.stringify(jobs));
+      const { error } = await supabaseClient
+        .from('published_jobs')
+        .insert([newJob]);
 
-      renderJobList();
+      if (error) {
+        alert("投稿に失敗しました: " + error.message);
+        return;
+      }
 
       document.getElementById("jobTitle").value = "";
       document.getElementById("jobSalary").value = "";
@@ -291,15 +304,11 @@
       document.getElementById("jobDuties").value = "";
       document.querySelectorAll('input[name="jobTag"]').forEach(cb => cb.checked = false);
 
-      alert("求人を投稿しました！");
+      alert("クラウド上に求人を掲載しました！");
+      fetchJobs();
     }
 
-    function getSavedJobs() {
-      const saved = localStorage.getItem("published_jobs");
-      return saved ? JSON.parse(saved) : [];
-    }
-
-    // 求職者プロフィール保存
+    // 求職者プロフィール保存（ローカル）
     function saveSeekerProfile() {
       const checkedLic = Array.from(document.querySelectorAll('input[name="seekerLic"]:checked')).map(cb => cb.value);
       
@@ -341,11 +350,10 @@
       const jobList = document.getElementById("jobList");
       const jobCount = document.getElementById("jobCount");
       const keyword = document.getElementById("searchKeyword").value.toLowerCase();
-      const jobs = getSavedJobs();
 
-      const filteredJobs = jobs.filter(job => 
+      const filteredJobs = cachedJobs.filter(job => 
         job.title.toLowerCase().includes(keyword) || 
-        job.tags.some(t => t.toLowerCase().includes(keyword))
+        (job.tags && job.tags.some(t => t.toLowerCase().includes(keyword)))
       );
 
       jobCount.innerText = `${filteredJobs.length}件`;
@@ -359,13 +367,13 @@
         <div onclick="openModal(${job.id})" class="border rounded-lg p-4 bg-white shadow-sm hover:shadow-md transition cursor-pointer relative border-l-4 ${job.capacity > 0 ? 'border-l-orange-500' : 'border-l-gray-400 opacity-75'}">
           <div class="flex justify-between items-start mb-1">
             <h3 class="font-bold text-gray-800 text-base">${escapeHtml(job.title)}</h3>
-            <span class="text-xs text-gray-400">${job.date}</span>
+            <span class="text-xs text-gray-400">ID: ${job.id}</span>
           </div>
           <p class="text-sm font-bold text-red-600 mb-2">${escapeHtml(job.salary || '給与応相談')}</p>
           
           <!-- タグ表示 -->
           <div class="flex flex-wrap gap-1 mb-3">
-            ${job.tags.map(t => `<span class="bg-orange-50 text-orange-700 border border-orange-200 text-[10px] px-1.5 py-0.5 rounded font-medium">${escapeHtml(t)}</span>`).join("")}
+            ${job.tags ? job.tags.map(t => `<span class="bg-orange-50 text-orange-700 border border-orange-200 text-[10px] px-1.5 py-0.5 rounded font-medium">${escapeHtml(t)}</span>`).join("") : ''}
           </div>
 
           <div class="flex justify-between items-center border-t pt-2 mt-2">
@@ -378,8 +386,7 @@
 
     // モーダル表示
     function openModal(id) {
-      const jobs = getSavedJobs();
-      selectedJob = jobs.find(j => j.id === id);
+      selectedJob = cachedJobs.find(j => j.id === id);
       if (!selectedJob) return;
 
       document.getElementById("modalTitle").innerText = selectedJob.title;
@@ -395,7 +402,7 @@
       }
 
       const tagsContainer = document.getElementById("modalTags");
-      tagsContainer.innerHTML = selectedJob.tags.map(t => `<span class="bg-orange-100 text-orange-800 text-xs px-2 py-0.5 rounded font-bold">${escapeHtml(t)}</span>`).join("");
+      tagsContainer.innerHTML = selectedJob.tags ? selectedJob.tags.map(t => `<span class="bg-orange-100 text-orange-800 text-xs px-2 py-0.5 rounded font-bold">${escapeHtml(t)}</span>`).join("") : '';
 
       document.getElementById("jobModal").classList.remove("hidden");
     }
@@ -438,51 +445,26 @@
       selectedJob = null;
     }
 
-    function deleteJob(id) {
-      if (!confirm("この求人を削除しますか？")) return;
-      let jobs = getSavedJobs();
-      jobs = jobs.filter(j => j.id !== id);
-      localStorage.setItem("published_jobs", JSON.stringify(jobs));
-      renderJobList();
+    // Supabaseから求人を削除
+    async function deleteJob(id) {
+      if (!confirm("この求人をクラウドから削除しますか？")) return;
+      
+      const { error } = await supabaseClient
+        .from('published_jobs')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        alert("削除に失敗しました: " + error.message);
+        return;
+      }
+
+      fetchJobs();
       closeModal();
     }
 
-    // データのエクスポート（バックアップ）
-    function exportData() {
-      const data = {
-        jobs: localStorage.getItem("published_jobs"),
-        seeker: localStorage.getItem("seeker_profile")
-      };
-      const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `job_matching_backup_${new Date().toISOString().slice(0,10)}.json`;
-      a.click();
-    }
-
-    // データのインポート（復元）
-    function importData(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        try {
-          const data = JSON.parse(e.target.result);
-          if (data.jobs) localStorage.setItem("published_jobs", data.jobs);
-          if (data.seeker) localStorage.setItem("seeker_profile", data.seeker);
-          renderJobList();
-          loadSeekerProfile();
-          alert("データを復元しました！");
-        } catch (err) {
-          alert("ファイルの復元に失敗しました。正しいJSONファイルを選択してください。");
-        }
-      };
-      reader.readAsText(file);
-    }
-
     function escapeHtml(str) {
+      if (!str) return '';
       return str.replace(/[&<>"']/g, (m) => ({
         '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
       })[m]);
