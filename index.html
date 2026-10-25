@@ -74,7 +74,7 @@
       renderJobList();
     });
 
-    // 1. AI求人票の生成処理
+    // 1. AI求人票の生成処理（JSONパースエラー防止対策済み）
     async function generateJobOffer() {
       const title = document.getElementById("jobTitle").value.trim();
       const condition = document.getElementById("jobCondition").value.trim();
@@ -100,7 +100,15 @@
           body: JSON.stringify({ prompt })
         });
 
-        const data = await response.json();
+        // プレーンテキストとしてレスポンスを取得（500/504などの非JSONレスポンス対策）
+        const responseText = await response.text();
+        
+        let data;
+        try {
+          data = JSON.parse(responseText);
+        } catch (e) {
+          throw new Error("サーバー側で一時的なエラーが発生しました（500/504等）。時間をおいて再度お試しください。");
+        }
 
         if (!response.ok) {
           throw new Error(data.error || "通信エラーが発生しました。");
