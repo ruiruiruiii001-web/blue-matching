@@ -21,7 +21,6 @@ export default async function handler(req) {
       });
     }
 
-    // 大文字・小文字どちらの環境変数名（Gemini_API_Key / GEMINI_API_KEY）でも確実に取得
     const apiKey = process.env.Gemini_API_Key || process.env.GEMINI_API_KEY;
     if (!apiKey) {
       return new Response(JSON.stringify({ error: 'Gemini_API_Key が設定されていません。' }), {
@@ -30,26 +29,34 @@ export default async function handler(req) {
       });
     }
 
-    // ログで特定した正解モデル (gemini-3.8-flash) を指定
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [{ text: prompt }],
+    // 503エラー（一時的な混雑）の際に最大3回自動リトライする関数
+    const fetchWithRetry = async (retries = 3, delay = 1500) => {
+      for (let i = 0; i < retries; i++) {
+        const response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
             },
-          ],
-          generationConfig: {
-            maxOutputTokens: 400,
-          },
-        }),
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }],
+              generationConfig: { maxOutputTokens: 400 },
+            }),
+          }
+        );
+
+        // 503 (UNAVAILABLE) の場合は待機して再試行
+        if (response.status === 503 && i < retries - 1) {
+          await new Promise((resolve) => setTimeout(resolve, delay));
+          continue;
+        }
+
+        return response;
       }
-    );
+    };
+
+    const response = await fetchWithRetry();
 
     if (!response.ok) {
       const errorText = await response.text();
