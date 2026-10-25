@@ -136,7 +136,80 @@
       btn.innerText = "Geminiに接続中...";
       resultContainer.classList.add("hidden");
 
-      const prompt = `以下の条件をもとに、現場求職者に響く魅力的な求人票テキストを作成してください。\n【職種】${title}\n【募集人数】${capacity}\n【条件・特徴】${condition}`;  try { const response = await fetch("/api/ai", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ prompt }) });  const responseText = await response.text(); let data; try { data = JSON.parse(responseText); } catch (e) { throw new Error("サーバー側で一時的なエラーが発生しました（500/504等）。時間をおいて再度お試しください。"); }  if (!response.ok) { throw new Error(data.error \vert{}\vert{} "通信エラーが発生しました。"); }  currentGeneratedText = data.result; resultText.innerText = currentGeneratedText; resultContainer.classList.remove("hidden");  } catch (error) { alert("エラーが発生しました: " + error.message); } finally { btn.disabled = false; btn.innerText = "Geminiで求人票を生成する"; } }  // 2. 求人を掲載（LocalStorageに保存） function publishJob() { const title = document.getElementById("jobTitle").value.trim() \vert{}\vert{} "求人募集"; const capacity = document.getElementById("jobCapacity").value.trim() \vert{}\vert{} "若干名"; if (!currentGeneratedText) return;  const newJob = { id: Date.now(), title: title, capacity: capacity, content: currentGeneratedText, date: new Date().toLocaleDateString("ja-JP") };  const jobs = getSavedJobs(); jobs.unshift(newJob); localStorage.setItem("published_jobs", JSON.stringify(jobs));  renderJobList();  document.getElementById("jobTitle").value = ""; document.getElementById("jobCapacity").value = ""; document.getElementById("jobCondition").value = ""; document.getElementById("resultContainer").classList.add("hidden"); currentGeneratedText = "";  alert("求人一覧に掲載しました！"); }  function getSavedJobs() { const saved = localStorage.getItem("published_jobs"); return saved ? JSON.parse(saved) : []; }  // 3. 求人カード一覧の表示 function renderJobList() { const jobList = document.getElementById("jobList"); const jobCount = document.getElementById("jobCount"); const jobs = getSavedJobs();  jobCount.innerText = `${jobs.length}件`;
+      const prompt = `以下の条件をもとに、現場求職者に響く魅力的な求人票テキストを作成してください。\n【職種】${title}\n【募集人数】${capacity}\n【条件・特徴】${condition}`;
+
+      try {
+        const response = await fetch("/api/ai", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt })
+        });
+
+        const responseText = await response.text();
+        let data;
+        try {
+          data = JSON.parse(responseText);
+        } catch (e) {
+          throw new Error("サーバー側で一時的なエラーが発生しました（500/504等）。時間をおいて再度お試しください。");
+        }
+
+        if (!response.ok) {
+          throw new Error(data.error || "通信エラーが発生しました。");
+        }
+
+        currentGeneratedText = data.result;
+        resultText.innerText = currentGeneratedText;
+        resultContainer.classList.remove("hidden");
+
+      } catch (error) {
+        alert("エラーが発生しました: " + error.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "Geminiで求人票を生成する";
+      }
+    }
+
+    // 2. 求人を掲載（LocalStorageに保存）
+    function publishJob() {
+      const title = document.getElementById("jobTitle").value.trim() || "求人募集";
+      const capacity = document.getElementById("jobCapacity").value.trim() || "若干名";
+      if (!currentGeneratedText) return;
+
+      const newJob = {
+        id: Date.now(),
+        title: title,
+        capacity: capacity,
+        content: currentGeneratedText,
+        date: new Date().toLocaleDateString("ja-JP")
+      };
+
+      const jobs = getSavedJobs();
+      jobs.unshift(newJob);
+      localStorage.setItem("published_jobs", JSON.stringify(jobs));
+
+      renderJobList();
+
+      document.getElementById("jobTitle").value = "";
+      document.getElementById("jobCapacity").value = "";
+      document.getElementById("jobCondition").value = "";
+      document.getElementById("resultContainer").classList.add("hidden");
+      currentGeneratedText = "";
+
+      alert("求人一覧に掲載しました！");
+    }
+
+    function getSavedJobs() {
+      const saved = localStorage.getItem("published_jobs");
+      return saved ? JSON.parse(saved) : [];
+    }
+
+    // 3. 求人カード一覧の表示
+    function renderJobList() {
+      const jobList = document.getElementById("jobList");
+      const jobCount = document.getElementById("jobCount");
+      const jobs = getSavedJobs();
+
+      jobCount.innerText = `${jobs.length}件`;
 
       if (jobs.length === 0) {
         jobList.innerHTML = `
@@ -172,10 +245,10 @@
       if (!selectedJob) return;
 
       document.getElementById("modalTitle").innerText = selectedJob.title;
-      document.getElementById("modalCapacity").innerText = `募集人数: ${selectedJob.capacity}`; document.getElementById("modalDate").innerText = `掲載日: ${selectedJob.date}`;
+      document.getElementById("modalCapacity").innerText = `募集人数: ${selectedJob.capacity}`;
+      document.getElementById("modalDate").innerText = `掲載日: ${selectedJob.date}`;
       document.getElementById("modalContent").innerText = selectedJob.content;
       
-      // マッチングフォームの初期化
       document.getElementById("userProfile").value = "";
       document.getElementById("matchResult").classList.add("hidden");
 
@@ -217,4 +290,54 @@ ${selectedJob.content}
 ${userProfile}
 
 【出力形式】
-1.
+1. 適合度スコア（例: 適合度 85%）
+2. マッチしている点・アピールできる強み（箇条書き）
+3. 懸念点や事前に確認しておくべきポイント（箇条書き）`;
+
+      try {
+        const response = await fetch("/api/ai", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt })
+        });
+
+        const responseText = await response.text();
+        let data;
+        try {
+          data = JSON.parse(responseText);
+        } catch (e) {
+          throw new Error("診断中に通信エラーが発生しました。");
+        }
+
+        if (!response.ok) {
+          throw new Error(data.error || "通信エラーが発生しました。");
+        }
+
+        matchResultText.innerText = data.result;
+        matchResult.classList.remove("hidden");
+
+      } catch (error) {
+        alert("エラーが発生しました: " + error.message);
+      } finally {
+        matchBtn.disabled = false;
+        matchBtn.innerText = "AIで適合度を診断する";
+      }
+    }
+
+    // 6. 削除処理
+    function deleteJob(id) {
+      if (!confirm("この求人を削除してもよろしいですか？")) return;
+      let jobs = getSavedJobs();
+      jobs = jobs.filter(job => job.id !== id);
+      localStorage.setItem("published_jobs", JSON.stringify(jobs));
+      renderJobList();
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, (m) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      })[m]);
+    }
+  </script>
+</body>
+</html>
