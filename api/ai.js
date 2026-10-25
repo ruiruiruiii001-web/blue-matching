@@ -21,18 +21,18 @@ export default async function handler(req) {
       });
     }
 
-    // コード側を Vercel の環境変数名に合わせる
+    // 大文字・小文字どちらの環境変数名（Gemini_API_Key / GEMINI_API_KEY）でも確実に取得
     const apiKey = process.env.Gemini_API_Key || process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      return new Response(JSON.stringify({ error: 'GEMINI_API_KEY が設定されていません。' }), {
+      return new Response(JSON.stringify({ error: 'Gemini_API_Key が設定されていません。' }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' },
       });
     }
 
-    // 正しいモデル名 (gemini-2.5-flash) を指定
+    // ログで特定した正解モデル (gemini-3.8-flash) を指定
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: {
