@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>現場特化型 求人・採用管理プラットフォーム</title>
+  <title>現場特化型 求人・採用マッチングプラットフォーム</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
@@ -12,16 +12,28 @@
   <!-- ヘッダー -->
   <header class="bg-blue-600 text-white shadow">
     <div class="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
-      <h1 class="text-xl font-bold">現場特化型 求人テンプレートメーカー</h1>
-      <span class="text-sm bg-blue-700 px-3 py-1 rounded-full">穴埋め式かんたん作成</span>
+      <h1 class="text-xl font-bold">現場特化型 求人＆マッチング</h1>
+      <span class="text-sm bg-blue-700 px-3 py-1 rounded-full">テンプレート穴埋め式</span>
     </div>
   </header>
 
-  <main class="max-w-5xl mx-auto px-4 py-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+  <!-- タブ切替ナビゲーション -->
+  <div class="max-w-5xl mx-auto px-4 mt-6">
+    <div class="flex border-b border-gray-300">
+      <button id="tabEmployerBtn" onclick="switchTab('employer')" class="py-2 px-6 font-bold text-sm border-b-2 border-blue-600 text-blue-600 focus:outline-none">
+        🏢 企業向け（求人作成）
+      </button>
+      <button id="tabSeekerBtn" onclick="switchTab('seeker')" class="py-2 px-6 font-bold text-sm border-b-2 border-transparent text-gray-500 hover:text-blue-600 focus:outline-none">
+        👷 求職者向け（Web履歴書）
+      </button>
+    </div>
+  </div>
+
+  <main class="max-w-5xl mx-auto px-4 py-6 grid grid-cols-1 md:grid-cols-2 gap-8">
     
-    <!-- 左側：テンプレート穴埋めフォーム -->
-    <section class="bg-white p-6 rounded-lg shadow-md h-fit">
-      <h2 class="text-lg font-bold mb-4 border-b pb-2 text-blue-600">1. 求人票テンプレート入力</h2>
+    <!-- 左側①：企業向け 求人作成フォーム -->
+    <section id="employerSection" class="bg-white p-6 rounded-lg shadow-md h-fit">
+      <h2 class="text-lg font-bold mb-4 border-b pb-2 text-blue-600">求人票テンプレート入力</h2>
       
       <div class="space-y-4">
         <div>
@@ -51,16 +63,16 @@
         </div>
 
         <div>
-          <label class="block text-sm font-medium mb-1">アピールポイント・福利厚生</label>
+          <label class="block text-sm font-medium mb-1">アピールポイント・待遇</label>
           <input type="text" id="jobPerks" placeholder="例: 未経験歓迎 / 資格取得支援あり / 寮完備" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none text-sm">
         </div>
 
         <button onclick="previewTemplate()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded transition shadow text-sm">
-          テンプレートをプレビューする
+          求人票をプレビューする
         </button>
       </div>
 
-      <!-- 生成・プレビュー結果エリア -->
+      <!-- プレビュー結果エリア -->
       <div id="resultContainer" class="mt-6 hidden">
         <h3 class="text-md font-semibold mb-2 text-gray-700">完成プレビュー</h3>
         <div id="resultText" class="p-4 bg-gray-50 border rounded text-xs whitespace-pre-wrap leading-relaxed min-h-[140px] text-gray-700 font-mono"></div>
@@ -71,10 +83,56 @@
       </div>
     </section>
 
+    <!-- 左側②：求職者向け Web履歴書・プロフィールフォーム -->
+    <section id="seekerSection" class="bg-white p-6 rounded-lg shadow-md h-fit hidden">
+      <h2 class="text-lg font-bold mb-4 border-b pb-2 text-green-600">求職者プロフィール（簡易Web履歴書）</h2>
+      
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium mb-1">お名前・ニックネーム</label>
+          <input type="text" id="seekerName" placeholder="例: 現場 太郎" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-green-500 outline-none text-sm">
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium mb-1">年齢</label>
+            <input type="number" id="seekerAge" placeholder="例: 25" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-green-500 outline-none text-sm">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">連絡先（電話 / Email）</label>
+            <input type="text" id="seekerContact" placeholder="例: 090-XXXX-XXXX" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-green-500 outline-none text-sm">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-1">保有資格（該当するものを入力）</label>
+          <input type="text" id="seekerLicenses" placeholder="例: 普通自動車免許、玉掛け、中型免許" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-green-500 outline-none text-sm">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-1">これまでの現場経験・得意な業務</label>
+          <textarea id="seekerExp" rows="2" placeholder="例: 解体現場経験2年、内装クロス貼り、建築資材の搬入作業など。" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-green-500 outline-none text-sm"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-1">希望条件（働き方・日払いなど）</label>
+          <input type="text" id="seekerPreference" placeholder="例: 即日勤務OK / 週4日希望 / 日払い希望" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-green-500 outline-none text-sm">
+        </div>
+
+        <button onclick="saveSeekerProfile()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 rounded transition shadow text-sm">
+          プロフィール情報を保存する
+        </button>
+      </div>
+
+      <div id="profileSavedMessage" class="mt-4 p-3 bg-green-50 border border-green-200 text-green-800 rounded text-xs hidden">
+        ✅ プロフィールが保存されました！右側の求人一覧からそのまま「応募する」ボタンで応募できます。
+      </div>
+    </section>
+
     <!-- 右側：掲載中の求人カード一覧 & 検索 -->
     <section class="bg-white p-6 rounded-lg shadow-md">
       <div class="flex justify-between items-center mb-4 border-b pb-2">
-        <h2 class="text-lg font-bold text-gray-800">2. 掲載中の求人一覧</h2>
+        <h2 class="text-lg font-bold text-gray-800">掲載中の求人一覧</h2>
         <span id="jobCount" class="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded-full">0件</span>
       </div>
 
@@ -90,7 +148,7 @@
 
   </main>
 
-  <!-- 求人詳細モーダル -->
+  <!-- 求人詳細 & 応募用モーダル -->
   <div id="jobModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 p-4">
     <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 relative">
       
@@ -117,6 +175,13 @@
         <div id="modalContent" class="p-4 bg-gray-50 border rounded text-xs whitespace-pre-wrap leading-relaxed text-gray-700 font-mono"></div>
       </div>
 
+      <!-- 応募ボタンセクション -->
+      <div class="border-t pt-4">
+        <button id="applyBtn" onclick="applyJob()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded transition shadow text-sm">
+          📩 保存したWeb履歴書でこの求人に応募する
+        </button>
+      </div>
+
     </div>
   </div>
 
@@ -126,7 +191,28 @@
 
     document.addEventListener("DOMContentLoaded", () => {
       renderJobList();
+      loadSeekerProfile();
     });
+
+    // タブ切替機能
+    function switchTab(tab) {
+      const employerSection = document.getElementById("employerSection");
+      const seekerSection = document.getElementById("seekerSection");
+      const tabEmployerBtn = document.getElementById("tabEmployerBtn");
+      const tabSeekerBtn = document.getElementById("tabSeekerBtn");
+
+      if (tab === 'employer') {
+        employerSection.classList.remove("hidden");
+        seekerSection.classList.add("hidden");
+        tabEmployerBtn.className = "py-2 px-6 font-bold text-sm border-b-2 border-blue-600 text-blue-600 focus:outline-none";
+        tabSeekerBtn.className = "py-2 px-6 font-bold text-sm border-b-2 border-transparent text-gray-500 hover:text-blue-600 focus:outline-none";
+      } else {
+        employerSection.classList.add("hidden");
+        seekerSection.classList.remove("hidden");
+        tabSeekerBtn.className = "py-2 px-6 font-bold text-sm border-b-2 border-green-600 text-green-600 focus:outline-none";
+        tabEmployerBtn.className = "py-2 px-6 font-bold text-sm border-b-2 border-transparent text-gray-500 hover:text-green-600 focus:outline-none";
+      }
+    }
 
     // テンプレートから求人票テキストを組み立てる
     function previewTemplate() {
@@ -184,7 +270,6 @@ ${perks}
 
       renderJobList();
 
-      // フォームリセット
       document.getElementById("jobTitle").value = "";
       document.getElementById("jobCapacity").value = "1";
       document.getElementById("jobLocation").value = "";
@@ -202,7 +287,54 @@ ${perks}
       return saved ? JSON.parse(saved) : [];
     }
 
-    // 求人カード一覧の表示（検索フィルター対応）
+    // 求職者プロフィールの保存＆取得
+    function saveSeekerProfile() {
+      const profile = {
+        name: document.getElementById("seekerName").value.trim(),
+        age: document.getElementById("seekerAge").value.trim(),
+        contact: document.getElementById("seekerContact").value.trim(),
+        licenses: document.getElementById("seekerLicenses").value.trim(),
+        exp: document.getElementById("seekerExp").value.trim(),
+        preference: document.getElementById("seekerPreference").value.trim()
+      };
+
+      if (!profile.name) {
+        alert("お名前を入力してください。");
+        return;
+      }
+
+      localStorage.setItem("seeker_profile", JSON.stringify(profile));
+      document.getElementById("profileSavedMessage").classList.remove("hidden");
+    }
+
+    function loadSeekerProfile() {
+      const saved = localStorage.getItem("seeker_profile");
+      if (!saved) return;
+      const profile = JSON.parse(saved);
+      document.getElementById("seekerName").value = profile.name || "";
+      document.getElementById("seekerAge").value = profile.age || "";
+      document.getElementById("seekerContact").value = profile.contact || "";
+      document.getElementById("seekerLicenses").value = profile.licenses || "";
+      document.getElementById("seekerExp").value = profile.exp || "";
+      document.getElementById("seekerPreference").value = profile.preference || "";
+    }
+
+    // 応募処理
+    function applyJob() {
+      const saved = localStorage.getItem("seeker_profile");
+      if (!saved) {
+        alert("応募するには、まず「求職者向け（Web履歴書）」タブからプロフィールを登録・保存してください。");
+        switchTab('seeker');
+        closeModal();
+        return;
+      }
+
+      const profile = JSON.parse(saved);
+      alert(`【応募完了】\n${selectedJob.title} へ応募しました！\n\n【応募者情報】\n氏名: ${profile.name}\n連絡先: ${profile.contact}`);
+      closeModal();
+    }
+
+    // 求人カード一覧の表示
     function renderJobList() {
       const jobList = document.getElementById("jobList");
       const jobCount = document.getElementById("jobCount");
@@ -235,7 +367,7 @@ ${perks}
           </span>
           <p class="text-xs text-gray-600 line-clamp-2 mb-3 whitespace-pre-wrap">${escapeHtml(job.content)}</p>
           <div class="flex justify-between items-center border-t pt-2 mt-2">
-            <span class="text-xs text-blue-600 font-semibold hover:underline">詳細を見る →</span>
+            <span class="text-xs text-blue-600 font-semibold hover:underline">詳細・応募を見る →</span>
             <button onclick="event.stopPropagation(); deleteJob(${job.id})" class="text-xs text-red-500 hover:text-red-700 px-2 py-1 rounded">
               削除
             </button>
@@ -279,7 +411,6 @@ ${perks}
       selectedJob = null;
     }
 
-    // 削除処理
     function deleteJob(id) {
       if (!confirm("この求人を削除してもよろしいですか？")) return;
       let jobs = getSavedJobs();
