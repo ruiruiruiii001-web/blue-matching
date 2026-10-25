@@ -17,6 +17,17 @@
     </div>
   </header>
 
+  <!-- API制限（429）時のインフォメーションバナー -->
+  <div id="rateLimitBanner" class="max-w-5xl mx-auto px-4 mt-4 hidden">
+    <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded shadow-sm flex items-start justify-between">
+      <div>
+        <h3 class="font-bold text-amber-800 text-sm">⚠️ 無料枠のAPIリクエスト制限（429）に達しています</h3>
+        <p id="rateLimitText" class="text-xs text-amber-700 mt-1">ただいま1日の制限回数を超過中です。制限がリセットされるまでしばらくお待ちいただくか、時間をおいてお試しください。</p>
+      </div>
+      <button onclick="document.getElementById('rateLimitBanner').classList.add('hidden')" class="text-amber-500 hover:text-amber-700 font-bold text-sm">✕</button>
+    </div>
+  </div>
+
   <main class="max-w-5xl mx-auto px-4 py-8 grid grid-cols-1 md:grid-cols-2 gap-8">
     
     <!-- 左側：求人票生成フォーム -->
@@ -31,7 +42,7 @@
 
         <div>
           <label class="block text-sm font-medium mb-1">募集人数</label>
-          <input type="text" id="jobCapacity" placeholder="例: 3名、若干名、大量募集" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+          <input type="number" id="jobCapacity" placeholder="例: 3" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none" min="1" value="1">
         </div>
 
         <div>
@@ -55,14 +66,19 @@
       </div>
     </section>
 
-    <!-- 右側：掲載中の求人カード一覧 -->
+    <!-- 右側：掲載中の求人カード一覧 & 検索 -->
     <section class="bg-white p-6 rounded-lg shadow-md">
       <div class="flex justify-between items-center mb-4 border-b pb-2">
         <h2 class="text-lg font-bold text-gray-800">2. 掲載中の求人一覧</h2>
         <span id="jobCount" class="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded-full">0件</span>
       </div>
 
-      <div id="jobList" class="space-y-4 max-h-[600px] overflow-y-auto pr-1">
+      <!-- キーワード検索バー -->
+      <div class="mb-4">
+        <input type="text" id="searchKeyword" oninput="renderJobList()" placeholder="🔍 職種名やキーワードで検索..." class="w-full border rounded px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+      </div>
+
+      <div id="jobList" class="space-y-4 max-h-[550px] overflow-y-auto pr-1">
         <!-- カードが動的に追加されます -->
       </div>
     </section>
@@ -78,7 +94,14 @@
 
       <!-- モーダルヘッダー -->
       <div class="border-b pb-3 mb-4">
-        <span id="modalCapacity" class="inline-block bg-blue-100 text-blue-800 text-xs px-2.5 py-0.5 rounded font-semibold mb-2"></span>
+        <div class="flex justify-between items-center mb-2">
+          <span id="modalCapacityBadge" class="inline-block bg-blue-100 text-blue-800 text-xs px-2.5 py-0.5 rounded font-semibold"></span>
+          <!-- 採用人数・ステータス調整ボタン -->
+          <div class="space-x-1">
+            <button onclick="adjustCapacity(-1)" class="bg-gray-200 hover:bg-gray-300 text-gray-700 text-xs px-2 py-1 rounded">人数 -1</button>
+            <button onclick="adjustCapacity(1)" class="bg-gray-200 hover:bg-gray-300 text-gray-700 text-xs px-2 py-1 rounded">人数 +1</button>
+          </div>
+        </div>
         <h2 id="modalTitle" class="text-xl font-bold text-gray-800"></h2>
         <p id="modalDate" class="text-xs text-gray-400 mt-1"></p>
       </div>
@@ -121,7 +144,7 @@
     // 1. AI求人票生成
     async function generateJobOffer() {
       const title = document.getElementById("jobTitle").value.trim();
-      const capacity = document.getElementById("jobCapacity").value.trim() || "若干名";
+      const capacity = document.getElementById("jobCapacity").value.trim() || "1";
       const condition = document.getElementById("jobCondition").value.trim();
       const btn = document.getElementById("generateBtn");
       const resultContainer = document.getElementById("resultContainer");
@@ -135,8 +158,9 @@
       btn.disabled = true;
       btn.innerText = "Geminiに接続中...";
       resultContainer.classList.add("hidden");
+      document.getElementById("rateLimitBanner").classList.add("hidden");
 
-      const prompt = `以下の条件をもとに、現場求職者に響く魅力的な求人票テキストを作成してください。\n【職種】${title}\n【募集人数】${capacity}\n【条件・特徴】${condition}`;
+      const prompt = `以下の条件をもとに、現場求職者に響く魅力的な求人票テキストを作成してください。\n【職種】${title}\n【募集人数】${capacity}名\n【条件・特徴】${condition}`;
 
       try {
         const response = await fetch("/api/ai", {
@@ -150,10 +174,13 @@
         try {
           data = JSON.parse(responseText);
         } catch (e) {
-          throw new Error("サーバー側で一時的なエラーが発生しました（500/504等）。時間をおいて再度お試しください。");
+          throw new Error("サーバー側で一時的なエラーが発生しました。");
         }
 
         if (!response.ok) {
+          if (response.status === 429) {
+            showRateLimitBanner(data.error);
+          }
           throw new Error(data.error || "通信エラーが発生しました。");
         }
 
@@ -162,17 +189,27 @@
         resultContainer.classList.remove("hidden");
 
       } catch (error) {
-        alert("エラーが発生しました: " + error.message);
+        if (!error.message.includes("429")) {
+          alert("エラーが発生しました: " + error.message);
+        }
       } finally {
         btn.disabled = false;
         btn.innerText = "Geminiで求人票を生成する";
       }
     }
 
+    // 429エラー専用バナー表示
+    function showRateLimitBanner(errorMsg) {
+      const banner = document.getElementById("rateLimitBanner");
+      const text = document.getElementById("rateLimitText");
+      text.innerText = "API制限に達しました: " + errorMsg;
+      banner.classList.remove("hidden");
+    }
+
     // 2. 求人を掲載（LocalStorageに保存）
     function publishJob() {
       const title = document.getElementById("jobTitle").value.trim() || "求人募集";
-      const capacity = document.getElementById("jobCapacity").value.trim() || "若干名";
+      const capacity = parseInt(document.getElementById("jobCapacity").value) || 1;
       if (!currentGeneratedText) return;
 
       const newJob = {
@@ -190,7 +227,7 @@
       renderJobList();
 
       document.getElementById("jobTitle").value = "";
-      document.getElementById("jobCapacity").value = "";
+      document.getElementById("jobCapacity").value = "1";
       document.getElementById("jobCondition").value = "";
       document.getElementById("resultContainer").classList.add("hidden");
       currentGeneratedText = "";
@@ -203,30 +240,37 @@
       return saved ? JSON.parse(saved) : [];
     }
 
-    // 3. 求人カード一覧の表示
+    // 3. 求人カード一覧の表示（検索フィルター対応）
     function renderJobList() {
       const jobList = document.getElementById("jobList");
       const jobCount = document.getElementById("jobCount");
+      const keyword = document.getElementById("searchKeyword").value.toLowerCase();
       const jobs = getSavedJobs();
 
-      jobCount.innerText = `${jobs.length}件`;
+      const filteredJobs = jobs.filter(job => 
+        job.title.toLowerCase().includes(keyword) || job.content.toLowerCase().includes(keyword)
+      );
 
-      if (jobs.length === 0) {
+      jobCount.innerText = `${filteredJobs.length}件`;
+
+      if (filteredJobs.length === 0) {
         jobList.innerHTML = `
           <div class="text-center py-8 text-gray-400 text-sm">
-            掲載中の求人はありません。<br>左側のフォームから作成して掲載してみましょう。
+            該当する求人はありません。
           </div>
         `;
         return;
       }
 
-      jobList.innerHTML = jobs.map(job => `
-        <div onclick="openModal(${job.id})" class="border rounded-lg p-4 bg-white shadow-sm hover:shadow-md transition cursor-pointer relative border-l-4 border-l-blue-500">
+      jobList.innerHTML = filteredJobs.map(job => `
+        <div onclick="openModal(${job.id})" class="border rounded-lg p-4 bg-white shadow-sm hover:shadow-md transition cursor-pointer relative border-l-4 ${job.capacity > 0 ? 'border-l-blue-500' : 'border-l-gray-400 opacity-75'}">
           <div class="flex justify-between items-start mb-1">
             <h3 class="font-bold text-gray-800 text-base">${escapeHtml(job.title)}</h3>
             <span class="text-xs text-gray-400">${job.date}</span>
           </div>
-          <span class="inline-block bg-blue-50 text-blue-700 text-xs px-2 py-0.5 rounded font-medium mb-2">募集: ${escapeHtml(job.capacity)}</span>
+          <span class="inline-block ${job.capacity > 0 ? 'bg-blue-50 text-blue-700' : 'bg-gray-200 text-gray-700'} text-xs px-2 py-0.5 rounded font-medium mb-2">
+            ${job.capacity > 0 ? `残り募集人数: ${job.capacity}名` : '採用終了（満員）'}
+          </span>
           <p class="text-xs text-gray-600 line-clamp-2 mb-3 whitespace-pre-wrap">${escapeHtml(job.content)}</p>
           <div class="flex justify-between items-center border-t pt-2 mt-2">
             <span class="text-xs text-blue-600 font-semibold hover:underline">詳細・AI診断を見る →</span>
@@ -238,21 +282,38 @@
       `).join("");
     }
 
-    // 4. モーダル表示制御
+    // 4. モーダル表示制御 & 人数調整
     function openModal(id) {
       const jobs = getSavedJobs();
       selectedJob = jobs.find(j => j.id === id);
       if (!selectedJob) return;
 
-      document.getElementById("modalTitle").innerText = selectedJob.title;
-      document.getElementById("modalCapacity").innerText = `募集人数: ${selectedJob.capacity}`;
-      document.getElementById("modalDate").innerText = `掲載日: ${selectedJob.date}`;
-      document.getElementById("modalContent").innerText = selectedJob.content;
-      
+      updateModalUI();
       document.getElementById("userProfile").value = "";
       document.getElementById("matchResult").classList.add("hidden");
-
       document.getElementById("jobModal").classList.remove("hidden");
+    }
+
+    function updateModalUI() {
+      if (!selectedJob) return;
+      document.getElementById("modalTitle").innerText = selectedJob.title;
+      document.getElementById("modalCapacityBadge.innerText" || "modalCapacityBadge").innerText = `残り募集人数: ${selectedJob.capacity} 名`;
+      document.getElementById("modalDate").innerText = `掲載日: ${selectedJob.date}`;
+      document.getElementById("modalContent").innerText = selectedJob.content;
+    }
+
+    function adjustCapacity(amount) {
+      if (!selectedJob) return;
+      selectedJob.capacity = Math.max(0, selectedJob.capacity + amount);
+      
+      // LocalStorageを更新
+      let jobs = getSavedJobs();
+      jobs = jobs.map(j => j.id === selectedJob.id ? selectedJob : j);
+      localStorage.setItem("published_jobs", JSON.stringify(jobs));
+
+      // 画面更新
+      updateModalUI();
+      renderJobList();
     }
 
     function closeModal() {
@@ -282,7 +343,7 @@
 
 【求人内容】
 職種: ${selectedJob.title}
-募集人数: ${selectedJob.capacity}
+募集人数: ${selectedJob.capacity}名
 本文:
 ${selectedJob.content}
 
@@ -331,6 +392,7 @@ ${userProfile}
       jobs = jobs.filter(job => job.id !== id);
       localStorage.setItem("published_jobs", JSON.stringify(jobs));
       renderJobList();
+      closeModal();
     }
 
     function escapeHtml(str) {
