@@ -842,6 +842,7 @@
       const isEmployer = accountType === "employer";
       const isSeeker = accountType === "seeker";
       updateHeaderAccountButton();
+      document.getElementById("employerAuthPanel").classList.toggle("hidden", hasUser && Boolean(accountType));
       document.getElementById("accountTypeSetup").classList.toggle("hidden", !hasUser || Boolean(accountType) || accountTypeLoading);
       document.getElementById("employerDashboard").classList.toggle("hidden", !hasUser || !isEmployer || !dashboardOpen);
       document.getElementById("employerJobForm").classList.toggle("hidden", !hasUser || !isEmployer);
