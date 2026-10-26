@@ -38,7 +38,32 @@
     
     <!-- 左側①：親方・企業向け 求人作成 -->
     <section id="employerSection" class="space-y-6">
-      <div class="bg-white p-6 rounded-lg shadow-md">
+      <div id="employerAuthPanel" class="bg-white p-6 rounded-lg shadow-md">
+        <h2 class="text-lg font-bold mb-2 text-blue-600">事業者アカウント</h2>
+        <p class="text-sm text-gray-600 mb-4">求人の投稿・管理にはログインが必要です。</p>
+        <div id="employerLoggedOut" class="space-y-3">
+          <div>
+            <label for="employerEmail" class="block text-sm font-medium mb-1">メールアドレス</label>
+            <input type="email" id="employerEmail" autocomplete="email" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+          </div>
+          <div>
+            <label for="employerPassword" class="block text-sm font-medium mb-1">パスワード（8文字以上）</label>
+            <input type="password" id="employerPassword" autocomplete="current-password" minlength="8" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <button onclick="signInEmployer()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg transition">ログイン</button>
+            <button onclick="signUpEmployer()" class="border border-blue-600 text-blue-600 hover:bg-blue-50 font-bold py-2.5 rounded-lg transition">新規登録</button>
+          </div>
+          <p class="text-xs text-gray-500">新規登録後、確認メールが届いた場合はメール内のリンクを開いてからログインしてください。</p>
+        </div>
+        <div id="employerLoggedIn" class="hidden items-center justify-between gap-3">
+          <p class="text-sm text-gray-700">ログイン中: <span id="employerAccountEmail" class="font-medium"></span></p>
+          <button onclick="signOutEmployer()" class="text-sm text-blue-600 hover:underline">ログアウト</button>
+        </div>
+        <p id="authMessage" role="status" aria-live="polite" class="text-sm mt-3 hidden"></p>
+      </div>
+
+      <div id="employerJobForm" class="bg-white p-6 rounded-lg shadow-md hidden">
         <h2 id="jobFormHeading" class="text-lg font-bold mb-4 border-b pb-2 text-blue-600">現場求人のクラウド投稿</h2>
         
         <div class="space-y-4">
@@ -337,11 +362,94 @@
     let selectedJob = null;
     let editingJobId = null;
     let activeTab = "employer";
+    let currentUser = null;
 
     document.addEventListener("DOMContentLoaded", () => {
       fetchJobs();
       loadSeekerProfile();
+      initializeEmployerAuth();
     });
+
+    async function initializeEmployerAuth() {
+      const { data, error } = await supabaseClient.auth.getSession();
+      if (error) {
+        setAuthMessage(`ログイン状態の確認に失敗しました: ${error.message}`, true);
+        return;
+      }
+
+      updateEmployerAuth(data.session);
+      supabaseClient.auth.onAuthStateChange((_event, session) => {
+        updateEmployerAuth(session);
+      });
+    }
+
+    function updateEmployerAuth(session) {
+      currentUser = session?.user || null;
+      document.getElementById("employerLoggedOut").classList.toggle("hidden", Boolean(currentUser));
+      const loggedInPanel = document.getElementById("employerLoggedIn");
+      loggedInPanel.classList.toggle("hidden", !currentUser);
+      loggedInPanel.classList.toggle("flex", Boolean(currentUser));
+      document.getElementById("employerJobForm").classList.toggle("hidden", !currentUser);
+      document.getElementById("employerAccountEmail").innerText = currentUser?.email || "";
+      if (!currentUser && editingJobId !== null) cancelJobEdit();
+      renderJobList();
+    }
+
+    function setAuthMessage(message, isError = false) {
+      const element = document.getElementById("authMessage");
+      element.innerText = message;
+      element.classList.remove("hidden", "text-red-600", "text-green-700");
+      element.classList.add(isError ? "text-red-600" : "text-green-700");
+    }
+
+    async function signInEmployer() {
+      const email = document.getElementById("employerEmail").value.trim();
+      const password = document.getElementById("employerPassword").value;
+      if (!email || !password) {
+        setAuthMessage("メールアドレスとパスワードを入力してください。", true);
+        return;
+      }
+
+      const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+      if (error) {
+        setAuthMessage(`ログインに失敗しました: ${error.message}`, true);
+        return;
+      }
+      setAuthMessage("ログインしました。");
+    }
+
+    async function signUpEmployer() {
+      const email = document.getElementById("employerEmail").value.trim();
+      const password = document.getElementById("employerPassword").value;
+      if (!email || !password) {
+        setAuthMessage("メールアドレスとパスワードを入力してください。", true);
+        return;
+      }
+      if (password.length < 8) {
+        setAuthMessage("パスワードは8文字以上で入力してください。", true);
+        return;
+      }
+
+      const { data, error } = await supabaseClient.auth.signUp({ email, password });
+      if (error) {
+        setAuthMessage(`新規登録に失敗しました: ${error.message}`, true);
+        return;
+      }
+      if (!data.session) {
+        setAuthMessage("登録を受け付けました。確認メールが届いた場合は、メール内のリンクを開いてからログインしてください。");
+      } else {
+        setAuthMessage("アカウントを作成し、ログインしました。");
+      }
+    }
+
+    async function signOutEmployer() {
+      const { error } = await supabaseClient.auth.signOut();
+      if (error) {
+        setAuthMessage(`ログアウトに失敗しました: ${error.message}`, true);
+        return;
+      }
+      setAuthMessage("ログアウトしました。");
+    }
 
     function switchTab(tab) {
       activeTab = tab;
@@ -385,6 +493,11 @@
 
     // 求人投稿・編集（Supabaseへ保存）
     async function publishJob() {
+      if (!currentUser) {
+        setAuthMessage("求人を管理するにはログインしてください。", true);
+        return;
+      }
+
       const title = document.getElementById("jobTitle").value.trim();
       const location = document.getElementById("jobLocation").value.trim();
       const salary = document.getElementById("jobSalary").value.trim();
@@ -412,7 +525,8 @@
         title, location, salary, phone, line, duties, capacity,
         pay_type: payType || null,
         pay_amount: payAmount,
-        tags: checkedTags
+        tags: checkedTags,
+        ...(!editingJobId && { owner_id: currentUser.id })
       };
 
       const query = supabaseClient.from('published_jobs');
@@ -434,7 +548,7 @@
 
     function editJob(id) {
       const job = cachedJobs.find(item => item.id === id);
-      if (!job) return;
+      if (!currentUser || !job || job.owner_id !== currentUser.id) return;
 
       editingJobId = id;
       document.getElementById("jobTitle").value = job.title || "";
@@ -475,7 +589,7 @@
 
     async function toggleJobClosed(id) {
       const job = cachedJobs.find(item => item.id === id);
-      if (!job) return;
+      if (!currentUser || !job || job.owner_id !== currentUser.id) return;
 
       const isClosed = Boolean(job.is_closed);
       const action = isClosed ? "募集を再開" : "募集を終了";
@@ -484,7 +598,8 @@
       const { error } = await supabaseClient
         .from('published_jobs')
         .update({ is_closed: !isClosed })
-        .eq('id', id);
+        .eq('id', id)
+        .eq('owner_id', currentUser.id);
 
       if (error) {
         alert(`${action}に失敗しました: ${error.message}`);
@@ -632,7 +747,7 @@
 
           <div class="flex justify-between items-center border-t pt-2 mt-2">
             <span class="text-xs text-blue-600 font-bold hover:underline">📱 ワンタップ連絡・詳細 →</span>
-            ${activeTab === "employer" ? `
+            ${activeTab === "employer" && currentUser && job.owner_id === currentUser.id ? `
               <div class="flex gap-2">
                 <button onclick="event.stopPropagation(); editJob(${job.id})" class="text-xs text-blue-600 px-2 py-1">編集</button>
                 <button onclick="event.stopPropagation(); toggleJobClosed(${job.id})" class="text-xs text-gray-600 px-2 py-1">${job.is_closed ? '募集再開' : '募集終了'}</button>
@@ -845,12 +960,15 @@
 
     // Supabaseから求人を削除
     async function deleteJob(id) {
+      const job = cachedJobs.find(item => item.id === id);
+      if (!currentUser || !job || job.owner_id !== currentUser.id) return;
       if (!confirm("この求人をクラウドから削除しますか？")) return;
       
       const { error } = await supabaseClient
         .from('published_jobs')
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+        .eq('owner_id', currentUser.id);
 
       if (error) {
         alert("削除に失敗しました: " + error.message);
