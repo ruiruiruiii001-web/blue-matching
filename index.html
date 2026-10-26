@@ -183,7 +183,10 @@
         <h2 class="text-lg font-bold border-b pb-2 text-blue-600">マイページ</h2>
         <p id="accountDashboardStatus" role="status" aria-live="polite" class="hidden text-sm text-red-600"></p>
         <div class="grid grid-cols-1 md:grid-cols-[180px_minmax(0,1fr)] gap-4">
-          <nav aria-label="マイページメニュー" class="flex md:flex-col gap-2 overflow-x-auto pb-1 md:pb-0">
+          <button id="dashboardMenuToggle" type="button" aria-expanded="false" aria-controls="dashboardNavigation" onclick="toggleDashboardMenu()" class="md:hidden w-full flex items-center justify-center gap-2 border rounded-lg px-4 py-3 text-sm font-bold text-blue-700 bg-blue-50">
+            <span aria-hidden="true">☰</span> メニュー
+          </button>
+          <nav id="dashboardNavigation" aria-label="マイページメニュー" class="hidden md:flex md:flex-col gap-2 overflow-x-auto pb-1 md:pb-0">
             <button type="button" data-dashboard-view="profile" onclick="showDashboardView('profile')" class="dashboard-menu-button shrink-0 text-left px-3 py-2 rounded-lg bg-blue-600 text-white font-bold text-sm">👤 プロフィール</button>
             <button type="button" data-dashboard-view="favorites" onclick="showDashboardView('favorites')" class="dashboard-menu-button shrink-0 text-left px-3 py-2 rounded-lg bg-gray-100 text-gray-700 font-bold text-sm">☆ お気に入り</button>
             <button type="button" data-dashboard-view="jobs" onclick="showDashboardView('jobs')" class="dashboard-menu-button shrink-0 text-left px-3 py-2 rounded-lg bg-gray-100 text-gray-700 font-bold text-sm">🏗 自分の求人</button>
@@ -1249,6 +1252,15 @@
         button.classList.toggle("text-gray-700", !isActive);
         button.setAttribute("aria-pressed", String(isActive));
       });
+      document.getElementById("dashboardNavigation").classList.add("hidden");
+      document.getElementById("dashboardMenuToggle").setAttribute("aria-expanded", "false");
+    }
+
+    function toggleDashboardMenu() {
+      const navigation = document.getElementById("dashboardNavigation");
+      const isExpanded = document.getElementById("dashboardMenuToggle").getAttribute("aria-expanded") === "true";
+      navigation.classList.toggle("hidden", isExpanded);
+      document.getElementById("dashboardMenuToggle").setAttribute("aria-expanded", String(!isExpanded));
     }
 
     function formatDashboardDate(value) {
