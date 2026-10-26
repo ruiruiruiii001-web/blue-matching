@@ -26,19 +26,36 @@
   <!-- タブ切替 -->
   <div class="max-w-5xl mx-auto px-4 mt-4">
     <div class="flex border-b border-gray-300 bg-white rounded-t-lg shadow-sm">
-      <button id="tabEmployerBtn" onclick="switchTab('employer')" class="flex-1 py-3.5 font-bold text-sm md:text-base border-b-2 border-blue-600 text-blue-600 focus:outline-none transition">
+      <button id="tabEmployerBtn" onclick="switchTab('employer')" class="flex-1 py-3.5 font-bold text-sm md:text-base border-b-2 border-transparent text-gray-500 hover:text-blue-600 focus:outline-none transition">
         🏢 親方・企業向け（求人投稿）
       </button>
-      <button id="tabSeekerBtn" onclick="switchTab('seeker')" class="flex-1 py-3.5 font-bold text-sm md:text-base border-b-2 border-transparent text-gray-500 hover:text-blue-600 focus:outline-none transition">
+      <button id="tabSeekerBtn" onclick="switchTab('seeker')" class="flex-1 py-3.5 font-bold text-sm md:text-base border-b-2 border-blue-600 text-blue-600 focus:outline-none transition">
         👷 職人・求職者向け（即戦力カード）
       </button>
     </div>
   </div>
 
+  <section id="accountTypeSetup" class="hidden max-w-5xl mx-auto px-4 mt-4">
+    <div class="rounded-lg border border-blue-200 bg-blue-50 p-4">
+      <h2 class="font-bold text-blue-800">アカウントの種類を選択</h2>
+      <p class="mt-1 text-sm text-blue-900">求職者は求人への応募、企業・親方は求人投稿や公開プロフィールの閲覧に使います。自分の求人を投稿済みの場合は企業・親方を選択してください。選択後は変更できません。</p>
+      <div class="mt-3 flex flex-col gap-2 sm:flex-row sm:items-end">
+        <label class="block flex-1 text-sm font-medium">アカウントの種類
+          <select id="existingAccountType" class="mt-1 w-full border rounded px-3 py-2.5 text-sm">
+            <option value="">選択してください</option>
+            <option value="seeker">求職者</option>
+            <option value="employer">企業・親方</option>
+          </select>
+        </label>
+        <button type="button" onclick="saveAccountType()" class="rounded bg-blue-600 px-4 py-2.5 font-bold text-white">この種類で登録</button>
+      </div>
+    </div>
+  </section>
+
   <main class="max-w-5xl mx-auto px-4 py-6 grid grid-cols-1 md:grid-cols-2 gap-8">
     
     <!-- 左側①：親方・企業向け 求人作成 -->
-    <section id="employerSection" class="space-y-6">
+    <section id="employerSection" class="space-y-6 hidden">
       <div id="employerAuthPanel" class="bg-white p-6 rounded-lg shadow-md">
         <h2 class="text-lg font-bold mb-2 text-blue-600">アカウント</h2>
         <p class="text-sm text-gray-600 mb-4">求職者プロフィールの保存・応募履歴・求人の投稿にはログインが必要です。</p>
@@ -51,6 +68,14 @@
             <label for="employerPassword" class="block text-sm font-medium mb-1">パスワード（8文字以上）</label>
             <input type="password" id="employerPassword" autocomplete="current-password" minlength="8" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
           </div>
+          <label class="block text-sm font-medium">登録するアカウントの種類
+            <select id="signupAccountType" class="mt-1 w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+              <option value="">選択してください</option>
+              <option value="seeker">求職者</option>
+              <option value="employer">企業・親方</option>
+            </select>
+          </label>
+          <p class="-mt-2 text-xs text-gray-500">求職者は求人への応募、企業・親方は求人投稿や公開プロフィールの閲覧に使います。企業の実在確認はありません。登録後に変更できません。</p>
           <div class="grid grid-cols-2 gap-3">
             <button onclick="signInEmployer()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg transition">ログイン</button>
             <button onclick="signUpEmployer()" class="border border-blue-600 text-blue-600 hover:bg-blue-50 font-bold py-2.5 rounded-lg transition">新規登録</button>
@@ -69,6 +94,7 @@
           <p class="text-sm text-gray-700">ログイン中: <span id="employerAccountEmail" class="font-medium"></span></p>
           <button onclick="signOutEmployer()" class="text-sm text-blue-600 hover:underline">ログアウト</button>
         </div>
+        <p id="accountTypeMismatch" class="hidden mt-3 rounded border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">この画面の求人管理機能は企業・親方アカウント専用です。</p>
         <div id="passwordRecoveryPanel" class="hidden mt-4 border-t pt-4 space-y-3">
           <h3 class="font-bold text-blue-700">新しいパスワードを設定</h3>
           <p class="text-xs text-gray-600">再設定メールのリンクから開いた画面です。8文字以上で入力してください。</p>
@@ -82,6 +108,20 @@
         </div>
         <p id="authMessage" role="status" aria-live="polite" class="text-sm mt-3 hidden"></p>
       </div>
+
+      <section id="employerDashboard" class="hidden bg-white p-6 rounded-lg shadow-md">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4 border-b pb-2">
+          <h2 class="text-lg font-bold text-blue-600">企業マイページ</h2>
+          <button type="button" onclick="document.getElementById('employerJobForm').scrollIntoView({ behavior: 'smooth' })" class="text-sm font-bold text-blue-700 underline">＋ 求人を新規投稿</button>
+        </div>
+        <h3 class="font-bold text-sm mb-2">自分の掲載求人</h3>
+        <div id="employerDashboardJobs" class="space-y-2 text-sm"></div>
+        <div class="mt-6 border-t pt-4">
+          <h3 class="font-bold text-sm mb-2">公開中の求職者プロフィール</h3>
+          <p class="text-xs text-gray-500 mb-3">本人が公開を許可したプロフィールのみ表示します。名前・電話番号は表示されません。</p>
+          <div id="employerSeekerProfiles" class="space-y-3 text-sm"></div>
+        </div>
+      </section>
 
       <div id="employerJobForm" class="bg-white p-6 rounded-lg shadow-md hidden">
         <h2 id="jobFormHeading" class="text-lg font-bold mb-4 border-b pb-2 text-blue-600">現場求人のクラウド投稿</h2>
@@ -173,9 +213,9 @@
     </section>
 
     <!-- 左側②：職人向け 即戦力プロフィール -->
-    <section id="seekerSection" class="bg-white p-6 rounded-lg shadow-md h-fit hidden md:col-span-2">
+    <section id="seekerSection" class="bg-white p-6 rounded-lg shadow-md h-fit md:col-span-2">
       <div id="seekerAccountPrompt" class="mb-4 p-4 rounded border border-blue-200 bg-blue-50">
-        <p class="text-sm text-blue-900">プロフィール・お気に入り・応募履歴をアカウントに保存するにはログインしてください。</p>
+        <p id="seekerAccountPromptText" class="text-sm text-blue-900">プロフィール・お気に入り・応募履歴をアカウントに保存するにはログインしてください。</p>
         <button onclick="switchTab('employer')" class="mt-2 text-sm font-bold text-blue-700 underline">ログイン / アカウント登録へ</button>
       </div>
 
@@ -285,6 +325,10 @@
       <div id="profileSavedMessage" class="mt-4 p-3 bg-blue-50 border border-blue-200 text-blue-800 rounded text-xs hidden">
         👍 プロフィールをアカウントに保存しました。
       </div>
+      <label class="mt-3 flex items-start gap-2 rounded border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+        <input id="seekerProfilePublic" type="checkbox" class="mt-0.5">
+        <span><span class="font-bold">企業向けに匿名プロフィールを公開する</span><br>公開すると、企業アカウントに希望職種・勤務地・給与・資格・経験・アピール情報が表示されます。名前と電話番号は表示されません。</span>
+      </label>
             </section>
 
             <section id="dashboardView-favorites" class="hidden rounded border p-3">
@@ -305,7 +349,7 @@
     </section>
 
     <!-- 右側：掲載中の現場求人一覧 -->
-    <section class="bg-white p-6 rounded-lg shadow-md h-fit">
+    <section id="jobListSection" class="bg-white p-6 rounded-lg shadow-md h-fit order-first md:col-span-2">
       <div class="flex justify-between items-center mb-4 border-b pb-2">
         <h2 id="jobListTitle" class="text-lg font-bold text-gray-800">現場求人一覧 (クラウド)</h2>
         <span id="jobCount" class="text-xs bg-gray-200 text-gray-700 px-2.5 py-1 rounded-full font-bold">0件</span>
@@ -482,14 +526,22 @@
     let loadingAccountUserId = null;
     let activeDashboardView = "profile";
     let editingJobId = null;
-    let activeTab = "employer";
+    let activeTab = "seeker";
     let currentUser = null;
+    let accountType = null;
+    let accountTypeLoadUserId = null;
+    let accountTypeLoading = false;
+    let publicSeekerProfiles = [];
+    let publicSeekerProfilesUserId = null;
+    let publicSeekerProfilesError = "";
+    let loadingPublicSeekerProfilesUserId = null;
     let turnstileToken = null;
     let turnstileWidgetId = null;
     let reportTurnstileToken = null;
     let reportTurnstileWidgetId = null;
 
     document.addEventListener("DOMContentLoaded", () => {
+      switchTab("seeker");
       fetchJobs();
       initializeEmployerAuth();
       initializeEmployerTurnstile();
@@ -672,11 +724,15 @@
       const loggedInPanel = document.getElementById("employerLoggedIn");
       loggedInPanel.classList.toggle("hidden", !currentUser);
       loggedInPanel.classList.toggle("flex", Boolean(currentUser));
-      document.getElementById("employerJobForm").classList.toggle("hidden", !currentUser);
       document.getElementById("employerAccountEmail").innerText = currentUser?.email || "";
-      document.getElementById("seekerAccountPrompt").classList.toggle("hidden", Boolean(currentUser));
-      document.getElementById("seekerDashboard").classList.toggle("hidden", !currentUser);
       if (previousUserId !== (currentUser?.id || null)) {
+        accountType = null;
+        accountTypeLoadUserId = null;
+        accountTypeLoading = Boolean(currentUser);
+        publicSeekerProfiles = [];
+        publicSeekerProfilesUserId = null;
+        publicSeekerProfilesError = "";
+        loadingPublicSeekerProfilesUserId = null;
         accountDataUserId = null;
         loadingAccountUserId = null;
         favoriteJobIds = [];
@@ -685,15 +741,106 @@
         activeDashboardView = "profile";
         showDashboardView(activeDashboardView);
         clearSeekerProfileForm();
+        if (currentUser) {
+          const user = currentUser;
+          setTimeout(() => loadAccountType(user), 0);
+        }
       }
       if (!currentUser && editingJobId !== null) cancelJobEdit();
+      updateAccountTypeUI();
       renderJobList();
-      if (currentUser && accountDataUserId !== currentUser.id) {
+      renderEmployerDashboard();
+      if (currentUser && accountType && accountDataUserId !== currentUser.id) {
         const user = currentUser;
         setTimeout(() => loadAccountData(user), 0);
       } else {
         renderAccountDashboard();
       }
+    }
+
+    function updateAccountTypeUI() {
+      const hasUser = Boolean(currentUser);
+      const isEmployer = accountType === "employer";
+      const isSeeker = accountType === "seeker";
+      document.getElementById("accountTypeSetup").classList.toggle("hidden", !hasUser || Boolean(accountType) || accountTypeLoading);
+      document.getElementById("employerDashboard").classList.toggle("hidden", !hasUser || !isEmployer);
+      document.getElementById("employerJobForm").classList.toggle("hidden", !hasUser || !isEmployer);
+      document.getElementById("accountTypeMismatch").classList.toggle("hidden", !hasUser || !accountType || isEmployer);
+      document.getElementById("seekerDashboard").classList.toggle("hidden", !hasUser || !isSeeker);
+      document.getElementById("seekerAccountPrompt").classList.toggle("hidden", hasUser && isSeeker);
+      document.getElementById("seekerAccountPromptText").innerText = hasUser
+        ? "求職者プロフィールは求職者アカウントで利用できます。企業アカウントでは、本人が公開を許可した匿名プロフィールだけを閲覧できます。"
+        : "プロフィール・お気に入り・応募履歴をアカウントに保存するにはログインしてください。";
+    }
+
+    async function loadAccountType(user) {
+      if (!user || currentUser?.id !== user.id || accountTypeLoadUserId === user.id) return;
+      accountTypeLoadUserId = user.id;
+      accountTypeLoading = true;
+      updateAccountTypeUI();
+      const { data, error } = await supabaseClient
+        .from("account_types")
+        .select("account_type")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (currentUser?.id !== user.id) {
+        if (accountTypeLoadUserId === user.id) accountTypeLoadUserId = null;
+        return;
+      }
+      if (error) {
+        accountTypeLoadUserId = null;
+        accountTypeLoading = false;
+        updateAccountTypeUI();
+        setAuthMessage(`アカウント種類を確認できませんでした。新しいSQL移行が必要です: ${error.message}`, true);
+        console.error("アカウント種類読み込みエラー:", error);
+        return;
+      }
+
+      const storedType = data?.account_type;
+      const metadataType = user.user_metadata?.account_type;
+      if (storedType === "seeker" || storedType === "employer") {
+        accountType = storedType;
+      } else if (metadataType === "seeker" || metadataType === "employer") {
+        const { error: insertError } = await supabaseClient
+          .from("account_types")
+          .insert({ user_id: user.id, account_type: metadataType });
+        if (insertError) {
+          accountTypeLoadUserId = null;
+          accountTypeLoading = false;
+          updateAccountTypeUI();
+          setAuthMessage(`アカウント種類を保存できませんでした: ${insertError.message}`, true);
+          console.error("アカウント種類保存エラー:", insertError);
+          return;
+        }
+        accountType = metadataType;
+      }
+      accountTypeLoadUserId = null;
+      accountTypeLoading = false;
+      updateAccountTypeUI();
+      renderEmployerDashboard();
+      if (accountType && accountDataUserId !== user.id) loadAccountData(user);
+    }
+
+    async function saveAccountType() {
+      const selectedType = document.getElementById("existingAccountType").value;
+      if (!currentUser || accountTypeLoading || !["seeker", "employer"].includes(selectedType)) {
+        setAuthMessage("アカウントの種類を選択してください。", true);
+        return;
+      }
+      const { error } = await supabaseClient
+        .from("account_types")
+        .insert({ user_id: currentUser.id, account_type: selectedType });
+      if (error) {
+        setAuthMessage(`アカウント種類を保存できませんでした: ${error.message}`, true);
+        console.error("アカウント種類保存エラー:", error);
+        return;
+      }
+      accountType = selectedType;
+      document.getElementById("existingAccountType").value = "";
+      setAuthMessage("アカウント種類を登録しました。");
+      updateAccountTypeUI();
+      renderEmployerDashboard();
+      loadAccountData(currentUser);
     }
 
     function setAuthMessage(message, isError = false) {
@@ -781,6 +928,7 @@
     async function signUpEmployer() {
       const email = document.getElementById("employerEmail").value.trim();
       const password = document.getElementById("employerPassword").value;
+      const selectedType = document.getElementById("signupAccountType").value;
       const siteKey = document.querySelector('meta[name="cloudflare-turnstile-sitekey"]').content.trim();
       if (!siteKey) {
         setAuthMessage("新規登録の安全対策を準備中です。設定完了までお待ちください。", true);
@@ -794,6 +942,10 @@
         setAuthMessage("パスワードは8文字以上で入力してください。", true);
         return;
       }
+      if (!["seeker", "employer"].includes(selectedType)) {
+        setAuthMessage("新規登録するアカウントの種類を選択してください。", true);
+        return;
+      }
       if (!turnstileToken) {
         setAuthMessage("新規登録の前にCAPTCHA確認を完了してください。", true);
         return;
@@ -802,7 +954,10 @@
       const { data, error } = await supabaseClient.auth.signUp({
         email,
         password,
-        options: { captchaToken: turnstileToken }
+        options: {
+          captchaToken: turnstileToken,
+          data: { account_type: selectedType }
+        }
       });
       if (error) {
         resetEmployerTurnstile("CAPTCHAをもう一度確認してください。");
@@ -830,6 +985,7 @@
       activeTab = tab;
       const employerSection = document.getElementById("employerSection");
       const seekerSection = document.getElementById("seekerSection");
+      const jobListSection = document.getElementById("jobListSection");
       const tabEmployerBtn = document.getElementById("tabEmployerBtn");
       const tabSeekerBtn = document.getElementById("tabSeekerBtn");
 
@@ -837,6 +993,7 @@
         document.getElementById("jobSort").value = "newest";
         employerSection.classList.remove("hidden");
         seekerSection.classList.add("hidden");
+        jobListSection.classList.remove("order-first", "md:col-span-2");
         tabEmployerBtn.className = "flex-1 py-3.5 font-bold text-sm md:text-base border-b-2 border-blue-600 text-blue-600 focus:outline-none transition";
         tabSeekerBtn.className = "flex-1 py-3.5 font-bold text-sm md:text-base border-b-2 border-transparent text-gray-500 hover:text-blue-600 focus:outline-none transition";
         document.getElementById("jobListTitle").innerText = "現場求人一覧 (クラウド)";
@@ -845,6 +1002,7 @@
         document.getElementById("jobSort").value = "recommended";
         employerSection.classList.add("hidden");
         seekerSection.classList.remove("hidden");
+        jobListSection.classList.add("order-first", "md:col-span-2");
         tabSeekerBtn.className = "flex-1 py-3.5 font-bold text-sm md:text-base border-b-2 border-blue-600 text-blue-600 focus:outline-none transition";
         tabEmployerBtn.className = "flex-1 py-3.5 font-bold text-sm md:text-base border-b-2 border-transparent text-gray-500 hover:text-blue-600 focus:outline-none transition";
         document.getElementById("jobListTitle").innerText = "希望に合う求人を探す";
@@ -866,13 +1024,14 @@
       }
       cachedJobs = data || [];
       renderJobList();
+      renderEmployerDashboard();
       renderAccountDashboard();
     }
 
     // 求人投稿・編集（Supabaseへ保存）
     async function publishJob() {
-      if (!currentUser) {
-        setAuthMessage("求人を管理するにはログインしてください。", true);
+      if (!currentUser || accountType !== "employer") {
+        setAuthMessage("求人を管理するには企業・親方アカウントでログインしてください。", true);
         return;
       }
 
@@ -964,7 +1123,7 @@
 
     function editJob(id) {
       const job = cachedJobs.find(item => item.id === id);
-      if (!currentUser || !job || job.owner_id !== currentUser.id) return;
+      if (!currentUser || accountType !== "employer" || !job || job.owner_id !== currentUser.id) return;
 
       editingJobId = id;
       document.getElementById("jobTitle").value = job.title || "";
@@ -983,7 +1142,7 @@
       document.getElementById("jobFormHeading").innerText = "求人情報を編集";
       document.getElementById("jobSubmitButton").innerText = "変更を保存";
       document.getElementById("cancelEditButton").classList.remove("hidden");
-      document.getElementById("employerSection").scrollIntoView({ behavior: "smooth" });
+      document.getElementById("employerJobForm").scrollIntoView({ behavior: "smooth" });
     }
 
     function cancelJobEdit() {
@@ -1005,7 +1164,7 @@
 
     async function toggleJobClosed(id) {
       const job = cachedJobs.find(item => item.id === id);
-      if (!currentUser || !job || job.owner_id !== currentUser.id) return;
+      if (!currentUser || accountType !== "employer" || !job || job.owner_id !== currentUser.id) return;
 
       const isClosed = Boolean(job.is_closed);
       const action = isClosed ? "募集を再開" : "募集を終了";
@@ -1028,8 +1187,8 @@
 
     // 求職者プロフィール保存
     async function saveSeekerProfile() {
-      if (!currentUser) {
-        alert("プロフィールをアカウントに保存するにはログインしてください。");
+      if (!currentUser || accountType !== "seeker") {
+        alert("プロフィールを保存するには求職者アカウントでログインしてください。");
         return;
       }
 
@@ -1065,6 +1224,18 @@
         return;
       }
 
+      const isPublic = document.getElementById("seekerProfilePublic").checked;
+      if (!isPublic) {
+        const { error: unpublishError } = await supabaseClient
+          .from("seeker_public_profiles")
+          .delete()
+          .eq("user_id", currentUser.id);
+        if (unpublishError) {
+          alert(`公開プロフィールを非公開にできませんでした: ${unpublishError.message}`);
+          return;
+        }
+      }
+
       const { error } = await supabaseClient
         .from("seeker_profiles")
         .upsert({
@@ -1078,6 +1249,7 @@
           licenses: profile.licenses,
           exp_years: profile.expYears,
           stamina: profile.stamina,
+          is_public: isPublic,
           updated_at: new Date().toISOString()
         }, { onConflict: "user_id" });
       if (error) {
@@ -1085,7 +1257,26 @@
         return;
       }
 
+      const publicProfileResult = isPublic
+        ? await supabaseClient.from("seeker_public_profiles").upsert({
+          user_id: currentUser.id,
+          job_type: profile.jobType,
+          location: profile.location,
+          pay_type: profile.payType || null,
+          minimum_salary: profile.minimumSalary,
+          licenses: profile.licenses,
+          exp_years: profile.expYears,
+          stamina: profile.stamina,
+          updated_at: new Date().toISOString()
+        }, { onConflict: "user_id" })
+        : { error: null };
+      if (publicProfileResult.error) {
+        alert(`プロフィール本体は保存しましたが、公開設定を更新できませんでした: ${publicProfileResult.error.message}`);
+        return;
+      }
+
       seekerProfileData = profile;
+      seekerProfileData.isPublic = isPublic;
       applySeekerSalaryPreferences(profile);
       document.getElementById("profileSavedMessage").classList.remove("hidden");
       accountDataUserId = currentUser.id;
@@ -1104,6 +1295,7 @@
       applySeekerSalaryPreferences(profile);
       document.getElementById("seekerExpYears").value = profile.expYears || "未経験（やる気あり）";
       document.getElementById("seekerStamina").value = profile.stamina || "★★★★★ (自信あり)";
+      document.getElementById("seekerProfilePublic").checked = Boolean(profile.isPublic);
 
       if (profile.licenses) {
         document.querySelectorAll('input[name="seekerLic"]').forEach(cb => {
@@ -1123,6 +1315,7 @@
       document.querySelectorAll('input[name="seekerLic"]').forEach(input => input.checked = false);
       document.getElementById("seekerExpYears").value = "未経験（やる気あり）";
       document.getElementById("seekerStamina").value = "★★★★★ (自信あり)";
+      document.getElementById("seekerProfilePublic").checked = false;
       document.getElementById("profileSavedMessage").classList.add("hidden");
       applySeekerSalaryPreferences({});
     }
@@ -1165,7 +1358,8 @@
         minimumSalary: profileRow.minimum_salary,
         licenses: profileRow.licenses || [],
         expYears: profileRow.exp_years || "",
-        stamina: profileRow.stamina || ""
+        stamina: profileRow.stamina || "",
+        isPublic: Boolean(profileRow.is_public)
       } : null;
       favoriteJobIds = favoritesResult.data.map(favorite => String(favorite.job_id));
       accountApplications = applicationsResult.data || [];
@@ -1237,6 +1431,84 @@
       `;
     }
 
+    function renderEmployerDashboard() {
+      const container = document.getElementById("employerDashboardJobs");
+      const profilesContainer = document.getElementById("employerSeekerProfiles");
+      if (!container || !profilesContainer) return;
+      if (!currentUser || accountType !== "employer") {
+        container.innerHTML = "";
+        profilesContainer.innerHTML = "";
+        return;
+      }
+
+      const ownedJobs = cachedJobs.filter(job => job.owner_id === currentUser.id);
+      container.innerHTML = ownedJobs.length
+        ? ownedJobs.map(job => `
+          <article class="flex flex-wrap items-center justify-between gap-3 border-b py-3">
+            <div class="min-w-0">
+              <p class="font-medium">${escapeHtml(String(job.title || ""))}</p>
+              <p class="text-xs text-gray-500">${escapeHtml(String(job.location || "勤務地未設定"))} ・ ${job.is_closed ? "募集終了" : "募集中"}</p>
+            </div>
+            <button type="button" onclick="editJob(${job.id})" class="shrink-0 rounded border border-blue-600 px-3 py-1.5 text-xs font-bold text-blue-700 hover:bg-blue-50">求人を編集</button>
+          </article>
+        `).join("")
+        : '<p class="text-xs text-gray-500 py-2">掲載中の求人はありません。「求人を新規投稿」から掲載できます。</p>';
+
+      if (publicSeekerProfilesUserId === currentUser.id) {
+        profilesContainer.innerHTML = publicSeekerProfilesError
+          ? `<p class="text-sm text-red-600">${escapeHtml(publicSeekerProfilesError)}</p>`
+          : publicSeekerProfiles.length
+          ? publicSeekerProfiles.map(profile => {
+            const payTypeLabels = { hourly: "時給", daily: "日給", monthly: "月給" };
+            const pay = profile.pay_type
+              ? `${payTypeLabels[profile.pay_type]}${profile.minimum_salary ? `・希望最低額 ${Number(profile.minimum_salary).toLocaleString("ja-JP")}円` : ""}`
+              : "指定なし";
+            const licenses = Array.isArray(profile.licenses) && profile.licenses.length
+              ? profile.licenses.map(license => escapeHtml(String(license))).join("、")
+              : "登録なし";
+            return `
+              <article class="rounded border p-3">
+                <p><span class="font-bold">希望職種:</span> ${escapeHtml(String(profile.job_type || "未設定"))}</p>
+                <p><span class="font-bold">希望勤務地:</span> ${escapeHtml(String(profile.location || "未設定"))}</p>
+                <p><span class="font-bold">希望給与:</span> ${escapeHtml(pay)}</p>
+                <p><span class="font-bold">保有資格:</span> ${licenses}</p>
+                <p><span class="font-bold">現場経験:</span> ${escapeHtml(String(profile.exp_years || "未設定"))}</p>
+                <p><span class="font-bold">アピール:</span> ${escapeHtml(String(profile.stamina || "未設定"))}</p>
+              </article>
+            `;
+          }).join("")
+          : '<p class="text-xs text-gray-500">現在公開中の求職者プロフィールはありません。</p>';
+      } else if (loadingPublicSeekerProfilesUserId !== currentUser.id) {
+        profilesContainer.innerHTML = '<p class="text-xs text-gray-500">公開プロフィールを読み込んでいます。</p>';
+        loadPublicSeekerProfiles(currentUser);
+      }
+    }
+
+    async function loadPublicSeekerProfiles(user) {
+      if (!user || currentUser?.id !== user.id || accountType !== "employer" ||
+          loadingPublicSeekerProfilesUserId === user.id || publicSeekerProfilesUserId === user.id) return;
+      loadingPublicSeekerProfilesUserId = user.id;
+      const { data, error } = await supabaseClient
+        .from("seeker_public_profiles")
+        .select("job_type, location, pay_type, minimum_salary, licenses, exp_years, stamina");
+      if (currentUser?.id !== user.id || accountType !== "employer") {
+        loadingPublicSeekerProfilesUserId = null;
+        return;
+      }
+      loadingPublicSeekerProfilesUserId = null;
+      if (error) {
+        publicSeekerProfilesError = `公開プロフィールを読み込めませんでした。SQL移行が実行済みか確認してください: ${error.message}`;
+        publicSeekerProfilesUserId = user.id;
+        renderEmployerDashboard();
+        console.error("公開プロフィール読み込みエラー:", error);
+        return;
+      }
+      publicSeekerProfiles = data || [];
+      publicSeekerProfilesError = "";
+      publicSeekerProfilesUserId = user.id;
+      renderEmployerDashboard();
+    }
+
     function showDashboardView(view) {
       const views = ["profile", "favorites", "jobs", "applications"];
       if (!views.includes(view)) return;
@@ -1273,7 +1545,7 @@
     }
 
     async function updateApplicationStatus(applicationId, status) {
-      if (!currentUser || !["pending", "reviewed", "dismissed"].includes(status)) return;
+      if (!currentUser || accountType !== "employer" || !["pending", "reviewed", "dismissed"].includes(status)) return;
       const { error } = await supabaseClient
         .from("job_applications")
         .update({ status })
@@ -1505,8 +1777,8 @@
 
     async function submitJobApplication(event) {
       event.preventDefault();
-      if (!currentUser || !selectedJob) {
-        document.getElementById("applicationStatus").innerText = "応募にはログインが必要です。";
+      if (!currentUser || accountType !== "seeker" || !selectedJob) {
+        document.getElementById("applicationStatus").innerText = "応募には求職者アカウントでログインしてください。";
         return;
       }
       if (selectedJob.is_closed || selectedJob.owner_id === currentUser.id) {
@@ -1721,7 +1993,7 @@
     // Supabaseから求人を削除
     async function deleteJob(id) {
       const job = cachedJobs.find(item => item.id === id);
-      if (!currentUser || !job || job.owner_id !== currentUser.id) return;
+      if (!currentUser || accountType !== "employer" || !job || job.owner_id !== currentUser.id) return;
       if (!confirm("この求人をクラウドから削除しますか？")) return;
       
       const { error } = await supabaseClient

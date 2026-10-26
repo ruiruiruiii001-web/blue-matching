@@ -48,6 +48,13 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.seeker_profiles, public.job
 GRANT SELECT, INSERT ON TABLE public.job_applications TO authenticated;
 GRANT UPDATE (status) ON TABLE public.job_applications TO authenticated;
 
+DROP POLICY IF EXISTS "seeker_profiles_owner_access" ON public.seeker_profiles;
+DROP POLICY IF EXISTS "job_favorites_owner_access" ON public.job_favorites;
+DROP POLICY IF EXISTS "job_applications_applicant_read" ON public.job_applications;
+DROP POLICY IF EXISTS "job_applications_applicant_insert" ON public.job_applications;
+DROP POLICY IF EXISTS "job_applications_job_owner_read" ON public.job_applications;
+DROP POLICY IF EXISTS "job_applications_job_owner_update" ON public.job_applications;
+
 CREATE POLICY "seeker_profiles_owner_access"
   ON public.seeker_profiles
   FOR ALL
