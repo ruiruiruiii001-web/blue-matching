@@ -144,7 +144,16 @@
           <button type="button" onclick="closeAccountPanel(); document.getElementById('employerJobForm').scrollIntoView({ behavior: 'smooth' })" class="text-sm font-bold text-blue-700 underline">＋ 求人を新規投稿</button>
         </div>
         <h3 class="font-bold text-sm mb-2">自分の掲載求人</h3>
-        <div id="employerDashboardJobs" class="space-y-2 text-sm"></div>
+        <div id="employerDashboardJobs" class="divide-y divide-gray-100 text-sm"></div>
+        <section class="mt-6 border-t border-gray-200 pt-5">
+          <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
+            <h3 class="font-bold text-sm">受け取った応募</h3>
+            <span id="employerApplicationCount" class="text-xs text-gray-500"></span>
+          </div>
+          <p class="mb-3 text-xs text-gray-500">応募者の名前・電話番号・経験・資格・メッセージを確認できます。メール通知はありません。マイページで確認してください。</p>
+          <p id="employerApplicationsStatus" role="status" aria-live="polite" class="hidden text-sm text-red-700"></p>
+          <div id="employerDashboardApplications" class="divide-y divide-gray-100 text-sm"></div>
+        </section>
       </section>
 
       <div id="employerJobForm" class="bg-white p-6 rounded-lg shadow-md hidden">
@@ -249,6 +258,7 @@
           <button type="button" role="tab" aria-selected="true" aria-controls="dashboardView-profile" data-dashboard-view="profile" onclick="showDashboardView('profile')" class="dashboard-menu-button h-11 shrink-0 rounded-lg bg-blue-600 px-3 font-bold text-sm text-white">プロフィール</button>
           <button type="button" role="tab" aria-selected="false" aria-controls="dashboardView-favorites" data-dashboard-view="favorites" onclick="showDashboardView('favorites')" class="dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 font-bold text-sm text-gray-700">お気に入り</button>
           <button type="button" role="tab" aria-selected="false" aria-controls="dashboardView-applications" data-dashboard-view="applications" onclick="showDashboardView('applications')" class="dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 font-bold text-sm text-gray-700">応募履歴</button>
+          <button id="seekerContactRequestsTab" type="button" role="tab" aria-selected="false" aria-controls="dashboardView-contacts" data-dashboard-view="contacts" onclick="showDashboardView('contacts')" class="dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 font-bold text-sm text-gray-700">企業からの連絡</button>
         </nav>
 
         <div class="min-w-0">
@@ -361,6 +371,11 @@
             <section id="dashboardView-applications" class="hidden rounded border p-3">
               <h3 class="font-bold text-sm mb-2">応募履歴・応募者</h3>
               <div id="dashboardApplications" class="space-y-2 text-sm"></div>
+            </section>
+            <section id="dashboardView-contacts" class="hidden rounded border p-3">
+              <h3 class="font-bold text-sm mb-2">企業からの連絡リクエスト</h3>
+              <p class="mb-3 text-xs text-gray-600">新しい連絡のメール通知はありません。マイページで確認してください。ここで返信しても、名前・電話番号・メールアドレスは企業に共有されません。</p>
+              <div id="dashboardContactRequests" class="space-y-3 text-sm"></div>
             </section>
           </div>
       </div>
@@ -575,6 +590,11 @@
     let favoriteJobIds = [];
     let seekerProfileData = null;
     let accountApplications = [];
+    let accountApplicationsError = "";
+    let seekerContactRequests = [];
+    let seekerContactRequestsError = "";
+    let employerContactRequests = [];
+    let employerContactRequestsError = "";
     let accountDataUserId = null;
     let loadingAccountUserId = null;
     let activeDashboardView = "profile";
@@ -828,6 +848,11 @@
         favoriteJobIds = [];
         seekerProfileData = null;
         accountApplications = [];
+        accountApplicationsError = "";
+        seekerContactRequests = [];
+        seekerContactRequestsError = "";
+        employerContactRequests = [];
+        employerContactRequestsError = "";
         activeDashboardView = "profile";
         showDashboardView(activeDashboardView);
         clearSeekerProfileForm();
@@ -1591,16 +1616,19 @@
       loadingAccountUserId = user.id;
       const status = document.getElementById("accountDashboardStatus");
       status.classList.add("hidden");
-      const [profileResult, favoritesResult, applicationsResult] = await Promise.all([
+      const [profileResult, favoritesResult, applicationsResult, contactRequestsResult] = await Promise.all([
         supabaseClient.from("seeker_profiles").select("*").eq("user_id", user.id).maybeSingle(),
         supabaseClient.from("job_favorites").select("job_id").eq("user_id", user.id),
-        supabaseClient.from("job_applications").select("*").order("created_at", { ascending: false })
+        supabaseClient.from("job_applications").select("*").order("created_at", { ascending: false }),
+        accountType === "seeker"
+          ? supabaseClient.from("seeker_contact_requests").select("*").eq("seeker_id", user.id).order("created_at", { ascending: false })
+          : Promise.resolve({ data: [], error: null })
       ]);
       if (currentUser?.id !== user.id) {
         loadingAccountUserId = null;
         return;
       }
-      const failedResult = [profileResult, favoritesResult, applicationsResult].find(result => result.error);
+      const failedResult = [profileResult, favoritesResult].find(result => result.error);
       if (failedResult) {
         loadingAccountUserId = null;
         status.innerText = `マイページを読み込めませんでした。データベース設定を確認してください: ${failedResult.error.message}`;
@@ -1624,6 +1652,15 @@
       } : null;
       favoriteJobIds = favoritesResult.data.map(favorite => String(favorite.job_id));
       accountApplications = applicationsResult.data || [];
+      accountApplicationsError = applicationsResult.error
+        ? `応募情報を読み込めませんでした。データベース設定を確認してください: ${applicationsResult.error.message}`
+        : "";
+      if (applicationsResult.error) console.error("応募情報読み込みエラー:", applicationsResult.error);
+      seekerContactRequests = contactRequestsResult.data || [];
+      seekerContactRequestsError = contactRequestsResult.error
+        ? `企業からの連絡を読み込めません。新しいSQL移行を実行してください: ${contactRequestsResult.error.message}`
+        : "";
+      if (contactRequestsResult.error) console.error("企業からの連絡読み込みエラー:", contactRequestsResult.error);
       loadSeekerProfile(seekerProfileData);
       accountDataUserId = user.id;
       loadingAccountUserId = null;
@@ -1647,7 +1684,9 @@
 
       const submitted = accountApplications.filter(application => application.applicant_id === currentUser.id);
       const applicationsContainer = document.getElementById("dashboardApplications");
-      applicationsContainer.innerHTML = `
+      applicationsContainer.innerHTML = accountApplicationsError
+        ? `<p class="text-sm text-red-700">${escapeHtml(accountApplicationsError)}</p>`
+        : `
         ${submitted.length
           ? submitted.map(application => `
             <div class="border-b py-2">
@@ -1657,6 +1696,79 @@
           `).join("")
           : '<p class="text-xs text-gray-500">応募履歴はありません。</p>'}
       `;
+      const pendingContacts = seekerContactRequests.filter(request => request.status === "pending").length;
+      document.getElementById("seekerContactRequestsTab").innerText = pendingContacts
+        ? `企業からの連絡 (${pendingContacts})`
+        : "企業からの連絡";
+      const contactRequestsContainer = document.getElementById("dashboardContactRequests");
+      contactRequestsContainer.innerHTML = seekerContactRequestsError
+        ? `<p class="text-sm text-red-700">${escapeHtml(seekerContactRequestsError)}</p>`
+        : seekerContactRequests.length
+        ? seekerContactRequests.map(request => `
+          <article class="rounded-lg border border-gray-200 bg-white p-3">
+            <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
+              <p class="font-bold">企業からの連絡リクエスト</p>
+              <span class="rounded-full px-2.5 py-1 text-xs font-bold ${request.status === "pending" ? "bg-amber-100 text-amber-900" : request.status === "responded" ? "bg-emerald-100 text-emerald-900" : "bg-gray-100 text-gray-700"}">${request.status === "pending" ? "未返信" : request.status === "responded" ? "返信済み" : "見送り済み"}</span>
+            </div>
+            <p class="mb-2 text-xs text-gray-500">${formatDashboardDate(request.created_at)}</p>
+            <p class="whitespace-pre-wrap break-words">${escapeHtml(request.employer_message)}</p>
+            ${request.status === "pending" ? '<p class="mt-2 text-xs text-gray-500">企業からの追加通知はありません。返信後、企業側では画面を再読み込みすると確認できます。</p>' : ""}
+            ${request.status === "pending" ? `
+              <label class="mt-3 block text-sm font-medium">返信メッセージ
+                <textarea id="contactReply-${escapeHtml(request.id)}" maxlength="1000" rows="3" class="mt-1 w-full rounded border px-3 py-2 text-sm" placeholder="企業への返信を入力"></textarea>
+              </label>
+              <div class="mt-2 flex flex-wrap gap-2">
+                <button type="button" onclick="respondToContactRequest('${escapeHtml(request.id)}', 'responded')" class="min-h-10 rounded-lg bg-emerald-700 px-3 py-2 text-sm font-bold text-white hover:bg-emerald-800">返信する</button>
+                <button type="button" onclick="respondToContactRequest('${escapeHtml(request.id)}', 'declined')" class="min-h-10 rounded-lg border border-gray-300 px-3 py-2 text-sm font-bold text-gray-700 hover:bg-gray-50">見送る</button>
+              </div>
+            ` : request.seeker_reply ? `<p class="mt-3 rounded bg-emerald-50 p-2 text-sm"><span class="font-bold">あなたの返信:</span><br>${escapeHtml(request.seeker_reply)}</p>` : ""}
+          </article>
+        `).join("")
+        : '<p class="text-xs text-gray-500">企業からの連絡リクエストはまだありません。</p>';
+    }
+
+    async function respondToContactRequest(requestId, status) {
+      if (!currentUser || accountType !== "seeker" || !["responded", "declined"].includes(status)) return;
+      const seekerId = currentUser.id;
+      const request = seekerContactRequests.find(item => item.id === requestId && item.seeker_id === seekerId);
+      if (!request || request.status !== "pending") return;
+      const reply = status === "responded"
+        ? document.getElementById(`contactReply-${requestId}`).value.trim()
+        : "";
+      if (status === "responded" && !reply) {
+        const dashboardStatus = document.getElementById("accountDashboardStatus");
+        dashboardStatus.innerText = "返信メッセージを入力してください。";
+        dashboardStatus.classList.remove("hidden");
+        document.getElementById(`contactReply-${requestId}`).focus();
+        return;
+      }
+      document.getElementById("accountDashboardStatus").classList.add("hidden");
+      const { data, error } = await supabaseClient
+        .from("seeker_contact_requests")
+        .update({
+          status,
+          seeker_reply: reply || null,
+          responded_at: new Date().toISOString()
+        })
+        .eq("id", requestId)
+        .eq("seeker_id", seekerId)
+        .eq("status", "pending")
+        .select()
+        .maybeSingle();
+      if (currentUser?.id !== seekerId || accountType !== "seeker") return;
+      if (error) {
+        document.getElementById("accountDashboardStatus").innerText = `連絡リクエストに返信できませんでした: ${error.message}`;
+        document.getElementById("accountDashboardStatus").classList.remove("hidden");
+        console.error("企業への返信エラー:", error);
+        return;
+      }
+      if (!data) {
+        document.getElementById("accountDashboardStatus").innerText = "この連絡リクエストはすでに処理されています。表示を更新してください。";
+        document.getElementById("accountDashboardStatus").classList.remove("hidden");
+        return;
+      }
+      seekerContactRequests = seekerContactRequests.map(item => item.id === data.id ? data : item);
+      renderAccountDashboard();
     }
 
     function renderEmployerDashboard() {
@@ -1670,6 +1782,10 @@
       }
 
       const ownedJobs = cachedJobs.filter(job => job.owner_id === currentUser.id);
+      const ownedJobIds = new Set(ownedJobs.map(job => String(job.id)));
+      const receivedApplications = accountApplications.filter(application =>
+        ownedJobIds.has(String(application.job_id))
+      );
       container.innerHTML = ownedJobs.length
         ? ownedJobs.map(job => `
           <article class="flex flex-wrap items-center justify-between gap-3 border-b py-3">
@@ -1682,11 +1798,46 @@
         `).join("")
         : '<p class="text-xs text-gray-500 py-2">掲載中の求人はありません。「求人を新規投稿」から掲載できます。</p>';
 
+      const applicationCount = document.getElementById("employerApplicationCount");
+      const applicationsStatus = document.getElementById("employerApplicationsStatus");
+      const applicationsContainer = document.getElementById("employerDashboardApplications");
+      applicationCount.innerText = receivedApplications.length ? `${receivedApplications.length}件` : "";
+      applicationsStatus.innerText = accountApplicationsError;
+      applicationsStatus.classList.toggle("hidden", !accountApplicationsError);
+      applicationsContainer.innerHTML = accountApplicationsError
+        ? ""
+        : receivedApplications.length
+          ? receivedApplications.map(application => `
+            <article class="py-4">
+              <div class="flex flex-wrap items-start justify-between gap-2">
+                <div class="min-w-0">
+                  <p class="font-bold">${escapeHtml(String(application.job_title || "求人"))}</p>
+                  <p class="mt-1 text-xs text-gray-500">${formatDashboardDate(application.created_at)} ・ ${formatApplicationStatus(application.status)}</p>
+                </div>
+                <a href="tel:${escapeHtml(String(application.applicant_phone || ""))}" class="shrink-0 font-bold text-blue-700 underline">${escapeHtml(String(application.applicant_phone || ""))}</a>
+              </div>
+              <p class="mt-2 text-sm"><span class="font-bold">応募者:</span> ${escapeHtml(String(application.applicant_name || ""))}</p>
+              <p class="mt-1 text-sm"><span class="font-bold">経験:</span> ${escapeHtml(String(application.experience || "未登録"))}</p>
+              <p class="mt-1 text-sm"><span class="font-bold">資格:</span> ${Array.isArray(application.licenses) && application.licenses.length
+                ? application.licenses.map(license => escapeHtml(String(license))).join("、")
+                : "未登録"}</p>
+              ${application.message ? `<p class="mt-3 whitespace-pre-wrap break-words border-l-2 border-blue-200 pl-3 text-sm text-gray-700">${escapeHtml(String(application.message))}</p>` : '<p class="mt-3 text-xs text-gray-400">応募メッセージはありません。</p>'}
+              ${application.status === "pending" ? `
+                <div class="mt-3 flex flex-wrap gap-2">
+                  <button type="button" onclick="updateApplicationStatus('${escapeHtml(String(application.id))}', 'reviewed')" class="min-h-10 rounded-lg bg-blue-700 px-3 py-2 text-xs font-bold text-white hover:bg-blue-800">確認済みにする</button>
+                  <button type="button" onclick="updateApplicationStatus('${escapeHtml(String(application.id))}', 'dismissed')" class="min-h-10 rounded-lg border border-gray-300 px-3 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50">対応不要にする</button>
+                </div>
+              ` : ""}
+            </article>
+          `).join("")
+          : '<p class="py-2 text-xs text-gray-500">受け取った応募はまだありません。</p>';
+
       if (publicSeekerProfilesUserId === currentUser.id) {
         profilesContainer.innerHTML = publicSeekerProfilesError
           ? `<p class="text-sm text-red-600">${escapeHtml(publicSeekerProfilesError)}</p>`
           : publicSeekerProfiles.length
-          ? publicSeekerProfiles.map(profile => {
+          ? `${employerContactRequestsError ? `<p class="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">${escapeHtml(employerContactRequestsError)}</p>` : ""}
+          ${publicSeekerProfiles.map(profile => {
             const payTypeLabels = { hourly: "時給", daily: "日給", monthly: "月給" };
             const pay = profile.pay_type
               ? `${payTypeLabels[profile.pay_type]}${profile.minimum_salary ? `・希望最低額 ${Number(profile.minimum_salary).toLocaleString("ja-JP")}円` : ""}`
@@ -1694,6 +1845,7 @@
             const licenses = Array.isArray(profile.licenses) && profile.licenses.length
               ? profile.licenses.map(license => escapeHtml(String(license))).join("、")
               : "登録なし";
+            const contactRequest = employerContactRequests.find(request => request.seeker_id === profile.user_id);
             return `
               <article class="rounded-xl border border-emerald-100 bg-white p-4 shadow-sm">
                 <div class="grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-2">
@@ -1704,9 +1856,24 @@
                   <p><span class="font-bold">現場経験:</span> ${escapeHtml(String(profile.exp_years || "未設定"))}</p>
                   <p><span class="font-bold">アピール:</span> ${escapeHtml(String(profile.stamina || "未設定"))}</p>
                 </div>
+                <div class="mt-4 border-t border-gray-100 pt-3">
+                  ${contactRequest
+                    ? `<p class="text-sm font-bold ${contactRequest.status === "responded" ? "text-emerald-800" : contactRequest.status === "declined" ? "text-gray-600" : "text-amber-800"}">${contactRequest.status === "responded" ? "求職者から返信が届いています" : contactRequest.status === "declined" ? "求職者は連絡を見送りました" : "連絡リクエストを送信済みです"}</p>
+                       ${contactRequest.seeker_reply ? `<p class="mt-2 whitespace-pre-wrap rounded bg-emerald-50 p-3 text-sm">${escapeHtml(contactRequest.seeker_reply)}</p>` : ""}
+                       <p class="mt-1 text-xs text-gray-500">${formatDashboardDate(contactRequest.created_at)}</p>`
+                    : employerContactRequestsError
+                      ? ""
+                      : `<label class="block text-sm font-medium">連絡リクエストを送る
+                          <textarea id="contactMessage-${escapeHtml(profile.user_id)}" maxlength="1000" rows="3" class="mt-1 w-full rounded border px-3 py-2 text-sm" placeholder="プロフィールを見て連絡した理由や求人の案内を入力"></textarea>
+                        </label>
+                        <p class="mt-1 text-xs text-gray-500">連絡先は共有されません。メッセージは求職者のマイページに届きます。</p>
+                        <button type="button" onclick="sendSeekerContactRequest('${escapeHtml(profile.user_id)}', this)" class="mt-2 min-h-10 rounded-lg bg-emerald-700 px-3 py-2 text-sm font-bold text-white hover:bg-emerald-800">連絡を送る</button>
+                        <p id="contactRequestStatus-${escapeHtml(profile.user_id)}" class="mt-2 hidden text-sm" role="status" aria-live="polite"></p>`
+                  }
+                </div>
               </article>
             `;
-          }).join("")
+          }).join("")}`
           : '<p class="text-xs text-gray-500">現在公開中の求職者プロフィールはありません。</p>';
       } else if (loadingPublicSeekerProfilesUserId !== currentUser.id) {
         profilesContainer.innerHTML = '<p class="text-xs text-gray-500">公開プロフィールを読み込んでいます。</p>';
@@ -1718,29 +1885,82 @@
       if (!user || currentUser?.id !== user.id || accountType !== "employer" ||
           loadingPublicSeekerProfilesUserId === user.id || publicSeekerProfilesUserId === user.id) return;
       loadingPublicSeekerProfilesUserId = user.id;
-      const { data, error } = await supabaseClient
-        .from("seeker_public_profiles")
-        .select("job_type, location, pay_type, minimum_salary, licenses, exp_years, stamina");
+      const [profilesResult, requestsResult] = await Promise.all([
+        supabaseClient
+          .from("seeker_public_profiles")
+          .select("user_id, job_type, location, pay_type, minimum_salary, licenses, exp_years, stamina"),
+        supabaseClient
+          .from("seeker_contact_requests")
+          .select("*")
+          .eq("employer_id", user.id)
+          .order("created_at", { ascending: false })
+      ]);
       if (currentUser?.id !== user.id || accountType !== "employer") {
         loadingPublicSeekerProfilesUserId = null;
         return;
       }
       loadingPublicSeekerProfilesUserId = null;
-      if (error) {
-        publicSeekerProfilesError = `公開プロフィールを読み込めませんでした。SQL移行が実行済みか確認してください: ${error.message}`;
+      if (profilesResult.error) {
+        publicSeekerProfilesError = `公開プロフィールを読み込めませんでした。SQL移行が実行済みか確認してください: ${profilesResult.error.message}`;
         publicSeekerProfilesUserId = user.id;
         renderEmployerDashboard();
-        console.error("公開プロフィール読み込みエラー:", error);
+        console.error("公開プロフィール読み込みエラー:", profilesResult.error);
         return;
       }
-      publicSeekerProfiles = data || [];
+      publicSeekerProfiles = profilesResult.data || [];
       publicSeekerProfilesError = "";
       publicSeekerProfilesUserId = user.id;
+      employerContactRequests = requestsResult.data || [];
+      employerContactRequestsError = requestsResult.error
+        ? `連絡リクエストを確認できません。新しいSQL移行を実行してください: ${requestsResult.error.message}`
+        : "";
+      if (requestsResult.error) console.error("連絡リクエスト読み込みエラー:", requestsResult.error);
+      renderEmployerDashboard();
+    }
+
+    async function sendSeekerContactRequest(seekerId, button) {
+      if (!currentUser || accountType !== "employer" ||
+          !publicSeekerProfiles.some(profile => profile.user_id === seekerId)) return;
+      const employerId = currentUser.id;
+      const messageInput = document.getElementById(`contactMessage-${seekerId}`);
+      const status = document.getElementById(`contactRequestStatus-${seekerId}`);
+      const message = messageInput.value.trim();
+      if (!message) {
+        status.innerText = "連絡メッセージを入力してください。";
+        status.className = "mt-2 text-sm text-red-700";
+        messageInput.focus();
+        return;
+      }
+
+      button.disabled = true;
+      const originalText = button.innerText;
+      button.innerText = "送信中...";
+      const { data, error } = await supabaseClient
+        .from("seeker_contact_requests")
+        .insert({
+          seeker_id: seekerId,
+          employer_id: employerId,
+          employer_message: message
+        })
+        .select()
+        .single();
+      button.disabled = false;
+      button.innerText = originalText;
+      if (currentUser?.id !== employerId || accountType !== "employer") return;
+      if (error) {
+        status.innerText = error.code === "23505"
+          ? "この求職者にはすでに連絡リクエストを送信しています。画面を再読み込みして状態を確認してください。"
+          : `送信できませんでした: ${error.message}`;
+        status.className = "mt-2 text-sm text-red-700";
+        console.error("連絡リクエスト送信エラー:", error);
+        return;
+      }
+      employerContactRequests.unshift(data);
       renderEmployerDashboard();
     }
 
     function showDashboardView(view) {
-      const views = ["profile", "favorites", "applications"];
+      const views = ["profile", "favorites", "applications", "contacts"];
       if (!views.includes(view)) return;
       activeDashboardView = view;
       views.forEach(item => {
@@ -1767,10 +1987,12 @@
 
     async function updateApplicationStatus(applicationId, status) {
       if (!currentUser || accountType !== "employer" || !["pending", "reviewed", "dismissed"].includes(status)) return;
+      const employerId = currentUser.id;
       const { error } = await supabaseClient
         .from("job_applications")
         .update({ status })
         .eq("id", applicationId);
+      if (currentUser?.id !== employerId || accountType !== "employer") return;
       if (error) {
         alert(`応募状況を更新できませんでした: ${error.message}`);
         return;
@@ -1872,7 +2094,7 @@
       }
 
       jobList.innerHTML = filteredJobs.map(job => `
-        <article onclick="openModal(${job.id})" class="cursor-pointer rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition hover:border-blue-300 hover:shadow-md sm:p-5 ${isJobClosed(job) ? 'border-l-4 border-l-gray-400' : 'border-l-4 border-l-blue-600'}">
+        <article onclick="openModal(${job.id})" class="cursor-pointer border-b border-gray-200 px-1 py-5 transition-colors last:border-0 hover:bg-gray-50 sm:px-4">
           <div class="flex items-start justify-between gap-3">
             <div class="min-w-0">
               <div class="mb-2 flex flex-wrap gap-2">
