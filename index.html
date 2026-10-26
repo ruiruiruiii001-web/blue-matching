@@ -173,15 +173,28 @@
     </section>
 
     <!-- 左側②：職人向け 即戦力プロフィール -->
-    <section id="seekerSection" class="bg-white p-6 rounded-lg shadow-md h-fit hidden">
+    <section id="seekerSection" class="bg-white p-6 rounded-lg shadow-md h-fit hidden md:col-span-2">
       <div id="seekerAccountPrompt" class="mb-4 p-4 rounded border border-blue-200 bg-blue-50">
         <p class="text-sm text-blue-900">プロフィール・お気に入り・応募履歴をアカウントに保存するにはログインしてください。</p>
         <button onclick="switchTab('employer')" class="mt-2 text-sm font-bold text-blue-700 underline">ログイン / アカウント登録へ</button>
       </div>
 
-      <h2 class="text-lg font-bold mb-4 border-b pb-2 text-blue-600">マイプロフィール</h2>
+      <div id="seekerDashboard" class="hidden space-y-4">
+        <h2 class="text-lg font-bold border-b pb-2 text-blue-600">マイページ</h2>
+        <p id="accountDashboardStatus" role="status" aria-live="polite" class="hidden text-sm text-red-600"></p>
+        <div class="grid grid-cols-1 md:grid-cols-[180px_minmax(0,1fr)] gap-4">
+          <nav aria-label="マイページメニュー" class="flex md:flex-col gap-2 overflow-x-auto pb-1 md:pb-0">
+            <button type="button" data-dashboard-view="profile" onclick="showDashboardView('profile')" class="dashboard-menu-button shrink-0 text-left px-3 py-2 rounded-lg bg-blue-600 text-white font-bold text-sm">👤 プロフィール</button>
+            <button type="button" data-dashboard-view="favorites" onclick="showDashboardView('favorites')" class="dashboard-menu-button shrink-0 text-left px-3 py-2 rounded-lg bg-gray-100 text-gray-700 font-bold text-sm">☆ お気に入り</button>
+            <button type="button" data-dashboard-view="jobs" onclick="showDashboardView('jobs')" class="dashboard-menu-button shrink-0 text-left px-3 py-2 rounded-lg bg-gray-100 text-gray-700 font-bold text-sm">🏗 自分の求人</button>
+            <button type="button" data-dashboard-view="applications" onclick="showDashboardView('applications')" class="dashboard-menu-button shrink-0 text-left px-3 py-2 rounded-lg bg-gray-100 text-gray-700 font-bold text-sm">📨 応募履歴</button>
+          </nav>
+
+          <div class="min-w-0">
+            <section id="dashboardView-profile">
+              <h3 class="text-lg font-bold mb-4 border-b pb-2 text-blue-600">マイプロフィール</h3>
       
-      <div class="space-y-4">
+      <div id="seekerProfileForm" class="space-y-4">
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="block text-sm font-medium mb-1">お名前 / 通称 <span class="text-red-500">*</span></label>
@@ -269,22 +282,22 @@
       <div id="profileSavedMessage" class="mt-4 p-3 bg-blue-50 border border-blue-200 text-blue-800 rounded text-xs hidden">
         👍 プロフィールをアカウントに保存しました。
       </div>
+            </section>
 
-      <div id="seekerDashboard" class="mt-6 space-y-4 hidden">
-        <h2 class="text-lg font-bold border-b pb-2 text-blue-600">マイページ</h2>
-        <p id="accountDashboardStatus" role="status" aria-live="polite" class="hidden text-sm text-red-600"></p>
-        <section class="rounded border p-3">
-          <h3 class="font-bold text-sm mb-2">お気に入り求人</h3>
-          <div id="dashboardFavorites" class="space-y-2 text-sm"></div>
-        </section>
-        <section class="rounded border p-3">
-          <h3 class="font-bold text-sm mb-2">自分の掲載求人</h3>
-          <div id="dashboardJobs" class="space-y-2 text-sm"></div>
-        </section>
-        <section class="rounded border p-3">
-          <h3 class="font-bold text-sm mb-2">応募履歴</h3>
-          <div id="dashboardApplications" class="space-y-2 text-sm"></div>
-        </section>
+            <section id="dashboardView-favorites" class="hidden rounded border p-3">
+              <h3 class="font-bold text-sm mb-2">お気に入り求人</h3>
+              <div id="dashboardFavorites" class="space-y-2 text-sm"></div>
+            </section>
+            <section id="dashboardView-jobs" class="hidden rounded border p-3">
+              <h3 class="font-bold text-sm mb-2">自分の掲載求人</h3>
+              <div id="dashboardJobs" class="space-y-2 text-sm"></div>
+            </section>
+            <section id="dashboardView-applications" class="hidden rounded border p-3">
+              <h3 class="font-bold text-sm mb-2">応募履歴・応募者</h3>
+              <div id="dashboardApplications" class="space-y-2 text-sm"></div>
+            </section>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -464,6 +477,7 @@
     let accountApplications = [];
     let accountDataUserId = null;
     let loadingAccountUserId = null;
+    let activeDashboardView = "profile";
     let editingJobId = null;
     let activeTab = "employer";
     let currentUser = null;
@@ -665,6 +679,8 @@
         favoriteJobIds = [];
         seekerProfileData = null;
         accountApplications = [];
+        activeDashboardView = "profile";
+        showDashboardView(activeDashboardView);
         clearSeekerProfileForm();
       }
       if (!currentUser && editingJobId !== null) cancelJobEdit();
@@ -1216,6 +1232,23 @@
           `).join("")
           : '<p class="text-xs text-gray-500">自分の求人への応募はありません。</p>'}
       `;
+    }
+
+    function showDashboardView(view) {
+      const views = ["profile", "favorites", "jobs", "applications"];
+      if (!views.includes(view)) return;
+      activeDashboardView = view;
+      views.forEach(item => {
+        document.getElementById(`dashboardView-${item}`).classList.toggle("hidden", item !== view);
+      });
+      document.querySelectorAll(".dashboard-menu-button").forEach(button => {
+        const isActive = button.dataset.dashboardView === view;
+        button.classList.toggle("bg-blue-600", isActive);
+        button.classList.toggle("text-white", isActive);
+        button.classList.toggle("bg-gray-100", !isActive);
+        button.classList.toggle("text-gray-700", !isActive);
+        button.setAttribute("aria-pressed", String(isActive));
+      });
     }
 
     function formatDashboardDate(value) {
