@@ -153,6 +153,14 @@
           <h2 class="text-lg font-bold text-blue-600">企業マイページ</h2>
           <button type="button" onclick="closeAccountPanel(); document.getElementById('employerJobForm').scrollIntoView({ behavior: 'smooth' })" class="text-sm font-bold text-blue-700 underline">＋ 求人を新規投稿</button>
         </div>
+        <details class="mb-5 rounded-lg border border-blue-200 bg-blue-50 p-3" open>
+          <summary class="cursor-pointer text-sm font-bold text-blue-900">企業アカウントの使い方（まずはこちら）</summary>
+          <ol class="mt-2 list-inside list-decimal space-y-1 text-sm text-blue-950">
+            <li>求人を投稿し、勤務地・給与・仕事内容・待遇タグを具体的に記入します。</li>
+            <li>応募はこのマイページで確認し、状態を「確認済み」または「対応不要」に更新します。</li>
+            <li>求職者一覧で希望職種や地域を絞り、公開プロフィールから連絡リクエストを送れます。</li>
+          </ol>
+        </details>
         <section class="mb-6 border-b border-gray-200 pb-5">
           <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
             <h3 class="font-bold text-sm">通知</h3>
@@ -168,7 +176,7 @@
             <h3 class="font-bold text-sm">受け取った応募</h3>
             <span id="employerApplicationCount" class="text-xs text-gray-500"></span>
           </div>
-          <p class="mb-3 text-xs text-gray-500">応募者の名前・電話番号・経験・資格・メッセージを確認できます。新しい応募はマイページの通知と登録メールでお知らせします。</p>
+          <p class="mb-3 text-xs text-gray-500">応募者の名前・電話番号・経験・資格・メッセージを確認できます。「確認済み」などの状況は応募者のマイページにも表示されます。新しい応募はマイページの通知と登録メールでお知らせします。</p>
           <p id="employerApplicationsStatus" role="status" aria-live="polite" class="hidden text-sm text-red-700"></p>
           <div id="employerDashboardApplications" class="divide-y divide-gray-100 text-sm"></div>
         </section>
@@ -282,6 +290,14 @@
         <div class="min-w-0">
             <section id="dashboardView-profile">
               <h3 class="text-lg font-bold mb-4 border-b pb-2 text-blue-600">マイプロフィール</h3>
+      <details class="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-3" open>
+        <summary class="cursor-pointer text-sm font-bold text-blue-900">はじめての方へ（求職者向け）</summary>
+        <ol class="mt-2 list-inside list-decimal space-y-1 text-sm text-blue-950">
+          <li>希望職種・地域・給与や経験を登録すると、求人のおすすめに反映されます。</li>
+          <li>求人一覧の「未経験歓迎」「寮あり」などから条件を選び、お気に入りも活用できます。</li>
+          <li>応募後は「応募履歴」で企業の確認状況を見られます。企業からの連絡は「連絡・通知」で確認できます。</li>
+        </ol>
+      </details>
       
       <div id="seekerProfileForm" class="space-y-4">
         <div class="grid grid-cols-2 gap-4">
@@ -406,9 +422,28 @@
         <h2 id="jobListTitle" class="text-lg font-bold text-gray-800">現場求人一覧 (クラウド)</h2>
         <span id="jobCount" class="text-xs bg-gray-200 text-gray-700 px-2.5 py-1 rounded-full font-bold">0件</span>
       </div>
+      <p class="mt-2 text-xs text-amber-800">掲載企業の本人確認は行っていません。応募前に求人条件や連絡先をご確認ください。</p>
       <p id="jobListDescription" class="mt-3 text-xs text-gray-500 hidden">希望職種・勤務地・給与条件に合う求人をおすすめ順に表示します。検索条件は下から変更できます。</p>
       <section id="employerSeekerProfilesPanel" class="hidden mt-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm sm:p-5">
         <p class="mb-4 border-b border-emerald-200 pb-3 text-sm leading-5 text-emerald-900">本人が公開を選んだ匿名プロフィールのみ表示しています。名前・電話番号は表示されません。企業アカウントは事業者の本人確認を行っていないため、表示情報の取り扱いにご注意ください。</p>
+        <div class="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_14rem]">
+          <label class="text-sm font-medium text-gray-700">希望職種・地域・資格で検索
+            <input id="employerSeekerKeyword" type="search" oninput="renderEmployerDashboard()" placeholder="例: 足場、横浜、玉掛け" class="mt-1 w-full rounded-lg border border-emerald-200 bg-white px-3 py-2.5">
+          </label>
+          <label class="text-sm font-medium text-gray-700">現場経験
+            <select id="employerSeekerExperience" onchange="renderEmployerDashboard()" class="mt-1 w-full rounded-lg border border-emerald-200 bg-white px-3 py-2.5">
+              <option value="">すべて</option>
+              <option value="未経験（やる気あり）">未経験</option>
+              <option value="1〜2年">1〜2年</option>
+              <option value="3〜5年（即戦力）">3〜5年</option>
+              <option value="5年以上（ベテラン）">5年以上</option>
+            </select>
+          </label>
+        </div>
+        <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <p id="employerSeekerProfileCount" class="text-xs text-emerald-900" aria-live="polite"></p>
+          <button type="button" onclick="resetEmployerSeekerFilters()" class="min-h-10 rounded-lg border border-emerald-300 bg-white px-3 py-2 text-xs font-bold text-emerald-900 hover:bg-emerald-100">条件をクリア</button>
+        </div>
         <div id="employerSeekerProfiles" class="space-y-3 text-sm"></div>
       </section>
 
@@ -420,6 +455,15 @@
 
         <label for="searchKeyword" class="mb-2 block text-sm font-bold text-gray-700">キーワード</label>
         <input type="text" id="searchKeyword" oninput="renderJobList()" placeholder="職種・勤務地・タグで検索（例: 横浜、日払い）" class="mb-4 w-full rounded-xl border border-blue-300 bg-white px-4 py-3 text-base shadow-sm outline-none focus:ring-2 focus:ring-blue-500">
+
+        <fieldset class="mb-4">
+          <legend class="mb-2 text-sm font-bold text-gray-700">人気の条件から探す</legend>
+          <div class="flex flex-wrap gap-2">
+            <button type="button" data-quick-job-tag="未経験・即日OK" aria-pressed="false" onclick="toggleQuickJobTag('未経験・即日OK')" class="min-h-10 rounded-full border border-blue-200 bg-white px-3 py-2 text-sm font-medium text-blue-900 hover:bg-blue-100">未経験歓迎</button>
+            <button type="button" data-quick-job-tag="寮・社宅完備" aria-pressed="false" onclick="toggleQuickJobTag('寮・社宅完備')" class="min-h-10 rounded-full border border-blue-200 bg-white px-3 py-2 text-sm font-medium text-blue-900 hover:bg-blue-100">寮・社宅あり</button>
+            <button type="button" data-quick-job-tag="資格取得支援" aria-pressed="false" onclick="toggleQuickJobTag('資格取得支援')" class="min-h-10 rounded-full border border-blue-200 bg-white px-3 py-2 text-sm font-medium text-blue-900 hover:bg-blue-100">資格取得支援</button>
+          </div>
+        </fieldset>
 
         <div class="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
           <label class="flex min-h-11 items-center gap-2 rounded-lg border border-blue-100 bg-white px-3 text-sm text-gray-700">
@@ -509,6 +553,8 @@
           <span id="modalClosed" class="inline-flex items-center rounded-full bg-gray-200 px-3 py-1 text-sm font-bold text-gray-700 hidden">募集終了</span>
         </div>
         <h2 id="modalTitle" class="text-2xl font-bold leading-snug text-gray-900"></h2>
+        <p id="modalJobFreshness" class="mt-2 text-xs text-gray-500"></p>
+        <p class="mt-1 text-xs text-amber-800">掲載企業の本人確認は行っていません。応募前に条件や連絡先をご確認ください。</p>
         <button id="modalFavoriteButton" type="button" onclick="toggleFavorite(selectedJob.id)" class="mt-3 min-h-11 rounded-lg border border-amber-300 px-4 py-2 text-sm font-bold text-amber-800 hover:bg-amber-50"></button>
       </div>
 
@@ -1746,10 +1792,14 @@
         : `
         ${submitted.length
           ? submitted.map(application => `
-            <div class="border-b py-2">
-              <p class="font-medium">${escapeHtml(application.job_title)}</p>
-              <p class="text-xs text-gray-500">${formatDashboardDate(application.created_at)} ・ ${formatApplicationStatus(application.status)}</p>
-            </div>
+            <article class="border-b py-3 last:border-0">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <p class="font-bold">${escapeHtml(application.job_title)}</p>
+                <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${formatApplicationStatusClass(application.status)}">${formatApplicationStatus(application.status)}</span>
+              </div>
+              <p class="mt-1 text-xs text-gray-500">応募日: ${formatDashboardDate(application.created_at)}</p>
+              <p class="mt-1 text-xs text-gray-600">${formatApplicationStatusDescription(application.status)}</p>
+            </article>
           `).join("")
           : '<p class="text-xs text-gray-500">応募履歴はありません。</p>'}
       `;
@@ -1964,12 +2014,28 @@
       const receivedApplications = accountApplications.filter(application =>
         ownedJobIds.has(String(application.job_id))
       );
+      const seekerSearchKeyword = document.getElementById("employerSeekerKeyword")?.value.trim().toLocaleLowerCase("ja-JP") || "";
+      const seekerExperienceFilter = document.getElementById("employerSeekerExperience")?.value || "";
+      const filteredPublicProfiles = publicSeekerProfiles.filter(profile => {
+        const searchableProfile = [
+          profile.job_type,
+          profile.location,
+          profile.exp_years,
+          profile.stamina,
+          ...(Array.isArray(profile.licenses) ? profile.licenses : [])
+        ].join(" ").toLocaleLowerCase("ja-JP");
+        return (!seekerSearchKeyword || searchableProfile.includes(seekerSearchKeyword)) &&
+          (!seekerExperienceFilter || profile.exp_years === seekerExperienceFilter);
+      });
+      document.getElementById("employerSeekerProfileCount").innerText = publicSeekerProfiles.length
+        ? `${filteredPublicProfiles.length} / ${publicSeekerProfiles.length}件を表示中`
+        : "";
       container.innerHTML = ownedJobs.length
         ? ownedJobs.map(job => `
           <article class="flex flex-wrap items-center justify-between gap-3 border-b py-3">
             <div class="min-w-0">
               <p class="font-medium">${escapeHtml(String(job.title || ""))}</p>
-              <p class="text-xs text-gray-500">${escapeHtml(String(job.location || "勤務地未設定"))} ・ ${job.is_closed ? "募集終了" : "募集中"}</p>
+              <p class="text-xs text-gray-500">${escapeHtml(String(job.location || "勤務地未設定"))} ・ ${job.is_closed ? "募集終了" : "募集中"} ・ ${escapeHtml(formatJobFreshness(job))}</p>
             </div>
             <button type="button" onclick="editJob(${job.id})" class="shrink-0 rounded border border-blue-600 px-3 py-1.5 text-xs font-bold text-blue-700 hover:bg-blue-50">求人を編集</button>
           </article>
@@ -1990,8 +2056,9 @@
               <div class="flex flex-wrap items-start justify-between gap-2">
                 <div class="min-w-0">
                   <p class="font-bold">${escapeHtml(String(application.job_title || "求人"))}</p>
-                  <p class="mt-1 text-xs text-gray-500">${formatDashboardDate(application.created_at)} ・ ${formatApplicationStatus(application.status)}</p>
+                  <p class="mt-1 text-xs text-gray-500">応募日: ${formatDashboardDate(application.created_at)}</p>
                 </div>
+                <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${formatApplicationStatusClass(application.status)}">${formatApplicationStatus(application.status)}</span>
                 <a href="tel:${escapeHtml(String(application.applicant_phone || ""))}" class="shrink-0 font-bold text-blue-700 underline">${escapeHtml(String(application.applicant_phone || ""))}</a>
               </div>
               <p class="mt-2 text-sm"><span class="font-bold">応募者:</span> ${escapeHtml(String(application.applicant_name || ""))}</p>
@@ -2013,9 +2080,9 @@
       if (publicSeekerProfilesUserId === currentUser.id) {
         profilesContainer.innerHTML = publicSeekerProfilesError
           ? `<p class="text-sm text-red-600">${escapeHtml(publicSeekerProfilesError)}</p>`
-          : publicSeekerProfiles.length
+          : filteredPublicProfiles.length
           ? `${employerContactRequestsError ? `<p class="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">${escapeHtml(employerContactRequestsError)}</p>` : ""}
-          ${publicSeekerProfiles.map(profile => {
+          ${filteredPublicProfiles.map(profile => {
             const payTypeLabels = { hourly: "時給", daily: "日給", monthly: "月給" };
             const pay = profile.pay_type
               ? `${payTypeLabels[profile.pay_type]}${profile.minimum_salary ? `・希望最低額 ${Number(profile.minimum_salary).toLocaleString("ja-JP")}円` : ""}`
@@ -2034,6 +2101,7 @@
                   <p><span class="font-bold">現場経験:</span> ${escapeHtml(String(profile.exp_years || "未設定"))}</p>
                   <p><span class="font-bold">アピール:</span> ${escapeHtml(String(profile.stamina || "未設定"))}</p>
                 </div>
+                <p class="mt-2 text-xs text-gray-500">プロフィール更新: ${escapeHtml(formatDashboardDate(profile.updated_at) || "日付不明")}</p>
                 <div class="mt-4 border-t border-gray-100 pt-3">
                   ${contactRequest
                     ? `<p class="text-sm font-bold ${contactRequest.status === "responded" ? "text-emerald-800" : contactRequest.status === "declined" ? "text-gray-600" : "text-amber-800"}">${contactRequest.status === "responded" ? "求職者から返信が届いています" : contactRequest.status === "declined" ? "求職者は連絡を見送りました" : "連絡リクエストを送信済みです"}</p>
@@ -2052,7 +2120,9 @@
               </article>
             `;
           }).join("")}`
-          : '<p class="text-xs text-gray-500">現在公開中の求職者プロフィールはありません。</p>';
+          : publicSeekerProfiles.length
+            ? '<p class="rounded-lg border border-dashed border-emerald-200 bg-white p-5 text-center text-sm text-gray-600">条件に合うプロフィールがありません。検索条件を変更してください。</p>'
+            : '<p class="text-xs text-gray-500">現在公開中の求職者プロフィールはありません。</p>';
       } else if (loadingPublicSeekerProfilesUserId !== currentUser.id) {
         profilesContainer.innerHTML = '<p class="text-xs text-gray-500">公開プロフィールを読み込んでいます。</p>';
         loadPublicSeekerProfiles(currentUser);
@@ -2066,7 +2136,7 @@
       const [profilesResult, requestsResult] = await Promise.all([
         supabaseClient
           .from("seeker_public_profiles")
-          .select("user_id, job_type, location, pay_type, minimum_salary, licenses, exp_years, stamina"),
+          .select("user_id, job_type, location, pay_type, minimum_salary, licenses, exp_years, stamina, updated_at"),
         supabaseClient
           .from("seeker_contact_requests")
           .select("*")
@@ -2162,8 +2232,33 @@
       return Number.isNaN(date.getTime()) ? "" : date.toLocaleString("ja-JP");
     }
 
+    function formatJobFreshness(job) {
+      const createdAt = Date.parse(job.created_at || "");
+      const updatedAt = Date.parse(job.updated_at || "");
+      if (Number.isFinite(updatedAt) && (!Number.isFinite(createdAt) || updatedAt - createdAt > 60000)) {
+        return `最終更新: ${formatDashboardDate(job.updated_at)}`;
+      }
+      return job.created_at ? `掲載日: ${formatDashboardDate(job.created_at)}` : "";
+    }
+
     function formatApplicationStatus(status) {
       return { pending: "未確認", reviewed: "確認済み", dismissed: "対応不要" }[status] || "未確認";
+    }
+
+    function formatApplicationStatusClass(status) {
+      return {
+        pending: "bg-amber-100 text-amber-900",
+        reviewed: "bg-emerald-100 text-emerald-900",
+        dismissed: "bg-gray-100 text-gray-700"
+      }[status] || "bg-amber-100 text-amber-900";
+    }
+
+    function formatApplicationStatusDescription(status) {
+      return {
+        pending: "企業からの確認を待っています。",
+        reviewed: "企業が応募を確認しました。以降の連絡は企業からの案内をご確認ください。",
+        dismissed: "企業が今回は対応不要と判断しました。"
+      }[status] || "応募状況を確認できません。";
     }
 
     async function updateApplicationStatus(applicationId, status) {
@@ -2200,6 +2295,19 @@
       updateJobFilterOptions();
       const locationFilter = document.getElementById("locationFilter").value;
       const selectedTags = Array.from(document.querySelectorAll('input[name="tagFilter"]:checked')).map(input => input.value);
+      document.querySelectorAll("[data-quick-job-tag]").forEach(button => {
+        const tag = button.dataset.quickJobTag;
+        const selected = selectedTags.includes(tag);
+        const available = cachedJobs.some(job => Array.isArray(job.tags) && job.tags.includes(tag));
+        button.setAttribute("aria-pressed", String(selected));
+        button.disabled = !available;
+        button.classList.toggle("bg-blue-700", selected);
+        button.classList.toggle("text-white", selected);
+        button.classList.toggle("border-blue-700", selected);
+        button.classList.toggle("bg-white", !selected);
+        button.classList.toggle("text-blue-900", !selected);
+        button.classList.toggle("opacity-50", !available);
+      });
       const salaryTypeFilter = document.getElementById("salaryTypeFilter").value;
       const minimumSalary = Number(document.getElementById("minimumSalary").value) || 0;
       const sortBy = document.getElementById("jobSort").value;
@@ -2284,6 +2392,7 @@
                 ${matchProfile && getJobMatchScore(job, matchProfile) > 0 ? '<span class="inline-flex items-center rounded-full bg-purple-50 px-2.5 py-1 text-xs font-bold text-purple-800">希望条件に一致</span>' : ''}
               </div>
               <h3 class="break-words text-lg font-bold leading-snug text-gray-900 sm:text-xl">${escapeHtml(job.title)}</h3>
+              <p class="mt-1 text-xs text-gray-500">${escapeHtml(formatJobFreshness(job))}</p>
             </div>
             <button type="button" aria-label="${isFavorite(job.id) ? 'お気に入りから削除' : 'お気に入りに追加'}" aria-pressed="${isFavorite(job.id)}" onclick="event.stopPropagation(); toggleFavorite(${job.id})" class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-amber-200 bg-amber-50 text-xl text-amber-700 hover:bg-amber-100" title="${isFavorite(job.id) ? 'お気に入りから削除' : 'お気に入りに追加'}">${isFavorite(job.id) ? '★' : '☆'}</button>
           </div>
@@ -2325,6 +2434,20 @@
       });
       document.getElementById("advancedJobFilters").open = false;
       renderJobList();
+    }
+
+    function toggleQuickJobTag(tag) {
+      const checkbox = Array.from(document.querySelectorAll('input[name="tagFilter"]'))
+        .find(input => input.value === tag);
+      if (!checkbox) return;
+      checkbox.checked = !checkbox.checked;
+      renderJobList();
+    }
+
+    function resetEmployerSeekerFilters() {
+      document.getElementById("employerSeekerKeyword").value = "";
+      document.getElementById("employerSeekerExperience").value = "";
+      renderEmployerDashboard();
     }
 
     function isJobClosed(job) {
@@ -2427,6 +2550,7 @@
       document.getElementById("jobReportSubmitButton").disabled = true;
       setJobReportStatus("通報するには確認を完了してください。");
       document.getElementById("modalTitle").innerText = selectedJob.title;
+      document.getElementById("modalJobFreshness").innerText = formatJobFreshness(selectedJob);
       document.getElementById("modalLocation").innerText = selectedJob.location ? `📍 ${selectedJob.location}` : "";
       document.getElementById("modalSalary").innerText = selectedJob.salary || "給与応相談";
       document.getElementById("modalCapacity").innerText = `募集人数: ${formatJobCapacity(selectedJob.capacity)}`;
