@@ -172,6 +172,12 @@
         </div>
 
         <div>
+          <label class="block text-sm font-medium mb-1">希望職種</label>
+          <input type="text" id="seekerJobType" maxlength="100" placeholder="例: 足場、解体、塗装" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+          <p class="text-xs text-gray-500 mt-1">求人の職種名や仕事内容に含まれるキーワードでおすすめします。</p>
+        </div>
+
+        <div>
           <label class="block text-sm font-medium mb-1">希望勤務地（都道府県）</label>
           <input type="text" id="seekerLocation" placeholder="例: 神奈川県横浜市" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
           <p class="text-xs text-gray-500 mt-1">登録した都道府県に近い求人を一覧で優先します（距離計算ではありません）。</p>
@@ -249,7 +255,7 @@
         <h2 id="jobListTitle" class="text-lg font-bold text-gray-800">現場求人一覧 (クラウド)</h2>
         <span id="jobCount" class="text-xs bg-gray-200 text-gray-700 px-2.5 py-1 rounded-full font-bold">0件</span>
       </div>
-      <p id="jobListDescription" class="text-xs text-gray-500 mb-3 hidden">希望勤務地の求人を優先表示し、希望給与を検索条件に反映します。条件は下から変更できます。</p>
+      <p id="jobListDescription" class="text-xs text-gray-500 mb-3 hidden">希望職種・勤務地・給与条件に合う求人をおすすめ順に表示します。検索条件は下から変更できます。</p>
 
       <!-- 検索バー -->
       <div class="mb-4">
@@ -301,7 +307,8 @@
         <label class="text-sm text-gray-700 sm:col-span-2">
           <span class="block mb-1">並び替え</span>
           <select id="jobSort" onchange="renderJobList()" class="w-full border rounded px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-            <option value="newest">新着順</option>
+            <option value="recommended">おすすめ順</option>
+            <option value="newest" selected>新着順</option>
             <option value="salary">給与額が高い順</option>
             <option value="capacity">募集人数が少ない順</option>
           </select>
@@ -661,6 +668,7 @@
       const tabSeekerBtn = document.getElementById("tabSeekerBtn");
 
       if (tab === 'employer') {
+        document.getElementById("jobSort").value = "newest";
         employerSection.classList.remove("hidden");
         seekerSection.classList.add("hidden");
         tabEmployerBtn.className = "flex-1 py-3.5 font-bold text-sm md:text-base border-b-2 border-blue-600 text-blue-600 focus:outline-none transition";
@@ -668,6 +676,7 @@
         document.getElementById("jobListTitle").innerText = "現場求人一覧 (クラウド)";
         document.getElementById("jobListDescription").classList.add("hidden");
       } else {
+        document.getElementById("jobSort").value = "recommended";
         employerSection.classList.add("hidden");
         seekerSection.classList.remove("hidden");
         tabSeekerBtn.className = "flex-1 py-3.5 font-bold text-sm md:text-base border-b-2 border-blue-600 text-blue-600 focus:outline-none transition";
@@ -866,6 +875,7 @@
       const profile = {
         name: document.getElementById("seekerName").value.trim(),
         phone: normalizeJapanesePhone(document.getElementById("seekerPhone").value.trim()),
+        jobType: document.getElementById("seekerJobType").value.trim(),
         location: document.getElementById("seekerLocation").value.trim(),
         payType: preferredPayType,
         minimumSalary: preferredMinimumSalary,
@@ -895,6 +905,7 @@
       const profile = JSON.parse(saved);
       document.getElementById("seekerName").value = profile.name || "";
       document.getElementById("seekerPhone").value = profile.phone || "";
+      document.getElementById("seekerJobType").value = profile.jobType || "";
       document.getElementById("seekerLocation").value = profile.location || "";
       document.getElementById("seekerPayType").value = profile.payType || "";
       document.getElementById("seekerMinimumSalary").value = profile.minimumSalary ?? "";
@@ -938,6 +949,7 @@
       const savedProfile = localStorage.getItem("seeker_profile");
       const seekerProfile = savedProfile ? JSON.parse(savedProfile) : null;
       const preferredLocation = activeTab === "seeker" && seekerProfile ? seekerProfile.location || "" : "";
+      const matchProfile = activeTab === "seeker" ? seekerProfile : null;
 
       const filteredJobs = cachedJobs
         .filter(job =>
@@ -953,6 +965,10 @@
             (!selectedTags.length || (Array.isArray(job.tags) && selectedTags.some(tag => job.tags.includes(tag))))
         )
         .sort((a, b) => {
+          if (sortBy === "recommended" && matchProfile) {
+            const matchDifference = getJobMatchScore(b, matchProfile) - getJobMatchScore(a, matchProfile);
+            if (matchDifference !== 0) return matchDifference;
+          }
           if (preferredLocation) {
             const locationDifference = getLocationMatchScore(b.location, preferredLocation) - getLocationMatchScore(a.location, preferredLocation);
             if (locationDifference !== 0) return locationDifference;
@@ -986,6 +1002,7 @@
             <span class="text-xs text-gray-400">ID: ${job.id}</span>
           </div>
           <div class="flex flex-wrap gap-1 mb-2">
+            ${matchProfile && getJobMatchScore(job, matchProfile) > 0 ? '<span class="bg-emerald-100 text-emerald-800 text-[10px] px-1.5 py-0.5 rounded font-bold">希望条件に一致</span>' : ''}
             ${job.is_closed ? '<span class="bg-gray-200 text-gray-700 text-[10px] px-1.5 py-0.5 rounded font-bold">募集終了</span>' : ''}
             <span class="bg-blue-100 text-blue-800 text-[10px] px-1.5 py-0.5 rounded font-bold">募集人数: ${formatJobCapacity(job.capacity)}</span>
           </div>
@@ -1182,6 +1199,22 @@
       const jobPrefecture = getPrefecture(jobArea);
       const preferredPrefecture = getPrefecture(preferredArea);
       return jobPrefecture && jobPrefecture === preferredPrefecture ? 1 : 0;
+    }
+
+    function getJobMatchScore(job, profile) {
+      let score = 0;
+      const preferredJobTypes = String(profile.jobType || "")
+        .split(/[,、，]/)
+        .map(jobType => jobType.trim().toLocaleLowerCase())
+        .filter(Boolean);
+      const jobDescription = `${job.title || ""} ${job.duties || ""}`.toLocaleLowerCase();
+      if (preferredJobTypes.some(jobType => jobDescription.includes(jobType))) score += 4;
+
+      score += getLocationMatchScore(job.location, profile.location) * 2;
+
+      if (profile.payType && getJobPayType(job) === profile.payType) score += 1;
+      if (profile.minimumSalary && getJobPayAmount(job) >= Number(profile.minimumSalary)) score += 1;
+      return score;
     }
 
     function getPrefecture(location) {
