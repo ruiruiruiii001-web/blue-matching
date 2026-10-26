@@ -219,6 +219,7 @@
           <span class="block mb-1">並び替え</span>
           <select id="jobSort" onchange="renderJobList()" class="w-full border rounded px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
             <option value="newest">新着順</option>
+            <option value="tagMatch">選択タグの合致が多い順</option>
             <option value="salary">給与額が高い順</option>
           </select>
         </label>
@@ -478,6 +479,10 @@
             (!selectedTags.length || (Array.isArray(job.tags) && selectedTags.some(tag => job.tags.includes(tag))))
         )
         .sort((a, b) => {
+          if (sortBy === "tagMatch" && selectedTags.length > 0) {
+            const matchDifference = getTagMatchCount(b, selectedTags) - getTagMatchCount(a, selectedTags);
+            if (matchDifference !== 0) return matchDifference;
+          }
           if (sortBy === "salary") {
             const salaryDifference = getSalaryAmount(b.salary) - getSalaryAmount(a.salary);
             if (salaryDifference !== 0) return salaryDifference;
@@ -520,6 +525,11 @@
           </div>
         </div>
       `).join("");
+    }
+
+    function getTagMatchCount(job, selectedTags) {
+      if (!Array.isArray(job.tags)) return 0;
+      return selectedTags.filter(tag => job.tags.includes(tag)).length;
     }
 
     function updateJobFilterOptions() {
