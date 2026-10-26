@@ -149,6 +149,26 @@
           <p class="text-xs text-gray-500 mt-1">登録した都道府県に近い求人を一覧で優先します（距離計算ではありません）。</p>
         </div>
 
+        <div class="bg-blue-50 p-3 rounded border border-blue-100 space-y-3">
+          <p class="text-sm font-bold text-gray-700">希望給与条件（任意）</p>
+          <div class="grid grid-cols-2 gap-3">
+            <label class="text-sm">
+              <span class="block mb-1">給与区分</span>
+              <select id="seekerPayType" class="w-full border rounded px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                <option value="">指定なし</option>
+                <option value="hourly">時給</option>
+                <option value="daily">日給</option>
+                <option value="monthly">月給</option>
+              </select>
+            </label>
+            <label class="text-sm">
+              <span class="block mb-1">最低希望額（円）</span>
+              <input type="number" id="seekerMinimumSalary" min="1" step="1" placeholder="例: 15000" class="w-full border rounded px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+            </label>
+          </div>
+          <p class="text-xs text-gray-600">保存すると希望条件が求人検索に反映されます。最低額を指定する場合は給与区分も選択してください。</p>
+        </div>
+
         <!-- 資格チェックボックス -->
         <div>
           <label class="block text-sm font-medium mb-1">保有資格（該当するものをチェック）</label>
@@ -198,9 +218,10 @@
     <!-- 右側：掲載中の現場求人一覧 -->
     <section class="bg-white p-6 rounded-lg shadow-md h-fit">
       <div class="flex justify-between items-center mb-4 border-b pb-2">
-        <h2 class="text-lg font-bold text-gray-800">現場求人一覧 (クラウド)</h2>
+        <h2 id="jobListTitle" class="text-lg font-bold text-gray-800">現場求人一覧 (クラウド)</h2>
         <span id="jobCount" class="text-xs bg-gray-200 text-gray-700 px-2.5 py-1 rounded-full font-bold">0件</span>
       </div>
+      <p id="jobListDescription" class="text-xs text-gray-500 mb-3 hidden">希望勤務地の求人を優先表示し、希望給与を検索条件に反映します。条件は下から変更できます。</p>
 
       <!-- 検索バー -->
       <div class="mb-4">
@@ -315,6 +336,7 @@
     let cachedJobs = [];
     let selectedJob = null;
     let editingJobId = null;
+    let activeTab = "employer";
 
     document.addEventListener("DOMContentLoaded", () => {
       fetchJobs();
@@ -322,6 +344,7 @@
     });
 
     function switchTab(tab) {
+      activeTab = tab;
       const employerSection = document.getElementById("employerSection");
       const seekerSection = document.getElementById("seekerSection");
       const tabEmployerBtn = document.getElementById("tabEmployerBtn");
@@ -332,12 +355,17 @@
         seekerSection.classList.add("hidden");
         tabEmployerBtn.className = "flex-1 py-3.5 font-bold text-sm md:text-base border-b-2 border-blue-600 text-blue-600 focus:outline-none transition";
         tabSeekerBtn.className = "flex-1 py-3.5 font-bold text-sm md:text-base border-b-2 border-transparent text-gray-500 hover:text-blue-600 focus:outline-none transition";
+        document.getElementById("jobListTitle").innerText = "現場求人一覧 (クラウド)";
+        document.getElementById("jobListDescription").classList.add("hidden");
       } else {
         employerSection.classList.add("hidden");
         seekerSection.classList.remove("hidden");
         tabSeekerBtn.className = "flex-1 py-3.5 font-bold text-sm md:text-base border-b-2 border-blue-600 text-blue-600 focus:outline-none transition";
         tabEmployerBtn.className = "flex-1 py-3.5 font-bold text-sm md:text-base border-b-2 border-transparent text-gray-500 hover:text-blue-600 focus:outline-none transition";
+        document.getElementById("jobListTitle").innerText = "希望に合う求人を探す";
+        document.getElementById("jobListDescription").classList.remove("hidden");
       }
+      renderJobList();
     }
 
     // Supabaseから求人一覧を取得
@@ -470,11 +498,22 @@
     // 求職者プロフィール保存（ローカル）
     function saveSeekerProfile() {
       const checkedLic = Array.from(document.querySelectorAll('input[name="seekerLic"]:checked')).map(cb => cb.value);
+      const preferredPayType = document.getElementById("seekerPayType").value;
+      const minimumSalaryValue = document.getElementById("seekerMinimumSalary").value;
+      const preferredMinimumSalary = minimumSalaryValue ? Number(minimumSalaryValue) : null;
+
+      if (preferredMinimumSalary !== null &&
+          (!Number.isFinite(preferredMinimumSalary) || preferredMinimumSalary <= 0 || !preferredPayType)) {
+        alert("希望最低額を入力する場合は、給与区分も選択してください。");
+        return;
+      }
       
       const profile = {
         name: document.getElementById("seekerName").value.trim(),
         phone: document.getElementById("seekerPhone").value.trim(),
         location: document.getElementById("seekerLocation").value.trim(),
+        payType: preferredPayType,
+        minimumSalary: preferredMinimumSalary,
         licenses: checkedLic,
         expYears: document.getElementById("seekerExpYears").value,
         stamina: document.getElementById("seekerStamina").value
@@ -486,6 +525,7 @@
       }
 
       localStorage.setItem("seeker_profile", JSON.stringify(profile));
+      applySeekerSalaryPreferences(profile);
       document.getElementById("profileSavedMessage").classList.remove("hidden");
       renderJobList();
     }
@@ -497,6 +537,9 @@
       document.getElementById("seekerName").value = profile.name || "";
       document.getElementById("seekerPhone").value = profile.phone || "";
       document.getElementById("seekerLocation").value = profile.location || "";
+      document.getElementById("seekerPayType").value = profile.payType || "";
+      document.getElementById("seekerMinimumSalary").value = profile.minimumSalary ?? "";
+      applySeekerSalaryPreferences(profile);
       document.getElementById("seekerExpYears").value = profile.expYears || "未経験（やる気あり）";
       document.getElementById("seekerStamina").value = profile.stamina || "★★★★★ (自信あり)";
 
@@ -505,6 +548,11 @@
           cb.checked = profile.licenses.includes(cb.value);
         });
       }
+    }
+
+    function applySeekerSalaryPreferences(profile) {
+      document.getElementById("salaryTypeFilter").value = profile.payType || "";
+      document.getElementById("minimumSalary").value = profile.minimumSalary ?? "";
     }
 
     // 求人リスト描画
@@ -521,7 +569,8 @@
       const minimumSalary = Number(document.getElementById("minimumSalary").value) || 0;
       const sortBy = document.getElementById("jobSort").value;
       const savedProfile = localStorage.getItem("seeker_profile");
-      const preferredLocation = savedProfile ? JSON.parse(savedProfile).location || "" : "";
+      const seekerProfile = savedProfile ? JSON.parse(savedProfile) : null;
+      const preferredLocation = activeTab === "seeker" && seekerProfile ? seekerProfile.location || "" : "";
 
       const filteredJobs = cachedJobs
         .filter(job =>
@@ -583,11 +632,13 @@
 
           <div class="flex justify-between items-center border-t pt-2 mt-2">
             <span class="text-xs text-blue-600 font-bold hover:underline">📱 ワンタップ連絡・詳細 →</span>
-            <div class="flex gap-2">
-              <button onclick="event.stopPropagation(); editJob(${job.id})" class="text-xs text-blue-600 px-2 py-1">編集</button>
-              <button onclick="event.stopPropagation(); toggleJobClosed(${job.id})" class="text-xs text-gray-600 px-2 py-1">${job.is_closed ? '募集再開' : '募集終了'}</button>
-              <button onclick="event.stopPropagation(); deleteJob(${job.id})" class="text-xs text-red-500 px-2 py-1">削除</button>
-            </div>
+            ${activeTab === "employer" ? `
+              <div class="flex gap-2">
+                <button onclick="event.stopPropagation(); editJob(${job.id})" class="text-xs text-blue-600 px-2 py-1">編集</button>
+                <button onclick="event.stopPropagation(); toggleJobClosed(${job.id})" class="text-xs text-gray-600 px-2 py-1">${job.is_closed ? '募集再開' : '募集終了'}</button>
+                <button onclick="event.stopPropagation(); deleteJob(${job.id})" class="text-xs text-red-500 px-2 py-1">削除</button>
+              </div>
+            ` : ""}
           </div>
         </div>
       `).join("");
