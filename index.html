@@ -12,23 +12,23 @@
 <body class="bg-gray-100 min-h-screen text-gray-800 pb-20 font-sans">
 
   <!-- ヘッダー -->
-  <header class="bg-orange-600 text-white shadow">
+  <header class="bg-blue-600 text-white shadow">
     <div class="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
       <div>
         <h1 class="text-xl font-bold tracking-wide">👷 現場直結！マッチング</h1>
-        <p class="text-xs text-orange-100">クラウド同期・現場特化型</p>
+        <p class="text-xs text-blue-100">クラウド同期・現場特化型</p>
       </div>
-      <span class="text-xs bg-orange-700 px-3 py-1.5 rounded-full font-bold">クラウド版</span>
+      <span class="text-xs bg-blue-700 px-3 py-1.5 rounded-full font-bold">クラウド版</span>
     </div>
   </header>
 
   <!-- タブ切替 -->
   <div class="max-w-5xl mx-auto px-4 mt-4">
     <div class="flex border-b border-gray-300 bg-white rounded-t-lg shadow-sm">
-      <button id="tabEmployerBtn" onclick="switchTab('employer')" class="flex-1 py-3.5 font-bold text-sm md:text-base border-b-2 border-orange-600 text-orange-600 focus:outline-none transition">
+      <button id="tabEmployerBtn" onclick="switchTab('employer')" class="flex-1 py-3.5 font-bold text-sm md:text-base border-b-2 border-blue-600 text-blue-600 focus:outline-none transition">
         🏢 親方・企業向け（求人投稿）
       </button>
-      <button id="tabSeekerBtn" onclick="switchTab('seeker')" class="flex-1 py-3.5 font-bold text-sm md:text-base border-b-2 border-transparent text-gray-500 hover:text-orange-600 focus:outline-none transition">
+      <button id="tabSeekerBtn" onclick="switchTab('seeker')" class="flex-1 py-3.5 font-bold text-sm md:text-base border-b-2 border-transparent text-gray-500 hover:text-blue-600 focus:outline-none transition">
         👷 職人・求職者向け（即戦力カード）
       </button>
     </div>
@@ -39,33 +39,43 @@
     <!-- 左側①：親方・企業向け 求人作成 -->
     <section id="employerSection" class="space-y-6">
       <div class="bg-white p-6 rounded-lg shadow-md">
-        <h2 class="text-lg font-bold mb-4 border-b pb-2 text-orange-600">現場求人のクラウド投稿</h2>
+        <h2 id="jobFormHeading" class="text-lg font-bold mb-4 border-b pb-2 text-blue-600">現場求人のクラウド投稿</h2>
         
         <div class="space-y-4">
           <div>
             <label class="block text-sm font-medium mb-1">職種・現場名 <span class="text-red-500">*</span></label>
-            <input type="text" id="jobTitle" placeholder="例: 解体現場の作業員・ダンプ運転手" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-orange-500 outline-none">
+            <input type="text" id="jobTitle" placeholder="例: 解体現場の作業員・ダンプ運転手" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-1">勤務地</label>
+            <input type="text" id="jobLocation" placeholder="例: 東京都新宿区 / 神奈川県横浜市" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
           </div>
 
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-medium mb-1">募集人数</label>
-              <input type="number" id="jobCapacity" value="2" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-orange-500 outline-none" min="1">
+              <select id="jobCapacity" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                <option value="1">1〜3名（少人数・ピンポイント）</option>
+                <option value="1" selected>1〜3名（少人数・ピンポイント）</option>
+                <option value="7">7〜10名（大規模）</option>
+                <option value="11">11名以上（超大型・大量募集）</option>
+              </select>
             </div>
             <div>
               <label class="block text-sm font-medium mb-1">給与（日給・月給）</label>
-              <input type="text" id="jobSalary" placeholder="例: 日給 15,000円〜" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-orange-500 outline-none">
+              <input type="text" id="jobSalary" placeholder="例: 日給 15,000円〜" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
             </div>
           </div>
 
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-medium mb-1">連絡用電話番号 <span class="text-red-500">*</span></label>
-              <input type="text" id="jobPhone" placeholder="例: 09012345678" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-orange-500 outline-none">
+              <input type="text" id="jobPhone" placeholder="例: 09012345678" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
             </div>
             <div>
               <label class="block text-sm font-medium mb-1">LINE ID / 公式URL (任意)</label>
-              <input type="text" id="jobLine" placeholder="例: line_id_123" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-orange-500 outline-none">
+              <input type="text" id="jobLine" placeholder="例: line_id_123" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
             </div>
           </div>
 
@@ -90,11 +100,14 @@
 
           <div>
             <label class="block text-sm font-medium mb-1">仕事内容の補足</label>
-            <textarea id="jobDuties" rows="2" placeholder="例: 都内の木造解体現場。資材の運び出しと簡単な手元作業です。" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-orange-500 outline-none"></textarea>
+            <textarea id="jobDuties" rows="2" placeholder="例: 都内の木造解体現場。資材の運び出しと簡単な手元作業です。" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
           </div>
 
-          <button onclick="publishJob()" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-3.5 rounded-lg transition shadow text-base">
+          <button id="jobSubmitButton" onclick="publishJob()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-lg transition shadow text-base">
             🔥 クラウドに求人を今すぐ掲載する
+          </button>
+          <button id="cancelEditButton" onclick="cancelJobEdit()" class="w-full border border-gray-300 text-gray-700 font-bold py-2.5 rounded-lg hover:bg-gray-50 hidden">
+            編集をキャンセル
           </button>
         </div>
       </div>
@@ -102,17 +115,17 @@
 
     <!-- 左側②：職人向け 即戦力プロフィール -->
     <section id="seekerSection" class="bg-white p-6 rounded-lg shadow-md h-fit hidden">
-      <h2 class="text-lg font-bold mb-4 border-b pb-2 text-green-600">職人Webカード（一発応募用）</h2>
+      <h2 class="text-lg font-bold mb-4 border-b pb-2 text-blue-600">職人Webカード（一発応募用）</h2>
       
       <div class="space-y-4">
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="block text-sm font-medium mb-1">お名前 / 通称 <span class="text-red-500">*</span></label>
-            <input type="text" id="seekerName" placeholder="例: 職人 太郎" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-green-500 outline-none">
+            <input type="text" id="seekerName" placeholder="例: 職人 太郎" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
           </div>
           <div>
             <label class="block text-sm font-medium mb-1">携帯電話番号</label>
-            <input type="text" id="seekerPhone" placeholder="例: 090-XXXX-XXXX" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-green-500 outline-none">
+            <input type="text" id="seekerPhone" placeholder="例: 090-XXXX-XXXX" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
           </div>
         </div>
 
@@ -152,12 +165,12 @@
           </div>
         </div>
 
-        <button onclick="saveSeekerProfile()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition shadow text-base">
+        <button onclick="saveSeekerProfile()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition shadow text-base">
           ✅ 職人プロフィールを保存する
         </button>
       </div>
 
-      <div id="profileSavedMessage" class="mt-4 p-3 bg-green-50 border border-green-200 text-green-800 rounded text-xs hidden">
+      <div id="profileSavedMessage" class="mt-4 p-3 bg-blue-50 border border-blue-200 text-blue-800 rounded text-xs hidden">
         👍 保存完了！右側の求人カードから「ワンタップ応募」が使えます！
       </div>
     </section>
@@ -165,13 +178,13 @@
     <!-- 右側：掲載中の現場求人一覧 -->
     <section class="bg-white p-6 rounded-lg shadow-md h-fit">
       <div class="flex justify-between items-center mb-4 border-b pb-2">
-        <h2 class="text-lg font-bold text-gray-800">募集中の現場一覧 (クラウド)</h2>
+        <h2 class="text-lg font-bold text-gray-800">現場求人一覧 (クラウド)</h2>
         <span id="jobCount" class="text-xs bg-gray-200 text-gray-700 px-2.5 py-1 rounded-full font-bold">0件</span>
       </div>
 
       <!-- 検索バー -->
       <div class="mb-4">
-        <input type="text" id="searchKeyword" oninput="renderJobList()" placeholder="🔍 タグや職種で検索 (例: 日払い, 玉掛け)..." class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-orange-500 outline-none">
+        <input type="text" id="searchKeyword" oninput="renderJobList()" placeholder="🔍 職種・勤務地・タグで検索 (例: 横浜, 日払い)..." class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
       </div>
 
       <div id="jobList" class="space-y-4 max-h-[600px] overflow-y-auto pr-1">
@@ -188,8 +201,10 @@
       <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl font-bold">✕</button>
 
       <div class="border-b pb-3 mb-4">
-        <span id="modalCapacity" class="inline-block bg-orange-100 text-orange-800 text-xs px-2.5 py-0.5 rounded font-bold mb-2"></span>
+        <span id="modalCapacity" class="inline-block bg-blue-100 text-blue-800 text-xs px-2.5 py-0.5 rounded font-bold mb-2"></span>
+        <span id="modalClosed" class="inline-block bg-gray-200 text-gray-700 text-xs px-2.5 py-0.5 rounded font-bold mb-2 hidden">募集終了</span>
         <h2 id="modalTitle" class="text-xl font-bold text-gray-800"></h2>
+        <p id="modalLocation" class="text-sm text-gray-600 mt-1"></p>
         <p id="modalSalary" class="text-base font-bold text-red-600 mt-1"></p>
       </div>
 
@@ -206,7 +221,7 @@
           <span>💬 LINEで親方に直接メッセージ</span>
         </button>
 
-        <button onclick="applyViaSMS()" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3.5 rounded-lg transition shadow text-sm flex items-center justify-center space-x-2">
+        <button onclick="applyViaSMS()" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-3.5 rounded-lg transition shadow text-sm flex items-center justify-center space-x-2">
           <span>📱 SMS (ショートメッセージ) で直接応募</span>
         </button>
 
@@ -227,6 +242,7 @@
 
     let cachedJobs = [];
     let selectedJob = null;
+    let editingJobId = null;
 
     document.addEventListener("DOMContentLoaded", () => {
       fetchJobs();
@@ -242,13 +258,13 @@
       if (tab === 'employer') {
         employerSection.classList.remove("hidden");
         seekerSection.classList.add("hidden");
-        tabEmployerBtn.className = "flex-1 py-3.5 font-bold text-sm md:text-base border-b-2 border-orange-600 text-orange-600 focus:outline-none transition";
-        tabSeekerBtn.className = "flex-1 py-3.5 font-bold text-sm md:text-base border-b-2 border-transparent text-gray-500 hover:text-orange-600 focus:outline-none transition";
+        tabEmployerBtn.className = "flex-1 py-3.5 font-bold text-sm md:text-base border-b-2 border-blue-600 text-blue-600 focus:outline-none transition";
+        tabSeekerBtn.className = "flex-1 py-3.5 font-bold text-sm md:text-base border-b-2 border-transparent text-gray-500 hover:text-blue-600 focus:outline-none transition";
       } else {
         employerSection.classList.add("hidden");
         seekerSection.classList.remove("hidden");
-        tabSeekerBtn.className = "flex-1 py-3.5 font-bold text-sm md:text-base border-b-2 border-green-600 text-green-600 focus:outline-none transition";
-        tabEmployerBtn.className = "flex-1 py-3.5 font-bold text-sm md:text-base border-b-2 border-transparent text-gray-500 hover:text-green-600 focus:outline-none transition";
+        tabSeekerBtn.className = "flex-1 py-3.5 font-bold text-sm md:text-base border-b-2 border-blue-600 text-blue-600 focus:outline-none transition";
+        tabEmployerBtn.className = "flex-1 py-3.5 font-bold text-sm md:text-base border-b-2 border-transparent text-gray-500 hover:text-blue-600 focus:outline-none transition";
       }
     }
 
@@ -267,9 +283,10 @@
       renderJobList();
     }
 
-    // 求人投稿（Supabaseへ保存）
+    // 求人投稿・編集（Supabaseへ保存）
     async function publishJob() {
       const title = document.getElementById("jobTitle").value.trim();
+      const location = document.getElementById("jobLocation").value.trim();
       const salary = document.getElementById("jobSalary").value.trim();
       const phone = document.getElementById("jobPhone").value.trim();
       const line = document.getElementById("jobLine").value.trim();
@@ -283,29 +300,84 @@
         return;
       }
 
-      const newJob = {
-        title, salary, phone, line, duties, capacity,
+      const jobData = {
+        title, location, salary, phone, line, duties, capacity,
         tags: checkedTags
       };
 
-      const { error } = await supabaseClient
-        .from('published_jobs')
-        .insert([newJob]);
+      const query = supabaseClient.from('published_jobs');
+      const { error } = editingJobId
+        ? await query.update(jobData).eq('id', editingJobId)
+        : await query.insert([jobData]);
 
       if (error) {
-        alert("投稿に失敗しました: " + error.message);
+        alert(`${editingJobId ? "更新" : "投稿"}に失敗しました: ${error.message}`);
         return;
       }
 
+      const wasEditing = editingJobId !== null;
+      cancelJobEdit();
+
+      alert(wasEditing ? "求人情報を更新しました！" : "クラウド上に求人を掲載しました！");
+      await fetchJobs();
+    }
+
+    function editJob(id) {
+      const job = cachedJobs.find(item => item.id === id);
+      if (!job) return;
+
+      editingJobId = id;
+      document.getElementById("jobTitle").value = job.title || "";
+      document.getElementById("jobLocation").value = job.location || "";
+      document.getElementById("jobSalary").value = job.salary || "";
+      document.getElementById("jobPhone").value = job.phone || "";
+      document.getElementById("jobLine").value = job.line || "";
+      document.getElementById("jobDuties").value = job.duties || "";
+      document.getElementById("jobCapacity").value = getCapacityOptionValue(job.capacity);
+      document.querySelectorAll('input[name="jobTag"]').forEach(cb => {
+        cb.checked = Array.isArray(job.tags) && job.tags.includes(cb.value);
+      });
+      document.getElementById("jobFormHeading").innerText = "求人情報を編集";
+      document.getElementById("jobSubmitButton").innerText = "変更を保存";
+      document.getElementById("cancelEditButton").classList.remove("hidden");
+      document.getElementById("employerSection").scrollIntoView({ behavior: "smooth" });
+    }
+
+    function cancelJobEdit() {
+      editingJobId = null;
       document.getElementById("jobTitle").value = "";
+      document.getElementById("jobLocation").value = "";
       document.getElementById("jobSalary").value = "";
       document.getElementById("jobPhone").value = "";
       document.getElementById("jobLine").value = "";
       document.getElementById("jobDuties").value = "";
+      document.getElementById("jobCapacity").value = "1";
       document.querySelectorAll('input[name="jobTag"]').forEach(cb => cb.checked = false);
+      document.getElementById("jobFormHeading").innerText = "現場求人のクラウド投稿";
+      document.getElementById("jobSubmitButton").innerText = "🔥 クラウドに求人を今すぐ掲載する";
+      document.getElementById("cancelEditButton").classList.add("hidden");
+    }
 
-      alert("クラウド上に求人を掲載しました！");
-      fetchJobs();
+    async function toggleJobClosed(id) {
+      const job = cachedJobs.find(item => item.id === id);
+      if (!job) return;
+
+      const isClosed = Boolean(job.is_closed);
+      const action = isClosed ? "募集を再開" : "募集を終了";
+      if (!confirm(`「${job.title}」の${action}をしますか？`)) return;
+
+      const { error } = await supabaseClient
+        .from('published_jobs')
+        .update({ is_closed: !isClosed })
+        .eq('id', id);
+
+      if (error) {
+        alert(`${action}に失敗しました: ${error.message}`);
+        return;
+      }
+
+      await fetchJobs();
+      if (selectedJob && selectedJob.id === id) openModal(id);
     }
 
     // 求職者プロフィール保存（ローカル）
@@ -352,7 +424,8 @@
       const keyword = document.getElementById("searchKeyword").value.toLowerCase();
 
       const filteredJobs = cachedJobs.filter(job => 
-        job.title.toLowerCase().includes(keyword) || 
+        (job.title || "").toLowerCase().includes(keyword) ||
+        (job.location || "").toLowerCase().includes(keyword) ||
         (job.tags && job.tags.some(t => t.toLowerCase().includes(keyword)))
       );
 
@@ -364,21 +437,30 @@
       }
 
       jobList.innerHTML = filteredJobs.map(job => `
-        <div onclick="openModal(${job.id})" class="border rounded-lg p-4 bg-white shadow-sm hover:shadow-md transition cursor-pointer relative border-l-4 ${job.capacity > 0 ? 'border-l-orange-500' : 'border-l-gray-400 opacity-75'}">
+        <div onclick="openModal(${job.id})" class="border rounded-lg p-4 bg-white shadow-sm hover:shadow-md transition cursor-pointer relative border-l-4 ${job.is_closed || job.capacity <= 0 ? 'border-l-gray-400 opacity-75' : 'border-l-blue-500'}">
           <div class="flex justify-between items-start mb-1">
             <h3 class="font-bold text-gray-800 text-base">${escapeHtml(job.title)}</h3>
             <span class="text-xs text-gray-400">ID: ${job.id}</span>
           </div>
+          <div class="flex flex-wrap gap-1 mb-2">
+            ${job.is_closed ? '<span class="bg-gray-200 text-gray-700 text-[10px] px-1.5 py-0.5 rounded font-bold">募集終了</span>' : ''}
+            <span class="bg-blue-100 text-blue-800 text-[10px] px-1.5 py-0.5 rounded font-bold">募集人数: ${formatJobCapacity(job.capacity)}</span>
+          </div>
+          ${job.location ? `<p class="text-sm text-gray-600 mb-2">📍 ${escapeHtml(job.location)}</p>` : ''}
           <p class="text-sm font-bold text-red-600 mb-2">${escapeHtml(job.salary || '給与応相談')}</p>
           
           <!-- タグ表示 -->
           <div class="flex flex-wrap gap-1 mb-3">
-            ${job.tags ? job.tags.map(t => `<span class="bg-orange-50 text-orange-700 border border-orange-200 text-[10px] px-1.5 py-0.5 rounded font-medium">${escapeHtml(t)}</span>`).join("") : ''}
+            ${job.tags ? job.tags.map(t => `<span class="bg-blue-50 text-blue-700 border border-blue-200 text-[10px] px-1.5 py-0.5 rounded font-medium">${escapeHtml(t)}</span>`).join("") : ''}
           </div>
 
           <div class="flex justify-between items-center border-t pt-2 mt-2">
-            <span class="text-xs text-orange-600 font-bold hover:underline">📱 ワンタップ連絡・詳細 →</span>
-            <button onclick="event.stopPropagation(); deleteJob(${job.id})" class="text-xs text-red-500 px-2 py-1">削除</button>
+            <span class="text-xs text-blue-600 font-bold hover:underline">📱 ワンタップ連絡・詳細 →</span>
+            <div class="flex gap-2">
+              <button onclick="event.stopPropagation(); editJob(${job.id})" class="text-xs text-blue-600 px-2 py-1">編集</button>
+              <button onclick="event.stopPropagation(); toggleJobClosed(${job.id})" class="text-xs text-gray-600 px-2 py-1">${job.is_closed ? '募集再開' : '募集終了'}</button>
+              <button onclick="event.stopPropagation(); deleteJob(${job.id})" class="text-xs text-red-500 px-2 py-1">削除</button>
+            </div>
           </div>
         </div>
       `).join("");
@@ -390,19 +472,24 @@
       if (!selectedJob) return;
 
       document.getElementById("modalTitle").innerText = selectedJob.title;
+      document.getElementById("modalLocation").innerText = selectedJob.location ? `📍 ${selectedJob.location}` : "";
       document.getElementById("modalSalary").innerText = selectedJob.salary || "給与応相談";
-      document.getElementById("modalCapacity").innerText = `残り募集: ${selectedJob.capacity} 名`;
+      document.getElementById("modalCapacity").innerText = `募集人数: ${formatJobCapacity(selectedJob.capacity)}`;
       document.getElementById("modalDuties").innerText = selectedJob.duties || "特記事項なし";
+      document.getElementById("modalClosed").classList.toggle("hidden", !selectedJob.is_closed);
 
       const btnLine = document.getElementById("btnLine");
-      if (selectedJob.line) {
+      if (selectedJob.line && !selectedJob.is_closed) {
         btnLine.classList.remove("hidden");
       } else {
         btnLine.classList.add("hidden");
       }
+      document.querySelectorAll("#jobModal button[onclick^='applyVia']:not(#btnLine)").forEach(button => {
+        button.classList.toggle("hidden", Boolean(selectedJob.is_closed));
+      });
 
       const tagsContainer = document.getElementById("modalTags");
-      tagsContainer.innerHTML = selectedJob.tags ? selectedJob.tags.map(t => `<span class="bg-orange-100 text-orange-800 text-xs px-2 py-0.5 rounded font-bold">${escapeHtml(t)}</span>`).join("") : '';
+      tagsContainer.innerHTML = selectedJob.tags ? selectedJob.tags.map(t => `<span class="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded font-bold">${escapeHtml(t)}</span>`).join("") : '';
 
       document.getElementById("jobModal").classList.remove("hidden");
     }
@@ -443,6 +530,23 @@
     function closeModal() {
       document.getElementById("jobModal").classList.add("hidden");
       selectedJob = null;
+    }
+
+    function formatJobCapacity(capacity) {
+      const count = Number.parseInt(capacity, 10);
+      if (!Number.isFinite(count) || count < 1) return "1〜3名（少人数・ピンポイント）";
+      if (count <= 3) return "1〜3名（少人数・ピンポイント）";
+      if (count <= 6) return "4〜6名（チーム・中規模）";
+      if (count <= 10) return "7〜10名（大規模）";
+      return "11名以上（超大型・大量募集）";
+    }
+
+    function getCapacityOptionValue(capacity) {
+      const count = Number.parseInt(capacity, 10);
+      if (!Number.isFinite(count) || count <= 3) return "1";
+      if (count <= 6) return "4";
+      if (count <= 10) return "7";
+      return "11";
     }
 
     // Supabaseから求人を削除
