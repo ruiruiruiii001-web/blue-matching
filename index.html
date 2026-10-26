@@ -40,8 +40,8 @@
     <!-- 左側①：親方・企業向け 求人作成 -->
     <section id="employerSection" class="space-y-6">
       <div id="employerAuthPanel" class="bg-white p-6 rounded-lg shadow-md">
-        <h2 class="text-lg font-bold mb-2 text-blue-600">事業者アカウント</h2>
-        <p class="text-sm text-gray-600 mb-4">求人の投稿・管理にはログインが必要です。</p>
+        <h2 class="text-lg font-bold mb-2 text-blue-600">アカウント</h2>
+        <p class="text-sm text-gray-600 mb-4">求職者プロフィールの保存・応募履歴・求人の投稿にはログインが必要です。</p>
         <div id="employerLoggedOut" class="space-y-3">
           <div>
             <label for="employerEmail" class="block text-sm font-medium mb-1">メールアドレス</label>
@@ -157,7 +157,12 @@
 
     <!-- 左側②：職人向け 即戦力プロフィール -->
     <section id="seekerSection" class="bg-white p-6 rounded-lg shadow-md h-fit hidden">
-      <h2 class="text-lg font-bold mb-4 border-b pb-2 text-blue-600">職人Webカード（一発応募用）</h2>
+      <div id="seekerAccountPrompt" class="mb-4 p-4 rounded border border-blue-200 bg-blue-50">
+        <p class="text-sm text-blue-900">プロフィール・お気に入り・応募履歴をアカウントに保存するにはログインしてください。</p>
+        <button onclick="switchTab('employer')" class="mt-2 text-sm font-bold text-blue-700 underline">ログイン / アカウント登録へ</button>
+      </div>
+
+      <h2 class="text-lg font-bold mb-4 border-b pb-2 text-blue-600">マイプロフィール</h2>
       
       <div class="space-y-4">
         <div class="grid grid-cols-2 gap-4">
@@ -245,7 +250,24 @@
       </div>
 
       <div id="profileSavedMessage" class="mt-4 p-3 bg-blue-50 border border-blue-200 text-blue-800 rounded text-xs hidden">
-        👍 保存完了！右側の求人カードから「ワンタップ応募」が使えます！
+        👍 プロフィールをアカウントに保存しました。
+      </div>
+
+      <div id="seekerDashboard" class="mt-6 space-y-4 hidden">
+        <h2 class="text-lg font-bold border-b pb-2 text-blue-600">マイページ</h2>
+        <p id="accountDashboardStatus" role="status" aria-live="polite" class="hidden text-sm text-red-600"></p>
+        <section class="rounded border p-3">
+          <h3 class="font-bold text-sm mb-2">お気に入り求人</h3>
+          <div id="dashboardFavorites" class="space-y-2 text-sm"></div>
+        </section>
+        <section class="rounded border p-3">
+          <h3 class="font-bold text-sm mb-2">自分の掲載求人</h3>
+          <div id="dashboardJobs" class="space-y-2 text-sm"></div>
+        </section>
+        <section class="rounded border p-3">
+          <h3 class="font-bold text-sm mb-2">応募履歴</h3>
+          <div id="dashboardApplications" class="space-y-2 text-sm"></div>
+        </section>
       </div>
     </section>
 
@@ -266,6 +288,10 @@
         <label class="flex items-center gap-2 text-sm text-gray-700">
           <input type="checkbox" id="openJobsOnly" onchange="renderJobList()" class="rounded text-blue-600 focus:ring-blue-500">
           募集中のみ表示
+        </label>
+        <label class="flex items-center gap-2 text-sm text-gray-700">
+          <input type="checkbox" id="favoritesOnly" onchange="renderJobList()" class="rounded text-blue-600 focus:ring-blue-500">
+          お気に入りのみ表示
         </label>
         <label class="text-sm text-gray-700">
           <span class="block mb-1">勤務地</span>
@@ -334,6 +360,7 @@
         <h2 id="modalTitle" class="text-xl font-bold text-gray-800"></h2>
         <p id="modalLocation" class="text-sm text-gray-600 mt-1"></p>
         <p id="modalSalary" class="text-base font-bold text-red-600 mt-1"></p>
+        <button id="modalFavoriteButton" type="button" onclick="toggleFavorite(selectedJob.id)" class="mt-3 border border-amber-300 text-amber-700 hover:bg-amber-50 text-sm font-bold px-3 py-1.5 rounded-lg"></button>
       </div>
 
       <!-- タグ一覧 -->
@@ -356,6 +383,26 @@
         <button onclick="applyViaPhone()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition shadow text-sm flex items-center justify-center space-x-2">
           <span>📞 親方に直接電話をかける</span>
         </button>
+      </div>
+
+      <div class="border-t mt-4 pt-4">
+        <h3 class="font-bold text-sm mb-2">サイトから応募して履歴に残す</h3>
+        <p id="applicationLoginPrompt" class="text-xs text-gray-600">応募履歴を保存するにはログインが必要です。職人・求職者向けタブの「ログイン / アカウント登録へ」からログインしてください。</p>
+        <form id="jobApplicationForm" class="hidden mt-3 space-y-3" onsubmit="submitJobApplication(event)">
+          <label class="block text-sm font-medium">お名前
+            <input id="applicationName" maxlength="100" required class="mt-1 w-full border rounded px-3 py-2 text-sm">
+          </label>
+          <label class="block text-sm font-medium">電話番号
+            <input id="applicationPhone" type="tel" maxlength="20" required placeholder="09012345678" class="mt-1 w-full border rounded px-3 py-2 text-sm">
+          </label>
+          <label class="block text-sm font-medium">応募メッセージ（任意）
+            <textarea id="applicationMessage" maxlength="1000" rows="3" class="mt-1 w-full border rounded px-3 py-2 text-sm" placeholder="経験や資格、親方へのメッセージ"></textarea>
+          </label>
+          <p class="text-xs text-gray-500">送信すると、お名前・電話番号・プロフィールの経験年数と資格が求人投稿者のマイページに保存されます。現在、通知メールは送信されません。</p>
+          <p id="applicationStatus" role="status" aria-live="polite" class="text-xs text-gray-600"></p>
+          <button id="applicationSubmitButton" type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg disabled:opacity-50">応募を送信する</button>
+        </form>
+        <p id="applicationSuccess" role="status" aria-live="polite" class="hidden mt-3 text-sm text-green-700">応募を送信しました。マイページの応募履歴から確認できます。</p>
       </div>
 
       <div class="border-t mt-4 pt-4">
@@ -395,6 +442,11 @@
 
     let cachedJobs = [];
     let selectedJob = null;
+    let favoriteJobIds = [];
+    let seekerProfileData = null;
+    let accountApplications = [];
+    let accountDataUserId = null;
+    let loadingAccountUserId = null;
     let editingJobId = null;
     let activeTab = "employer";
     let currentUser = null;
@@ -405,7 +457,6 @@
 
     document.addEventListener("DOMContentLoaded", () => {
       fetchJobs();
-      loadSeekerProfile();
       initializeEmployerAuth();
       initializeEmployerTurnstile();
     });
@@ -578,6 +629,7 @@
     }
 
     function updateEmployerAuth(session) {
+      const previousUserId = currentUser?.id || null;
       currentUser = session?.user || null;
       document.getElementById("employerLoggedOut").classList.toggle("hidden", Boolean(currentUser));
       const loggedInPanel = document.getElementById("employerLoggedIn");
@@ -585,8 +637,24 @@
       loggedInPanel.classList.toggle("flex", Boolean(currentUser));
       document.getElementById("employerJobForm").classList.toggle("hidden", !currentUser);
       document.getElementById("employerAccountEmail").innerText = currentUser?.email || "";
+      document.getElementById("seekerAccountPrompt").classList.toggle("hidden", Boolean(currentUser));
+      document.getElementById("seekerDashboard").classList.toggle("hidden", !currentUser);
+      if (previousUserId !== (currentUser?.id || null)) {
+        accountDataUserId = null;
+        loadingAccountUserId = null;
+        favoriteJobIds = [];
+        seekerProfileData = null;
+        accountApplications = [];
+        clearSeekerProfileForm();
+      }
       if (!currentUser && editingJobId !== null) cancelJobEdit();
       renderJobList();
+      if (currentUser && accountDataUserId !== currentUser.id) {
+        const user = currentUser;
+        setTimeout(() => loadAccountData(user), 0);
+      } else {
+        renderAccountDashboard();
+      }
     }
 
     function setAuthMessage(message, isError = false) {
@@ -700,6 +768,7 @@
       }
       cachedJobs = data || [];
       renderJobList();
+      renderAccountDashboard();
     }
 
     // 求人投稿・編集（Supabaseへ保存）
@@ -859,8 +928,13 @@
       if (selectedJob && selectedJob.id === id) openModal(id);
     }
 
-    // 求職者プロフィール保存（ローカル）
-    function saveSeekerProfile() {
+    // 求職者プロフィール保存
+    async function saveSeekerProfile() {
+      if (!currentUser) {
+        alert("プロフィールをアカウントに保存するにはログインしてください。");
+        return;
+      }
+
       const checkedLic = Array.from(document.querySelectorAll('input[name="seekerLic"]:checked')).map(cb => cb.value);
       const preferredPayType = document.getElementById("seekerPayType").value;
       const minimumSalaryValue = document.getElementById("seekerMinimumSalary").value;
@@ -893,16 +967,36 @@
         return;
       }
 
-      localStorage.setItem("seeker_profile", JSON.stringify(profile));
+      const { error } = await supabaseClient
+        .from("seeker_profiles")
+        .upsert({
+          user_id: currentUser.id,
+          name: profile.name,
+          phone: profile.phone || null,
+          job_type: profile.jobType,
+          location: profile.location,
+          pay_type: profile.payType || null,
+          minimum_salary: profile.minimumSalary,
+          licenses: profile.licenses,
+          exp_years: profile.expYears,
+          stamina: profile.stamina,
+          updated_at: new Date().toISOString()
+        }, { onConflict: "user_id" });
+      if (error) {
+        alert(`プロフィールを保存できませんでした: ${error.message}`);
+        return;
+      }
+
+      seekerProfileData = profile;
       applySeekerSalaryPreferences(profile);
       document.getElementById("profileSavedMessage").classList.remove("hidden");
+      accountDataUserId = currentUser.id;
+      renderAccountDashboard();
       renderJobList();
     }
 
-    function loadSeekerProfile() {
-      const saved = localStorage.getItem("seeker_profile");
-      if (!saved) return;
-      const profile = JSON.parse(saved);
+    function loadSeekerProfile(profile) {
+      if (!profile) return;
       document.getElementById("seekerName").value = profile.name || "";
       document.getElementById("seekerPhone").value = profile.phone || "";
       document.getElementById("seekerJobType").value = profile.jobType || "";
@@ -920,9 +1014,151 @@
       }
     }
 
+    function clearSeekerProfileForm() {
+      seekerProfileData = null;
+      document.getElementById("seekerName").value = "";
+      document.getElementById("seekerPhone").value = "";
+      document.getElementById("seekerJobType").value = "";
+      document.getElementById("seekerLocation").value = "";
+      document.getElementById("seekerPayType").value = "";
+      document.getElementById("seekerMinimumSalary").value = "";
+      document.querySelectorAll('input[name="seekerLic"]').forEach(input => input.checked = false);
+      document.getElementById("seekerExpYears").value = "未経験（やる気あり）";
+      document.getElementById("seekerStamina").value = "★★★★★ (自信あり)";
+      document.getElementById("profileSavedMessage").classList.add("hidden");
+      applySeekerSalaryPreferences({});
+    }
+
     function applySeekerSalaryPreferences(profile) {
       document.getElementById("salaryTypeFilter").value = profile.payType || "";
       document.getElementById("minimumSalary").value = profile.minimumSalary ?? "";
+    }
+
+    async function loadAccountData(user) {
+      if (!user || currentUser?.id !== user.id || loadingAccountUserId === user.id) return;
+      loadingAccountUserId = user.id;
+      const status = document.getElementById("accountDashboardStatus");
+      status.classList.add("hidden");
+      const [profileResult, favoritesResult, applicationsResult] = await Promise.all([
+        supabaseClient.from("seeker_profiles").select("*").eq("user_id", user.id).maybeSingle(),
+        supabaseClient.from("job_favorites").select("job_id").eq("user_id", user.id),
+        supabaseClient.from("job_applications").select("*").order("created_at", { ascending: false })
+      ]);
+      if (currentUser?.id !== user.id) {
+        loadingAccountUserId = null;
+        return;
+      }
+      const failedResult = [profileResult, favoritesResult, applicationsResult].find(result => result.error);
+      if (failedResult) {
+        loadingAccountUserId = null;
+        status.innerText = `マイページを読み込めませんでした。データベース設定を確認してください: ${failedResult.error.message}`;
+        status.classList.remove("hidden");
+        console.error("マイページ読み込みエラー:", failedResult.error);
+        return;
+      }
+
+      const profileRow = profileResult.data;
+      seekerProfileData = profileRow ? {
+        name: profileRow.name,
+        phone: profileRow.phone || "",
+        jobType: profileRow.job_type || "",
+        location: profileRow.location || "",
+        payType: profileRow.pay_type || "",
+        minimumSalary: profileRow.minimum_salary,
+        licenses: profileRow.licenses || [],
+        expYears: profileRow.exp_years || "",
+        stamina: profileRow.stamina || ""
+      } : null;
+      favoriteJobIds = favoritesResult.data.map(favorite => String(favorite.job_id));
+      accountApplications = applicationsResult.data || [];
+      loadSeekerProfile(seekerProfileData);
+      accountDataUserId = user.id;
+      loadingAccountUserId = null;
+      renderAccountDashboard();
+      renderJobList();
+    }
+
+    function renderAccountDashboard() {
+      if (!currentUser || accountDataUserId !== currentUser.id) return;
+
+      const favoriteJobs = cachedJobs.filter(job => isFavorite(job.id));
+      const favoriteContainer = document.getElementById("dashboardFavorites");
+      favoriteContainer.innerHTML = favoriteJobs.length
+        ? favoriteJobs.map(job => `
+          <div class="flex items-center justify-between gap-2">
+            <button type="button" onclick="openModal(${job.id})" class="text-left text-blue-700 hover:underline">${escapeHtml(job.title)}</button>
+            <button type="button" onclick="toggleFavorite('${String(job.id)}')" class="shrink-0 text-xs text-amber-700">★ 解除</button>
+          </div>
+        `).join("")
+        : '<p class="text-xs text-gray-500">お気に入り求人はまだありません。</p>';
+
+      const ownedJobs = cachedJobs.filter(job => job.owner_id === currentUser.id);
+      const jobsContainer = document.getElementById("dashboardJobs");
+      jobsContainer.innerHTML = ownedJobs.length
+        ? ownedJobs.map(job => `
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-sm">${escapeHtml(job.title)}${job.is_closed ? ' <span class="text-xs text-gray-500">（募集終了）</span>' : ""}</span>
+            <button type="button" onclick="switchTab('employer'); editJob(${job.id})" class="shrink-0 text-xs text-blue-700 underline">管理</button>
+          </div>
+        `).join("")
+        : '<p class="text-xs text-gray-500">自分が掲載した求人はまだありません。</p>';
+
+      const submitted = accountApplications.filter(application => application.applicant_id === currentUser.id);
+      const received = accountApplications.filter(application => {
+        const job = cachedJobs.find(item => String(item.id) === application.job_id);
+        return job?.owner_id === currentUser.id;
+      });
+      const applicationsContainer = document.getElementById("dashboardApplications");
+      applicationsContainer.innerHTML = `
+        <h4 class="text-xs font-bold text-gray-600">自分が応募した求人</h4>
+        ${submitted.length
+          ? submitted.map(application => `
+            <div class="border-b py-2">
+              <p class="font-medium">${escapeHtml(application.job_title)}</p>
+              <p class="text-xs text-gray-500">${formatDashboardDate(application.created_at)} ・ ${formatApplicationStatus(application.status)}</p>
+            </div>
+          `).join("")
+          : '<p class="text-xs text-gray-500 mb-3">応募履歴はありません。</p>'}
+        <h4 class="text-xs font-bold text-gray-600 mt-3">自分の求人への応募</h4>
+        ${received.length
+          ? received.map(application => `
+            <div class="border-b py-2">
+              <p class="font-medium">${escapeHtml(application.job_title)} — ${escapeHtml(application.applicant_name)}</p>
+              <p class="text-xs text-gray-600">電話: ${escapeHtml(application.applicant_phone)} ・ ${escapeHtml(application.experience || "経験情報なし")}</p>
+              ${application.message ? `<p class="text-xs text-gray-600 whitespace-pre-wrap">${escapeHtml(application.message)}</p>` : ""}
+              <label class="mt-1 block text-xs">対応状況
+                <select onchange="updateApplicationStatus('${application.id}', this.value)" class="ml-1 border rounded px-1 py-1">
+                  <option value="pending" ${application.status === "pending" ? "selected" : ""}>未確認</option>
+                  <option value="reviewed" ${application.status === "reviewed" ? "selected" : ""}>確認済み</option>
+                  <option value="dismissed" ${application.status === "dismissed" ? "selected" : ""}>対応不要</option>
+                </select>
+              </label>
+            </div>
+          `).join("")
+          : '<p class="text-xs text-gray-500">自分の求人への応募はありません。</p>'}
+      `;
+    }
+
+    function formatDashboardDate(value) {
+      const date = new Date(value);
+      return Number.isNaN(date.getTime()) ? "" : date.toLocaleString("ja-JP");
+    }
+
+    function formatApplicationStatus(status) {
+      return { pending: "未確認", reviewed: "確認済み", dismissed: "対応不要" }[status] || "未確認";
+    }
+
+    async function updateApplicationStatus(applicationId, status) {
+      if (!currentUser || !["pending", "reviewed", "dismissed"].includes(status)) return;
+      const { error } = await supabaseClient
+        .from("job_applications")
+        .update({ status })
+        .eq("id", applicationId);
+      if (error) {
+        alert(`応募状況を更新できませんでした: ${error.message}`);
+        return;
+      }
+      await loadAccountData(currentUser);
     }
 
     function normalizeJapanesePhone(phone) {
@@ -939,6 +1175,7 @@
       const jobCount = document.getElementById("jobCount");
       const keyword = document.getElementById("searchKeyword").value.toLowerCase();
       const openJobsOnly = document.getElementById("openJobsOnly").checked;
+      const favoritesOnly = document.getElementById("favoritesOnly").checked;
       const capacityFilter = document.getElementById("capacityFilter").value;
       updateJobFilterOptions();
       const locationFilter = document.getElementById("locationFilter").value;
@@ -946,8 +1183,7 @@
       const salaryTypeFilter = document.getElementById("salaryTypeFilter").value;
       const minimumSalary = Number(document.getElementById("minimumSalary").value) || 0;
       const sortBy = document.getElementById("jobSort").value;
-      const savedProfile = localStorage.getItem("seeker_profile");
-      const seekerProfile = savedProfile ? JSON.parse(savedProfile) : null;
+      const seekerProfile = seekerProfileData;
       const preferredLocation = activeTab === "seeker" && seekerProfile ? seekerProfile.location || "" : "";
       const matchProfile = activeTab === "seeker" ? seekerProfile : null;
 
@@ -958,6 +1194,7 @@
             (job.location || "").toLowerCase().includes(keyword) ||
             (job.tags && job.tags.some(t => t.toLowerCase().includes(keyword)))) &&
           (!openJobsOnly || !job.is_closed) &&
+            (!favoritesOnly || isFavorite(job.id)) &&
             (!capacityFilter || getCapacityOptionValue(job.capacity) === capacityFilter) &&
             (!locationFilter || (job.location || "").trim() === locationFilter) &&
             (!salaryTypeFilter || getJobPayType(job) === salaryTypeFilter) &&
@@ -991,7 +1228,9 @@
       jobCount.innerText = `${filteredJobs.length}件`;
 
       if (filteredJobs.length === 0) {
-        jobList.innerHTML = `<div class="text-center py-8 text-gray-400 text-sm">該当する現場求人はありません。</div>`;
+        jobList.innerHTML = favoritesOnly
+          ? `<div class="text-center py-8 text-gray-400 text-sm">${currentUser ? "お気に入りの求人はありません。求人カードの☆を押すと保存できます。" : "お気に入りを見るにはログインしてください。"}</div>`
+          : `<div class="text-center py-8 text-gray-400 text-sm">該当する現場求人はありません。</div>`;
         return;
       }
 
@@ -999,7 +1238,10 @@
         <div onclick="openModal(${job.id})" class="border rounded-lg p-4 bg-white shadow-sm hover:shadow-md transition cursor-pointer relative border-l-4 ${job.is_closed || job.capacity <= 0 ? 'border-l-gray-400 opacity-75' : 'border-l-blue-500'}">
           <div class="flex justify-between items-start mb-1">
             <h3 class="font-bold text-gray-800 text-base">${escapeHtml(job.title)}</h3>
-            <span class="text-xs text-gray-400">ID: ${job.id}</span>
+            <div class="flex items-center gap-2">
+              <button type="button" aria-label="${isFavorite(job.id) ? 'お気に入りから削除' : 'お気に入りに追加'}" aria-pressed="${isFavorite(job.id)}" onclick="event.stopPropagation(); toggleFavorite(${job.id})" class="text-amber-600 hover:text-amber-700 text-lg leading-none" title="${isFavorite(job.id) ? 'お気に入りから削除' : 'お気に入りに追加'}">${isFavorite(job.id) ? '★' : '☆'}</button>
+              <span class="text-xs text-gray-400">ID: ${job.id}</span>
+            </div>
           </div>
           <div class="flex flex-wrap gap-1 mb-2">
             ${matchProfile && getJobMatchScore(job, matchProfile) > 0 ? '<span class="bg-emerald-100 text-emerald-800 text-[10px] px-1.5 py-0.5 rounded font-bold">希望条件に一致</span>' : ''}
@@ -1080,10 +1322,32 @@
 
     // モーダル表示
     function openModal(id) {
-      selectedJob = cachedJobs.find(j => j.id === id);
+      selectedJob = cachedJobs.find(j => String(j.id) === String(id));
       if (!selectedJob) return;
 
       clearJobReportWidget();
+      document.getElementById("applicationSuccess").classList.add("hidden");
+      document.getElementById("applicationStatus").innerText = "";
+      document.getElementById("applicationSubmitButton").disabled = false;
+      document.getElementById("applicationName").value = seekerProfileData?.name || "";
+      document.getElementById("applicationPhone").value = seekerProfileData?.phone || "";
+      document.getElementById("applicationMessage").value = "";
+      const alreadyApplied = Boolean(currentUser && accountApplications.some(application =>
+        application.applicant_id === currentUser.id && application.job_id === String(selectedJob.id)
+      ));
+      const canApply = Boolean(currentUser && !selectedJob.is_closed &&
+        selectedJob.owner_id !== currentUser.id && !alreadyApplied);
+      document.getElementById("jobApplicationForm").classList.toggle("hidden", !canApply);
+      document.getElementById("applicationLoginPrompt").classList.toggle("hidden", canApply);
+      if (!currentUser) {
+        document.getElementById("applicationLoginPrompt").innerText = "応募履歴を保存するにはログインが必要です。職人・求職者向けタブの「ログイン / アカウント登録へ」からログインしてください。";
+      } else if (selectedJob.owner_id === currentUser.id) {
+        document.getElementById("applicationLoginPrompt").innerText = "自分が投稿した求人には応募できません。";
+      } else if (selectedJob.is_closed) {
+        document.getElementById("applicationLoginPrompt").innerText = "募集が終了しているため、サイトから応募できません。";
+      } else if (alreadyApplied) {
+        document.getElementById("applicationLoginPrompt").innerText = "この求人にはすでにサイトから応募済みです。応募履歴はマイページで確認できます。";
+      }
       document.getElementById("jobReportForm").classList.add("hidden");
       document.getElementById("jobReportButton").classList.remove("hidden");
       document.getElementById("jobReportSuccess").classList.add("hidden");
@@ -1097,6 +1361,7 @@
       document.getElementById("modalCapacity").innerText = `募集人数: ${formatJobCapacity(selectedJob.capacity)}`;
       document.getElementById("modalDuties").innerText = selectedJob.duties || "特記事項なし";
       document.getElementById("modalClosed").classList.toggle("hidden", !selectedJob.is_closed);
+      updateModalFavoriteButton();
 
       const btnLine = document.getElementById("btnLine");
       if (selectedJob.line && !selectedJob.is_closed) {
@@ -1114,6 +1379,54 @@
       document.getElementById("jobModal").classList.remove("hidden");
     }
 
+    async function submitJobApplication(event) {
+      event.preventDefault();
+      if (!currentUser || !selectedJob) {
+        document.getElementById("applicationStatus").innerText = "応募にはログインが必要です。";
+        return;
+      }
+      if (selectedJob.is_closed || selectedJob.owner_id === currentUser.id) {
+        document.getElementById("applicationStatus").innerText = "この求人には応募できません。";
+        return;
+      }
+
+      const name = document.getElementById("applicationName").value.trim();
+      const phone = normalizeJapanesePhone(document.getElementById("applicationPhone").value.trim());
+      const message = document.getElementById("applicationMessage").value.trim();
+      if (!name || !phone || !isValidJapanesePhone(phone)) {
+        document.getElementById("applicationStatus").innerText = "名前と有効な日本の電話番号を入力してください。";
+        return;
+      }
+      const submitButton = document.getElementById("applicationSubmitButton");
+      submitButton.disabled = true;
+      document.getElementById("applicationStatus").innerText = "応募を送信しています。";
+      const { data, error } = await supabaseClient.from("job_applications").insert({
+        applicant_id: currentUser.id,
+        job_id: String(selectedJob.id),
+        job_title: selectedJob.title,
+        applicant_name: name,
+        applicant_phone: phone,
+        experience: seekerProfileData?.expYears || "",
+        licenses: seekerProfileData?.licenses || [],
+        message
+      }).select().single();
+      if (error) {
+        submitButton.disabled = false;
+        document.getElementById("applicationStatus").innerText = `応募を送信できませんでした: ${error.message}`;
+        return;
+      }
+
+      document.getElementById("jobApplicationForm").classList.add("hidden");
+      document.getElementById("applicationSuccess").classList.remove("hidden");
+      if (data) {
+        accountApplications.unshift(data);
+        renderAccountDashboard();
+      } else {
+        accountDataUserId = null;
+        await loadAccountData(currentUser);
+      }
+    }
+
     // LINE応募
     function applyViaLINE() {
       if (!selectedJob || !selectedJob.line) return;
@@ -1128,11 +1441,10 @@
     function applyViaSMS() {
       if (!selectedJob || !selectedJob.phone) return;
 
-      const saved = localStorage.getItem("seeker_profile");
       let message = "";
 
-      if (saved) {
-        const p = JSON.parse(saved);
+      if (seekerProfileData) {
+        const p = seekerProfileData;
         message = `【求人応募】${selectedJob.title}の募集を見て連絡しました。氏名:${p.name} / 経験:${p.expYears} / 資格:${p.licenses ? p.licenses.join(',') : 'なし'}。よろしくお願いします。`;
       } else {
         message = `【求人応募】${selectedJob.title}の募集を見て連絡しました。詳細をお伺いできますでしょうか？`;
@@ -1151,6 +1463,36 @@
       document.getElementById("jobModal").classList.add("hidden");
       clearJobReportWidget();
       selectedJob = null;
+    }
+
+    function isFavorite(jobId) {
+      return favoriteJobIds.includes(String(jobId));
+    }
+
+    async function toggleFavorite(jobId) {
+      if (!currentUser) {
+        alert("お気に入りをアカウントに保存するにはログインしてください。");
+        switchTab("employer");
+        return;
+      }
+
+      const normalizedId = String(jobId);
+      const { error } = isFavorite(normalizedId)
+        ? await supabaseClient.from("job_favorites").delete().eq("user_id", currentUser.id).eq("job_id", normalizedId)
+        : await supabaseClient.from("job_favorites").insert({ user_id: currentUser.id, job_id: normalizedId });
+      if (error) {
+        alert(`お気に入りを更新できませんでした: ${error.message}`);
+        return;
+      }
+      await loadAccountData(currentUser);
+    }
+
+    function updateModalFavoriteButton() {
+      const button = document.getElementById("modalFavoriteButton");
+      if (!button || !selectedJob) return;
+      const favorited = isFavorite(selectedJob.id);
+      button.innerText = favorited ? "★ お気に入りから削除" : "☆ お気に入りに追加";
+      button.setAttribute("aria-pressed", String(favorited));
     }
 
     function formatJobCapacity(capacity) {
