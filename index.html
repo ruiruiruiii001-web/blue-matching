@@ -29,10 +29,17 @@
   <div id="myPageOverlay" class="fixed inset-0 z-50 hidden items-center justify-center p-0 sm:p-4" onclick="handleMyPageOverlayClick(event)">
     <button type="button" aria-label="マイページを閉じる" aria-hidden="true" tabindex="-1" onclick="closeAccountPanel()" class="absolute inset-0 h-full w-full bg-black/60"></button>
     <section role="dialog" aria-modal="true" aria-labelledby="myPageOverlayTitle" class="relative z-10 flex max-h-full w-full max-w-5xl flex-col overflow-hidden bg-gray-100 shadow-2xl sm:max-h-[92vh] sm:rounded-2xl">
-      <div class="flex shrink-0 items-center justify-between border-b bg-white px-4 py-3 sm:px-6">
-        <h2 id="myPageOverlayTitle" class="text-lg font-bold text-gray-900">マイページ</h2>
-        <button id="myPageOverlayClose" type="button" aria-label="マイページを閉じる" onclick="closeAccountPanel()" class="flex h-11 w-11 items-center justify-center rounded-full text-2xl font-bold text-gray-600 hover:bg-gray-100" autofocus>×</button>
+      <div class="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b bg-white px-4 py-3 sm:px-6">
+        <div class="min-w-0">
+          <h2 id="myPageOverlayTitle" class="text-lg font-bold text-gray-900">マイページ</h2>
+          <p id="myPageAccountInfo" class="mt-0.5 break-all text-xs text-gray-600"></p>
+        </div>
+        <div class="flex shrink-0 items-center gap-2">
+          <button id="myPageLogoutButton" type="button" onclick="signOutEmployer()" class="min-h-11 rounded-lg border border-red-200 px-3 py-2 text-sm font-bold text-red-700 hover:bg-red-50">ログアウト</button>
+          <button id="myPageOverlayClose" type="button" aria-label="マイページを閉じる" onclick="closeAccountPanel()" class="flex h-11 w-11 items-center justify-center rounded-full text-2xl font-bold text-gray-600 hover:bg-gray-100" autofocus>×</button>
+        </div>
       </div>
+      <p id="myPageLogoutStatus" role="status" aria-live="polite" class="hidden shrink-0 bg-red-50 px-4 py-2 text-sm text-red-700 sm:px-6"></p>
       <div id="myPageOverlayContent" class="min-h-0 flex-1 overflow-y-auto p-3 sm:p-6"></div>
     </section>
   </div>
@@ -870,6 +877,9 @@
         dashboardReturnPlaceholder = document.createComment("my-page-return-point");
         dashboard.parentNode.insertBefore(dashboardReturnPlaceholder, dashboard);
         document.getElementById("myPageOverlayContent").append(dashboard);
+        document.getElementById("myPageLogoutStatus").classList.add("hidden");
+        document.getElementById("myPageLogoutStatus").innerText = "";
+        updateMyPageAccountInfo();
         dashboardScrollPosition = window.scrollY;
         previousBodyOverflow = document.body.style.overflow;
         document.body.style.overflow = "hidden";
@@ -907,6 +917,13 @@
 
     function handleMyPageOverlayClick(event) {
       if (event.target === document.getElementById("myPageOverlay")) closeAccountPanel();
+    }
+
+    function updateMyPageAccountInfo() {
+      const accountTypeLabel = accountType === "seeker" ? "求職者" : accountType === "employer" ? "企業・親方" : "";
+      document.getElementById("myPageAccountInfo").innerText = currentUser?.email
+        ? `${currentUser.email} ・ ${accountTypeLabel}アカウント`
+        : `${accountTypeLabel}アカウント`;
     }
 
     function promptLogin(message) {
@@ -1117,12 +1134,23 @@
     }
 
     async function signOutEmployer() {
-      const { error } = await supabaseClient.auth.signOut();
-      if (error) {
-        setAuthMessage(`ログアウトに失敗しました: ${error.message}`, true);
-        return;
+      const button = document.getElementById("myPageLogoutButton");
+      const logoutStatus = document.getElementById("myPageLogoutStatus");
+      button.disabled = true;
+      button.innerText = "ログアウト中…";
+      try {
+        const { error } = await supabaseClient.auth.signOut();
+        if (error) {
+          setAuthMessage(`ログアウトに失敗しました: ${error.message}`, true);
+          logoutStatus.innerText = `ログアウトに失敗しました: ${error.message}`;
+          logoutStatus.classList.remove("hidden");
+          return;
+        }
+        setAuthMessage("ログアウトしました。");
+      } finally {
+        button.disabled = false;
+        button.innerText = "ログアウト";
       }
-      setAuthMessage("ログアウトしました。");
     }
 
     function switchTab(tab) {
