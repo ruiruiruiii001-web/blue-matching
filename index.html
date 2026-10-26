@@ -20,27 +20,36 @@
         <p class="text-xs text-blue-100">クラウド同期・現場特化型</p>
       </div>
       <div class="flex items-center gap-2">
-        <button id="headerAccountButton" type="button" onclick="openAccountPanel()" class="rounded-lg bg-white px-3 py-2 text-xs font-bold text-blue-700">ログイン / 登録</button>
+        <button id="headerAccountButton" type="button" aria-haspopup="dialog" aria-controls="myPageOverlay loginOverlay" aria-expanded="false" onclick="openAccountPanel()" class="rounded-lg bg-white px-3 py-2 text-xs font-bold text-blue-700">ログイン / 登録</button>
         <span class="hidden sm:inline-block text-xs bg-blue-700 px-3 py-1.5 rounded-full font-bold">クラウド版</span>
       </div>
     </div>
   </header>
 
-  <div id="myPageOverlay" class="fixed inset-0 z-50 hidden items-center justify-center p-0 sm:p-4" onclick="handleMyPageOverlayClick(event)">
+  <div id="myPageOverlay" class="fixed inset-0 z-[60] hidden items-center justify-center p-0 sm:p-4" onclick="handleMyPageOverlayClick(event)">
     <button type="button" aria-label="マイページを閉じる" aria-hidden="true" tabindex="-1" onclick="closeAccountPanel()" class="absolute inset-0 h-full w-full bg-black/60"></button>
-    <section role="dialog" aria-modal="true" aria-labelledby="myPageOverlayTitle" class="relative z-10 flex max-h-full w-full max-w-5xl flex-col overflow-hidden bg-gray-100 shadow-2xl sm:max-h-[92vh] sm:rounded-2xl">
-      <div class="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b bg-white px-4 py-3 sm:px-6">
+    <section role="dialog" aria-modal="true" aria-labelledby="myPageOverlayTitle" class="relative z-10 flex h-[100dvh] max-h-full w-full max-w-5xl flex-col overflow-hidden bg-gray-100 shadow-2xl sm:h-[92vh] sm:rounded-2xl">
+      <div class="relative flex min-h-[76px] shrink-0 items-start justify-between gap-3 border-b bg-white px-4 py-3 pr-20 sm:px-6 sm:pr-24">
         <div class="min-w-0">
           <h2 id="myPageOverlayTitle" class="text-lg font-bold text-gray-900">マイページ</h2>
           <p id="myPageAccountInfo" class="mt-0.5 break-all text-xs text-gray-600"></p>
         </div>
-        <div class="flex shrink-0 items-center gap-2">
-          <button id="myPageLogoutButton" type="button" onclick="signOutEmployer()" class="min-h-11 rounded-lg border border-red-200 px-3 py-2 text-sm font-bold text-red-700 hover:bg-red-50">ログアウト</button>
-          <button id="myPageOverlayClose" type="button" aria-label="マイページを閉じる" onclick="closeAccountPanel()" class="flex h-11 w-11 items-center justify-center rounded-full text-2xl font-bold text-gray-600 hover:bg-gray-100" autofocus>×</button>
-        </div>
+        <button id="myPageLogoutButton" type="button" onclick="signOutEmployer()" class="min-h-11 shrink-0 rounded-lg border border-red-200 px-3 py-2 text-sm font-bold text-red-700 hover:bg-red-50">ログアウト</button>
+        <button id="myPageOverlayClose" type="button" aria-label="マイページを閉じる" onclick="closeAccountPanel()" class="absolute right-3 top-3 flex h-11 w-11 items-center justify-center rounded-full text-2xl font-bold text-gray-600 hover:bg-gray-100" autofocus>×</button>
       </div>
       <p id="myPageLogoutStatus" role="status" aria-live="polite" class="hidden shrink-0 bg-red-50 px-4 py-2 text-sm text-red-700 sm:px-6"></p>
       <div id="myPageOverlayContent" class="min-h-0 flex-1 overflow-y-auto p-3 sm:p-6"></div>
+    </section>
+  </div>
+
+  <div id="loginOverlay" class="fixed inset-0 z-[60] hidden items-center justify-center p-4" onclick="handleLoginOverlayClick(event)">
+    <button type="button" aria-label="ログイン画面を閉じる" aria-hidden="true" tabindex="-1" onclick="closeLoginPanel()" class="absolute inset-0 h-full w-full bg-black/60"></button>
+    <section role="dialog" aria-modal="true" aria-labelledby="loginOverlayTitle" class="relative z-10 flex max-h-[92vh] w-full max-w-lg flex-col overflow-y-auto rounded-2xl bg-gray-100 shadow-2xl">
+      <div class="flex shrink-0 items-center justify-between border-b bg-white px-4 py-3 sm:px-6">
+        <h2 id="loginOverlayTitle" class="text-lg font-bold text-gray-900">ログイン / 新規登録</h2>
+        <button id="loginOverlayClose" type="button" aria-label="ログイン画面を閉じる" onclick="closeLoginPanel()" class="flex h-11 w-11 items-center justify-center rounded-full text-2xl font-bold text-gray-600 hover:bg-gray-100">×</button>
+      </div>
+      <div id="loginOverlayContent" class="overflow-y-auto p-3 sm:p-5"></div>
     </section>
   </div>
 
@@ -78,7 +87,6 @@
     <!-- 左側①：親方・企業向け 求人作成 -->
     <section id="employerSection" class="space-y-6 hidden">
       <div id="employerAuthPanel" class="bg-white p-6 rounded-lg shadow-md">
-        <h2 class="text-lg font-bold mb-2 text-blue-600">アカウント</h2>
         <p class="text-sm text-gray-600 mb-4">求職者プロフィールの保存・応募履歴・求人の投稿にはログインが必要です。</p>
         <div id="employerLoggedOut" class="space-y-3">
           <div>
@@ -237,24 +245,19 @@
     <section id="seekerSection" class="bg-white p-6 rounded-lg shadow-md h-fit md:col-span-2">
       <div id="seekerAccountPrompt" class="mb-4 p-4 rounded border border-blue-200 bg-blue-50">
         <p id="seekerAccountPromptText" class="text-sm text-blue-900">プロフィール・お気に入り・応募履歴をアカウントに保存するにはログインしてください。</p>
-        <button onclick="switchTab('employer')" class="mt-2 text-sm font-bold text-blue-700 underline">ログイン / アカウント登録へ</button>
+        <button onclick="openAccountPanel()" class="mt-2 text-sm font-bold text-blue-700 underline">ログイン / アカウント登録へ</button>
       </div>
 
       <div id="seekerDashboard" class="hidden scroll-mt-20 space-y-4">
-        <h2 class="text-lg font-bold border-b pb-2 text-blue-600">マイページ</h2>
         <p id="accountDashboardStatus" role="status" aria-live="polite" class="hidden text-sm text-red-600"></p>
-        <div class="grid grid-cols-1 md:grid-cols-[180px_minmax(0,1fr)] gap-4">
-          <button id="dashboardMenuToggle" type="button" aria-expanded="false" aria-controls="dashboardNavigation" onclick="toggleDashboardMenu()" class="md:hidden w-full flex items-center justify-center gap-2 border rounded-lg px-4 py-3 text-sm font-bold text-blue-700 bg-blue-50">
-            <span aria-hidden="true">☰</span> メニュー
-          </button>
-          <nav id="dashboardNavigation" aria-label="マイページメニュー" class="hidden md:flex md:flex-col gap-2 overflow-x-auto pb-1 md:pb-0">
-            <button type="button" data-dashboard-view="profile" onclick="showDashboardView('profile')" class="dashboard-menu-button shrink-0 text-left px-3 py-2 rounded-lg bg-blue-600 text-white font-bold text-sm">👤 プロフィール</button>
-            <button type="button" data-dashboard-view="favorites" onclick="showDashboardView('favorites')" class="dashboard-menu-button shrink-0 text-left px-3 py-2 rounded-lg bg-gray-100 text-gray-700 font-bold text-sm">☆ お気に入り</button>
-            <button type="button" data-dashboard-view="jobs" onclick="showDashboardView('jobs')" class="dashboard-menu-button shrink-0 text-left px-3 py-2 rounded-lg bg-gray-100 text-gray-700 font-bold text-sm">🏗 自分の求人</button>
-            <button type="button" data-dashboard-view="applications" onclick="showDashboardView('applications')" class="dashboard-menu-button shrink-0 text-left px-3 py-2 rounded-lg bg-gray-100 text-gray-700 font-bold text-sm">📨 応募履歴</button>
-          </nav>
+        <nav id="dashboardNavigation" role="tablist" aria-label="マイページの表示切替" class="sticky top-0 z-10 flex shrink-0 gap-2 overflow-x-auto border-b bg-gray-100 py-2">
+          <button type="button" role="tab" aria-selected="true" aria-controls="dashboardView-profile" data-dashboard-view="profile" onclick="showDashboardView('profile')" class="dashboard-menu-button h-11 shrink-0 rounded-lg bg-blue-600 px-3 font-bold text-sm text-white">プロフィール</button>
+          <button type="button" role="tab" aria-selected="false" aria-controls="dashboardView-favorites" data-dashboard-view="favorites" onclick="showDashboardView('favorites')" class="dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 font-bold text-sm text-gray-700">お気に入り</button>
+          <button type="button" role="tab" aria-selected="false" aria-controls="dashboardView-jobs" data-dashboard-view="jobs" onclick="showDashboardView('jobs')" class="dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 font-bold text-sm text-gray-700">自分の求人</button>
+          <button type="button" role="tab" aria-selected="false" aria-controls="dashboardView-applications" data-dashboard-view="applications" onclick="showDashboardView('applications')" class="dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 font-bold text-sm text-gray-700">応募履歴</button>
+        </nav>
 
-          <div class="min-w-0">
+        <div class="min-w-0">
             <section id="dashboardView-profile">
               <h3 class="text-lg font-bold mb-4 border-b pb-2 text-blue-600">マイプロフィール</h3>
       
@@ -365,7 +368,6 @@
               <div id="dashboardApplications" class="space-y-2 text-sm"></div>
             </section>
           </div>
-        </div>
       </div>
     </section>
 
@@ -577,9 +579,13 @@
     let currentUser = null;
     let accountType = null;
     let dashboardOpen = false;
+    let loginPanelOpen = false;
     let dashboardReturnPlaceholder = null;
+    let loginPanelReturnPlaceholder = null;
     let dashboardScrollPosition = 0;
+    let loginPanelScrollPosition = 0;
     let previousBodyOverflow = "";
+    let loginPanelPreviousBodyOverflow = "";
     let accountTypeLoadUserId = null;
     let accountTypeLoading = false;
     let publicSeekerProfiles = [];
@@ -599,14 +605,16 @@
     });
 
     document.addEventListener("keydown", event => {
-      if (!dashboardOpen) return;
       if (event.key === "Escape") {
-        closeAccountPanel();
+        if (dashboardOpen) closeAccountPanel();
+        else if (loginPanelOpen) closeLoginPanel();
         return;
       }
-      if (event.key !== "Tab") return;
+      if (event.key !== "Tab" || (!dashboardOpen && !loginPanelOpen)) return;
 
-      const dialog = document.querySelector("#myPageOverlay [role='dialog']");
+      const dialog = document.querySelector(dashboardOpen
+        ? "#myPageOverlay [role='dialog']"
+        : "#loginOverlay [role='dialog']");
       const focusable = Array.from(dialog.querySelectorAll(
         'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
       )).filter(element => element.getClientRects().length > 0);
@@ -802,6 +810,7 @@
       document.getElementById("employerAccountEmail").innerText = currentUser?.email || "";
       if (previousUserId !== (currentUser?.id || null)) {
         if (dashboardOpen) closeAccountPanel();
+        if (loginPanelOpen) closeLoginPanel(false);
         accountType = null;
         dashboardOpen = false;
         accountTypeLoadUserId = null;
@@ -862,7 +871,7 @@
         : accountType === "employer" || accountType === "seeker"
           ? "マイページ"
           : "アカウント設定";
-      button.setAttribute("aria-expanded", String(Boolean(currentUser && dashboardOpen)));
+      button.setAttribute("aria-expanded", String(Boolean(dashboardOpen || loginPanelOpen)));
     }
 
     function openAccountPanel() {
@@ -890,11 +899,54 @@
         document.getElementById("myPageOverlayClose").focus();
         return;
       }
+      if (!currentUser) {
+        openLoginPanel();
+        return;
+      }
       switchTab("employer");
-      const target = currentUser && !accountType
-        ? document.getElementById("accountTypeSetup")
-        : document.getElementById("employerAuthPanel");
+      const target = document.getElementById("accountTypeSetup");
       target.scrollIntoView({ behavior: "smooth" });
+    }
+
+    function openLoginPanel(toggle = true) {
+      if (loginPanelOpen) {
+        if (toggle) closeLoginPanel();
+        return;
+      }
+      const authPanel = document.getElementById("employerAuthPanel");
+      loginPanelReturnPlaceholder = document.createComment("login-panel-return-point");
+      authPanel.parentNode.insertBefore(loginPanelReturnPlaceholder, authPanel);
+      document.getElementById("loginOverlayContent").append(authPanel);
+      loginPanelOpen = true;
+      loginPanelScrollPosition = window.scrollY;
+      loginPanelPreviousBodyOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      const overlay = document.getElementById("loginOverlay");
+      overlay.classList.remove("hidden");
+      overlay.classList.add("flex");
+      updateHeaderAccountButton();
+      document.getElementById("employerEmail").focus();
+    }
+
+    function closeLoginPanel(returnFocus = true) {
+      if (!loginPanelOpen) return;
+      const authPanel = document.getElementById("employerAuthPanel");
+      if (loginPanelReturnPlaceholder?.parentNode) {
+        loginPanelReturnPlaceholder.replaceWith(authPanel);
+      }
+      loginPanelReturnPlaceholder = null;
+      loginPanelOpen = false;
+      const overlay = document.getElementById("loginOverlay");
+      overlay.classList.add("hidden");
+      overlay.classList.remove("flex");
+      document.body.style.overflow = loginPanelPreviousBodyOverflow;
+      window.scrollTo({ top: loginPanelScrollPosition, behavior: "instant" });
+      updateHeaderAccountButton();
+      if (returnFocus) document.getElementById("headerAccountButton").focus();
+    }
+
+    function handleLoginOverlayClick(event) {
+      if (event.target === document.getElementById("loginOverlay")) closeLoginPanel();
     }
 
     function closeAccountPanel() {
@@ -928,9 +980,9 @@
     }
 
     function promptLogin(message) {
+      if (currentUser) return;
       setAuthMessage(message);
-      openAccountPanel();
-      document.getElementById("employerAuthPanel").scrollIntoView({ behavior: "smooth" });
+      openLoginPanel(false);
     }
 
     async function loadAccountType(user) {
@@ -1706,19 +1758,10 @@
         const isActive = button.dataset.dashboardView === view;
         button.classList.toggle("bg-blue-600", isActive);
         button.classList.toggle("text-white", isActive);
-        button.classList.toggle("bg-gray-100", !isActive);
+        button.classList.toggle("bg-gray-200", !isActive);
         button.classList.toggle("text-gray-700", !isActive);
-        button.setAttribute("aria-pressed", String(isActive));
+        button.setAttribute("aria-selected", String(isActive));
       });
-      document.getElementById("dashboardNavigation").classList.add("hidden");
-      document.getElementById("dashboardMenuToggle").setAttribute("aria-expanded", "false");
-    }
-
-    function toggleDashboardMenu() {
-      const navigation = document.getElementById("dashboardNavigation");
-      const isExpanded = document.getElementById("dashboardMenuToggle").getAttribute("aria-expanded") === "true";
-      navigation.classList.toggle("hidden", isExpanded);
-      document.getElementById("dashboardMenuToggle").setAttribute("aria-expanded", String(!isExpanded));
     }
 
     function formatDashboardDate(value) {
