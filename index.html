@@ -143,6 +143,14 @@
           <h2 class="text-lg font-bold text-blue-600">企業マイページ</h2>
           <button type="button" onclick="closeAccountPanel(); document.getElementById('employerJobForm').scrollIntoView({ behavior: 'smooth' })" class="text-sm font-bold text-blue-700 underline">＋ 求人を新規投稿</button>
         </div>
+        <section class="mb-6 border-b border-gray-200 pb-5">
+          <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
+            <h3 class="font-bold text-sm">通知</h3>
+            <span id="employerNotificationCount" class="text-xs text-gray-500"></span>
+          </div>
+          <p id="employerNotificationsStatus" role="status" aria-live="polite" class="hidden text-sm text-red-700"></p>
+          <div id="employerDashboardNotifications" class="divide-y divide-gray-100 text-sm"></div>
+        </section>
         <h3 class="font-bold text-sm mb-2">自分の掲載求人</h3>
         <div id="employerDashboardJobs" class="divide-y divide-gray-100 text-sm"></div>
         <section class="mt-6 border-t border-gray-200 pt-5">
@@ -150,7 +158,7 @@
             <h3 class="font-bold text-sm">受け取った応募</h3>
             <span id="employerApplicationCount" class="text-xs text-gray-500"></span>
           </div>
-          <p class="mb-3 text-xs text-gray-500">応募者の名前・電話番号・経験・資格・メッセージを確認できます。メール通知はありません。マイページで確認してください。</p>
+          <p class="mb-3 text-xs text-gray-500">応募者の名前・電話番号・経験・資格・メッセージを確認できます。新しい応募はマイページの通知と登録メールでお知らせします。</p>
           <p id="employerApplicationsStatus" role="status" aria-live="polite" class="hidden text-sm text-red-700"></p>
           <div id="employerDashboardApplications" class="divide-y divide-gray-100 text-sm"></div>
         </section>
@@ -259,6 +267,7 @@
           <button type="button" role="tab" aria-selected="false" aria-controls="dashboardView-favorites" data-dashboard-view="favorites" onclick="showDashboardView('favorites')" class="dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 font-bold text-sm text-gray-700">お気に入り</button>
           <button type="button" role="tab" aria-selected="false" aria-controls="dashboardView-applications" data-dashboard-view="applications" onclick="showDashboardView('applications')" class="dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 font-bold text-sm text-gray-700">応募履歴</button>
           <button id="seekerContactRequestsTab" type="button" role="tab" aria-selected="false" aria-controls="dashboardView-contacts" data-dashboard-view="contacts" onclick="showDashboardView('contacts')" class="dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 font-bold text-sm text-gray-700">企業からの連絡</button>
+          <button id="seekerNotificationsTab" type="button" role="tab" aria-selected="false" aria-controls="dashboardView-notifications" data-dashboard-view="notifications" onclick="showDashboardView('notifications')" class="dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 font-bold text-sm text-gray-700">通知</button>
         </nav>
 
         <div class="min-w-0">
@@ -374,8 +383,13 @@
             </section>
             <section id="dashboardView-contacts" class="hidden rounded border p-3">
               <h3 class="font-bold text-sm mb-2">企業からの連絡リクエスト</h3>
-              <p class="mb-3 text-xs text-gray-600">新しい連絡のメール通知はありません。マイページで確認してください。ここで返信しても、名前・電話番号・メールアドレスは企業に共有されません。</p>
+              <p class="mb-3 text-xs text-gray-600">新しい連絡や企業からの返信はマイページの通知と登録メールでお知らせします。ここで返信しても、名前・電話番号・メールアドレスは企業に共有されません。</p>
               <div id="dashboardContactRequests" class="space-y-3 text-sm"></div>
+            </section>
+            <section id="dashboardView-notifications" class="hidden rounded border p-3">
+              <h3 class="font-bold text-sm mb-2">通知</h3>
+              <p id="seekerNotificationsStatus" role="status" aria-live="polite" class="hidden text-sm text-red-700"></p>
+              <div id="seekerDashboardNotifications" class="divide-y divide-gray-100 text-sm"></div>
             </section>
           </div>
       </div>
@@ -543,7 +557,7 @@
           <label class="block text-sm font-medium">応募メッセージ（任意）
             <textarea id="applicationMessage" maxlength="1000" rows="3" class="mt-1 w-full border rounded px-3 py-2 text-sm" placeholder="経験や資格、親方へのメッセージ"></textarea>
           </label>
-          <p class="text-xs text-gray-500">送信すると、お名前・電話番号・プロフィールの経験年数と資格が求人投稿者のマイページに保存されます。現在、通知メールは送信されません。</p>
+          <p class="text-xs text-gray-500">送信すると、お名前・電話番号・プロフィールの経験年数と資格が求人投稿者のマイページに保存され、通知と登録メールでお知らせします。</p>
           <p id="applicationStatus" role="status" aria-live="polite" class="text-xs text-gray-600"></p>
           <button id="applicationSubmitButton" type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg disabled:opacity-50">応募を送信する</button>
         </form>
@@ -591,6 +605,8 @@
     let seekerProfileData = null;
     let accountApplications = [];
     let accountApplicationsError = "";
+    let appNotifications = [];
+    let appNotificationsError = "";
     let seekerContactRequests = [];
     let seekerContactRequestsError = "";
     let employerContactRequests = [];
@@ -849,6 +865,8 @@
         seekerProfileData = null;
         accountApplications = [];
         accountApplicationsError = "";
+        appNotifications = [];
+        appNotificationsError = "";
         seekerContactRequests = [];
         seekerContactRequestsError = "";
         employerContactRequests = [];
@@ -1616,13 +1634,14 @@
       loadingAccountUserId = user.id;
       const status = document.getElementById("accountDashboardStatus");
       status.classList.add("hidden");
-      const [profileResult, favoritesResult, applicationsResult, contactRequestsResult] = await Promise.all([
+      const [profileResult, favoritesResult, applicationsResult, contactRequestsResult, notificationsResult] = await Promise.all([
         supabaseClient.from("seeker_profiles").select("*").eq("user_id", user.id).maybeSingle(),
         supabaseClient.from("job_favorites").select("job_id").eq("user_id", user.id),
         supabaseClient.from("job_applications").select("*").order("created_at", { ascending: false }),
         accountType === "seeker"
           ? supabaseClient.from("seeker_contact_requests").select("*").eq("seeker_id", user.id).order("created_at", { ascending: false })
-          : Promise.resolve({ data: [], error: null })
+          : Promise.resolve({ data: [], error: null }),
+        supabaseClient.from("app_notifications").select("*").eq("recipient_id", user.id).order("created_at", { ascending: false }).limit(100)
       ]);
       if (currentUser?.id !== user.id) {
         loadingAccountUserId = null;
@@ -1656,6 +1675,11 @@
         ? `応募情報を読み込めませんでした。データベース設定を確認してください: ${applicationsResult.error.message}`
         : "";
       if (applicationsResult.error) console.error("応募情報読み込みエラー:", applicationsResult.error);
+      appNotifications = notificationsResult.data || [];
+      appNotificationsError = notificationsResult.error
+        ? `通知を読み込めませんでした。通知用SQL移行が実行済みか確認してください: ${notificationsResult.error.message}`
+        : "";
+      if (notificationsResult.error) console.error("通知読み込みエラー:", notificationsResult.error);
       seekerContactRequests = contactRequestsResult.data || [];
       seekerContactRequestsError = contactRequestsResult.error
         ? `企業からの連絡を読み込めません。新しいSQL移行を実行してください: ${contactRequestsResult.error.message}`
@@ -1665,6 +1689,7 @@
       accountDataUserId = user.id;
       loadingAccountUserId = null;
       renderAccountDashboard();
+      renderEmployerDashboard();
       renderJobList();
     }
 
@@ -1700,6 +1725,11 @@
       document.getElementById("seekerContactRequestsTab").innerText = pendingContacts
         ? `企業からの連絡 (${pendingContacts})`
         : "企業からの連絡";
+      const unreadNotifications = appNotifications.filter(notification => !notification.read_at).length;
+      document.getElementById("seekerNotificationsTab").innerText = unreadNotifications
+        ? `通知 (${unreadNotifications})`
+        : "通知";
+      renderNotifications("seekerDashboardNotifications", "seekerNotificationsStatus");
       const contactRequestsContainer = document.getElementById("dashboardContactRequests");
       contactRequestsContainer.innerHTML = seekerContactRequestsError
         ? `<p class="text-sm text-red-700">${escapeHtml(seekerContactRequestsError)}</p>`
@@ -1725,6 +1755,74 @@
           </article>
         `).join("")
         : '<p class="text-xs text-gray-500">企業からの連絡リクエストはまだありません。</p>';
+    }
+
+    function renderNotifications(containerId, statusId) {
+      const container = document.getElementById(containerId);
+      const status = document.getElementById(statusId);
+      if (!container || !status) return;
+      status.innerText = appNotificationsError;
+      status.classList.toggle("hidden", !appNotificationsError);
+      container.innerHTML = appNotificationsError
+        ? ""
+        : appNotifications.length
+          ? appNotifications.map(notification => `
+            <article class="flex items-start justify-between gap-3 py-3 ${notification.read_at ? "" : "bg-blue-50/70"}">
+              <div class="min-w-0">
+                <p class="font-bold ${notification.read_at ? "text-gray-700" : "text-blue-900"}">${escapeHtml(String(notification.title || "通知"))}</p>
+                <p class="mt-1 text-sm text-gray-700">${escapeHtml(String(notification.body || ""))}</p>
+                <p class="mt-1 text-xs text-gray-500">${formatDashboardDate(notification.created_at)}</p>
+              </div>
+              ${notification.read_at
+                ? '<span class="shrink-0 text-xs text-gray-400">確認済み</span>'
+                : `<button type="button" onclick="markNotificationRead('${escapeHtml(String(notification.id))}')" class="min-h-10 shrink-0 rounded-lg border border-blue-200 px-3 py-2 text-xs font-bold text-blue-700 hover:bg-blue-50">既読にする</button>`}
+            </article>
+          `).join("")
+          : '<p class="py-3 text-xs text-gray-500">新しい通知はありません。</p>';
+    }
+
+    async function markNotificationRead(notificationId) {
+      if (!currentUser) return;
+      const userId = currentUser.id;
+      const notification = appNotifications.find(item =>
+        item.id === notificationId && item.recipient_id === userId && !item.read_at
+      );
+      if (!notification) return;
+      const { data, error } = await supabaseClient
+        .from("app_notifications")
+        .update({ read_at: new Date().toISOString() })
+        .eq("id", notificationId)
+        .eq("recipient_id", userId)
+        .is("read_at", null)
+        .select()
+        .maybeSingle();
+      if (currentUser?.id !== userId) return;
+      if (error) {
+        const statusId = accountType === "employer" ? "employerNotificationsStatus" : "seekerNotificationsStatus";
+        const status = document.getElementById(statusId);
+        status.innerText = `通知を既読にできませんでした: ${error.message}`;
+        status.classList.remove("hidden");
+        console.error("通知既読更新エラー:", error);
+        return;
+      }
+      if (!data) return;
+      appNotifications = appNotifications.map(item => item.id === data.id ? data : item);
+      if (accountType === "employer") renderEmployerDashboard();
+      else renderAccountDashboard();
+    }
+
+    async function sendNotificationEmail(eventType, recordId) {
+      try {
+        const { error } = await supabaseClient.functions.invoke("send-notification", {
+          body: { event_type: eventType, record_id: recordId }
+        });
+        if (!error) return "";
+        console.error("メール通知の送信エラー:", error);
+        return `操作は保存されましたが、通知メールを送信できませんでした。通知用SQL移行とメール設定を確認してください (${error.message})`;
+      } catch (error) {
+        console.error("メール通知への接続エラー:", error);
+        return "操作は保存されましたが、通知メールサービスに接続できませんでした。通知用SQL移行とメール設定を確認してください。";
+      }
     }
 
     async function respondToContactRequest(requestId, status) {
@@ -1767,8 +1865,15 @@
         document.getElementById("accountDashboardStatus").classList.remove("hidden");
         return;
       }
+      const emailWarning = await sendNotificationEmail("contact_reply", requestId);
+      if (currentUser?.id !== seekerId || accountType !== "seeker") return;
       seekerContactRequests = seekerContactRequests.map(item => item.id === data.id ? data : item);
       renderAccountDashboard();
+      if (emailWarning) {
+        const dashboardStatus = document.getElementById("accountDashboardStatus");
+        dashboardStatus.innerText = emailWarning;
+        dashboardStatus.classList.remove("hidden");
+      }
     }
 
     function renderEmployerDashboard() {
@@ -1781,6 +1886,11 @@
         return;
       }
 
+      const unreadNotifications = appNotifications.filter(notification => !notification.read_at).length;
+      document.getElementById("employerNotificationCount").innerText = unreadNotifications
+        ? `未読 ${unreadNotifications}件`
+        : "";
+      renderNotifications("employerDashboardNotifications", "employerNotificationsStatus");
       const ownedJobs = cachedJobs.filter(job => job.owner_id === currentUser.id);
       const ownedJobIds = new Set(ownedJobs.map(job => String(job.id)));
       const receivedApplications = accountApplications.filter(application =>
@@ -1955,12 +2065,15 @@
         console.error("連絡リクエスト送信エラー:", error);
         return;
       }
+      const emailWarning = await sendNotificationEmail("contact_request", data.id);
+      if (currentUser?.id !== employerId || accountType !== "employer") return;
       employerContactRequests.unshift(data);
       renderEmployerDashboard();
+      if (emailWarning) alert(emailWarning);
     }
 
     function showDashboardView(view) {
-      const views = ["profile", "favorites", "applications", "contacts"];
+      const views = ["profile", "favorites", "applications", "contacts", "notifications"];
       if (!views.includes(view)) return;
       activeDashboardView = view;
       views.forEach(item => {
@@ -2289,11 +2402,12 @@
         document.getElementById("applicationStatus").innerText = "名前と有効な日本の電話番号を入力してください。";
         return;
       }
+      const applicantId = currentUser.id;
       const submitButton = document.getElementById("applicationSubmitButton");
       submitButton.disabled = true;
       document.getElementById("applicationStatus").innerText = "応募を送信しています。";
       const { data, error } = await supabaseClient.from("job_applications").insert({
-        applicant_id: currentUser.id,
+        applicant_id: applicantId,
         job_id: String(selectedJob.id),
         job_title: selectedJob.title,
         applicant_name: name,
@@ -2308,7 +2422,14 @@
         return;
       }
 
+      const emailWarning = data
+        ? await sendNotificationEmail("job_application", data.id)
+        : "";
+      if (currentUser?.id !== applicantId || accountType !== "seeker") return;
       document.getElementById("jobApplicationForm").classList.add("hidden");
+      document.getElementById("applicationSuccess").innerText = emailWarning
+        ? `応募を送信しました。${emailWarning}`
+        : "応募を送信しました。マイページの応募履歴から確認できます。";
       document.getElementById("applicationSuccess").classList.remove("hidden");
       if (data) {
         accountApplications.unshift(data);
