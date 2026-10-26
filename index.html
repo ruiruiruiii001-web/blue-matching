@@ -253,7 +253,6 @@
         <nav id="dashboardNavigation" role="tablist" aria-label="マイページの表示切替" class="sticky top-0 z-10 flex shrink-0 gap-2 overflow-x-auto border-b bg-gray-100 py-2">
           <button type="button" role="tab" aria-selected="true" aria-controls="dashboardView-profile" data-dashboard-view="profile" onclick="showDashboardView('profile')" class="dashboard-menu-button h-11 shrink-0 rounded-lg bg-blue-600 px-3 font-bold text-sm text-white">プロフィール</button>
           <button type="button" role="tab" aria-selected="false" aria-controls="dashboardView-favorites" data-dashboard-view="favorites" onclick="showDashboardView('favorites')" class="dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 font-bold text-sm text-gray-700">お気に入り</button>
-          <button type="button" role="tab" aria-selected="false" aria-controls="dashboardView-jobs" data-dashboard-view="jobs" onclick="showDashboardView('jobs')" class="dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 font-bold text-sm text-gray-700">自分の求人</button>
           <button type="button" role="tab" aria-selected="false" aria-controls="dashboardView-applications" data-dashboard-view="applications" onclick="showDashboardView('applications')" class="dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 font-bold text-sm text-gray-700">応募履歴</button>
         </nav>
 
@@ -358,10 +357,6 @@
             <section id="dashboardView-favorites" class="hidden rounded border p-3">
               <h3 class="font-bold text-sm mb-2">お気に入り求人</h3>
               <div id="dashboardFavorites" class="space-y-2 text-sm"></div>
-            </section>
-            <section id="dashboardView-jobs" class="hidden rounded border p-3">
-              <h3 class="font-bold text-sm mb-2">自分の掲載求人</h3>
-              <div id="dashboardJobs" class="space-y-2 text-sm"></div>
             </section>
             <section id="dashboardView-applications" class="hidden rounded border p-3">
               <h3 class="font-bold text-sm mb-2">応募履歴・応募者</h3>
@@ -1622,25 +1617,9 @@
         `).join("")
         : '<p class="text-xs text-gray-500">お気に入り求人はまだありません。</p>';
 
-      const ownedJobs = cachedJobs.filter(job => job.owner_id === currentUser.id);
-      const jobsContainer = document.getElementById("dashboardJobs");
-      jobsContainer.innerHTML = ownedJobs.length
-        ? ownedJobs.map(job => `
-          <div class="flex items-center justify-between gap-2">
-            <span class="text-sm">${escapeHtml(job.title)}${job.is_closed ? ' <span class="text-xs text-gray-500">（募集終了）</span>' : ""}</span>
-            <button type="button" onclick="switchTab('employer'); editJob(${job.id})" class="shrink-0 text-xs text-blue-700 underline">管理</button>
-          </div>
-        `).join("")
-        : '<p class="text-xs text-gray-500">自分が掲載した求人はまだありません。</p>';
-
       const submitted = accountApplications.filter(application => application.applicant_id === currentUser.id);
-      const received = accountApplications.filter(application => {
-        const job = cachedJobs.find(item => String(item.id) === application.job_id);
-        return job?.owner_id === currentUser.id;
-      });
       const applicationsContainer = document.getElementById("dashboardApplications");
       applicationsContainer.innerHTML = `
-        <h4 class="text-xs font-bold text-gray-600">自分が応募した求人</h4>
         ${submitted.length
           ? submitted.map(application => `
             <div class="border-b py-2">
@@ -1648,24 +1627,7 @@
               <p class="text-xs text-gray-500">${formatDashboardDate(application.created_at)} ・ ${formatApplicationStatus(application.status)}</p>
             </div>
           `).join("")
-          : '<p class="text-xs text-gray-500 mb-3">応募履歴はありません。</p>'}
-        <h4 class="text-xs font-bold text-gray-600 mt-3">自分の求人への応募</h4>
-        ${received.length
-          ? received.map(application => `
-            <div class="border-b py-2">
-              <p class="font-medium">${escapeHtml(application.job_title)} — ${escapeHtml(application.applicant_name)}</p>
-              <p class="text-xs text-gray-600">電話: ${escapeHtml(application.applicant_phone)} ・ ${escapeHtml(application.experience || "経験情報なし")}</p>
-              ${application.message ? `<p class="text-xs text-gray-600 whitespace-pre-wrap">${escapeHtml(application.message)}</p>` : ""}
-              <label class="mt-1 block text-xs">対応状況
-                <select onchange="updateApplicationStatus('${application.id}', this.value)" class="ml-1 border rounded px-1 py-1">
-                  <option value="pending" ${application.status === "pending" ? "selected" : ""}>未確認</option>
-                  <option value="reviewed" ${application.status === "reviewed" ? "selected" : ""}>確認済み</option>
-                  <option value="dismissed" ${application.status === "dismissed" ? "selected" : ""}>対応不要</option>
-                </select>
-              </label>
-            </div>
-          `).join("")
-          : '<p class="text-xs text-gray-500">自分の求人への応募はありません。</p>'}
+          : '<p class="text-xs text-gray-500">応募履歴はありません。</p>'}
       `;
     }
 
@@ -1748,7 +1710,7 @@
     }
 
     function showDashboardView(view) {
-      const views = ["profile", "favorites", "jobs", "applications"];
+      const views = ["profile", "favorites", "applications"];
       if (!views.includes(view)) return;
       activeDashboardView = view;
       views.forEach(item => {
