@@ -14,6 +14,13 @@
 
 公開登録を許可しているため、Supabase Auth のメール確認を有効にし、CAPTCHAやサインアップのレート制限も設定してください。移行SQLを実行するまでは、データベース側の権限保護は有効になりません。
 
+### 新規登録のCAPTCHA（Cloudflare Turnstile）
+
+1. CloudflareでTurnstileウィジェットを作成し、ドメインに `blue-matching-pi.vercel.app` を登録します。
+2. 発行されたSitekeyを `index.html` の `cloudflare-turnstile-sitekey` メタタグの `content` に設定してサイトを再デプロイします。Sitekeyは公開用ですが、Secret keyはソースコードやGitHubに置かないでください。
+3. Supabase Dashboardの **Authentication → Bot and Abuse Protection** でCAPTCHAを有効にし、Cloudflare Turnstileを選択してSecret keyを登録・保存します。サイト側のデプロイが完了する前にSupabase側を有効化すると、新規登録できなくなるため順番を守ってください。
+4. 公開サイトでTurnstileが表示されることを確認し、CAPTCHAを完了してから新規登録できることをテストします。
+
 ### Supabase の準備
 
 求人の募集状態、勤務地、給与条件を保存するカラムを追加します。Supabase の SQL Editor で次のSQLファイルをそれぞれ一度実行してください。

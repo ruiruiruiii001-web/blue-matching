@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="cloudflare-turnstile-sitekey" content="0x4AAAAAAFmKntPFXSdCMP-V">
   <title>現場直結！職人＆親方の求人マッチング</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -54,6 +55,8 @@
             <button onclick="signInEmployer()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg transition">ログイン</button>
             <button onclick="signUpEmployer()" class="border border-blue-600 text-blue-600 hover:bg-blue-50 font-bold py-2.5 rounded-lg transition">新規登録</button>
           </div>
+          <div id="employerTurnstile" class="min-h-4"></div>
+          <p id="turnstileStatus" role="status" aria-live="polite" class="text-xs text-gray-500">新規登録にはCAPTCHA確認が必要です。現在、設定準備中です。</p>
           <p class="text-xs text-gray-500">新規登録後、確認メールが届いた場合はメール内のリンクを開いてからログインしてください。</p>
         </div>
         <div id="employerLoggedIn" class="hidden items-center justify-between gap-3">
@@ -363,12 +366,69 @@
     let editingJobId = null;
     let activeTab = "employer";
     let currentUser = null;
+    let turnstileToken = null;
+    let turnstileWidgetId = null;
 
     document.addEventListener("DOMContentLoaded", () => {
       fetchJobs();
       loadSeekerProfile();
       initializeEmployerAuth();
+      initializeEmployerTurnstile();
     });
+
+    function initializeEmployerTurnstile() {
+      const siteKey = document.querySelector('meta[name="cloudflare-turnstile-sitekey"]').content.trim();
+      if (!siteKey) return;
+
+      setTurnstileStatus("CAPTCHA確認画面を読み込んでいます。");
+      const script = document.createElement("script");
+      script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoaded&render=explicit";
+      script.async = true;
+      script.defer = true;
+      script.onerror = () => setTurnstileStatus("CAPTCHAを読み込めませんでした。ページを再読み込みしてください。", true);
+      document.head.appendChild(script);
+    }
+
+    function onTurnstileLoaded() {
+      const siteKey = document.querySelector('meta[name="cloudflare-turnstile-sitekey"]').content.trim();
+      if (!siteKey || !window.turnstile) {
+        setTurnstileStatus("CAPTCHAの設定を確認できませんでした。ページを再読み込みしてください。", true);
+        return;
+      }
+
+      turnstileWidgetId = window.turnstile.render("#employerTurnstile", {
+        sitekey: siteKey,
+        callback: token => {
+          turnstileToken = token;
+          setTurnstileStatus("CAPTCHA確認が完了しました。");
+        },
+        "expired-callback": () => {
+          turnstileToken = null;
+          setTurnstileStatus("確認の有効期限が切れました。もう一度確認してください。", true);
+        },
+        "error-callback": () => {
+          turnstileToken = null;
+          setTurnstileStatus("CAPTCHA確認に失敗しました。もう一度お試しください。", true);
+        }
+      });
+      setTurnstileStatus("CAPTCHAを確認してから新規登録してください。");
+    }
+
+    function setTurnstileStatus(message, isError = false) {
+      const element = document.getElementById("turnstileStatus");
+      element.innerText = message;
+      element.classList.toggle("text-red-600", isError);
+      element.classList.toggle("text-gray-500", !isError);
+      element.classList.toggle("text-green-700", !isError && Boolean(turnstileToken));
+    }
+
+    function resetEmployerTurnstile(message = "CAPTCHAをもう一度確認してください。") {
+      turnstileToken = null;
+      if (turnstileWidgetId !== null && window.turnstile) {
+        window.turnstile.reset(turnstileWidgetId);
+      }
+      setTurnstileStatus(message);
+    }
 
     async function initializeEmployerAuth() {
       const { data, error } = await supabaseClient.auth.getSession();
@@ -421,6 +481,11 @@
     async function signUpEmployer() {
       const email = document.getElementById("employerEmail").value.trim();
       const password = document.getElementById("employerPassword").value;
+      const siteKey = document.querySelector('meta[name="cloudflare-turnstile-sitekey"]').content.trim();
+      if (!siteKey) {
+        setAuthMessage("新規登録の安全対策を準備中です。設定完了までお待ちください。", true);
+        return;
+      }
       if (!email || !password) {
         setAuthMessage("メールアドレスとパスワードを入力してください。", true);
         return;
@@ -429,12 +494,22 @@
         setAuthMessage("パスワードは8文字以上で入力してください。", true);
         return;
       }
+      if (!turnstileToken) {
+        setAuthMessage("新規登録の前にCAPTCHA確認を完了してください。", true);
+        return;
+      }
 
-      const { data, error } = await supabaseClient.auth.signUp({ email, password });
+      const { data, error } = await supabaseClient.auth.signUp({
+        email,
+        password,
+        options: { captchaToken: turnstileToken }
+      });
       if (error) {
+        resetEmployerTurnstile("CAPTCHAをもう一度確認してください。");
         setAuthMessage(`新規登録に失敗しました: ${error.message}`, true);
         return;
       }
+      resetEmployerTurnstile("CAPTCHAをもう一度確認してください。");
       if (!data.session) {
         setAuthMessage("登録を受け付けました。確認メールが届いた場合は、メール内のリンクを開いてからログインしてください。");
       } else {
