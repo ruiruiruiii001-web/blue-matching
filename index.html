@@ -145,11 +145,6 @@
         </div>
         <h3 class="font-bold text-sm mb-2">自分の掲載求人</h3>
         <div id="employerDashboardJobs" class="space-y-2 text-sm"></div>
-        <div class="mt-6 border-t pt-4">
-          <h3 class="font-bold text-sm mb-2">公開中の求職者プロフィール</h3>
-          <p class="text-xs text-gray-500 mb-3">本人が公開を許可したプロフィールのみ表示します。名前・電話番号は表示されません。</p>
-          <div id="employerSeekerProfiles" class="space-y-3 text-sm"></div>
-        </div>
       </section>
 
       <div id="employerJobForm" class="bg-white p-6 rounded-lg shadow-md hidden">
@@ -279,9 +274,9 @@
         </div>
 
         <div>
-          <label class="block text-sm font-medium mb-1">希望勤務地（都道府県）</label>
-          <input type="text" id="seekerLocation" placeholder="例: 神奈川県横浜市" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-          <p class="text-xs text-gray-500 mt-1">登録した都道府県に近い求人を一覧で優先します（距離計算ではありません）。</p>
+          <label class="block text-sm font-medium mb-1">希望勤務地（都道府県・市区町村まで）</label>
+          <input type="text" id="seekerLocation" maxlength="100" placeholder="例: 神奈川県横浜市" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+          <p class="text-xs text-gray-500 mt-1">番地・建物名など詳しい住所は入力しないでください。登録した地域に近い求人を一覧で優先します（距離計算ではありません）。</p>
         </div>
 
         <div class="bg-blue-50 p-3 rounded border border-blue-100 space-y-3">
@@ -340,6 +335,15 @@
           </div>
         </div>
 
+        <fieldset class="rounded-lg border border-amber-300 bg-amber-50 p-4">
+          <legend class="px-1 text-sm font-bold text-amber-950">企業へのプロフィール公開（任意）</legend>
+          <label class="flex items-start gap-2 text-sm text-amber-950">
+            <input id="seekerProfilePublic" type="checkbox" class="mt-0.5 h-4 w-4 shrink-0">
+            <span><span class="font-bold">企業アカウントに匿名プロフィールを公開する</span><br>チェックを入れてプロフィールを保存すると、希望職種・都道府県/市区町村・希望給与区分と最低希望額・資格・経験・アピールが企業アカウントに表示されます。名前と電話番号は表示されません。一般公開ではありません。</span>
+          </label>
+          <p class="mt-3 border-t border-amber-200 pt-3 text-xs leading-5 text-amber-900">公開は任意です。チェックを外して保存すると非公開になります。企業アカウントの利用者は本人確認されているとは限らないため、公開する情報に個人を特定できる内容を含めないでください。勤務地は市区町村までにしてください。</p>
+        </fieldset>
+
         <button onclick="saveSeekerProfile()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition shadow text-base">
           ✅ 職人プロフィールを保存する
         </button>
@@ -348,10 +352,6 @@
       <div id="profileSavedMessage" class="mt-4 p-3 bg-blue-50 border border-blue-200 text-blue-800 rounded text-xs hidden">
         👍 プロフィールをアカウントに保存しました。
       </div>
-      <label class="mt-3 flex items-start gap-2 rounded border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
-        <input id="seekerProfilePublic" type="checkbox" class="mt-0.5">
-        <span><span class="font-bold">企業向けに匿名プロフィールを公開する</span><br>公開すると、企業アカウントに希望職種・勤務地・給与・資格・経験・アピール情報が表示されます。名前と電話番号は表示されません。</span>
-      </label>
             </section>
 
             <section id="dashboardView-favorites" class="hidden rounded border p-3">
@@ -368,31 +368,39 @@
 
     <!-- 右側：掲載中の現場求人一覧 -->
     <section id="jobListSection" class="bg-white p-6 rounded-lg shadow-md h-fit order-first md:col-span-2">
-      <div class="flex justify-between items-center mb-4 border-b pb-2">
+      <div class="flex justify-between items-center gap-3 border-b pb-3">
         <h2 id="jobListTitle" class="text-lg font-bold text-gray-800">現場求人一覧 (クラウド)</h2>
         <span id="jobCount" class="text-xs bg-gray-200 text-gray-700 px-2.5 py-1 rounded-full font-bold">0件</span>
       </div>
-      <p id="jobListDescription" class="text-xs text-gray-500 mb-3 hidden">希望職種・勤務地・給与条件に合う求人をおすすめ順に表示します。検索条件は下から変更できます。</p>
+      <p id="jobListDescription" class="mt-3 text-xs text-gray-500 hidden">希望職種・勤務地・給与条件に合う求人をおすすめ順に表示します。検索条件は下から変更できます。</p>
+      <section id="employerSeekerProfilesPanel" class="hidden mt-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm sm:p-5">
+        <p class="mb-4 border-b border-emerald-200 pb-3 text-sm leading-5 text-emerald-900">本人が公開を選んだ匿名プロフィールのみ表示しています。名前・電話番号は表示されません。企業アカウントは事業者の本人確認を行っていないため、表示情報の取り扱いにご注意ください。</p>
+        <div id="employerSeekerProfiles" class="space-y-3 text-sm"></div>
+      </section>
 
-      <!-- 検索バー -->
-      <div class="mb-4">
-        <input type="text" id="searchKeyword" oninput="renderJobList()" placeholder="🔍 職種・勤務地・タグで検索 (例: 横浜, 日払い)..." class="w-full rounded-lg border px-3 py-3 text-base focus:ring-2 focus:ring-blue-500 outline-none">
-      </div>
+      <div id="jobSearchPanel" role="search" class="mt-5 mb-8 rounded-2xl border border-blue-200 bg-blue-50 p-4 shadow-sm sm:p-5">
+        <div class="mb-4">
+          <h3 class="text-base font-bold text-blue-900">求人を検索・絞り込み</h3>
+          <p class="mt-1 text-sm text-blue-800">キーワードや条件を指定して、希望に合う求人を探せます。</p>
+        </div>
 
-      <div class="mb-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <label class="flex items-center gap-2 text-sm text-gray-700">
-          <input type="checkbox" id="openJobsOnly" onchange="renderJobList()" class="h-4 w-4 rounded text-blue-600 focus:ring-blue-500">
-          募集中のみ表示
-        </label>
-        <label class="flex items-center gap-2 text-sm text-gray-700">
-          <input type="checkbox" id="favoritesOnly" onchange="renderJobList()" class="h-4 w-4 rounded text-blue-600 focus:ring-blue-500">
-          お気に入りのみ表示
-        </label>
-      </div>
+        <label for="searchKeyword" class="mb-2 block text-sm font-bold text-gray-700">キーワード</label>
+        <input type="text" id="searchKeyword" oninput="renderJobList()" placeholder="職種・勤務地・タグで検索（例: 横浜、日払い）" class="mb-4 w-full rounded-xl border border-blue-300 bg-white px-4 py-3 text-base shadow-sm outline-none focus:ring-2 focus:ring-blue-500">
 
-      <details id="advancedJobFilters" class="mb-4 rounded-lg border border-gray-200 bg-gray-50">
-        <summary class="cursor-pointer select-none px-4 py-3 text-sm font-bold text-gray-700">条件を追加して絞り込む</summary>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 border-t border-gray-200 p-4">
+        <div class="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <label class="flex min-h-11 items-center gap-2 rounded-lg border border-blue-100 bg-white px-3 text-sm text-gray-700">
+            <input type="checkbox" id="openJobsOnly" onchange="renderJobList()" class="h-4 w-4 rounded text-blue-600 focus:ring-blue-500">
+            募集中のみ表示
+          </label>
+          <label class="flex min-h-11 items-center gap-2 rounded-lg border border-blue-100 bg-white px-3 text-sm text-gray-700">
+            <input type="checkbox" id="favoritesOnly" onchange="renderJobList()" class="h-4 w-4 rounded text-blue-600 focus:ring-blue-500">
+            お気に入りのみ表示
+          </label>
+        </div>
+
+        <details id="advancedJobFilters" class="rounded-xl border border-blue-200 bg-white">
+          <summary class="cursor-pointer select-none rounded-xl px-4 py-3 text-sm font-bold text-blue-900 hover:bg-blue-100">詳細条件を追加</summary>
+          <div class="grid grid-cols-1 gap-3 border-t border-blue-100 p-4 sm:grid-cols-2">
         <label class="text-sm text-gray-700">
           <span class="block mb-1">勤務地</span>
           <select id="locationFilter" onchange="renderJobList()" class="w-full rounded-lg border px-3 py-2.5 text-base focus:ring-2 focus:ring-blue-500 outline-none">
@@ -439,15 +447,16 @@
             <option value="capacity">募集人数が少ない順</option>
           </select>
         </label>
-        </div>
-      </details>
+          </div>
+        </details>
 
-      <div id="activeJobFilters" class="mb-3 flex flex-wrap items-center justify-between gap-2 text-sm hidden">
-        <p id="activeJobFilterSummary" class="text-gray-600" aria-live="polite"></p>
-        <button type="button" onclick="resetJobFilters()" class="min-h-10 rounded-lg border border-blue-200 px-3 py-2 font-bold text-blue-700 hover:bg-blue-50">条件をリセット</button>
+        <div id="activeJobFilters" class="mt-4 flex flex-wrap items-center justify-between gap-2 text-sm hidden">
+          <p id="activeJobFilterSummary" class="text-gray-600" aria-live="polite"></p>
+          <button type="button" onclick="resetJobFilters()" class="min-h-10 rounded-lg border border-blue-200 bg-white px-3 py-2 font-bold text-blue-700 hover:bg-blue-50">条件をリセット</button>
+        </div>
       </div>
 
-      <div id="jobList" class="space-y-4 max-h-[none] overflow-visible pr-0 sm:max-h-[700px] sm:overflow-y-auto sm:pr-1" aria-live="polite">
+      <div id="jobList" class="mt-6 space-y-4 max-h-[none] overflow-visible pr-0 sm:max-h-[700px] sm:overflow-y-auto sm:pr-1" aria-live="polite">
         <!-- 求人カード -->
       </div>
     </section>
@@ -1209,6 +1218,10 @@
       const employerSection = document.getElementById("employerSection");
       const seekerSection = document.getElementById("seekerSection");
       const jobListSection = document.getElementById("jobListSection");
+      const jobSearchPanel = document.getElementById("jobSearchPanel");
+      const jobList = document.getElementById("jobList");
+      const seekerProfilesPanel = document.getElementById("employerSeekerProfilesPanel");
+      const jobCount = document.getElementById("jobCount");
       const tabEmployerBtn = document.getElementById("tabEmployerBtn");
       const tabSeekerBtn = document.getElementById("tabSeekerBtn");
 
@@ -1216,6 +1229,10 @@
         employerSection.classList.add("hidden");
         seekerSection.classList.add("hidden");
         jobListSection.classList.add("order-first", "md:col-span-2");
+        seekerProfilesPanel.classList.add("hidden");
+        jobSearchPanel.classList.remove("hidden");
+        jobList.classList.remove("hidden");
+        jobCount.classList.remove("hidden");
         document.getElementById("jobListTitle").innerText = "現場求人一覧";
         document.getElementById("jobListDescription").classList.add("hidden");
         renderJobList();
@@ -1229,13 +1246,24 @@
         jobListSection.classList.remove("order-first", "md:col-span-2");
         tabEmployerBtn.className = "flex-1 py-3.5 font-bold text-sm md:text-base border-b-2 border-blue-600 text-blue-600 focus:outline-none transition";
         tabSeekerBtn.className = "flex-1 py-3.5 font-bold text-sm md:text-base border-b-2 border-transparent text-gray-500 hover:text-blue-600 focus:outline-none transition";
-        document.getElementById("jobListTitle").innerText = "現場求人一覧 (クラウド)";
+        const showSeekerProfiles = Boolean(currentUser && accountType === "employer");
+        seekerProfilesPanel.classList.toggle("hidden", !showSeekerProfiles);
+        jobSearchPanel.classList.toggle("hidden", showSeekerProfiles);
+        jobList.classList.toggle("hidden", showSeekerProfiles);
+        jobCount.classList.toggle("hidden", showSeekerProfiles);
+        document.getElementById("jobListTitle").innerText = showSeekerProfiles
+          ? "公開中の求職者プロフィール"
+          : "現場求人一覧 (クラウド)";
         document.getElementById("jobListDescription").classList.add("hidden");
       } else {
         document.getElementById("jobSort").value = "recommended";
         employerSection.classList.add("hidden");
         seekerSection.classList.remove("hidden");
         jobListSection.classList.add("order-first", "md:col-span-2");
+        seekerProfilesPanel.classList.add("hidden");
+        jobSearchPanel.classList.remove("hidden");
+        jobList.classList.remove("hidden");
+        jobCount.classList.remove("hidden");
         tabSeekerBtn.className = "flex-1 py-3.5 font-bold text-sm md:text-base border-b-2 border-blue-600 text-blue-600 focus:outline-none transition";
         tabEmployerBtn.className = "flex-1 py-3.5 font-bold text-sm md:text-base border-b-2 border-transparent text-gray-500 hover:text-blue-600 focus:outline-none transition";
         document.getElementById("jobListTitle").innerText = "希望に合う求人を探す";
@@ -1667,13 +1695,15 @@
               ? profile.licenses.map(license => escapeHtml(String(license))).join("、")
               : "登録なし";
             return `
-              <article class="rounded border p-3">
-                <p><span class="font-bold">希望職種:</span> ${escapeHtml(String(profile.job_type || "未設定"))}</p>
-                <p><span class="font-bold">希望勤務地:</span> ${escapeHtml(String(profile.location || "未設定"))}</p>
-                <p><span class="font-bold">希望給与:</span> ${escapeHtml(pay)}</p>
-                <p><span class="font-bold">保有資格:</span> ${licenses}</p>
-                <p><span class="font-bold">現場経験:</span> ${escapeHtml(String(profile.exp_years || "未設定"))}</p>
-                <p><span class="font-bold">アピール:</span> ${escapeHtml(String(profile.stamina || "未設定"))}</p>
+              <article class="rounded-xl border border-emerald-100 bg-white p-4 shadow-sm">
+                <div class="grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-2">
+                  <p class="sm:col-span-2 text-base"><span class="font-bold text-emerald-900">希望職種:</span> ${escapeHtml(String(profile.job_type || "未設定"))}</p>
+                  <p><span class="font-bold">希望勤務地:</span> ${escapeHtml(String(profile.location || "未設定"))}</p>
+                  <p><span class="font-bold">希望給与:</span> ${escapeHtml(pay)}</p>
+                  <p class="sm:col-span-2"><span class="font-bold">保有資格:</span> ${licenses}</p>
+                  <p><span class="font-bold">現場経験:</span> ${escapeHtml(String(profile.exp_years || "未設定"))}</p>
+                  <p><span class="font-bold">アピール:</span> ${escapeHtml(String(profile.stamina || "未設定"))}</p>
+                </div>
               </article>
             `;
           }).join("")
