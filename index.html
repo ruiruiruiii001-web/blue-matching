@@ -193,6 +193,18 @@
           募集中のみ表示
         </label>
         <label class="text-sm text-gray-700">
+          <span class="block mb-1">勤務地</span>
+          <select id="locationFilter" onchange="renderJobList()" class="w-full border rounded px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+            <option value="">すべての勤務地</option>
+          </select>
+        </label>
+        <label class="text-sm text-gray-700">
+          <span class="block mb-1">タグ</span>
+          <select id="tagFilter" onchange="renderJobList()" class="w-full border rounded px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+            <option value="">すべてのタグ</option>
+          </select>
+        </label>
+        <label class="text-sm text-gray-700">
           <span class="block mb-1">募集人数</span>
           <select id="capacityFilter" onchange="renderJobList()" class="w-full border rounded px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
             <option value="">すべて</option>
@@ -448,6 +460,9 @@
       const keyword = document.getElementById("searchKeyword").value.toLowerCase();
       const openJobsOnly = document.getElementById("openJobsOnly").checked;
       const capacityFilter = document.getElementById("capacityFilter").value;
+      updateJobFilterOptions();
+      const locationFilter = document.getElementById("locationFilter").value;
+      const tagFilter = document.getElementById("tagFilter").value;
       const sortBy = document.getElementById("jobSort").value;
 
       const filteredJobs = cachedJobs
@@ -457,7 +472,9 @@
             (job.location || "").toLowerCase().includes(keyword) ||
             (job.tags && job.tags.some(t => t.toLowerCase().includes(keyword)))) &&
           (!openJobsOnly || !job.is_closed) &&
-          (!capacityFilter || getCapacityOptionValue(job.capacity) === capacityFilter)
+            (!capacityFilter || getCapacityOptionValue(job.capacity) === capacityFilter) &&
+            (!locationFilter || (job.location || "").trim() === locationFilter) &&
+            (!tagFilter || (Array.isArray(job.tags) && job.tags.includes(tagFilter)))
         )
         .sort((a, b) => {
           if (sortBy === "salary") {
@@ -502,6 +519,30 @@
           </div>
         </div>
       `).join("");
+    }
+
+    function updateJobFilterOptions() {
+      const filters = [
+        {
+          id: "locationFilter",
+          emptyLabel: "すべての勤務地",
+          values: cachedJobs.map(job => (job.location || "").trim()).filter(Boolean)
+        },
+        {
+          id: "tagFilter",
+          emptyLabel: "すべてのタグ",
+          values: cachedJobs.flatMap(job => Array.isArray(job.tags) ? job.tags : [])
+        }
+      ];
+
+      filters.forEach(({ id, emptyLabel, values }) => {
+        const select = document.getElementById(id);
+        const previousValue = select.value;
+        const options = [...new Set(values)].sort((a, b) => a.localeCompare(b, "ja"));
+        select.replaceChildren(new Option(emptyLabel, ""));
+        options.forEach(value => select.add(new Option(value, value)));
+        select.value = options.includes(previousValue) ? previousValue : "";
+      });
     }
 
     // モーダル表示
