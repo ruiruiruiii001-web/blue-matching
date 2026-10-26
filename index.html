@@ -57,7 +57,7 @@
               <label class="block text-sm font-medium mb-1">募集人数</label>
               <select id="jobCapacity" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
                 <option value="1">1〜3名（少人数・ピンポイント）</option>
-                <option value="1" selected>1〜3名（少人数・ピンポイント）</option>
+                <option value="4" selected>4〜6名（チーム・中規模）</option>
                 <option value="7">7〜10名（大規模）</option>
                 <option value="11">11名以上（超大型・大量募集）</option>
               </select>
@@ -185,6 +185,30 @@
       <!-- 検索バー -->
       <div class="mb-4">
         <input type="text" id="searchKeyword" oninput="renderJobList()" placeholder="🔍 職種・勤務地・タグで検索 (例: 横浜, 日払い)..." class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+        <label class="flex items-center gap-2 text-sm text-gray-700">
+          <input type="checkbox" id="openJobsOnly" onchange="renderJobList()" class="rounded text-blue-600 focus:ring-blue-500">
+          募集中のみ表示
+        </label>
+        <label class="text-sm text-gray-700">
+          <span class="block mb-1">募集人数</span>
+          <select id="capacityFilter" onchange="renderJobList()" class="w-full border rounded px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+            <option value="">すべて</option>
+            <option value="1">1〜3名（少人数・ピンポイント）</option>
+            <option value="4">4〜6名（チーム・中規模）</option>
+            <option value="7">7〜10名（大規模）</option>
+            <option value="11">11名以上（超大型・大量募集）</option>
+          </select>
+        </label>
+        <label class="text-sm text-gray-700 sm:col-span-2">
+          <span class="block mb-1">並び替え</span>
+          <select id="jobSort" onchange="renderJobList()" class="w-full border rounded px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+            <option value="newest">新着順</option>
+            <option value="salary">給与額が高い順</option>
+          </select>
+        </label>
       </div>
 
       <div id="jobList" class="space-y-4 max-h-[600px] overflow-y-auto pr-1">
@@ -422,12 +446,26 @@
       const jobList = document.getElementById("jobList");
       const jobCount = document.getElementById("jobCount");
       const keyword = document.getElementById("searchKeyword").value.toLowerCase();
+      const openJobsOnly = document.getElementById("openJobsOnly").checked;
+      const capacityFilter = document.getElementById("capacityFilter").value;
+      const sortBy = document.getElementById("jobSort").value;
 
-      const filteredJobs = cachedJobs.filter(job => 
-        (job.title || "").toLowerCase().includes(keyword) ||
-        (job.location || "").toLowerCase().includes(keyword) ||
-        (job.tags && job.tags.some(t => t.toLowerCase().includes(keyword)))
-      );
+      const filteredJobs = cachedJobs
+        .filter(job =>
+          (!keyword ||
+            (job.title || "").toLowerCase().includes(keyword) ||
+            (job.location || "").toLowerCase().includes(keyword) ||
+            (job.tags && job.tags.some(t => t.toLowerCase().includes(keyword)))) &&
+          (!openJobsOnly || !job.is_closed) &&
+          (!capacityFilter || getCapacityOptionValue(job.capacity) === capacityFilter)
+        )
+        .sort((a, b) => {
+          if (sortBy === "salary") {
+            const salaryDifference = getSalaryAmount(b.salary) - getSalaryAmount(a.salary);
+            if (salaryDifference !== 0) return salaryDifference;
+          }
+          return compareJobsByNewest(a, b);
+        });
 
       jobCount.innerText = `${filteredJobs.length}件`;
 
@@ -547,6 +585,28 @@
       if (count <= 6) return "4";
       if (count <= 10) return "7";
       return "11";
+    }
+
+    function getSalaryAmount(salary) {
+      const normalizedSalary = String(salary || "").replace(/,/g, "");
+      const match = normalizedSalary.match(/(\d+(?:\.\d+)?)\s*(万|千)?/);
+      if (!match) return -1;
+
+      const multiplier = match[2] === "万" ? 10000 : match[2] === "千" ? 1000 : 1;
+      return Number(match[1]) * multiplier;
+    }
+
+    function compareJobsByNewest(a, b) {
+      const aDate = Date.parse(a.created_at || "");
+      const bDate = Date.parse(b.created_at || "");
+      if (Number.isFinite(aDate) && Number.isFinite(bDate) && aDate !== bDate) {
+        return bDate - aDate;
+      }
+
+      const aId = Number(a.id);
+      const bId = Number(b.id);
+      if (Number.isFinite(aId) && Number.isFinite(bId)) return bId - aId;
+      return String(b.id).localeCompare(String(a.id));
     }
 
     // Supabaseから求人を削除
