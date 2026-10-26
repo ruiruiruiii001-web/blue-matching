@@ -27,7 +27,7 @@
   </header>
 
   <!-- タブ切替 -->
-  <div class="max-w-5xl mx-auto px-4 mt-4">
+  <div id="accountModeTabs" class="hidden max-w-5xl mx-auto px-4 mt-4">
     <div class="flex border-b border-gray-300 bg-white rounded-t-lg shadow-sm">
       <button id="tabSeekerBtn" onclick="switchTab('seeker')" class="flex-1 py-3.5 font-bold text-sm md:text-base border-b-2 border-blue-600 text-blue-600 focus:outline-none transition">
         👷 職人・求職者向け（即戦力カード）
@@ -545,7 +545,7 @@
     let reportTurnstileWidgetId = null;
 
     document.addEventListener("DOMContentLoaded", () => {
-      switchTab("seeker");
+      switchTab("guest");
       fetchJobs();
       initializeEmployerAuth();
       initializeEmployerTurnstile();
@@ -746,9 +746,10 @@
         showDashboardView(activeDashboardView);
         clearSeekerProfileForm();
         if (currentUser) {
+          switchTab("employer");
           const user = currentUser;
           setTimeout(() => loadAccountType(user), 0);
-        }
+        } else switchTab("guest");
       }
       if (!currentUser && editingJobId !== null) cancelJobEdit();
       updateHeaderAccountButton();
@@ -854,6 +855,7 @@
       accountTypeLoadUserId = null;
       accountTypeLoading = false;
       updateAccountTypeUI();
+      if (accountType) switchTab(accountType);
       renderEmployerDashboard();
       if (accountType && accountDataUserId !== user.id) loadAccountData(user);
     }
@@ -876,6 +878,7 @@
       document.getElementById("existingAccountType").value = "";
       setAuthMessage("アカウント種類を登録しました。");
       updateAccountTypeUI();
+      switchTab(accountType);
       renderEmployerDashboard();
       loadAccountData(currentUser);
     }
@@ -1019,12 +1022,25 @@
     }
 
     function switchTab(tab) {
+      if (currentUser && (accountType === "seeker" || accountType === "employer")) {
+        tab = accountType;
+      }
       activeTab = tab;
       const employerSection = document.getElementById("employerSection");
       const seekerSection = document.getElementById("seekerSection");
       const jobListSection = document.getElementById("jobListSection");
       const tabEmployerBtn = document.getElementById("tabEmployerBtn");
       const tabSeekerBtn = document.getElementById("tabSeekerBtn");
+
+      if (tab === "guest") {
+        employerSection.classList.add("hidden");
+        seekerSection.classList.add("hidden");
+        jobListSection.classList.add("order-first", "md:col-span-2");
+        document.getElementById("jobListTitle").innerText = "現場求人一覧";
+        document.getElementById("jobListDescription").classList.add("hidden");
+        renderJobList();
+        return;
+      }
 
       if (tab === 'employer') {
         document.getElementById("jobSort").value = "newest";
