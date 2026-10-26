@@ -26,6 +26,17 @@
     </div>
   </header>
 
+  <div id="myPageOverlay" class="fixed inset-0 z-50 hidden items-center justify-center p-0 sm:p-4" onclick="handleMyPageOverlayClick(event)">
+    <button type="button" aria-label="マイページを閉じる" aria-hidden="true" tabindex="-1" onclick="closeAccountPanel()" class="absolute inset-0 h-full w-full bg-black/60"></button>
+    <section role="dialog" aria-modal="true" aria-labelledby="myPageOverlayTitle" class="relative z-10 flex max-h-full w-full max-w-5xl flex-col overflow-hidden bg-gray-100 shadow-2xl sm:max-h-[92vh] sm:rounded-2xl">
+      <div class="flex shrink-0 items-center justify-between border-b bg-white px-4 py-3 sm:px-6">
+        <h2 id="myPageOverlayTitle" class="text-lg font-bold text-gray-900">マイページ</h2>
+        <button id="myPageOverlayClose" type="button" aria-label="マイページを閉じる" onclick="closeAccountPanel()" class="flex h-11 w-11 items-center justify-center rounded-full text-2xl font-bold text-gray-600 hover:bg-gray-100" autofocus>×</button>
+      </div>
+      <div id="myPageOverlayContent" class="min-h-0 flex-1 overflow-y-auto p-3 sm:p-6"></div>
+    </section>
+  </div>
+
   <!-- タブ切替 -->
   <div id="accountModeTabs" class="hidden max-w-5xl mx-auto px-4 mt-4">
     <div class="flex border-b border-gray-300 bg-white rounded-t-lg shadow-sm">
@@ -115,7 +126,7 @@
       <section id="employerDashboard" class="hidden scroll-mt-20 bg-white p-6 rounded-lg shadow-md">
         <div class="flex flex-wrap items-center justify-between gap-3 mb-4 border-b pb-2">
           <h2 class="text-lg font-bold text-blue-600">企業マイページ</h2>
-          <button type="button" onclick="document.getElementById('employerJobForm').scrollIntoView({ behavior: 'smooth' })" class="text-sm font-bold text-blue-700 underline">＋ 求人を新規投稿</button>
+          <button type="button" onclick="closeAccountPanel(); document.getElementById('employerJobForm').scrollIntoView({ behavior: 'smooth' })" class="text-sm font-bold text-blue-700 underline">＋ 求人を新規投稿</button>
         </div>
         <h3 class="font-bold text-sm mb-2">自分の掲載求人</h3>
         <div id="employerDashboardJobs" class="space-y-2 text-sm"></div>
@@ -559,6 +570,9 @@
     let currentUser = null;
     let accountType = null;
     let dashboardOpen = false;
+    let dashboardReturnPlaceholder = null;
+    let dashboardScrollPosition = 0;
+    let previousBodyOverflow = "";
     let accountTypeLoadUserId = null;
     let accountTypeLoading = false;
     let publicSeekerProfiles = [];
@@ -575,6 +589,30 @@
       fetchJobs();
       initializeEmployerAuth();
       initializeEmployerTurnstile();
+    });
+
+    document.addEventListener("keydown", event => {
+      if (!dashboardOpen) return;
+      if (event.key === "Escape") {
+        closeAccountPanel();
+        return;
+      }
+      if (event.key !== "Tab") return;
+
+      const dialog = document.querySelector("#myPageOverlay [role='dialog']");
+      const focusable = Array.from(dialog.querySelectorAll(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      )).filter(element => element.getClientRects().length > 0);
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     });
 
     function initializeEmployerTurnstile() {
@@ -756,6 +794,7 @@
       loggedInPanel.classList.toggle("flex", Boolean(currentUser));
       document.getElementById("employerAccountEmail").innerText = currentUser?.email || "";
       if (previousUserId !== (currentUser?.id || null)) {
+        if (dashboardOpen) closeAccountPanel();
         accountType = null;
         dashboardOpen = false;
         accountTypeLoadUserId = null;
@@ -813,23 +852,31 @@
       button.innerText = !currentUser
         ? "ログイン / 登録"
         : accountType === "employer" || accountType === "seeker"
-          ? dashboardOpen ? "マイページを閉じる" : "マイページ"
+          ? "マイページ"
           : "アカウント設定";
       button.setAttribute("aria-expanded", String(Boolean(currentUser && dashboardOpen)));
     }
 
     function openAccountPanel() {
       if (currentUser?.id && (accountType === "seeker" || accountType === "employer")) {
-        dashboardOpen = !dashboardOpen;
-        updateAccountTypeUI();
         if (dashboardOpen) {
-          switchTab(accountType);
-          document.getElementById(accountType === "seeker" ? "seekerDashboard" : "employerDashboard")
-            .scrollIntoView({ behavior: "smooth", block: "start" });
-        } else {
-          document.getElementById("jobListSection")
-            .scrollIntoView({ behavior: "smooth", block: "start" });
+          closeAccountPanel();
+          return;
         }
+        dashboardOpen = true;
+        switchTab(accountType);
+        updateAccountTypeUI();
+        const dashboard = document.getElementById(accountType === "seeker" ? "seekerDashboard" : "employerDashboard");
+        dashboardReturnPlaceholder = document.createComment("my-page-return-point");
+        dashboard.parentNode.insertBefore(dashboardReturnPlaceholder, dashboard);
+        document.getElementById("myPageOverlayContent").append(dashboard);
+        dashboardScrollPosition = window.scrollY;
+        previousBodyOverflow = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+        const overlay = document.getElementById("myPageOverlay");
+        overlay.classList.remove("hidden");
+        overlay.classList.add("flex");
+        document.getElementById("myPageOverlayClose").focus();
         return;
       }
       switchTab("employer");
@@ -837,6 +884,29 @@
         ? document.getElementById("accountTypeSetup")
         : document.getElementById("employerAuthPanel");
       target.scrollIntoView({ behavior: "smooth" });
+    }
+
+    function closeAccountPanel() {
+      if (!dashboardOpen) return;
+      const dashboard = document.getElementById("seekerDashboard").parentNode === document.getElementById("myPageOverlayContent")
+        ? document.getElementById("seekerDashboard")
+        : document.getElementById("employerDashboard");
+      if (dashboardReturnPlaceholder?.parentNode) {
+        dashboardReturnPlaceholder.replaceWith(dashboard);
+      }
+      dashboardReturnPlaceholder = null;
+      dashboardOpen = false;
+      const overlay = document.getElementById("myPageOverlay");
+      overlay.classList.add("hidden");
+      overlay.classList.remove("flex");
+      document.body.style.overflow = previousBodyOverflow;
+      window.scrollTo({ top: dashboardScrollPosition, behavior: "instant" });
+      updateAccountTypeUI();
+      document.getElementById("headerAccountButton").focus();
+    }
+
+    function handleMyPageOverlayClick(event) {
+      if (event.target === document.getElementById("myPageOverlay")) closeAccountPanel();
     }
 
     function promptLogin(message) {
