@@ -63,9 +63,23 @@
               </select>
             </div>
             <div>
-              <label class="block text-sm font-medium mb-1">給与（日給・月給）</label>
+              <label class="block text-sm font-medium mb-1">給与表記</label>
               <input type="text" id="jobSalary" placeholder="例: 日給 15,000円〜" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
             </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-1">給与条件（絞り込み用・任意）</label>
+            <div class="grid grid-cols-2 gap-3">
+              <select id="jobPayType" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                <option value="">給与区分を選択</option>
+                <option value="hourly">時給</option>
+                <option value="daily">日給</option>
+                <option value="monthly">月給</option>
+              </select>
+              <input type="number" id="jobPayAmount" min="1" step="1" placeholder="金額（円）" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+            <p class="text-xs text-gray-500 mt-1">給与額で検索できるよう、区分と金額を入力してください。</p>
           </div>
 
           <div class="grid grid-cols-2 gap-4">
@@ -127,6 +141,12 @@
             <label class="block text-sm font-medium mb-1">携帯電話番号</label>
             <input type="text" id="seekerPhone" placeholder="例: 090-XXXX-XXXX" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
           </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-1">希望勤務地（都道府県）</label>
+          <input type="text" id="seekerLocation" placeholder="例: 神奈川県横浜市" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+          <p class="text-xs text-gray-500 mt-1">登録した都道府県に近い求人を一覧で優先します（距離計算ではありません）。</p>
         </div>
 
         <!-- 資格チェックボックス -->
@@ -215,11 +235,26 @@
             <option value="11">11名以上（超大型・大量募集）</option>
           </select>
         </label>
+        <label class="text-sm text-gray-700">
+          <span class="block mb-1">給与区分</span>
+          <select id="salaryTypeFilter" onchange="renderJobList()" class="w-full border rounded px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+            <option value="">すべて</option>
+            <option value="hourly">時給</option>
+            <option value="daily">日給</option>
+            <option value="monthly">月給</option>
+          </select>
+        </label>
+        <label class="text-sm text-gray-700">
+          <span class="block mb-1">最低給与額（円）</span>
+          <input type="number" id="minimumSalary" min="0" step="1" oninput="renderJobList()" placeholder="例: 15000" class="w-full border rounded px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+          <span class="block text-xs text-gray-500 mt-1">最低額で絞る場合は給与区分も選択してください。</span>
+        </label>
         <label class="text-sm text-gray-700 sm:col-span-2">
           <span class="block mb-1">並び替え</span>
           <select id="jobSort" onchange="renderJobList()" class="w-full border rounded px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
             <option value="newest">新着順</option>
             <option value="salary">給与額が高い順</option>
+            <option value="capacity">募集人数が少ない順</option>
           </select>
         </label>
       </div>
@@ -329,6 +364,9 @@
       const line = document.getElementById("jobLine").value.trim();
       const duties = document.getElementById("jobDuties").value.trim();
       const capacity = parseInt(document.getElementById("jobCapacity").value) || 1;
+      const payType = document.getElementById("jobPayType").value;
+      const payAmountValue = document.getElementById("jobPayAmount").value;
+      const payAmount = payAmountValue ? Number(payAmountValue) : null;
 
       const checkedTags = Array.from(document.querySelectorAll('input[name="jobTag"]:checked')).map(cb => cb.value);
 
@@ -337,8 +375,15 @@
         return;
       }
 
+      if ((payType && (!Number.isFinite(payAmount) || payAmount <= 0)) || (!payType && payAmountValue)) {
+        alert("給与の絞り込み条件を設定する場合は、給与区分と1円以上の金額を両方入力してください。");
+        return;
+      }
+
       const jobData = {
         title, location, salary, phone, line, duties, capacity,
+        pay_type: payType || null,
+        pay_amount: payAmount,
         tags: checkedTags
       };
 
@@ -367,6 +412,9 @@
       document.getElementById("jobTitle").value = job.title || "";
       document.getElementById("jobLocation").value = job.location || "";
       document.getElementById("jobSalary").value = job.salary || "";
+      document.getElementById("jobPayType").value = getJobPayType(job);
+      const payAmount = getJobPayAmount(job);
+      document.getElementById("jobPayAmount").value = payAmount > 0 ? String(payAmount) : "";
       document.getElementById("jobPhone").value = job.phone || "";
       document.getElementById("jobLine").value = job.line || "";
       document.getElementById("jobDuties").value = job.duties || "";
@@ -385,6 +433,8 @@
       document.getElementById("jobTitle").value = "";
       document.getElementById("jobLocation").value = "";
       document.getElementById("jobSalary").value = "";
+      document.getElementById("jobPayType").value = "";
+      document.getElementById("jobPayAmount").value = "";
       document.getElementById("jobPhone").value = "";
       document.getElementById("jobLine").value = "";
       document.getElementById("jobDuties").value = "";
@@ -424,6 +474,7 @@
       const profile = {
         name: document.getElementById("seekerName").value.trim(),
         phone: document.getElementById("seekerPhone").value.trim(),
+        location: document.getElementById("seekerLocation").value.trim(),
         licenses: checkedLic,
         expYears: document.getElementById("seekerExpYears").value,
         stamina: document.getElementById("seekerStamina").value
@@ -436,6 +487,7 @@
 
       localStorage.setItem("seeker_profile", JSON.stringify(profile));
       document.getElementById("profileSavedMessage").classList.remove("hidden");
+      renderJobList();
     }
 
     function loadSeekerProfile() {
@@ -444,6 +496,7 @@
       const profile = JSON.parse(saved);
       document.getElementById("seekerName").value = profile.name || "";
       document.getElementById("seekerPhone").value = profile.phone || "";
+      document.getElementById("seekerLocation").value = profile.location || "";
       document.getElementById("seekerExpYears").value = profile.expYears || "未経験（やる気あり）";
       document.getElementById("seekerStamina").value = profile.stamina || "★★★★★ (自信あり)";
 
@@ -464,7 +517,11 @@
       updateJobFilterOptions();
       const locationFilter = document.getElementById("locationFilter").value;
       const selectedTags = Array.from(document.querySelectorAll('input[name="tagFilter"]:checked')).map(input => input.value);
+      const salaryTypeFilter = document.getElementById("salaryTypeFilter").value;
+      const minimumSalary = Number(document.getElementById("minimumSalary").value) || 0;
       const sortBy = document.getElementById("jobSort").value;
+      const savedProfile = localStorage.getItem("seeker_profile");
+      const preferredLocation = savedProfile ? JSON.parse(savedProfile).location || "" : "";
 
       const filteredJobs = cachedJobs
         .filter(job =>
@@ -475,15 +532,25 @@
           (!openJobsOnly || !job.is_closed) &&
             (!capacityFilter || getCapacityOptionValue(job.capacity) === capacityFilter) &&
             (!locationFilter || (job.location || "").trim() === locationFilter) &&
+            (!salaryTypeFilter || getJobPayType(job) === salaryTypeFilter) &&
+            (!minimumSalary || (salaryTypeFilter && getJobPayAmount(job) >= minimumSalary)) &&
             (!selectedTags.length || (Array.isArray(job.tags) && selectedTags.some(tag => job.tags.includes(tag))))
         )
         .sort((a, b) => {
+          if (preferredLocation) {
+            const locationDifference = getLocationMatchScore(b.location, preferredLocation) - getLocationMatchScore(a.location, preferredLocation);
+            if (locationDifference !== 0) return locationDifference;
+          }
           if (selectedTags.length > 0) {
             const matchDifference = getTagMatchCount(b, selectedTags) - getTagMatchCount(a, selectedTags);
             if (matchDifference !== 0) return matchDifference;
           }
+          if (sortBy === "capacity") {
+            const capacityDifference = getCapacitySortValue(a.capacity) - getCapacitySortValue(b.capacity);
+            if (capacityDifference !== 0) return capacityDifference;
+          }
           if (sortBy === "salary") {
-            const salaryDifference = getSalaryAmount(b.salary) - getSalaryAmount(a.salary);
+            const salaryDifference = getJobPayAmount(b) - getJobPayAmount(a);
             if (salaryDifference !== 0) return salaryDifference;
           }
           return compareJobsByNewest(a, b);
@@ -657,6 +724,50 @@
       if (count <= 6) return "4";
       if (count <= 10) return "7";
       return "11";
+    }
+
+    function getCapacitySortValue(capacity) {
+      const count = Number.parseInt(capacity, 10);
+      return Number.isFinite(count) && count > 0 ? count : 1;
+    }
+
+    function getJobPayType(job) {
+      if (["hourly", "daily", "monthly"].includes(job.pay_type)) return job.pay_type;
+      const salary = String(job.salary || "");
+      if (/時給|時間給/.test(salary)) return "hourly";
+      if (/日給|日額/.test(salary)) return "daily";
+      if (/月給|月額/.test(salary)) return "monthly";
+      return "";
+    }
+
+    function getJobPayAmount(job) {
+      const amount = Number(job.pay_amount);
+      if (Number.isFinite(amount) && amount > 0) return amount;
+      return getSalaryAmount(job.salary);
+    }
+
+    function getLocationMatchScore(jobLocation, preferredLocation) {
+      const jobArea = String(jobLocation || "").trim();
+      const preferredArea = String(preferredLocation || "").trim();
+      if (!jobArea || !preferredArea) return 0;
+      if (jobArea.includes(preferredArea) || preferredArea.includes(jobArea)) return 2;
+
+      const jobPrefecture = getPrefecture(jobArea);
+      const preferredPrefecture = getPrefecture(preferredArea);
+      return jobPrefecture && jobPrefecture === preferredPrefecture ? 1 : 0;
+    }
+
+    function getPrefecture(location) {
+      const prefectures = [
+        "北海道", "青森県", "岩手県", "宮城県", "秋田県", "山形県", "福島県",
+        "茨城県", "栃木県", "群馬県", "埼玉県", "千葉県", "東京都", "神奈川県",
+        "新潟県", "富山県", "石川県", "福井県", "山梨県", "長野県", "岐阜県",
+        "静岡県", "愛知県", "三重県", "滋賀県", "京都府", "大阪府", "兵庫県",
+        "奈良県", "和歌山県", "鳥取県", "島根県", "岡山県", "広島県", "山口県",
+        "徳島県", "香川県", "愛媛県", "高知県", "福岡県", "佐賀県", "長崎県",
+        "熊本県", "大分県", "宮崎県", "鹿児島県", "沖縄県"
+      ];
+      return prefectures.find(prefecture => location.includes(prefecture)) || "";
     }
 
     function getSalaryAmount(salary) {
