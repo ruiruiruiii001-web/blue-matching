@@ -55,6 +55,12 @@
             <button onclick="signInEmployer()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg transition">ログイン</button>
             <button onclick="signUpEmployer()" class="border border-blue-600 text-blue-600 hover:bg-blue-50 font-bold py-2.5 rounded-lg transition">新規登録</button>
           </div>
+          <button type="button" onclick="showPasswordResetRequest()" class="text-sm text-blue-700 underline">パスワードを忘れた場合</button>
+          <div id="passwordResetRequestPanel" class="hidden border-t pt-3 space-y-2">
+            <p class="text-sm font-medium">登録したメールアドレスに再設定リンクを送ります。</p>
+            <button type="button" onclick="sendPasswordReset()" class="w-full border border-blue-600 text-blue-700 font-bold py-2 rounded-lg">再設定メールを送る</button>
+            <button type="button" onclick="hidePasswordResetRequest()" class="text-sm text-gray-600 underline">ログインに戻る</button>
+          </div>
           <div id="employerTurnstile" class="min-h-4"></div>
           <p id="turnstileStatus" role="status" aria-live="polite" class="text-xs text-gray-500">新規登録にはCAPTCHA確認が必要です。現在、設定準備中です。</p>
           <p class="text-xs text-gray-500">新規登録後、確認メールが届いた場合はメール内のリンクを開いてからログインしてください。</p>
@@ -62,6 +68,17 @@
         <div id="employerLoggedIn" class="hidden items-center justify-between gap-3">
           <p class="text-sm text-gray-700">ログイン中: <span id="employerAccountEmail" class="font-medium"></span></p>
           <button onclick="signOutEmployer()" class="text-sm text-blue-600 hover:underline">ログアウト</button>
+        </div>
+        <div id="passwordRecoveryPanel" class="hidden mt-4 border-t pt-4 space-y-3">
+          <h3 class="font-bold text-blue-700">新しいパスワードを設定</h3>
+          <p class="text-xs text-gray-600">再設定メールのリンクから開いた画面です。8文字以上で入力してください。</p>
+          <label class="block text-sm">新しいパスワード
+            <input type="password" id="newPassword" autocomplete="new-password" minlength="8" class="mt-1 w-full border rounded px-3 py-2.5 text-sm">
+          </label>
+          <label class="block text-sm">新しいパスワード（確認）
+            <input type="password" id="confirmNewPassword" autocomplete="new-password" minlength="8" class="mt-1 w-full border rounded px-3 py-2.5 text-sm">
+          </label>
+          <button type="button" onclick="saveNewPassword()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg">新しいパスワードを保存</button>
         </div>
         <p id="authMessage" role="status" aria-live="polite" class="text-sm mt-3 hidden"></p>
       </div>
@@ -616,16 +633,19 @@
     }
 
     async function initializeEmployerAuth() {
+      supabaseClient.auth.onAuthStateChange((_event, session) => {
+        updateEmployerAuth(session);
+        if (_event === "PASSWORD_RECOVERY") {
+          document.getElementById("passwordRecoveryPanel").classList.remove("hidden");
+          document.getElementById("newPassword").focus();
+        }
+      });
       const { data, error } = await supabaseClient.auth.getSession();
       if (error) {
         setAuthMessage(`ログイン状態の確認に失敗しました: ${error.message}`, true);
         return;
       }
-
       updateEmployerAuth(data.session);
-      supabaseClient.auth.onAuthStateChange((_event, session) => {
-        updateEmployerAuth(session);
-      });
     }
 
     function updateEmployerAuth(session) {
@@ -662,6 +682,65 @@
       element.innerText = message;
       element.classList.remove("hidden", "text-red-600", "text-green-700");
       element.classList.add(isError ? "text-red-600" : "text-green-700");
+    }
+
+    function showPasswordResetRequest() {
+      const email = document.getElementById("employerEmail").value.trim();
+      document.getElementById("passwordResetRequestPanel").classList.remove("hidden");
+      if (!email) {
+        document.getElementById("employerEmail").focus();
+        setAuthMessage("登録したメールアドレスを入力してから、再設定メールを送ってください。", true);
+        return;
+      }
+      setAuthMessage("登録したメールアドレスを確認し、「再設定メールを送る」を押してください。");
+    }
+
+    function hidePasswordResetRequest() {
+      document.getElementById("passwordResetRequestPanel").classList.add("hidden");
+    }
+
+    async function sendPasswordReset() {
+      const email = document.getElementById("employerEmail").value.trim();
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        setAuthMessage("登録したメールアドレスを正しく入力してください。", true);
+        document.getElementById("employerEmail").focus();
+        return;
+      }
+
+      const button = document.querySelector("#passwordResetRequestPanel button[onclick='sendPasswordReset()']");
+      button.disabled = true;
+      const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}${window.location.pathname}`
+      });
+      button.disabled = false;
+      if (error) {
+        setAuthMessage(`再設定メールを送れませんでした: ${error.message}`, true);
+        return;
+      }
+      setAuthMessage("再設定メールを送信しました。受信箱と迷惑メールを確認し、メール内のリンクを開いてください。");
+    }
+
+    async function saveNewPassword() {
+      const password = document.getElementById("newPassword").value;
+      const confirmation = document.getElementById("confirmNewPassword").value;
+      if (password.length < 8) {
+        setAuthMessage("新しいパスワードは8文字以上で入力してください。", true);
+        return;
+      }
+      if (password !== confirmation) {
+        setAuthMessage("2つのパスワードが一致しません。もう一度確認してください。", true);
+        return;
+      }
+
+      const { error } = await supabaseClient.auth.updateUser({ password });
+      if (error) {
+        setAuthMessage(`パスワードを更新できませんでした: ${error.message}`, true);
+        return;
+      }
+      document.getElementById("passwordRecoveryPanel").classList.add("hidden");
+      document.getElementById("newPassword").value = "";
+      document.getElementById("confirmNewPassword").value = "";
+      setAuthMessage("パスワードを変更しました。このままログインして利用できます。");
     }
 
     async function signInEmployer() {
