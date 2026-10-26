@@ -13,7 +13,7 @@
 <body class="bg-gray-100 min-h-screen text-gray-800 pb-20 font-sans">
 
   <!-- ヘッダー -->
-  <header class="bg-blue-600 text-white shadow">
+  <header class="sticky top-0 z-40 bg-blue-600 text-white shadow">
     <div class="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
       <div>
         <h1 class="text-xl font-bold tracking-wide">👷 現場直結！マッチング</h1>
@@ -112,7 +112,7 @@
         <p id="authMessage" role="status" aria-live="polite" class="text-sm mt-3 hidden"></p>
       </div>
 
-      <section id="employerDashboard" class="hidden bg-white p-6 rounded-lg shadow-md">
+      <section id="employerDashboard" class="hidden scroll-mt-20 bg-white p-6 rounded-lg shadow-md">
         <div class="flex flex-wrap items-center justify-between gap-3 mb-4 border-b pb-2">
           <h2 class="text-lg font-bold text-blue-600">企業マイページ</h2>
           <button type="button" onclick="document.getElementById('employerJobForm').scrollIntoView({ behavior: 'smooth' })" class="text-sm font-bold text-blue-700 underline">＋ 求人を新規投稿</button>
@@ -222,7 +222,7 @@
         <button onclick="switchTab('employer')" class="mt-2 text-sm font-bold text-blue-700 underline">ログイン / アカウント登録へ</button>
       </div>
 
-      <div id="seekerDashboard" class="hidden space-y-4">
+      <div id="seekerDashboard" class="hidden scroll-mt-20 space-y-4">
         <h2 class="text-lg font-bold border-b pb-2 text-blue-600">マイページ</h2>
         <p id="accountDashboardStatus" role="status" aria-live="polite" class="hidden text-sm text-red-600"></p>
         <div class="grid grid-cols-1 md:grid-cols-[180px_minmax(0,1fr)] gap-4">
@@ -810,17 +810,20 @@
       if (!button) return;
       button.innerText = !currentUser
         ? "ログイン / 登録"
-        : accountType === "employer"
-          ? "企業マイページ"
-          : accountType === "seeker"
-            ? "求職者マイページ"
-            : "アカウント設定";
+        : accountType === "employer" || accountType === "seeker"
+          ? "マイページ"
+          : "アカウント設定";
     }
 
     function openAccountPanel() {
       if (currentUser?.id && accountType === "seeker") {
         switchTab("seeker");
-        document.getElementById("seekerSection").scrollIntoView({ behavior: "smooth" });
+        document.getElementById("seekerDashboard").scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
+      }
+      if (currentUser?.id && accountType === "employer") {
+        switchTab("employer");
+        document.getElementById("employerDashboard").scrollIntoView({ behavior: "smooth", block: "start" });
         return;
       }
       switchTab("employer");
