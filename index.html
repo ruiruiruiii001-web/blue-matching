@@ -19,7 +19,10 @@
         <h1 class="text-xl font-bold tracking-wide">👷 現場直結！マッチング</h1>
         <p class="text-xs text-blue-100">クラウド同期・現場特化型</p>
       </div>
-      <span class="text-xs bg-blue-700 px-3 py-1.5 rounded-full font-bold">クラウド版</span>
+      <div class="flex items-center gap-2">
+        <button id="headerAccountButton" type="button" onclick="openAccountPanel()" class="rounded-lg bg-white px-3 py-2 text-xs font-bold text-blue-700">ログイン / 登録</button>
+        <span class="hidden sm:inline-block text-xs bg-blue-700 px-3 py-1.5 rounded-full font-bold">クラウド版</span>
+      </div>
     </div>
   </header>
 
@@ -465,6 +468,7 @@
       <div class="border-t mt-4 pt-4">
         <h3 class="font-bold text-sm mb-2">サイトから応募して履歴に残す</h3>
         <p id="applicationLoginPrompt" class="text-xs text-gray-600">応募履歴を保存するにはログインが必要です。職人・求職者向けタブの「ログイン / アカウント登録へ」からログインしてください。</p>
+        <button id="applicationLoginButton" type="button" onclick="closeModal(); openAccountPanel()" class="hidden mt-3 rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white">ログイン / 新規登録</button>
         <form id="jobApplicationForm" class="hidden mt-3 space-y-3" onsubmit="submitJobApplication(event)">
           <label class="block text-sm font-medium">お名前
             <input id="applicationName" maxlength="100" required class="mt-1 w-full border rounded px-3 py-2 text-sm">
@@ -747,6 +751,7 @@
         }
       }
       if (!currentUser && editingJobId !== null) cancelJobEdit();
+      updateHeaderAccountButton();
       updateAccountTypeUI();
       renderJobList();
       renderEmployerDashboard();
@@ -762,6 +767,7 @@
       const hasUser = Boolean(currentUser);
       const isEmployer = accountType === "employer";
       const isSeeker = accountType === "seeker";
+      updateHeaderAccountButton();
       document.getElementById("accountTypeSetup").classList.toggle("hidden", !hasUser || Boolean(accountType) || accountTypeLoading);
       document.getElementById("employerDashboard").classList.toggle("hidden", !hasUser || !isEmployer);
       document.getElementById("employerJobForm").classList.toggle("hidden", !hasUser || !isEmployer);
@@ -771,6 +777,37 @@
       document.getElementById("seekerAccountPromptText").innerText = hasUser
         ? "求職者プロフィールは求職者アカウントで利用できます。企業アカウントでは、本人が公開を許可した匿名プロフィールだけを閲覧できます。"
         : "プロフィール・お気に入り・応募履歴をアカウントに保存するにはログインしてください。";
+    }
+
+    function updateHeaderAccountButton() {
+      const button = document.getElementById("headerAccountButton");
+      if (!button) return;
+      button.innerText = !currentUser
+        ? "ログイン / 登録"
+        : accountType === "employer"
+          ? "企業マイページ"
+          : accountType === "seeker"
+            ? "求職者マイページ"
+            : "アカウント設定";
+    }
+
+    function openAccountPanel() {
+      if (currentUser?.id && accountType === "seeker") {
+        switchTab("seeker");
+        document.getElementById("seekerSection").scrollIntoView({ behavior: "smooth" });
+        return;
+      }
+      switchTab("employer");
+      const target = currentUser && !accountType
+        ? document.getElementById("accountTypeSetup")
+        : document.getElementById("employerAuthPanel");
+      target.scrollIntoView({ behavior: "smooth" });
+    }
+
+    function promptLogin(message) {
+      setAuthMessage(message);
+      openAccountPanel();
+      document.getElementById("employerAuthPanel").scrollIntoView({ behavior: "smooth" });
     }
 
     async function loadAccountType(user) {
@@ -1188,7 +1225,7 @@
     // 求職者プロフィール保存
     async function saveSeekerProfile() {
       if (!currentUser || accountType !== "seeker") {
-        alert("プロフィールを保存するには求職者アカウントでログインしてください。");
+        promptLogin("プロフィールを保存するには求職者アカウントでログインしてください。");
         return;
       }
 
@@ -1625,7 +1662,9 @@
 
       if (filteredJobs.length === 0) {
         jobList.innerHTML = favoritesOnly
-          ? `<div class="text-center py-8 text-gray-400 text-sm">${currentUser ? "お気に入りの求人はありません。求人カードの☆を押すと保存できます。" : "お気に入りを見るにはログインしてください。"}</div>`
+          ? `<div class="text-center py-8 text-gray-400 text-sm">${currentUser
+            ? "お気に入りの求人はありません。求人カードの☆を押すと保存できます。"
+            : `お気に入りを見るにはログインしてください。<button type="button" onclick="openAccountPanel()" class="mt-2 block mx-auto text-blue-700 underline">ログイン / 新規登録</button>`}</div>`
           : `<div class="text-center py-8 text-gray-400 text-sm">該当する現場求人はありません。</div>`;
         return;
       }
@@ -1731,12 +1770,21 @@
       const alreadyApplied = Boolean(currentUser && accountApplications.some(application =>
         application.applicant_id === currentUser.id && application.job_id === String(selectedJob.id)
       ));
-      const canApply = Boolean(currentUser && !selectedJob.is_closed &&
+      const isSeekerAccount = Boolean(currentUser && accountType === "seeker");
+      const canApply = Boolean(isSeekerAccount && !selectedJob.is_closed &&
         selectedJob.owner_id !== currentUser.id && !alreadyApplied);
       document.getElementById("jobApplicationForm").classList.toggle("hidden", !canApply);
       document.getElementById("applicationLoginPrompt").classList.toggle("hidden", canApply);
+      document.getElementById("applicationLoginButton").classList.toggle("hidden",
+        canApply || accountType === "employer" || selectedJob.is_closed ||
+        selectedJob.owner_id === currentUser?.id || alreadyApplied);
+      document.getElementById("applicationLoginButton").innerText = currentUser
+        ? "アカウント画面を開く"
+        : "ログイン / 新規登録";
       if (!currentUser) {
-        document.getElementById("applicationLoginPrompt").innerText = "応募履歴を保存するにはログインが必要です。職人・求職者向けタブの「ログイン / アカウント登録へ」からログインしてください。";
+        document.getElementById("applicationLoginPrompt").innerText = "サイトから応募して履歴に残すには、求職者アカウントでログインしてください。求人の閲覧やLINE・電話・SMSでの直接連絡はログインなしで利用できます。";
+      } else if (accountType !== "seeker") {
+        document.getElementById("applicationLoginPrompt").innerText = "サイトから応募するには求職者アカウントが必要です。別の求職者アカウントでログインしてください。";
       } else if (selectedJob.owner_id === currentUser.id) {
         document.getElementById("applicationLoginPrompt").innerText = "自分が投稿した求人には応募できません。";
       } else if (selectedJob.is_closed) {
@@ -1779,6 +1827,7 @@
       event.preventDefault();
       if (!currentUser || accountType !== "seeker" || !selectedJob) {
         document.getElementById("applicationStatus").innerText = "応募には求職者アカウントでログインしてください。";
+        if (!currentUser) promptLogin("サイトから応募して履歴に残すには、求職者アカウントでログインしてください。");
         return;
       }
       if (selectedJob.is_closed || selectedJob.owner_id === currentUser.id) {
@@ -1867,8 +1916,7 @@
 
     async function toggleFavorite(jobId) {
       if (!currentUser) {
-        alert("お気に入りをアカウントに保存するにはログインしてください。");
-        switchTab("employer");
+        promptLogin("お気に入りを保存するにはログインしてください。");
         return;
       }
 
