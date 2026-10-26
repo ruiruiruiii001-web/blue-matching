@@ -198,12 +198,13 @@
             <option value="">すべての勤務地</option>
           </select>
         </label>
-        <label class="text-sm text-gray-700">
-          <span class="block mb-1">タグ</span>
-          <select id="tagFilter" onchange="renderJobList()" class="w-full border rounded px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-            <option value="">すべてのタグ</option>
-          </select>
-        </label>
+        <fieldset class="text-sm text-gray-700">
+          <legend class="mb-1">タグ（複数選択可）</legend>
+          <p class="text-xs text-gray-500 mb-2">選んだタグのいずれかを含む求人を表示します。</p>
+          <div id="tagFilterOptions" class="max-h-36 overflow-y-auto rounded border p-2 space-y-1">
+            <p class="text-xs text-gray-400">タグは求人の読み込み後に表示されます。</p>
+          </div>
+        </fieldset>
         <label class="text-sm text-gray-700">
           <span class="block mb-1">募集人数</span>
           <select id="capacityFilter" onchange="renderJobList()" class="w-full border rounded px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
@@ -462,7 +463,7 @@
       const capacityFilter = document.getElementById("capacityFilter").value;
       updateJobFilterOptions();
       const locationFilter = document.getElementById("locationFilter").value;
-      const tagFilter = document.getElementById("tagFilter").value;
+      const selectedTags = Array.from(document.querySelectorAll('input[name="tagFilter"]:checked')).map(input => input.value);
       const sortBy = document.getElementById("jobSort").value;
 
       const filteredJobs = cachedJobs
@@ -474,7 +475,7 @@
           (!openJobsOnly || !job.is_closed) &&
             (!capacityFilter || getCapacityOptionValue(job.capacity) === capacityFilter) &&
             (!locationFilter || (job.location || "").trim() === locationFilter) &&
-            (!tagFilter || (Array.isArray(job.tags) && job.tags.includes(tagFilter)))
+            (!selectedTags.length || (Array.isArray(job.tags) && selectedTags.some(tag => job.tags.includes(tag))))
         )
         .sort((a, b) => {
           if (sortBy === "salary") {
@@ -522,26 +523,47 @@
     }
 
     function updateJobFilterOptions() {
-      const filters = [
-        {
-          id: "locationFilter",
-          emptyLabel: "すべての勤務地",
-          values: cachedJobs.map(job => (job.location || "").trim()).filter(Boolean)
-        },
-        {
-          id: "tagFilter",
-          emptyLabel: "すべてのタグ",
-          values: cachedJobs.flatMap(job => Array.isArray(job.tags) ? job.tags : [])
-        }
-      ];
+      const locationSelect = document.getElementById("locationFilter");
+      const previousLocation = locationSelect.value;
+      const locations = [...new Set(cachedJobs.map(job => (job.location || "").trim()).filter(Boolean))]
+        .sort((a, b) => a.localeCompare(b, "ja"));
+      locationSelect.replaceChildren(new Option("すべての勤務地", ""));
+      locations.forEach(location => locationSelect.add(new Option(location, location)));
+      locationSelect.value = locations.includes(previousLocation) ? previousLocation : "";
 
-      filters.forEach(({ id, emptyLabel, values }) => {
-        const select = document.getElementById(id);
-        const previousValue = select.value;
-        const options = [...new Set(values)].sort((a, b) => a.localeCompare(b, "ja"));
-        select.replaceChildren(new Option(emptyLabel, ""));
-        options.forEach(value => select.add(new Option(value, value)));
-        select.value = options.includes(previousValue) ? previousValue : "";
+      const tagOptions = document.getElementById("tagFilterOptions");
+      const previousTags = new Set(
+        Array.from(tagOptions.querySelectorAll('input[name="tagFilter"]:checked')).map(input => input.value)
+      );
+      const tags = [...new Set(cachedJobs.flatMap(job => Array.isArray(job.tags) ? job.tags : []))]
+        .sort((a, b) => a.localeCompare(b, "ja"));
+      tagOptions.replaceChildren();
+      if (tags.length === 0) {
+        const emptyMessage = document.createElement("p");
+        emptyMessage.className = "text-xs text-gray-400";
+        emptyMessage.textContent = "選択できるタグはありません。";
+        tagOptions.append(emptyMessage);
+        return;
+      }
+
+      tags.forEach((tag, index) => {
+        const label = document.createElement("label");
+        label.className = "flex items-center gap-2 py-1 cursor-pointer";
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.name = "tagFilter";
+        checkbox.value = tag;
+        checkbox.checked = previousTags.has(tag);
+        checkbox.className = "rounded text-blue-600 focus:ring-blue-500";
+        checkbox.onchange = renderJobList;
+
+        const text = document.createElement("span");
+        text.textContent = tag;
+        label.htmlFor = `tagFilter-${index}`;
+        checkbox.id = `tagFilter-${index}`;
+        label.append(checkbox, text);
+        tagOptions.append(label);
       });
     }
 
