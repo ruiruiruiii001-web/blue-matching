@@ -72,12 +72,12 @@
         <div class="space-y-4">
           <div>
             <label class="block text-sm font-medium mb-1">職種・現場名 <span class="text-red-500">*</span></label>
-            <input type="text" id="jobTitle" placeholder="例: 解体現場の作業員・ダンプ運転手" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+            <input type="text" id="jobTitle" maxlength="80" required placeholder="例: 解体現場の作業員・ダンプ運転手" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
           </div>
 
           <div>
             <label class="block text-sm font-medium mb-1">勤務地</label>
-            <input type="text" id="jobLocation" placeholder="例: 東京都新宿区 / 神奈川県横浜市" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+            <input type="text" id="jobLocation" maxlength="100" placeholder="例: 東京都新宿区 / 神奈川県横浜市" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
           </div>
 
           <div class="grid grid-cols-2 gap-4">
@@ -92,7 +92,7 @@
             </div>
             <div>
               <label class="block text-sm font-medium mb-1">給与表記</label>
-              <input type="text" id="jobSalary" placeholder="例: 日給 15,000円〜" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+              <input type="text" id="jobSalary" maxlength="100" placeholder="例: 日給 15,000円〜" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
             </div>
           </div>
 
@@ -105,7 +105,7 @@
                 <option value="daily">日給</option>
                 <option value="monthly">月給</option>
               </select>
-              <input type="number" id="jobPayAmount" min="1" step="1" placeholder="金額（円）" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+              <input type="number" id="jobPayAmount" min="1" max="100000000" step="1" placeholder="金額（円）" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
             </div>
             <p class="text-xs text-gray-500 mt-1">給与額で検索できるよう、区分と金額を入力してください。</p>
           </div>
@@ -113,11 +113,11 @@
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-medium mb-1">連絡用電話番号 <span class="text-red-500">*</span></label>
-              <input type="text" id="jobPhone" placeholder="例: 09012345678" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+              <input type="tel" id="jobPhone" maxlength="20" required placeholder="例: 09012345678" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
             </div>
             <div>
               <label class="block text-sm font-medium mb-1">LINE ID / 公式URL (任意)</label>
-              <input type="text" id="jobLine" placeholder="例: line_id_123" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+              <input type="text" id="jobLine" maxlength="200" placeholder="例: line_id_123" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
             </div>
           </div>
 
@@ -142,7 +142,7 @@
 
           <div>
             <label class="block text-sm font-medium mb-1">仕事内容の補足</label>
-            <textarea id="jobDuties" rows="2" placeholder="例: 都内の木造解体現場。資材の運び出しと簡単な手元作業です。" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
+            <textarea id="jobDuties" rows="2" maxlength="2000" placeholder="例: 都内の木造解体現場。資材の運び出しと簡単な手元作業です。" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
           </div>
 
           <button id="jobSubmitButton" onclick="publishJob()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-lg transition shadow text-base">
@@ -351,6 +351,31 @@
         </button>
       </div>
 
+      <div class="border-t mt-4 pt-4">
+        <button id="jobReportButton" onclick="showJobReportForm()" class="text-sm text-gray-500 hover:text-red-600 underline">この求人を通報する</button>
+        <form id="jobReportForm" class="hidden mt-3 space-y-3" onsubmit="submitJobReport(event)">
+          <label class="block text-sm font-medium">
+            通報理由
+            <select id="jobReportReason" required class="mt-1 w-full border rounded px-3 py-2 text-sm">
+              <option value="">選択してください</option>
+              <option value="misleading">虚偽・誤解を招く内容</option>
+              <option value="inappropriate">不適切な内容</option>
+              <option value="scam">詐欺・不審な求人</option>
+              <option value="contact">連絡先が不正確</option>
+              <option value="other">その他</option>
+            </select>
+          </label>
+          <label class="block text-sm font-medium">
+            詳細（任意）
+            <textarea id="jobReportDetails" maxlength="500" rows="3" class="mt-1 w-full border rounded px-3 py-2 text-sm" placeholder="気になる点を入力してください（500文字以内）"></textarea>
+          </label>
+          <div id="jobReportTurnstile" class="min-h-4"></div>
+          <p id="jobReportStatus" role="status" aria-live="polite" class="text-xs text-gray-600">通報するには確認を完了してください。</p>
+          <button id="jobReportSubmitButton" type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-lg disabled:opacity-50" disabled>通報を送信</button>
+        </form>
+        <p id="jobReportSuccess" role="status" aria-live="polite" class="hidden mt-3 text-sm text-green-700">通報を受け付けました。確認ありがとうございます。</p>
+      </div>
+
     </div>
   </div>
 
@@ -368,6 +393,8 @@
     let currentUser = null;
     let turnstileToken = null;
     let turnstileWidgetId = null;
+    let reportTurnstileToken = null;
+    let reportTurnstileWidgetId = null;
 
     document.addEventListener("DOMContentLoaded", () => {
       fetchJobs();
@@ -429,6 +456,105 @@
         window.turnstile.reset(turnstileWidgetId);
       }
       setTurnstileStatus(message);
+    }
+
+    function setJobReportStatus(message, isError = false) {
+      const element = document.getElementById("jobReportStatus");
+      element.innerText = message;
+      element.classList.toggle("text-red-600", isError);
+      element.classList.toggle("text-gray-600", !isError);
+    }
+
+    function showJobReportForm() {
+      if (!selectedJob) return;
+      document.getElementById("jobReportForm").classList.remove("hidden");
+      document.getElementById("jobReportButton").classList.add("hidden");
+      const siteKey = document.querySelector('meta[name="cloudflare-turnstile-sitekey"]').content.trim();
+      if (!siteKey || !window.turnstile) {
+        setJobReportStatus("CAPTCHAを読み込めません。ページを再読み込みしてもう一度お試しください。", true);
+        return;
+      }
+      if (reportTurnstileWidgetId !== null) return;
+
+      reportTurnstileWidgetId = window.turnstile.render("#jobReportTurnstile", {
+        sitekey: siteKey,
+        action: "job_report",
+        callback: token => {
+          reportTurnstileToken = token;
+          document.getElementById("jobReportSubmitButton").disabled = false;
+          setJobReportStatus("CAPTCHA確認が完了しました。");
+        },
+        "expired-callback": () => {
+          reportTurnstileToken = null;
+          document.getElementById("jobReportSubmitButton").disabled = true;
+          setJobReportStatus("確認の有効期限が切れました。もう一度確認してください。", true);
+        },
+        "error-callback": errorCode => {
+          reportTurnstileToken = null;
+          document.getElementById("jobReportSubmitButton").disabled = true;
+          setJobReportStatus(`CAPTCHA確認に失敗しました（${errorCode}）。もう一度お試しください。`, true);
+          return true;
+        }
+      });
+      setJobReportStatus("CAPTCHAを確認してから通報を送信してください。");
+    }
+
+    async function submitJobReport(event) {
+      event.preventDefault();
+      if (!selectedJob) return;
+      const reason = document.getElementById("jobReportReason").value;
+      const details = document.getElementById("jobReportDetails").value.trim();
+      if (!reason) {
+        setJobReportStatus("通報理由を選択してください。", true);
+        return;
+      }
+      if (details.length > 500) {
+        setJobReportStatus("詳細は500文字以内で入力してください。", true);
+        return;
+      }
+      if (!reportTurnstileToken) {
+        setJobReportStatus("送信前にCAPTCHA確認を完了してください。", true);
+        return;
+      }
+
+      const submitButton = document.getElementById("jobReportSubmitButton");
+      submitButton.disabled = true;
+      setJobReportStatus("通報を送信しています。");
+      try {
+        const response = await fetch("/api/report", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            jobId: String(selectedJob.id),
+            reason,
+            details,
+            captchaToken: reportTurnstileToken
+          })
+        });
+        const result = await response.json();
+        if (!response.ok) {
+          throw new Error(result.error || `通報の送信に失敗しました（${response.status}）。`);
+        }
+
+        document.getElementById("jobReportForm").classList.add("hidden");
+        document.getElementById("jobReportSuccess").classList.remove("hidden");
+      } catch (error) {
+        setJobReportStatus(`通報を送信できませんでした: ${error.message}`, true);
+        if (window.turnstile && reportTurnstileWidgetId !== null) {
+          window.turnstile.reset(reportTurnstileWidgetId);
+        }
+      } finally {
+        reportTurnstileToken = null;
+      }
+    }
+
+    function clearJobReportWidget() {
+      if (window.turnstile && reportTurnstileWidgetId !== null) {
+        window.turnstile.remove(reportTurnstileWidgetId);
+      }
+      reportTurnstileToken = null;
+      reportTurnstileWidgetId = null;
+      document.getElementById("jobReportTurnstile").replaceChildren();
     }
 
     async function initializeEmployerAuth() {
@@ -584,6 +710,7 @@
       const payType = document.getElementById("jobPayType").value;
       const payAmountValue = document.getElementById("jobPayAmount").value;
       const payAmount = payAmountValue ? Number(payAmountValue) : null;
+      const normalizedPhone = normalizeJapanesePhone(phone);
 
       const checkedTags = Array.from(document.querySelectorAll('input[name="jobTag"]:checked')).map(cb => cb.value);
 
@@ -592,13 +719,50 @@
         return;
       }
 
-      if ((payType && (!Number.isFinite(payAmount) || payAmount <= 0)) || (!payType && payAmountValue)) {
-        alert("給与の絞り込み条件を設定する場合は、給与区分と1円以上の金額を両方入力してください。");
+      if (title.length > 80 || location.length > 100 || salary.length > 100 || duties.length > 2000) {
+        alert("職種名は80文字、勤務地と給与表記は100文字、仕事内容は2,000文字以内で入力してください。");
+        return;
+      }
+
+      if (!isValidJapanesePhone(normalizedPhone)) {
+        alert("連絡用電話番号は日本の電話番号を入力してください（例: 09012345678）。");
+        return;
+      }
+
+      if (/-\s*\d/.test(salary)) {
+        alert("給与表記にマイナスの金額は入力できません。");
+        return;
+      }
+
+      if (line.length > 200) {
+        alert("LINE ID / URLは200文字以内で入力してください。");
+        return;
+      }
+
+      if (line) {
+        const isHttpsUrl = /^https:\/\//i.test(line);
+        if (isHttpsUrl) {
+          try {
+            const lineUrl = new URL(line);
+            if (!["line.me", "www.line.me"].includes(lineUrl.hostname)) throw new Error("unsupported host");
+          } catch {
+            alert("LINE URLにはhttps://line.meから始まるURLを入力してください。");
+            return;
+          }
+        } else if (!/^[A-Za-z0-9._-]{1,64}$/.test(line)) {
+          alert("LINE IDは英数字と「.」「_」「-」で入力するか、https://line.meのURLを入力してください。");
+          return;
+        }
+      }
+
+      if ((payType && (!Number.isFinite(payAmount) || !Number.isInteger(payAmount) || payAmount <= 0 || payAmount > 100000000)) ||
+          (!payType && payAmountValue)) {
+        alert("給与の絞り込み条件を設定する場合は、給与区分と1〜100,000,000円の整数を入力してください。");
         return;
       }
 
       const jobData = {
-        title, location, salary, phone, line, duties, capacity,
+        title, location, salary, phone: normalizedPhone, line, duties, capacity,
         pay_type: payType || null,
         pay_amount: payAmount,
         tags: checkedTags,
@@ -701,7 +865,7 @@
       
       const profile = {
         name: document.getElementById("seekerName").value.trim(),
-        phone: document.getElementById("seekerPhone").value.trim(),
+        phone: normalizeJapanesePhone(document.getElementById("seekerPhone").value.trim()),
         location: document.getElementById("seekerLocation").value.trim(),
         payType: preferredPayType,
         minimumSalary: preferredMinimumSalary,
@@ -712,6 +876,10 @@
 
       if (!profile.name) {
         alert("お名前を入力してください。");
+        return;
+      }
+      if (profile.phone && !isValidJapanesePhone(profile.phone)) {
+        alert("電話番号は日本の電話番号を入力してください（例: 09012345678）。");
         return;
       }
 
@@ -744,6 +912,14 @@
     function applySeekerSalaryPreferences(profile) {
       document.getElementById("salaryTypeFilter").value = profile.payType || "";
       document.getElementById("minimumSalary").value = profile.minimumSalary ?? "";
+    }
+
+    function normalizeJapanesePhone(phone) {
+      return phone.replace(/[()\s-]/g, "");
+    }
+
+    function isValidJapanesePhone(phone) {
+      return /^(0\d{9,10}|\+81\d{9,10})$/.test(phone);
     }
 
     // 求人リスト描画
@@ -890,6 +1066,14 @@
       selectedJob = cachedJobs.find(j => j.id === id);
       if (!selectedJob) return;
 
+      clearJobReportWidget();
+      document.getElementById("jobReportForm").classList.add("hidden");
+      document.getElementById("jobReportButton").classList.remove("hidden");
+      document.getElementById("jobReportSuccess").classList.add("hidden");
+      document.getElementById("jobReportReason").value = "";
+      document.getElementById("jobReportDetails").value = "";
+      document.getElementById("jobReportSubmitButton").disabled = true;
+      setJobReportStatus("通報するには確認を完了してください。");
       document.getElementById("modalTitle").innerText = selectedJob.title;
       document.getElementById("modalLocation").innerText = selectedJob.location ? `📍 ${selectedJob.location}` : "";
       document.getElementById("modalSalary").innerText = selectedJob.salary || "給与応相談";
@@ -948,6 +1132,7 @@
 
     function closeModal() {
       document.getElementById("jobModal").classList.add("hidden");
+      clearJobReportWidget();
       selectedJob = null;
     }
 

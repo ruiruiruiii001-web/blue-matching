@@ -21,6 +21,35 @@
 3. Supabase Dashboardの **Authentication → Bot and Abuse Protection** でCAPTCHAを有効にし、Cloudflare Turnstileを選択してSecret keyを登録・保存します。サイト側のデプロイが完了する前にSupabase側を有効化すると、新規登録できなくなるため順番を守ってください。
 4. 公開サイトでTurnstileが表示されることを確認し、CAPTCHAを完了してから新規登録できることをテストします。Turnstile確認に成功して新規登録を送信すると、Supabase AuthがSecret keyを使ってCloudflare Siteverifyをサーバー側で呼び出します。アプリのブラウザーコードからSiteverifyを直接呼び出したり、Secret keyを配置したりしないでください。
 
+### 求人の入力チェックと通報
+
+求人のタイトル・電話番号・給与表記・連絡先URLなどはブラウザー側で検証します。通報は求人詳細から送信でき、Cloudflare Turnstileをサーバー側で検証した後、Supabaseの `job_reports` テーブルに保存します。通報機能を公開する前に、次の移行SQLをSupabase SQL Editorで実行してください。
+
+- [`supabase/migrations/20261026_add_job_reports.sql`](./supabase/migrations/20261026_add_job_reports.sql)
+
+Vercelのプロジェクト設定 **Settings → Environment Variables** に、Production用として次の環境変数を追加し、再デプロイしてください。値はGitHubやチャットに貼らないでください。
+
+- `CLOUDFLARE_TURNSTILE_SECRET_KEY`: TurnstileのSecret key
+- `SUPABASE_URL`: `https://qefqlbkqewvahtqzqmfp.supabase.co`
+- `SUPABASE_SERVICE_ROLE_KEY`: Supabaseのサーバー専用service_role key（ブラウザー用publishable/anon keyではありません）
+
+通報内容はSupabase Dashboardの **Table Editor → job_reports** で確認できます。公開ユーザーには通報一覧の読み取り・直接書き込み権限を付与せず、検証済みのサーバーAPIだけが保存します。
+
+### 確認メールをResendから送る（標準メール上限の回避）
+
+Supabase標準メール送信はテスト向けで送信数が非常に限られます。Resendを使うには、送信元として使える独自ドメインを用意し、Resendにドメインを追加してDNSのSPF/DKIMレコードを設定・検証します。Vercelの `vercel.app` ドメインは送信者ドメインとして使えません。
+
+1. ResendでAPI keyを作成し、ドメインをVerifiedにします。API keyはSupabase SMTPのパスワードとしてだけ設定し、共有しないでください。
+2. Supabase Dashboardの **Authentication → Email → SMTP Settings** を開いて、Custom SMTPを有効にします。
+3. 次を入力して保存します。
+   - Host: `smtp.resend.com`
+   - Port: `465`
+   - Username: `resend`
+   - Password: ResendのAPI key
+   - Sender email: Resendで検証したドメイン上のアドレス（例: `auth@あなたのドメイン`）
+   - Sender name: `blue-matching`
+4. テスト登録または確認メール送信を一度だけ行い、受信できることを確認します。送信上限はResendの契約・アカウント状態にも従います。
+
 ### Supabase の準備
 
 求人の募集状態、勤務地、給与条件を保存するカラムを追加します。Supabase の SQL Editor で次のSQLファイルをそれぞれ一度実行してください。
