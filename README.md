@@ -19,7 +19,7 @@
 1. CloudflareでTurnstileウィジェットを作成し、ドメインに `blue-matching-pi.vercel.app` を登録します。
 2. 発行されたSitekeyを `index.html` の `cloudflare-turnstile-sitekey` メタタグの `content` に設定してサイトを再デプロイします。Sitekeyは公開用ですが、Secret keyはソースコードやGitHubに置かないでください。
 3. Supabase Dashboardの **Authentication → Bot and Abuse Protection** でCAPTCHAを有効にし、Cloudflare Turnstileを選択してSecret keyを登録・保存します。サイト側のデプロイが完了する前にSupabase側を有効化すると、新規登録できなくなるため順番を守ってください。
-4. 公開サイトでTurnstileが表示されることを確認し、CAPTCHAを完了してから新規登録できることをテストします。
+4. 公開サイトでTurnstileが表示されることを確認し、CAPTCHAを完了してから新規登録できることをテストします。Turnstile確認に成功して新規登録を送信すると、Supabase AuthがSecret keyを使ってCloudflare Siteverifyをサーバー側で呼び出します。アプリのブラウザーコードからSiteverifyを直接呼び出したり、Secret keyを配置したりしないでください。
 
 ### Supabase の準備
 

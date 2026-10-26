@@ -406,9 +406,10 @@
           turnstileToken = null;
           setTurnstileStatus("確認の有効期限が切れました。もう一度確認してください。", true);
         },
-        "error-callback": () => {
+        "error-callback": errorCode => {
           turnstileToken = null;
-          setTurnstileStatus("CAPTCHA確認に失敗しました。もう一度お試しください。", true);
+          setTurnstileStatus(`CAPTCHA確認に失敗しました（エラーコード: ${errorCode}）。もう一度お試しください。`, true);
+          return true;
         }
       });
       setTurnstileStatus("CAPTCHAを確認してから新規登録してください。");
