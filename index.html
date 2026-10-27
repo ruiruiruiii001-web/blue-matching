@@ -256,9 +256,15 @@
             </div>
           </div>
 
-          <div>
-            <label class="block text-sm font-medium mb-1">仕事内容の補足</label>
+                    <div>
+            <div class="flex justify-between items-center mb-1">
+              <label class="block text-sm font-medium">仕事内容の補足</label>
+              <button type="button" onclick="generateAIDuties()" class="text-xs font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1 bg-blue-50 px-2 py-1 rounded transition-colors">
+                <span>✨ AIで作成</span>
+              </button>
+            </div>
             <textarea id="jobDuties" rows="2" maxlength="2000" placeholder="例: 都内の木造解体現場。資材の運び出しと簡単な手元作業です。" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
+            <p id="aiStatus" class="hidden text-[10px] text-blue-500 mt-1 animate-pulse font-medium"></p>
           </div>
 
           <button id="jobSubmitButton" onclick="publishJob()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-lg transition shadow text-base">
@@ -416,14 +422,18 @@
       </div>
     </section>
 
-    <!-- 右側：掲載中の現場求人一覧 -->
-    <section id="jobListSection" class="bg-white p-6 rounded-lg shadow-md h-fit order-first md:col-span-2">
-      <div class="flex justify-between items-center gap-3 border-b pb-3">
-        <h2 id="jobListTitle" class="text-lg font-bold text-gray-800">現場求人一覧 (クラウド)</h2>
-        <span id="jobCount" class="text-xs bg-gray-200 text-gray-700 px-2.5 py-1 rounded-full font-bold">0件</span>
+        <!-- 右側：掲載中の現場求人一覧 -->
+    <section id="jobListSection" class="h-fit order-first md:col-span-2">
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-6">
+        <div class="flex justify-between items-center gap-3 border-b border-gray-50 pb-3">
+          <h2 id="jobListTitle" class="text-xl font-black text-gray-800">現場求人一覧</h2>
+          <span id="jobCount" class="text-xs bg-blue-600 text-white px-3 py-1 rounded-full font-bold shadow-sm shadow-blue-100">0件</span>
+        </div>
+        <p class="mt-3 text-[11px] font-medium text-amber-700 flex items-center gap-1.5">
+          <span class="text-base">⚠️</span> 掲載企業の本人確認は行っていません。応募前に条件や連絡先をご確認ください。
+        </p>
+        <p id="jobListDescription" class="mt-3 text-xs text-gray-500 hidden leading-relaxed">希望職種・勤務地・給与条件に合う求人をAIがおすすめ順に表示します。検索条件は以下のパネルから自由に変更できます。</p>
       </div>
-      <p class="mt-2 text-xs text-amber-800">掲載企業の本人確認は行っていません。応募前に求人条件や連絡先をご確認ください。</p>
-      <p id="jobListDescription" class="mt-3 text-xs text-gray-500 hidden">希望職種・勤務地・給与条件に合う求人をおすすめ順に表示します。検索条件は下から変更できます。</p>
       <section id="employerSeekerProfilesPanel" class="hidden mt-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm sm:p-5">
         <p class="mb-4 border-b border-emerald-200 pb-3 text-sm leading-5 text-emerald-900">本人が公開を選んだ匿名プロフィールのみ表示しています。名前・電話番号は表示されません。企業アカウントは事業者の本人確認を行っていないため、表示情報の取り扱いにご注意ください。</p>
         <div class="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_14rem]">
@@ -534,7 +544,7 @@
         </div>
       </div>
 
-      <div id="jobList" class="mt-6 space-y-4 max-h-[none] overflow-visible pr-0 sm:max-h-[700px] sm:overflow-y-auto sm:pr-1" aria-live="polite">
+            <div id="jobList" class="mt-6 space-y-4 pr-0" aria-live="polite">
         <!-- 求人カード -->
       </div>
     </section>
@@ -610,9 +620,9 @@
           </label>
           <p class="text-xs text-gray-500">送信すると、お名前・電話番号・プロフィールの経験年数と資格が求人投稿者のマイページに保存され、通知と登録メールでお知らせします。</p>
           <p id="applicationStatus" role="status" aria-live="polite" class="text-xs text-gray-600"></p>
-          <button id="applicationSubmitButton" type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg disabled:opacity-50">応募を送信する</button>
+                    <button id="applicationSubmitButton" type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg disabled:opacity-50">この内容で応募を送信する</button>
         </form>
-        <p id="applicationSuccess" role="status" aria-live="polite" class="hidden mt-3 text-sm text-green-700">応募を送信しました。マイページの応募履歴から確認できます。</p>
+        <p id="applicationSuccess" role="status" aria-live="polite" class="hidden mt-3 text-sm text-green-700">応募を送信しました。安全なマッチングのため、企業からの返信をお待ちください。履歴はマイページから確認できます。</p>
       </div>
 
       <div class="border-t mt-4 pt-4">
@@ -637,7 +647,7 @@
           <p id="jobReportStatus" role="status" aria-live="polite" class="text-xs text-gray-600">通報するには確認を完了してください。</p>
           <button id="jobReportSubmitButton" type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-lg disabled:opacity-50" disabled>通報を送信</button>
         </form>
-        <p id="jobReportSuccess" role="status" aria-live="polite" class="hidden mt-3 text-sm text-green-700">通報を受け付けました。確認ありがとうございます。</p>
+        <p id="jobReportSuccess" role="status" aria-live="polite" class="hidden mt-3 text-sm text-green-700">通報を送信しました。安全なコミュニティづくりのためのご協力、ありがとうございます。運営で内容を確認させていただきますね。</p>
       </div>
 
     </div>
@@ -2369,51 +2379,63 @@
         ? `${activeFilters.length}件の条件で絞り込み中`
         : "";
 
-      if (filteredJobs.length === 0) {
+            if (filteredJobs.length === 0) {
         jobList.innerHTML = favoritesOnly
-          ? `<div class="text-center py-8 text-gray-400 text-sm">${currentUser
-            ? `お気に入りの求人はありません。<button type="button" onclick="resetJobFilters()" class="mt-3 block mx-auto min-h-11 rounded-lg border border-blue-200 px-4 py-2 font-bold text-blue-700 hover:bg-blue-50">条件をリセット</button>`
-            : `お気に入りを見るにはログインしてください。<button type="button" onclick="openAccountPanel()" class="mt-2 block mx-auto text-blue-700 underline">ログイン / 新規登録</button>`}</div>`
-          : `<div class="rounded-xl border border-dashed border-gray-300 bg-gray-50 px-4 py-10 text-center">
+          ? `<div class="text-center py-12 bg-white rounded-2xl border border-dashed border-gray-200">
+              <div class="text-3xl mb-3">⭐</div>
+              <p class="text-sm text-gray-500">${currentUser
+                ? `お気に入りの求人はありません。<br><button type="button" onclick="resetJobFilters()" class="mt-4 font-bold text-blue-600 underline">条件をリセット</button>`
+                : `お気に入りを見るにはログインしてください。<br><button type="button" onclick="openAccountPanel()" class="mt-4 font-bold text-blue-600 underline">ログイン / 新規登録</button>`}</p>
+            </div>`
+          : `<div class="rounded-2xl border border-dashed border-gray-300 bg-white px-4 py-12 text-center shadow-sm">
+              <div class="text-3xl mb-3">🔍</div>
               <p class="text-base font-bold text-gray-800">${activeFilters.length ? "条件に合う求人が見つかりませんでした" : "現在、掲載中の求人はありません"}</p>
-              <p class="mt-2 text-sm text-gray-600">${activeFilters.length ? "条件をリセットして、ほかの求人も見てみましょう。" : "新しい求人が掲載されるまでお待ちください。"}</p>
-              ${activeFilters.length ? '<button type="button" onclick="resetJobFilters()" class="mt-4 min-h-11 rounded-lg bg-blue-700 px-5 py-2.5 font-bold text-white hover:bg-blue-800">検索条件をリセット</button>' : ""}
+              <p class="mt-2 text-sm text-gray-500">${activeFilters.length ? "条件をリセットして、ほかの求人も見てみましょう。" : "新しい求人が掲載されるまでお待ちください。"}</p>
+              ${activeFilters.length ? '<button type="button" onclick="resetJobFilters()" class="mt-6 min-h-11 rounded-xl bg-blue-600 px-6 py-2.5 font-bold text-white hover:bg-blue-700 shadow-lg shadow-blue-100 transition-all">検索条件をリセット</button>' : ""}
             </div>`;
         return;
       }
 
       jobList.innerHTML = filteredJobs.map(job => `
-        <article onclick="openModal(${job.id})" class="cursor-pointer border-b border-gray-200 px-1 py-5 transition-colors last:border-0 hover:bg-gray-50 sm:px-4">
+        <article onclick="openModal(${job.id})" class="cursor-pointer group relative bg-white rounded-2xl border border-gray-100 p-5 transition-all hover:shadow-md hover:border-blue-200 sm:p-6 mb-4">
           <div class="flex items-start justify-between gap-3">
-            <div class="min-w-0">
-              <div class="mb-2 flex flex-wrap gap-2">
-                <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold ${isJobClosed(job) ? 'bg-gray-100 text-gray-700' : 'bg-emerald-100 text-emerald-800'}">${isJobClosed(job) ? '募集終了' : '募集中'}</span>
-                ${job.capacity <= 0 ? '' : `<span class="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-800">募集人数 ${formatJobCapacity(job.capacity)}</span>`}
-                ${matchProfile && getJobMatchScore(job, matchProfile) > 0 ? '<span class="inline-flex items-center rounded-full bg-purple-50 px-2.5 py-1 text-xs font-bold text-purple-800">希望条件に一致</span>' : ''}
+            <div class="min-w-0 flex-1">
+              <div class="mb-3 flex flex-wrap gap-2">
+                <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-wider uppercase ${isJobClosed(job) ? 'bg-gray-100 text-gray-500' : 'bg-emerald-50 text-emerald-700'}">${isJobClosed(job) ? '募集終了' : '募集中'}</span>
+                ${job.capacity <= 0 ? '' : `<span class="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-[10px] font-bold text-blue-700 uppercase">募集人数 ${formatJobCapacity(job.capacity)}</span>`}
+                ${matchProfile && getJobMatchScore(job, matchProfile) > 0 ? '<span class="inline-flex items-center rounded-full bg-purple-50 px-2.5 py-0.5 text-[10px] font-bold text-purple-700 uppercase">希望条件に一致</span>' : ''}
               </div>
-              <h3 class="break-words text-lg font-bold leading-snug text-gray-900 sm:text-xl">${escapeHtml(job.title)}</h3>
-              <p class="mt-1 text-xs text-gray-500">${escapeHtml(formatJobFreshness(job))}</p>
+              <h3 class="break-words text-lg font-extrabold leading-tight text-gray-900 sm:text-xl group-hover:text-blue-700 transition-colors">${escapeHtml(job.title)}</h3>
+              <p class="mt-2 text-[10px] font-medium text-gray-400 uppercase tracking-widest">${escapeHtml(formatJobFreshness(job))}</p>
             </div>
-            <button type="button" aria-label="${isFavorite(job.id) ? 'お気に入りから削除' : 'お気に入りに追加'}" aria-pressed="${isFavorite(job.id)}" onclick="event.stopPropagation(); toggleFavorite(${job.id})" class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-amber-200 bg-amber-50 text-xl text-amber-700 hover:bg-amber-100" title="${isFavorite(job.id) ? 'お気に入りから削除' : 'お気に入りに追加'}">${isFavorite(job.id) ? '★' : '☆'}</button>
+            <button type="button" aria-label="${isFavorite(job.id) ? 'お気に入りから削除' : 'お気に入りに追加'}" aria-pressed="${isFavorite(job.id)}" onclick="event.stopPropagation(); toggleFavorite(${job.id})" class="z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-amber-100 bg-amber-50/50 text-xl text-amber-500 hover:bg-amber-100 hover:text-amber-600 transition-all" title="${isFavorite(job.id) ? 'お気に入りから削除' : 'お気に入りに追加'}">${isFavorite(job.id) ? '★' : '☆'}</button>
           </div>
-          <div class="mt-4 grid grid-cols-1 gap-3 rounded-lg bg-gray-50 p-3 sm:grid-cols-2">
-            <div>
-              <p class="text-xs font-bold text-gray-500">勤務地</p>
-              <p class="mt-1 text-sm font-medium text-gray-800">${job.location ? `📍 ${escapeHtml(job.location)}` : '勤務地は詳細をご確認ください'}</p>
+          <div class="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div class="flex items-center gap-3">
+              <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gray-50 text-gray-500 text-sm">📍</div>
+              <div class="min-w-0">
+                <p class="text-[10px] font-bold text-gray-400 uppercase">勤務地</p>
+                <p class="truncate text-sm font-bold text-gray-700">${job.location ? escapeHtml(job.location) : '詳細確認'}</p>
+              </div>
             </div>
-            <div>
-              <p class="text-xs font-bold text-gray-500">給与</p>
-              <p class="mt-1 text-base font-bold text-emerald-800">${escapeHtml(job.salary || '給与応相談')}</p>
+            <div class="flex items-center gap-3">
+              <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 text-sm">💰</div>
+              <div class="min-w-0">
+                <p class="text-[10px] font-bold text-emerald-600/50 uppercase">給与</p>
+                <p class="truncate text-base font-black text-emerald-700">${escapeHtml(job.salary || '給与応相談')}</p>
+              </div>
             </div>
           </div>
-          ${Array.isArray(job.tags) && job.tags.length ? `<div class="mt-3 flex flex-wrap gap-1.5">${job.tags.map(tag => `<span class="rounded-full border border-blue-100 bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-800">${escapeHtml(tag)}</span>`).join("")}</div>` : ''}
-          <div class="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-gray-100 pt-3">
-            <span class="min-h-10 inline-flex items-center text-sm font-bold text-blue-700">求人の詳細・連絡方法を見る →</span>
-            ${activeTab === "employer" && currentUser && job.owner_id === currentUser.id ? `
+          ${Array.isArray(job.tags) && job.tags.length ? `<div class="mt-5 flex flex-wrap gap-1.5">${job.tags.slice(0, 5).map(tag => `<span class="rounded-lg bg-blue-50/50 px-2.5 py-1 text-[10px] font-bold text-blue-600 ring-1 ring-inset ring-blue-100/50">${escapeHtml(tag)}</span>`).join("")}${job.tags.length > 5 ? '<span class="text-[10px] text-gray-400 self-center">...</span>' : ''}</div>` : ''}
+          <div class="mt-5 flex items-center justify-between border-t border-gray-50 pt-4">
+             <div class="flex items-center text-xs font-bold text-blue-600">
+               詳細を見る
+               <svg class="ml-1 w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="9 5l7 7-7 7"/></svg>
+             </div>
+             ${activeTab === "employer" && currentUser && job.owner_id === currentUser.id ? `
               <div class="flex gap-2">
-                <button onclick="event.stopPropagation(); editJob(${job.id})" class="min-h-10 rounded px-3 py-2 text-sm font-bold text-blue-700">編集</button>
-                <button onclick="event.stopPropagation(); toggleJobClosed(${job.id})" class="min-h-10 rounded px-3 py-2 text-sm font-bold text-gray-700">${job.is_closed ? '募集再開' : '募集終了'}</button>
-                <button onclick="event.stopPropagation(); deleteJob(${job.id})" class="min-h-10 rounded px-3 py-2 text-sm font-bold text-red-700">削除</button>
+                <button onclick="event.stopPropagation(); editJob(${job.id})" class="px-3 py-1.5 text-[10px] font-bold text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">編集</button>
+                <button onclick="event.stopPropagation(); toggleJobClosed(${job.id})" class="px-3 py-1.5 text-[10px] font-bold text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">${job.is_closed ? '募集再開' : '募集終了'}</button>
               </div>
             ` : ""}
           </div>
@@ -2619,9 +2641,9 @@
         : "";
       if (currentUser?.id !== applicantId || accountType !== "seeker") return;
       document.getElementById("jobApplicationForm").classList.add("hidden");
-      document.getElementById("applicationSuccess").innerText = emailWarning
+            document.getElementById("applicationSuccess").innerText = emailWarning
         ? `応募を送信しました。${emailWarning}`
-        : "応募を送信しました。マイページの応募履歴から確認できます。";
+        : "応募を送信しました。安全なマッチングのため、企業からの返答をお待ちください。履歴はマイページから確認できます。";
       document.getElementById("applicationSuccess").classList.remove("hidden");
       if (data) {
         accountApplications.unshift(data);
@@ -2629,6 +2651,38 @@
       } else {
         accountDataUserId = null;
         await loadAccountData(currentUser);
+      }
+    }
+
+    async function generateAIDuties() {
+      const title = document.getElementById("jobTitle").value.trim();
+      const status = document.getElementById("aiStatus");
+      if (!title) {
+        alert("先に職種名（例: 解体作業員）を入力してください。AIがそれを元に文章を作ります。");
+        return;
+      }
+      status.innerText = "✨ AIが魅力的な文章を考えています...";
+      status.classList.remove("hidden");
+      try {
+        const response = await fetch("/api/ai", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            prompt: `${title}の現場求人情報を募集しています。親しみやすく、かつ誠実な印象で、仕事内容や現場の魅力を200文字程度で作成してください。「未経験歓迎」「チームワーク重視」などの要素を含めてください。箇条書きではなく、呼びかけるような自然な文章にしてください。`
+          })
+        });
+        const data = await response.json();
+        if (data.result) {
+          const textarea = document.getElementById("jobDuties");
+          textarea.value = data.result;
+          status.innerText = "✨ AIが文章を作成しました！必要に応じて修正してください。";
+          setTimeout(() => status.classList.add("hidden"), 3000);
+        } else {
+          throw new Error(data.error || "返答がありませんでした。");
+        }
+      } catch (error) {
+        console.error("AI生成エラー:", error);
+        status.innerText = "❌ AI文章の作成に失敗しました。時間をおいて再度お試しください。";
       }
     }
 
@@ -2674,21 +2728,35 @@
       return favoriteJobIds.includes(String(jobId));
     }
 
-    async function toggleFavorite(jobId) {
+        async function toggleFavorite(jobId) {
       if (!currentUser) {
         promptLogin("お気に入りを保存するにはログインしてください。");
         return;
       }
 
       const normalizedId = String(jobId);
-      const { error } = isFavorite(normalizedId)
+      const favorited = isFavorite(normalizedId);
+      const { error } = favorited
         ? await supabaseClient.from("job_favorites").delete().eq("user_id", currentUser.id).eq("job_id", normalizedId)
         : await supabaseClient.from("job_favorites").insert({ user_id: currentUser.id, job_id: normalizedId });
+      
       if (error) {
-        alert(`お気に入りを更新できませんでした: ${error.message}`);
+        alert(`お気に入りの更新に失敗しました: ${error.message}`);
         return;
       }
-      await loadAccountData(currentUser);
+
+      // お気に入り状態をローカルで即座に反映（フィードバック用）
+      if (favorited) {
+        favoriteJobIds = favoriteJobIds.filter(id => id !== normalizedId);
+      } else {
+        favoriteJobIds.push(normalizedId);
+      }
+      
+      renderJobList();
+      updateModalFavoriteButton();
+      
+      // 実際にはバックグラウンドで再読み込みして整合性を取る
+      loadAccountData(currentUser);
     }
 
     function updateModalFavoriteButton() {
