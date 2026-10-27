@@ -608,19 +608,28 @@
         <h3 class="font-bold text-sm mb-2">サイトから応募して履歴に残す</h3>
         <p id="applicationLoginPrompt" class="text-xs text-gray-600">応募履歴を保存するにはログインが必要です。職人・求職者向けタブの「ログイン / アカウント登録へ」からログインしてください。</p>
         <button id="applicationLoginButton" type="button" onclick="closeModal(); openAccountPanel()" class="hidden mt-3 rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white">ログイン / 新規登録</button>
-        <form id="jobApplicationForm" class="hidden mt-3 space-y-3" onsubmit="submitJobApplication(event)">
+                <form id="jobApplicationForm" class="hidden mt-3 space-y-4" onsubmit="submitJobApplication(event)">
           <label class="block text-sm font-medium">お名前
-            <input id="applicationName" maxlength="100" required class="mt-1 w-full border rounded px-3 py-2 text-sm">
+            <input id="applicationName" maxlength="100" required class="mt-1 w-full border rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
           </label>
           <label class="block text-sm font-medium">電話番号
-            <input id="applicationPhone" type="tel" maxlength="20" required placeholder="09012345678" class="mt-1 w-full border rounded px-3 py-2 text-sm">
+            <input id="applicationPhone" type="tel" maxlength="20" required placeholder="09012345678" class="mt-1 w-full border rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
           </label>
-          <label class="block text-sm font-medium">応募メッセージ（任意）
-            <textarea id="applicationMessage" maxlength="1000" rows="3" class="mt-1 w-full border rounded px-3 py-2 text-sm" placeholder="経験や資格、親方へのメッセージ"></textarea>
-          </label>
-          <p class="text-xs text-gray-500">送信すると、お名前・電話番号・プロフィールの経験年数と資格が求人投稿者のマイページに保存され、通知と登録メールでお知らせします。</p>
+          <div>
+            <label class="block text-sm font-medium mb-1.5">応募メッセージ（任意）</label>
+            <div class="flex flex-wrap gap-2 mb-2">
+              <button type="button" onclick="setAppTemplate('詳しくお話を聞きたいです！')" class="text-[10px] bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-1 rounded-full font-bold transition-colors">💬 詳しく聞きたい</button>
+              <button type="button" onclick="setAppTemplate('すぐにでも働けます。よろしくお願いします。')" class="text-[10px] bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-1 rounded-full font-bold transition-colors">⚡ すぐ働ける</button>
+              <button type="button" onclick="setAppTemplate('未経験ですが、一生懸命頑張ります！')" class="text-[10px] bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-1 rounded-full font-bold transition-colors">💪 未経験から挑戦</button>
+            </div>
+            <textarea id="applicationMessage" maxlength="1000" rows="3" class="w-full border rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="経験や資格、親方へのメッセージ"></textarea>
+          </div>
+          <p class="text-[11px] text-gray-500 leading-relaxed bg-gray-50 p-3 rounded-lg border border-gray-100">
+            <span class="font-bold text-blue-600 text-xs block mb-1">💡 送信される内容</span>
+            お名前、電話番号、プロフィールに登録済みの「経験年数」と「保有資格」が投稿者に共有されます。
+          </p>
           <p id="applicationStatus" role="status" aria-live="polite" class="text-xs text-gray-600"></p>
-                    <button id="applicationSubmitButton" type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg disabled:opacity-50">この内容で応募を送信する</button>
+          <button id="applicationSubmitButton" type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl transition shadow-lg shadow-blue-100 disabled:opacity-50">🚀 この内容で応募を送信する</button>
         </form>
         <p id="applicationSuccess" role="status" aria-live="polite" class="hidden mt-3 text-sm text-green-700">応募を送信しました。安全なマッチングのため、企業からの返信をお待ちください。履歴はマイページから確認できます。</p>
       </div>
@@ -1784,19 +1793,22 @@
       renderJobList();
     }
 
-    function renderAccountDashboard() {
+        function renderAccountDashboard() {
       if (!currentUser || accountDataUserId !== currentUser.id) return;
 
       const favoriteJobs = cachedJobs.filter(job => isFavorite(job.id));
       const favoriteContainer = document.getElementById("dashboardFavorites");
       favoriteContainer.innerHTML = favoriteJobs.length
         ? favoriteJobs.map(job => `
-          <div class="flex items-center justify-between gap-2">
-            <button type="button" onclick="openModal(${job.id})" class="text-left text-blue-700 hover:underline">${escapeHtml(job.title)}</button>
-            <button type="button" onclick="toggleFavorite('${String(job.id)}')" class="shrink-0 text-xs text-amber-700">★ 解除</button>
+          <div class="flex items-center justify-between gap-4 bg-white p-4 rounded-xl border border-gray-100 shadow-sm mb-2 hover:border-blue-200 transition-all">
+            <div class="min-w-0">
+              <button type="button" onclick="openModal(${job.id})" class="text-left font-bold text-gray-800 hover:text-blue-600 truncate block w-full">${escapeHtml(job.title)}</button>
+              <p class="text-[10px] text-gray-400 mt-1 uppercase tracking-wider">📍 ${escapeHtml(job.location || '場所未設定')}</p>
+            </div>
+            <button type="button" onclick="toggleFavorite('${String(job.id)}')" class="shrink-0 text-xs font-bold text-amber-600 bg-amber-50 px-3 py-2 rounded-lg hover:bg-amber-100 transition-colors">★ 解除</button>
           </div>
         `).join("")
-        : '<p class="text-xs text-gray-500">お気に入り求人はまだありません。</p>';
+        : '<div class="text-center py-8 bg-gray-50 rounded-xl border border-dashed border-gray-200"><p class="text-xs text-gray-400">お気に入り求人はまだありません。</p></div>';
 
       const submitted = accountApplications.filter(application => application.applicant_id === currentUser.id);
       const applicationsContainer = document.getElementById("dashboardApplications");
@@ -1805,20 +1817,22 @@
         : `
         ${submitted.length
           ? submitted.map(application => `
-            <article class="border-b py-3 last:border-0">
-              <div class="flex flex-wrap items-center justify-between gap-2">
-                <p class="font-bold">${escapeHtml(application.job_title)}</p>
-                <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${formatApplicationStatusClass(application.status)}">${formatApplicationStatus(application.status)}</span>
+            <article class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm mb-4">
+              <div class="flex flex-wrap items-center justify-between gap-3 mb-3 pb-3 border-b border-gray-50">
+                <p class="font-black text-gray-800">${escapeHtml(application.job_title)}</p>
+                <span class="inline-flex rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest ${formatApplicationStatusClass(application.status)}">${formatApplicationStatus(application.status)}</span>
               </div>
-              <p class="mt-1 text-xs text-gray-500">応募日: ${formatDashboardDate(application.created_at)}</p>
-              <p class="mt-1 text-xs text-gray-600">${formatApplicationStatusDescription(application.status)}</p>
+              <div class="flex items-center justify-between text-xs">
+                <p class="text-gray-500">応募日: <span class="font-bold">${formatDashboardDate(application.created_at)}</span></p>
+                <p class="font-medium ${application.status === 'reviewed' ? 'text-emerald-600' : 'text-gray-600'}">${formatApplicationStatusDescription(application.status)}</p>
+              </div>
             </article>
           `).join("")
-          : '<p class="text-xs text-gray-500">応募履歴はありません。</p>'}
+          : '<div class="text-center py-10 bg-gray-50 rounded-2xl border border-dashed border-gray-200"><p class="text-xs text-gray-400">応募履歴はありません。</p></div>'}
       `;
       const unreadNotifications = appNotifications.filter(notification => !notification.read_at).length;
       document.getElementById("seekerNotificationsTab").innerText = unreadNotifications
-        ? `連絡・通知 (${unreadNotifications})`
+        ? `通知 (${unreadNotifications})`
         : "連絡・通知";
       renderNotifications("seekerDashboardNotifications", "seekerNotificationsStatus");
       renderLoginNotificationBanner();
@@ -1849,7 +1863,7 @@
       document.getElementById("loginNotificationBanner").classList.add("hidden");
     }
 
-    function renderNotifications(containerId, statusId) {
+        function renderNotifications(containerId, statusId) {
       const container = document.getElementById(containerId);
       const status = document.getElementById(statusId);
       if (!container || !status) return;
@@ -1861,19 +1875,24 @@
         ? ""
         : appNotifications.length
           ? appNotifications.map(notification => `
-            <article class="flex items-start justify-between gap-3 py-3 ${notification.read_at ? "" : "bg-blue-50/70"}">
-              <div class="min-w-0">
-                <p class="font-bold ${notification.read_at ? "text-gray-700" : "text-blue-900"}">${escapeHtml(String(notification.title || "通知"))}</p>
-                <p class="mt-1 text-sm text-gray-700">${escapeHtml(String(notification.body || ""))}</p>
-                <p class="mt-1 text-xs text-gray-500">${formatDashboardDate(notification.created_at)}</p>
-                ${notification.event_type === "contact_request" ? renderContactRequestNotification(notification.related_id) : ""}
+            <article class="p-5 rounded-2xl border border-gray-100 shadow-sm mb-3 transition-all ${notification.read_at ? "bg-white" : "bg-blue-50/40 border-blue-100"}">
+              <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <div class="flex items-center gap-2 mb-1">
+                    <span class="flex h-2 w-2 rounded-full ${notification.read_at ? "bg-gray-300" : "bg-blue-600 animate-pulse"}"></span>
+                    <p class="font-black text-gray-900">${escapeHtml(String(notification.title || "通知"))}</p>
+                  </div>
+                  <p class="mt-1 text-sm text-gray-600 leading-relaxed">${escapeHtml(String(notification.body || ""))}</p>
+                  <p class="mt-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest">${formatDashboardDate(notification.created_at)}</p>
+                  ${notification.event_type === "contact_request" ? renderContactRequestNotification(notification.related_id) : ""}
+                </div>
+                ${notification.read_at
+                  ? '<span class="shrink-0 text-[10px] font-bold text-gray-300 uppercase tracking-tighter">Read</span>'
+                  : `<button type="button" onclick="markNotificationRead('${escapeHtml(String(notification.id))}')" class="shrink-0 rounded-xl bg-blue-600 px-3 py-1.5 text-[10px] font-bold text-white hover:bg-blue-700 transition-all shadow-md shadow-blue-100">${notification.legacy ? "確認" : "既読にする"}</button>`}
               </div>
-              ${notification.read_at
-                ? '<span class="shrink-0 text-xs text-gray-400">確認済み</span>'
-                : `<button type="button" onclick="markNotificationRead('${escapeHtml(String(notification.id))}')" class="min-h-10 shrink-0 rounded-lg border border-blue-200 px-3 py-2 text-xs font-bold text-blue-700 hover:bg-blue-50">${notification.legacy ? "確認済みにする" : "既読にする"}</button>`}
             </article>
           `).join("")
-          : '<p class="py-3 text-xs text-gray-500">新しい通知はありません。</p>';
+          : '<div class="text-center py-10 bg-gray-50 rounded-2xl border border-dashed border-gray-200"><p class="text-xs text-gray-400">新しい通知はありません。</p></div>';
     }
 
     function renderContactRequestNotification(requestId) {
@@ -2712,6 +2731,12 @@
         console.error("AI生成エラー:", error);
         status.innerText = "❌ AI文章の作成に失敗しました。時間をおいて再度お試しください。";
       }
+    }
+
+    function setAppTemplate(text) {
+      const textarea = document.getElementById("applicationMessage");
+      textarea.value = text;
+      textarea.focus();
     }
 
     // LINE応募
