@@ -436,12 +436,12 @@
       </div>
       <section id="employerSeekerProfilesPanel" class="hidden mt-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm sm:p-5">
         <p class="mb-4 border-b border-emerald-200 pb-3 text-sm leading-5 text-emerald-900">本人が公開を選んだ匿名プロフィールのみ表示しています。名前・電話番号は表示されません。企業アカウントは事業者の本人確認を行っていないため、表示情報の取り扱いにご注意ください。</p>
-        <div class="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_14rem]">
+                <div class="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_14rem]">
           <label class="text-sm font-medium text-gray-700">希望職種・地域・資格で検索
-            <input id="employerSeekerKeyword" type="search" oninput="renderEmployerDashboard()" placeholder="例: 足場、横浜、玉掛け" class="mt-1 w-full rounded-lg border border-emerald-200 bg-white px-3 py-2.5">
+            <input id="employerSeekerKeyword" type="search" oninput="renderEmployerDashboard(true)" placeholder="例: 足場、横浜、玉掛け" class="mt-1 w-full rounded-lg border border-emerald-200 bg-white px-3 py-2.5">
           </label>
           <label class="text-sm font-medium text-gray-700">現場経験
-            <select id="employerSeekerExperience" onchange="renderEmployerDashboard()" class="mt-1 w-full rounded-lg border border-emerald-200 bg-white px-3 py-2.5">
+            <select id="employerSeekerExperience" onchange="renderEmployerDashboard(true)" class="mt-1 w-full rounded-lg border border-emerald-200 bg-white px-3 py-2.5">
               <option value="">すべて</option>
               <option value="未経験（やる気あり）">未経験</option>
               <option value="1〜2年">1〜2年</option>
@@ -464,7 +464,7 @@
         </div>
 
         <label for="searchKeyword" class="mb-2 block text-sm font-bold text-gray-700">キーワード</label>
-        <input type="text" id="searchKeyword" oninput="renderJobList()" placeholder="職種・勤務地・タグで検索（例: 横浜、日払い）" class="mb-4 w-full rounded-xl border border-blue-300 bg-white px-4 py-3 text-base shadow-sm outline-none focus:ring-2 focus:ring-blue-500">
+        <input type="text" id="searchKeyword" oninput="renderJobList(true)" placeholder="職種・勤務地・タグで検索（例: 横浜、日払い）" class="mb-4 w-full rounded-xl border border-blue-300 bg-white px-4 py-3 text-base shadow-sm outline-none focus:ring-2 focus:ring-blue-500">
 
         <fieldset class="mb-4">
           <legend class="mb-2 text-sm font-bold text-gray-700">人気の条件から探す</legend>
@@ -476,22 +476,22 @@
         </fieldset>
 
         <div class="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <label class="flex min-h-11 items-center gap-2 rounded-lg border border-blue-100 bg-white px-3 text-sm text-gray-700">
-            <input type="checkbox" id="openJobsOnly" onchange="renderJobList()" class="h-4 w-4 rounded text-blue-600 focus:ring-blue-500">
+                    <label class="flex min-h-11 items-center gap-2 rounded-lg border border-blue-100 bg-white px-3 text-sm text-gray-700">
+            <input type="checkbox" id="openJobsOnly" onchange="renderJobList(true)" class="h-4 w-4 rounded text-blue-600 focus:ring-blue-500">
             募集中のみ表示
           </label>
           <label class="flex min-h-11 items-center gap-2 rounded-lg border border-blue-100 bg-white px-3 text-sm text-gray-700">
-            <input type="checkbox" id="favoritesOnly" onchange="renderJobList()" class="h-4 w-4 rounded text-blue-600 focus:ring-blue-500">
+            <input type="checkbox" id="favoritesOnly" onchange="renderJobList(true)" class="h-4 w-4 rounded text-blue-600 focus:ring-blue-500">
             お気に入りのみ表示
           </label>
         </div>
 
         <details id="advancedJobFilters" class="rounded-xl border border-blue-200 bg-white">
           <summary class="cursor-pointer select-none rounded-xl px-4 py-3 text-sm font-bold text-blue-900 hover:bg-blue-100">詳細条件を追加</summary>
-          <div class="grid grid-cols-1 gap-3 border-t border-blue-100 p-4 sm:grid-cols-2">
+                    <div class="grid grid-cols-1 gap-3 border-t border-blue-100 p-4 sm:grid-cols-2">
         <label class="text-sm text-gray-700">
           <span class="block mb-1">勤務地</span>
-          <select id="locationFilter" onchange="renderJobList()" class="w-full rounded-lg border px-3 py-2.5 text-base focus:ring-2 focus:ring-blue-500 outline-none">
+          <select id="locationFilter" onchange="renderJobList(true)" class="w-full rounded-lg border px-3 py-2.5 text-base focus:ring-2 focus:ring-blue-500 outline-none">
             <option value="">すべての勤務地</option>
           </select>
         </label>
@@ -502,9 +502,9 @@
             <p class="text-xs text-gray-400">タグは求人の読み込み後に表示されます。</p>
           </div>
         </fieldset>
-        <label class="text-sm text-gray-700">
+                <label class="text-sm text-gray-700">
           <span class="block mb-1">募集人数</span>
-          <select id="capacityFilter" onchange="renderJobList()" class="w-full rounded-lg border px-3 py-2.5 text-base focus:ring-2 focus:ring-blue-500 outline-none">
+          <select id="capacityFilter" onchange="renderJobList(true)" class="w-full rounded-lg border px-3 py-2.5 text-base focus:ring-2 focus:ring-blue-500 outline-none">
             <option value="">すべて</option>
             <option value="1">1〜3名（少人数・ピンポイント）</option>
             <option value="4">4〜6名（チーム・中規模）</option>
@@ -514,7 +514,7 @@
         </label>
         <label class="text-sm text-gray-700">
           <span class="block mb-1">給与区分</span>
-          <select id="salaryTypeFilter" onchange="renderJobList()" class="w-full rounded-lg border px-3 py-2.5 text-base focus:ring-2 focus:ring-blue-500 outline-none">
+          <select id="salaryTypeFilter" onchange="renderJobList(true)" class="w-full rounded-lg border px-3 py-2.5 text-base focus:ring-2 focus:ring-blue-500 outline-none">
             <option value="">すべて</option>
             <option value="hourly">時給</option>
             <option value="daily">日給</option>
@@ -523,12 +523,12 @@
         </label>
         <label class="text-sm text-gray-700">
           <span class="block mb-1">最低給与額（円）</span>
-          <input type="number" id="minimumSalary" min="0" step="1" oninput="renderJobList()" placeholder="例: 15000" class="w-full rounded-lg border px-3 py-2.5 text-base focus:ring-2 focus:ring-blue-500 outline-none">
+          <input type="number" id="minimumSalary" min="0" step="1" oninput="renderJobList(true)" placeholder="例: 15000" class="w-full rounded-lg border px-3 py-2.5 text-base focus:ring-2 focus:ring-blue-500 outline-none">
           <span class="block text-xs text-gray-500 mt-1">最低額で絞る場合は給与区分も選択してください。</span>
         </label>
         <label class="text-sm text-gray-700 sm:col-span-2">
           <span class="block mb-1">並び替え</span>
-          <select id="jobSort" onchange="renderJobList()" class="w-full rounded-lg border px-3 py-2.5 text-base focus:ring-2 focus:ring-blue-500 outline-none">
+          <select id="jobSort" onchange="renderJobList(true)" class="w-full rounded-lg border px-3 py-2.5 text-base focus:ring-2 focus:ring-blue-500 outline-none">
             <option value="recommended">おすすめ順</option>
             <option value="newest" selected>新着順</option>
             <option value="salary">給与額が高い順</option>
@@ -696,8 +696,11 @@
     let loadingPublicSeekerProfilesUserId = null;
     let turnstileToken = null;
     let turnstileWidgetId = null;
-    let reportTurnstileToken = null;
+        let reportTurnstileToken = null;
     let reportTurnstileWidgetId = null;
+
+    let displayLimitJobs = 10;
+    let displayLimitProfiles = 10;
 
     document.addEventListener("DOMContentLoaded", () => {
       switchTab("guest");
@@ -2004,7 +2007,8 @@
       }
     }
 
-    function renderEmployerDashboard() {
+        function renderEmployerDashboard(resetLimit = false) {
+      if (resetLimit === true) displayLimitProfiles = 10;
       const container = document.getElementById("employerDashboardJobs");
       const profilesContainer = document.getElementById("employerSeekerProfiles");
       if (!container || !profilesContainer) return;
@@ -2026,7 +2030,7 @@
       );
       const seekerSearchKeyword = document.getElementById("employerSeekerKeyword")?.value.trim().toLocaleLowerCase("ja-JP") || "";
       const seekerExperienceFilter = document.getElementById("employerSeekerExperience")?.value || "";
-      const filteredPublicProfiles = publicSeekerProfiles.filter(profile => {
+            const filteredPublicProfiles = publicSeekerProfiles.filter(profile => {
         const searchableProfile = [
           profile.job_type,
           profile.location,
@@ -2037,6 +2041,9 @@
         return (!seekerSearchKeyword || searchableProfile.includes(seekerSearchKeyword)) &&
           (!seekerExperienceFilter || profile.exp_years === seekerExperienceFilter);
       });
+
+      const displayProfiles = filteredPublicProfiles.slice(0, displayLimitProfiles);
+
       document.getElementById("employerSeekerProfileCount").innerText = publicSeekerProfiles.length
         ? `${filteredPublicProfiles.length} / ${publicSeekerProfiles.length}件を表示中`
         : "";
@@ -2090,9 +2097,9 @@
       if (publicSeekerProfilesUserId === currentUser.id) {
         profilesContainer.innerHTML = publicSeekerProfilesError
           ? `<p class="text-sm text-red-600">${escapeHtml(publicSeekerProfilesError)}</p>`
-          : filteredPublicProfiles.length
+          : displayProfiles.length
           ? `${employerContactRequestsError ? `<p class="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">${escapeHtml(employerContactRequestsError)}</p>` : ""}
-          ${filteredPublicProfiles.map(profile => {
+          ${displayProfiles.map(profile => {
             const payTypeLabels = { hourly: "時給", daily: "日給", monthly: "月給" };
             const pay = profile.pay_type
               ? `${payTypeLabels[profile.pay_type]}${profile.minimum_salary ? `・希望最低額 ${Number(profile.minimum_salary).toLocaleString("ja-JP")}円` : ""}`
@@ -2102,7 +2109,7 @@
               : "登録なし";
             const contactRequest = employerContactRequests.find(request => request.seeker_id === profile.user_id);
             return `
-              <article class="rounded-xl border border-emerald-100 bg-white p-4 shadow-sm">
+              <article class="rounded-xl border border-emerald-100 bg-white p-4 shadow-sm mb-3">
                 <div class="grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-2">
                   <p class="sm:col-span-2 text-base"><span class="font-bold text-emerald-900">希望職種:</span> ${escapeHtml(String(profile.job_type || "未設定"))}</p>
                   <p><span class="font-bold">希望勤務地:</span> ${escapeHtml(String(profile.location || "未設定"))}</p>
@@ -2129,7 +2136,13 @@
                 </div>
               </article>
             `;
-          }).join("")}`
+          }).join("")}
+          ${filteredPublicProfiles.length > displayLimitProfiles ? `
+            <button type="button" onclick="loadMoreProfiles()" class="w-full py-3 mt-4 bg-emerald-50 text-emerald-700 font-bold rounded-xl hover:bg-emerald-100 transition-colors border border-emerald-100">
+              もっとプロフィールを見る (${filteredPublicProfiles.length - displayLimitProfiles}件)
+            </button>
+          ` : ""}
+          `
           : publicSeekerProfiles.length
             ? '<p class="rounded-lg border border-dashed border-emerald-200 bg-white p-5 text-center text-sm text-gray-600">条件に合うプロフィールがありません。検索条件を変更してください。</p>'
             : '<p class="text-xs text-gray-500">現在公開中の求職者プロフィールはありません。</p>';
@@ -2294,8 +2307,9 @@
       return /^(0\d{9,10}|\+81\d{9,10})$/.test(phone);
     }
 
-    // 求人リスト描画
-    function renderJobList() {
+        // 求人リスト描画
+    function renderJobList(resetLimit = false) {
+      if (resetLimit === true) displayLimitJobs = 10;
       const jobList = document.getElementById("jobList");
       const jobCount = document.getElementById("jobCount");
       const keyword = document.getElementById("searchKeyword").value.toLowerCase();
@@ -2325,7 +2339,7 @@
       const preferredLocation = activeTab === "seeker" && seekerProfile ? seekerProfile.location || "" : "";
       const matchProfile = activeTab === "seeker" ? seekerProfile : null;
 
-      const filteredJobs = cachedJobs
+            const filteredJobs = cachedJobs
         .filter(job =>
           (!keyword ||
             (job.title || "").toLowerCase().includes(keyword) ||
@@ -2379,7 +2393,7 @@
         ? `${activeFilters.length}件の条件で絞り込み中`
         : "";
 
-            if (filteredJobs.length === 0) {
+      if (filteredJobs.length === 0) {
         jobList.innerHTML = favoritesOnly
           ? `<div class="text-center py-12 bg-white rounded-2xl border border-dashed border-gray-200">
               <div class="text-3xl mb-3">⭐</div>
@@ -2396,7 +2410,9 @@
         return;
       }
 
-      jobList.innerHTML = filteredJobs.map(job => `
+      const displayJobs = filteredJobs.slice(0, displayLimitJobs);
+
+      jobList.innerHTML = displayJobs.map(job => `
         <article onclick="openModal(${job.id})" class="cursor-pointer group relative bg-white rounded-2xl border border-gray-100 p-5 transition-all hover:shadow-md hover:border-blue-200 sm:p-6 mb-4">
           <div class="flex items-start justify-between gap-3">
             <div class="min-w-0 flex-1">
@@ -2441,9 +2457,19 @@
           </div>
         </article>
       `).join("");
+
+      if (filteredJobs.length > displayLimitJobs) {
+        const loadMoreBtn = document.createElement("button");
+        loadMoreBtn.type = "button";
+        loadMoreBtn.onclick = loadMoreJobs;
+        loadMoreBtn.className = "w-full py-4 mt-4 bg-white border border-blue-100 text-blue-600 font-bold rounded-2xl hover:bg-blue-50 transition-colors shadow-sm";
+        loadMoreBtn.innerText = `もっと求人を見る (${filteredJobs.length - displayLimitJobs}件の残り)`;
+        jobList.appendChild(loadMoreBtn);
+      }
     }
 
     function resetJobFilters() {
+      displayLimitJobs = 10;
       document.getElementById("searchKeyword").value = "";
       document.getElementById("openJobsOnly").checked = false;
       document.getElementById("favoritesOnly").checked = false;
@@ -2459,6 +2485,7 @@
     }
 
     function toggleQuickJobTag(tag) {
+      displayLimitJobs = 10;
       const checkbox = Array.from(document.querySelectorAll('input[name="tagFilter"]'))
         .find(input => input.value === tag);
       if (!checkbox) return;
@@ -2467,6 +2494,7 @@
     }
 
     function resetEmployerSeekerFilters() {
+      displayLimitProfiles = 10;
       document.getElementById("employerSeekerKeyword").value = "";
       document.getElementById("employerSeekerExperience").value = "";
       renderEmployerDashboard();
@@ -2866,6 +2894,16 @@
       const bId = Number(b.id);
       if (Number.isFinite(aId) && Number.isFinite(bId)) return bId - aId;
       return String(b.id).localeCompare(String(a.id));
+    }
+
+    function loadMoreJobs() {
+      displayLimitJobs += 10;
+      renderJobList();
+    }
+
+    function loadMoreProfiles() {
+      displayLimitProfiles += 10;
+      renderEmployerDashboard();
     }
 
     // Supabaseから求人を削除
