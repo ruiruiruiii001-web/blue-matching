@@ -237,6 +237,18 @@
             </div>
           </div>
 
+          <div>
+            <label class="block text-sm font-medium mb-1">現場写真のURL (任意)</label>
+            <input type="url" id="jobImageUrl" placeholder="https://example.com/photo.jpg" class="w-full border rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+            <p class="text-[10px] text-gray-500 mt-1">現場の雰囲気がわかる写真のリンクを貼ると応募が増えやすくなります。</p>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-1">現場写真のURL (任意)</label>
+            <input type="url" id="jobImageUrl" placeholder="https://example.com/photo.jpg" class="w-full border rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+            <p class="text-[10px] text-gray-500 mt-1">現場の雰囲気がわかる写真のリンクを貼ると応募が増えやすくなります。</p>
+          </div>
+
           <!-- 現場特化タグ選択 (12種類) -->
           <div>
             <label class="block text-sm font-medium mb-1">現場アピールタグ（複数選択可）</label>
@@ -306,15 +318,21 @@
       </details>
       
       <div id="seekerProfileForm" class="space-y-4">
-        <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="block text-sm font-medium mb-1">お名前 / 通称 <span class="text-red-500">*</span></label>
-            <input type="text" id="seekerName" placeholder="例: 職人 太郎" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+            <input type="text" id="seekerName" placeholder="例: 職人 太郎" class="w-full border rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
           </div>
           <div>
             <label class="block text-sm font-medium mb-1">携帯電話番号</label>
-            <input type="text" id="seekerPhone" placeholder="例: 090-XXXX-XXXX" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+            <input type="text" id="seekerPhone" placeholder="例: 090-XXXX-XXXX" class="w-full border rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
           </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-1">プロフィール写真のURL (任意)</label>
+          <input type="url" id="seekerAvatarUrl" placeholder="https://example.com/my-photo.jpg" class="w-full border rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+          <p class="text-[10px] text-gray-500 mt-1">あなたの顔写真や、仕事中の様子の写真リンクを貼ると信頼がアップします。</p>
         </div>
 
         <div>
@@ -1481,11 +1499,12 @@
         return;
       }
 
-      const jobData = {
+            const jobData = {
         title, location, salary, phone: normalizedPhone, line, duties, capacity,
         pay_type: payType || null,
         pay_amount: payAmount,
         tags: checkedTags,
+        image_url: document.getElementById("jobImageUrl").value.trim() || null,
         ...(!editingJobId && { owner_id: currentUser.id })
       };
 
@@ -1512,6 +1531,7 @@
 
       editingJobId = id;
       document.getElementById("jobTitle").value = job.title || "";
+      document.getElementById("jobImageUrl").value = job.image_url || "";
       document.getElementById("jobLocation").value = job.location || "";
       document.getElementById("jobSalary").value = job.salary || "";
       document.getElementById("jobPayType").value = getJobPayType(job);
@@ -1531,8 +1551,9 @@
     }
 
     function cancelJobEdit() {
-      editingJobId = null;
+            editingJobId = null;
       document.getElementById("jobTitle").value = "";
+      document.getElementById("jobImageUrl").value = "";
       document.getElementById("jobLocation").value = "";
       document.getElementById("jobSalary").value = "";
       document.getElementById("jobPayType").value = "";
@@ -1710,89 +1731,6 @@
       document.getElementById("minimumSalary").value = profile.minimumSalary ?? "";
     }
 
-    async function loadAccountData(user) {
-      if (!user || currentUser?.id !== user.id || loadingAccountUserId === user.id) return;
-      loadingAccountUserId = user.id;
-      const status = document.getElementById("accountDashboardStatus");
-      status.classList.add("hidden");
-      const [profileResult, favoritesResult, applicationsResult, contactRequestsResult, notificationsResult] = await Promise.all([
-        supabaseClient.from("seeker_profiles").select("*").eq("user_id", user.id).maybeSingle(),
-        supabaseClient.from("job_favorites").select("job_id").eq("user_id", user.id),
-        supabaseClient.from("job_applications").select("*").order("created_at", { ascending: false }),
-        accountType === "seeker"
-          ? supabaseClient.from("seeker_contact_requests").select("*").eq("seeker_id", user.id).order("created_at", { ascending: false })
-          : Promise.resolve({ data: [], error: null }),
-        supabaseClient.from("app_notifications").select("*").eq("recipient_id", user.id).order("created_at", { ascending: false }).limit(100)
-      ]);
-      if (currentUser?.id !== user.id) {
-        loadingAccountUserId = null;
-        return;
-      }
-      const failedResult = [profileResult, favoritesResult].find(result => result.error);
-      if (failedResult) {
-        loadingAccountUserId = null;
-        status.innerText = `マイページを読み込めませんでした。データベース設定を確認してください: ${failedResult.error.message}`;
-        status.classList.remove("hidden");
-        console.error("マイページ読み込みエラー:", failedResult.error);
-        return;
-      }
-
-      const profileRow = profileResult.data;
-      seekerProfileData = profileRow ? {
-        name: profileRow.name,
-        phone: profileRow.phone || "",
-        jobType: profileRow.job_type || "",
-        location: profileRow.location || "",
-        payType: profileRow.pay_type || "",
-        minimumSalary: profileRow.minimum_salary,
-        licenses: profileRow.licenses || [],
-        expYears: profileRow.exp_years || "",
-        stamina: profileRow.stamina || "",
-        isPublic: Boolean(profileRow.is_public)
-      } : null;
-      favoriteJobIds = favoritesResult.data.map(favorite => String(favorite.job_id));
-      accountApplications = applicationsResult.data || [];
-      accountApplicationsError = applicationsResult.error
-        ? `応募情報を読み込めませんでした。データベース設定を確認してください: ${applicationsResult.error.message}`
-        : "";
-      if (applicationsResult.error) console.error("応募情報読み込みエラー:", applicationsResult.error);
-      appNotifications = notificationsResult.data || [];
-      appNotificationsError = notificationsResult.error
-        ? `通知を読み込めませんでした。通知用SQL移行が実行済みか確認してください: ${notificationsResult.error.message}`
-        : "";
-      if (notificationsResult.error) console.error("通知読み込みエラー:", notificationsResult.error);
-      seekerContactRequests = contactRequestsResult.data || [];
-      seekerContactRequestsError = contactRequestsResult.error
-        ? `企業からの連絡を読み込めません。新しいSQL移行を実行してください: ${contactRequestsResult.error.message}`
-        : "";
-      if (contactRequestsResult.error) console.error("企業からの連絡読み込みエラー:", contactRequestsResult.error);
-      if (accountType === "seeker") {
-        const previousPendingContacts = seekerContactRequests
-          .filter(request => request.status === "pending" && !appNotifications.some(notification =>
-            notification.event_type === "contact_request" && notification.related_id === request.id
-          ))
-          .map(request => ({
-            id: `legacy-contact-${request.id}`,
-            recipient_id: user.id,
-            event_type: "contact_request",
-            related_id: request.id,
-            title: "企業から連絡リクエストが届きました",
-            body: "マイページの連絡・通知で内容を確認できます。",
-            created_at: request.created_at,
-            read_at: null,
-            legacy: true
-          }));
-        appNotifications = [...previousPendingContacts, ...appNotifications];
-      }
-      loadSeekerProfile(seekerProfileData);
-      accountDataUserId = user.id;
-      loadingAccountUserId = null;
-      renderAccountDashboard();
-      renderEmployerDashboard();
-      renderLoginNotificationBanner();
-      renderJobList();
-    }
-
         function renderAccountDashboard() {
       if (!currentUser || accountDataUserId !== currentUser.id) return;
 
@@ -1800,15 +1738,17 @@
       const favoriteContainer = document.getElementById("dashboardFavorites");
       favoriteContainer.innerHTML = favoriteJobs.length
         ? favoriteJobs.map(job => `
-          <div class="flex items-center justify-between gap-4 bg-white p-4 rounded-xl border border-gray-100 shadow-sm mb-2 hover:border-blue-200 transition-all">
-            <div class="min-w-0">
-              <button type="button" onclick="openModal(${job.id})" class="text-left font-bold text-gray-800 hover:text-blue-600 truncate block w-full">${escapeHtml(job.title)}</button>
-              <p class="text-[10px] text-gray-400 mt-1 uppercase tracking-wider">📍 ${escapeHtml(job.location || '場所未設定')}</p>
+          <div class="flex items-center justify-between gap-4 bg-white p-4 rounded-xl border border-gray-100 shadow-sm mb-2 hover:border-blue-200 transition-all group">
+            <div class="min-w-0 flex-1">
+              <button type="button" onclick="openModal(${job.id})" class="text-left font-bold text-gray-800 group-hover:text-blue-600 truncate block w-full transition-colors">${escapeHtml(job.title)}</button>
+              <p class="text-[10px] text-gray-400 mt-1 uppercase tracking-wider font-medium flex items-center gap-1">
+                <span class="text-xs">📍</span> ${escapeHtml(job.location || '場所未設定')}
+              </p>
             </div>
-            <button type="button" onclick="toggleFavorite('${String(job.id)}')" class="shrink-0 text-xs font-bold text-amber-600 bg-amber-50 px-3 py-2 rounded-lg hover:bg-amber-100 transition-colors">★ 解除</button>
+            <button type="button" onclick="toggleFavorite('${String(job.id)}')" class="shrink-0 text-[10px] font-black text-amber-600 bg-amber-50 px-3 py-2 rounded-lg hover:bg-amber-100 transition-colors uppercase tracking-tighter">Remove</button>
           </div>
         `).join("")
-        : '<div class="text-center py-8 bg-gray-50 rounded-xl border border-dashed border-gray-200"><p class="text-xs text-gray-400">お気に入り求人はまだありません。</p></div>';
+        : '<div class="text-center py-10 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200"><p class="text-xs text-gray-400 font-bold uppercase tracking-widest">No Favorites Yet</p></div>';
 
       const submitted = accountApplications.filter(application => application.applicant_id === currentUser.id);
       const applicationsContainer = document.getElementById("dashboardApplications");
@@ -1817,18 +1757,22 @@
         : `
         ${submitted.length
           ? submitted.map(application => `
-            <article class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm mb-4">
-              <div class="flex flex-wrap items-center justify-between gap-3 mb-3 pb-3 border-b border-gray-50">
-                <p class="font-black text-gray-800">${escapeHtml(application.job_title)}</p>
+            <article class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm mb-4 transition-all hover:shadow-md">
+              <div class="flex flex-wrap items-center justify-between gap-3 mb-4 pb-4 border-b border-gray-50">
+                <p class="font-black text-gray-900 text-lg leading-tight">${escapeHtml(application.job_title)}</p>
                 <span class="inline-flex rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest ${formatApplicationStatusClass(application.status)}">${formatApplicationStatus(application.status)}</span>
               </div>
-              <div class="flex items-center justify-between text-xs">
-                <p class="text-gray-500">応募日: <span class="font-bold">${formatDashboardDate(application.created_at)}</span></p>
-                <p class="font-medium ${application.status === 'reviewed' ? 'text-emerald-600' : 'text-gray-600'}">${formatApplicationStatusDescription(application.status)}</p>
+              <div class="flex items-center justify-between">
+                <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                  Applied on: <span class="text-gray-600">${formatDashboardDate(application.created_at)}</span>
+                </div>
+                <p class="text-xs font-bold ${application.status === 'reviewed' ? 'text-emerald-600' : 'text-blue-500'} flex items-center gap-1">
+                  ${application.status === 'reviewed' ? '✅' : '⏳'} ${formatApplicationStatusDescription(application.status)}
+                </p>
               </div>
             </article>
           `).join("")
-          : '<div class="text-center py-10 bg-gray-50 rounded-2xl border border-dashed border-gray-200"><p class="text-xs text-gray-400">応募履歴はありません。</p></div>'}
+          : '<div class="text-center py-12 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200"><p class="text-xs text-gray-400 font-bold uppercase tracking-widest">No Applications Yet</p></div>'}
       `;
       const unreadNotifications = appNotifications.filter(notification => !notification.read_at).length;
       document.getElementById("seekerNotificationsTab").innerText = unreadNotifications
@@ -2066,17 +2010,25 @@
       document.getElementById("employerSeekerProfileCount").innerText = publicSeekerProfiles.length
         ? `${filteredPublicProfiles.length} / ${publicSeekerProfiles.length}件を表示中`
         : "";
-      container.innerHTML = ownedJobs.length
+            container.innerHTML = ownedJobs.length
         ? ownedJobs.map(job => `
-          <article class="flex flex-wrap items-center justify-between gap-3 border-b py-3">
-            <div class="min-w-0">
-              <p class="font-medium">${escapeHtml(String(job.title || ""))}</p>
-              <p class="text-xs text-gray-500">${escapeHtml(String(job.location || "勤務地未設定"))} ・ ${job.is_closed ? "募集終了" : "募集中"} ・ ${escapeHtml(formatJobFreshness(job))}</p>
+          <article class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm mb-4 transition-all hover:border-blue-200">
+            <div class="flex items-center justify-between gap-4">
+              <div class="min-w-0">
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">${escapeHtml(formatJobFreshness(job))}</p>
+                <p class="font-black text-gray-800 text-lg leading-tight truncate">${escapeHtml(String(job.title || ""))}</p>
+                <div class="flex flex-wrap gap-2 mt-2">
+                  <span class="px-2 py-0.5 rounded-full bg-gray-50 border border-gray-100 text-[10px] font-bold text-gray-500 uppercase">📍 ${escapeHtml(String(job.location || "未設定"))}</span>
+                  <span class="px-2 py-0.5 rounded-full ${job.is_closed ? 'bg-gray-100 text-gray-400' : 'bg-emerald-50 text-emerald-600'} text-[10px] font-bold border border-current/10 uppercase">${job.is_closed ? "募集終了" : "募集中"}</span>
+                </div>
+              </div>
+              <button type="button" onclick="editJob(${job.id})" class="shrink-0 h-11 w-11 flex items-center justify-center rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors shadow-sm" title="求人を編集">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+              </button>
             </div>
-            <button type="button" onclick="editJob(${job.id})" class="shrink-0 rounded border border-blue-600 px-3 py-1.5 text-xs font-bold text-blue-700 hover:bg-blue-50">求人を編集</button>
           </article>
         `).join("")
-        : '<p class="text-xs text-gray-500 py-2">掲載中の求人はありません。「求人を新規投稿」から掲載できます。</p>';
+        : '<div class="text-center py-10 bg-gray-50 rounded-2xl border border-dashed border-gray-200"><p class="text-xs text-gray-400">掲載中の求人はまだありません。</p></div>';
 
       const applicationCount = document.getElementById("employerApplicationCount");
       const applicationsStatus = document.getElementById("employerApplicationsStatus");
@@ -2084,34 +2036,43 @@
       applicationCount.innerText = receivedApplications.length ? `${receivedApplications.length}件` : "";
       applicationsStatus.innerText = accountApplicationsError;
       applicationsStatus.classList.toggle("hidden", !accountApplicationsError);
-      applicationsContainer.innerHTML = accountApplicationsError
+            applicationsContainer.innerHTML = accountApplicationsError
         ? ""
         : receivedApplications.length
           ? receivedApplications.map(application => `
-            <article class="py-4">
-              <div class="flex flex-wrap items-start justify-between gap-2">
-                <div class="min-w-0">
-                  <p class="font-bold">${escapeHtml(String(application.job_title || "求人"))}</p>
-                  <p class="mt-1 text-xs text-gray-500">応募日: ${formatDashboardDate(application.created_at)}</p>
+            <article class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm mb-4 transition-all hover:border-blue-200">
+              <div class="flex flex-wrap items-start justify-between gap-3 mb-4 pb-4 border-b border-gray-50">
+                <div class="min-w-0 flex-1">
+                  <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">求人: ${escapeHtml(String(application.job_title || "求人"))}</p>
+                  <p class="font-black text-gray-900 text-lg leading-tight">👷 ${escapeHtml(String(application.applicant_name || ""))}</p>
                 </div>
-                <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${formatApplicationStatusClass(application.status)}">${formatApplicationStatus(application.status)}</span>
-                <a href="tel:${escapeHtml(String(application.applicant_phone || ""))}" class="shrink-0 font-bold text-blue-700 underline">${escapeHtml(String(application.applicant_phone || ""))}</a>
+                <div class="flex flex-col items-end gap-2">
+                  <span class="inline-flex rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-widest ${formatApplicationStatusClass(application.status)}">${formatApplicationStatus(application.status)}</span>
+                  <a href="tel:${escapeHtml(String(application.applicant_phone || ""))}" class="font-black text-blue-600 text-sm hover:underline flex items-center gap-1">
+                    <span class="text-base">📞</span> ${escapeHtml(String(application.applicant_phone || ""))}
+                  </a>
+                </div>
               </div>
-              <p class="mt-2 text-sm"><span class="font-bold">応募者:</span> ${escapeHtml(String(application.applicant_name || ""))}</p>
-              <p class="mt-1 text-sm"><span class="font-bold">経験:</span> ${escapeHtml(String(application.experience || "未登録"))}</p>
-              <p class="mt-1 text-sm"><span class="font-bold">資格:</span> ${Array.isArray(application.licenses) && application.licenses.length
-                ? application.licenses.map(license => escapeHtml(String(license))).join("、")
-                : "未登録"}</p>
-              ${application.message ? `<p class="mt-3 whitespace-pre-wrap break-words border-l-2 border-blue-200 pl-3 text-sm text-gray-700">${escapeHtml(String(application.message))}</p>` : '<p class="mt-3 text-xs text-gray-400">応募メッセージはありません。</p>'}
+              <div class="grid grid-cols-2 gap-4 text-xs mb-4 bg-gray-50/50 p-4 rounded-xl">
+                <p><span class="text-[10px] font-bold text-gray-400 uppercase block mb-1">現場経験</span>💪 ${escapeHtml(String(application.experience || "未登録"))}</p>
+                <p><span class="text-[10px] font-bold text-gray-400 uppercase block mb-1">保有資格</span>🔧 ${Array.isArray(application.licenses) && application.licenses.length ? application.licenses.join("、") : "未登録"}</p>
+              </div>
+              ${application.message 
+                ? `<div class="relative bg-blue-50/30 p-4 rounded-xl border border-blue-50 italic text-sm text-blue-900 leading-relaxed">
+                    <span class="absolute -top-2 left-4 px-2 bg-white text-[9px] font-bold text-blue-400 uppercase tracking-widest border border-blue-50 rounded">Message</span>
+                    "${escapeHtml(String(application.message))}"
+                   </div>` 
+                : '<p class="text-center py-2 text-[10px] text-gray-300 font-bold uppercase tracking-widest">No Message Provided</p>'}
+              
               ${application.status === "pending" ? `
-                <div class="mt-3 flex flex-wrap gap-2">
-                  <button type="button" onclick="updateApplicationStatus('${escapeHtml(String(application.id))}', 'reviewed')" class="min-h-10 rounded-lg bg-blue-700 px-3 py-2 text-xs font-bold text-white hover:bg-blue-800">確認済みにする</button>
-                  <button type="button" onclick="updateApplicationStatus('${escapeHtml(String(application.id))}', 'dismissed')" class="min-h-10 rounded-lg border border-gray-300 px-3 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50">対応不要にする</button>
+                <div class="mt-5 flex gap-3">
+                  <button type="button" onclick="updateApplicationStatus('${escapeHtml(String(application.id))}', 'reviewed')" class="flex-1 min-h-11 rounded-xl bg-blue-600 px-4 py-2 text-xs font-black text-white hover:bg-blue-700 transition-all shadow-md shadow-blue-100">確認済みにする</button>
+                  <button type="button" onclick="updateApplicationStatus('${escapeHtml(String(application.id))}', 'dismissed')" class="flex-1 min-h-11 rounded-xl border border-gray-200 bg-white px-4 py-2 text-xs font-black text-gray-500 hover:bg-gray-50 transition-all">対応不要</button>
                 </div>
               ` : ""}
             </article>
           `).join("")
-          : '<p class="py-2 text-xs text-gray-500">受け取った応募はまだありません。</p>';
+          : '<div class="text-center py-10 bg-gray-50 rounded-2xl border border-dashed border-gray-200"><p class="text-xs text-gray-400">受け取った応募はまだありません。</p></div>';
 
       if (publicSeekerProfilesUserId === currentUser.id) {
         profilesContainer.innerHTML = publicSeekerProfilesError
