@@ -180,7 +180,7 @@
             <h3 class="font-bold text-sm">受け取った応募</h3>
             <span id="employerApplicationCount" class="text-xs text-gray-500"></span>
           </div>
-          <p class="mb-3 text-xs text-gray-500">応募者の名前・電話番号・経験・資格・メッセージを確認できます。「確認済み」などの状況は応募者のマイページにも表示されます。新しい応募はマイページの通知と登録メールでお知らせします。</p>
+          <p class="mb-3 text-xs text-gray-500">応募者の名前・経験・資格・メッセージを確認できます。「確認済み」などの状況は応募者のマイページにも表示されます。新しい応募はマイページの通知と登録メールでお知らせします。</p>
           <p id="employerApplicationsStatus" role="status" aria-live="polite" class="hidden text-sm text-red-700"></p>
           <div id="employerDashboardApplications" class="divide-y divide-gray-100 text-sm"></div>
         </section>
@@ -674,51 +674,11 @@
         </div>
       </div>
 
-      <!-- ワンタップ連絡アクションボタン -->
-      <div class="space-y-3 border-t pt-4">
-        <p class="text-xs font-bold text-center text-gray-600">＼ 面倒な履歴書不要！親方に直接連絡 ／</p>
-        
-        <button onclick="applyViaLINE()" id="btnLine" class="w-full min-h-12 bg-green-600 hover:bg-green-700 text-white font-bold py-3.5 rounded-lg transition shadow text-base flex items-center justify-center space-x-2">
-          <span>💬 LINEで親方に直接メッセージ</span>
-        </button>
-
-        <button onclick="applyViaSMS()" class="w-full min-h-12 bg-blue-700 hover:bg-blue-800 text-white font-bold py-3.5 rounded-lg transition shadow text-base flex items-center justify-center space-x-2">
-          <span>📱 SMS (ショートメッセージ) で直接応募</span>
-        </button>
-
-        <button onclick="applyViaPhone()" class="w-full min-h-12 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition shadow text-base flex items-center justify-center space-x-2">
-          <span>📞 親方に直接電話をかける</span>
-        </button>
-      </div>
-
       <div class="border-t mt-4 pt-4">
-        <h3 class="font-bold text-sm mb-2">サイトから応募して履歴に残す</h3>
+        <h3 class="font-bold text-sm mb-2">サイトから応募</h3>
         <p id="applicationLoginPrompt" class="text-xs text-gray-600">応募履歴を保存するにはログインが必要です。職人・求職者向けタブの「ログイン / アカウント登録へ」からログインしてください。</p>
         <button id="applicationLoginButton" type="button" onclick="closeModal(); openAccountPanel()" class="hidden mt-3 rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white">ログイン / 新規登録</button>
-                <form id="jobApplicationForm" class="hidden mt-3 space-y-4" onsubmit="submitJobApplication(event)">
-          <label class="block text-sm font-medium">お名前
-            <input id="applicationName" maxlength="100" required class="mt-1 w-full border rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-          </label>
-          <label class="block text-sm font-medium">電話番号
-            <input id="applicationPhone" type="tel" maxlength="20" required placeholder="09012345678" class="mt-1 w-full border rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-          </label>
-          <div>
-            <label class="block text-sm font-medium mb-1.5">応募メッセージ（任意）</label>
-            <div class="flex flex-wrap gap-2 mb-2">
-              <button type="button" onclick="setAppTemplate('詳しくお話を聞きたいです！')" class="text-[10px] bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-1 rounded-full font-bold transition-colors">💬 詳しく聞きたい</button>
-              <button type="button" onclick="setAppTemplate('すぐにでも働けます。よろしくお願いします。')" class="text-[10px] bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-1 rounded-full font-bold transition-colors">⚡ すぐ働ける</button>
-              <button type="button" onclick="setAppTemplate('未経験ですが、一生懸命頑張ります！')" class="text-[10px] bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-1 rounded-full font-bold transition-colors">💪 未経験から挑戦</button>
-            </div>
-            <textarea id="applicationMessage" maxlength="1000" rows="3" class="w-full border rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="経験や資格、親方へのメッセージ"></textarea>
-          </div>
-          <p class="text-[11px] text-gray-500 leading-relaxed bg-gray-50 p-3 rounded-lg border border-gray-100">
-            <span class="font-bold text-blue-600 text-xs block mb-1">💡 送信される内容</span>
-            お名前、電話番号、プロフィールに登録済みの「経験年数」と「保有資格」が投稿者に共有されます。
-          </p>
-          <p id="applicationStatus" role="status" aria-live="polite" class="text-xs text-gray-600"></p>
-          <button id="applicationSubmitButton" type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl transition shadow-lg shadow-blue-100 disabled:opacity-50">🚀 この内容で応募を送信する</button>
-        </form>
-        <p id="applicationSuccess" role="status" aria-live="polite" class="hidden mt-3 text-sm text-green-700">応募を送信しました。安全なマッチングのため、企業からの返信をお待ちください。履歴はマイページから確認できます。</p>
+        <a id="applicationContinueButton" href="#" class="hidden mt-3 w-full rounded-xl bg-blue-600 px-4 py-3.5 text-center font-bold text-white hover:bg-blue-700">応募画面に進む</a>
       </div>
 
       <div class="border-t mt-4 pt-4">
@@ -2225,9 +2185,6 @@
                   </div>
                   <div class="flex flex-col items-end gap-2 shrink-0">
                     <span class="inline-flex rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-widest ${formatApplicationStatusClass(application.status)}">${formatApplicationStatus(application.status)}</span>
-                    <a href="tel:${escapeHtml(String(application.applicant_phone || ""))}" class="h-10 px-4 flex items-center justify-center rounded-xl bg-blue-600 text-white font-bold text-sm hover:bg-blue-700 transition-colors shadow-lg shadow-blue-100">
-                      📞 ${escapeHtml(String(application.applicant_phone || ""))}
-                    </a>
                   </div>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs mb-4 bg-gray-50/80 p-4 rounded-xl border border-gray-100">
@@ -2688,7 +2645,7 @@
             </div>
           </div>
           ${Array.isArray(job.tags) && job.tags.length ? `<div class="mt-5 flex flex-wrap gap-1.5">${job.tags.slice(0, 5).map(tag => `<span class="rounded-lg bg-blue-50/50 px-2.5 py-1 text-[10px] font-bold text-blue-600 ring-1 ring-inset ring-blue-100/50">${escapeHtml(tag)}</span>`).join("")}${job.tags.length > 5 ? '<span class="text-[10px] text-gray-400 self-center">...</span>' : ''}</div>` : ''}
-          <div class="mt-5 flex items-center justify-between border-t border-gray-50 pt-4">
+          <div class="mt-5 flex items-center justify-between pt-4">
              <div class="flex items-center text-xs font-bold text-blue-600">
                詳細を見る
                <svg class="ml-1 w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="9 5l7 7-7 7"/></svg>
@@ -2805,12 +2762,6 @@
       if (!selectedJob) return;
 
       clearJobReportWidget();
-      document.getElementById("applicationSuccess").classList.add("hidden");
-      document.getElementById("applicationStatus").innerText = "";
-      document.getElementById("applicationSubmitButton").disabled = false;
-      document.getElementById("applicationName").value = seekerProfileData?.name || "";
-      document.getElementById("applicationPhone").value = seekerProfileData?.phone || "";
-      document.getElementById("applicationMessage").value = "";
       const alreadyApplied = Boolean(currentUser && accountApplications.some(application =>
         application.applicant_id === currentUser.id && application.job_id === String(selectedJob.id)
       ));
@@ -2818,7 +2769,9 @@
       const isSeekerAccount = Boolean(currentUser && accountType === "seeker");
       const canApply = Boolean(isSeekerAccount && !selectedJobIsClosed &&
         selectedJob.owner_id !== currentUser.id && !alreadyApplied);
-      document.getElementById("jobApplicationForm").classList.toggle("hidden", !canApply);
+      const continueButton = document.getElementById("applicationContinueButton");
+      continueButton.classList.toggle("hidden", !canApply);
+      continueButton.href = `/apply.html?jobId=${encodeURIComponent(String(selectedJob.id))}`;
       document.getElementById("applicationLoginPrompt").classList.toggle("hidden", canApply);
       document.getElementById("applicationLoginButton").classList.toggle("hidden",
         canApply || accountType === "employer" || selectedJobIsClosed ||
@@ -2827,7 +2780,7 @@
         ? "アカウント画面を開く"
         : "ログイン / 新規登録";
       if (!currentUser) {
-        document.getElementById("applicationLoginPrompt").innerText = "サイトから応募して履歴に残すには、求職者アカウントでログインしてください。求人の閲覧やLINE・電話・SMSでの直接連絡はログインなしで利用できます。";
+        document.getElementById("applicationLoginPrompt").innerText = "応募画面に進むには、求職者アカウントでログインしてください。";
       } else if (accountType !== "seeker") {
         document.getElementById("applicationLoginPrompt").innerText = "サイトから応募するには求職者アカウントが必要です。別の求職者アカウントでログインしてください。";
       } else if (selectedJob.owner_id === currentUser.id) {
@@ -2854,86 +2807,10 @@
       document.getElementById("modalClosed").classList.toggle("hidden", !selectedJobIsClosed);
       updateModalFavoriteButton();
 
-      const btnLine = document.getElementById("btnLine");
-      if (selectedJob.line && !selectedJobIsClosed) {
-        btnLine.classList.remove("hidden");
-      } else {
-        btnLine.classList.add("hidden");
-      }
-      document.querySelectorAll("#jobModal button[onclick^='applyVia']:not(#btnLine)").forEach(button => {
-        button.classList.toggle("hidden", selectedJobIsClosed);
-      });
-
       const tagsContainer = document.getElementById("modalTags");
       tagsContainer.innerHTML = selectedJob.tags ? selectedJob.tags.map(t => `<span class="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded font-bold">${escapeHtml(t)}</span>`).join("") : '';
 
       document.getElementById("jobModal").classList.remove("hidden");
-    }
-
-    async function submitJobApplication(event) {
-      event.preventDefault();
-      if (!currentUser || accountType !== "seeker" || !selectedJob) {
-        document.getElementById("applicationStatus").innerText = "応募には求職者アカウントでログインしてください。";
-        if (!currentUser) promptLogin("サイトから応募して履歴に残すには、求職者アカウントでログインしてください。");
-        return;
-      }
-      if (isJobClosed(selectedJob) || selectedJob.owner_id === currentUser.id) {
-        document.getElementById("applicationStatus").innerText = "この求人には応募できません。";
-        return;
-      }
-
-      const name = document.getElementById("applicationName").value.trim();
-      const phone = normalizeJapanesePhone(document.getElementById("applicationPhone").value.trim());
-      const message = document.getElementById("applicationMessage").value.trim();
-      if (!name || !phone || !isValidJapanesePhone(phone)) {
-        document.getElementById("applicationStatus").innerText = "名前と有効な日本の電話番号を入力してください。";
-        return;
-      }
-      const applicantId = currentUser.id;
-      const submitButton = document.getElementById("applicationSubmitButton");
-      submitButton.disabled = true;
-      document.getElementById("applicationStatus").innerText = "応募を送信しています。";
-      const { data, error } = await supabaseClient.from("job_applications").insert({
-        applicant_id: applicantId,
-        job_id: String(selectedJob.id),
-        job_title: selectedJob.title,
-        applicant_name: name,
-        applicant_phone: phone,
-        experience: seekerProfileData?.expYears || "",
-        licenses: seekerProfileData?.licenses || [],
-        message
-      }).select().single();
-      if (error) {
-        submitButton.disabled = false;
-        document.getElementById("applicationStatus").innerText = `応募を送信できませんでした: ${error.message}`;
-        return;
-      }
-
-      const emailWarning = data
-        ? await sendNotificationEmail("job_application", data.id)
-        : "";
-      if (currentUser?.id !== applicantId || accountType !== "seeker") return;
-            document.getElementById("jobApplicationForm").classList.add("hidden");
-      
-      confetti({
-        particleCount: 100,
-        spread: 60,
-        origin: { y: 0.8 },
-        colors: ['#2563eb', '#10b981', '#ffffff']
-      });
-
-      document.getElementById("applicationSuccess").innerText = emailWarning
-
-        ? `応募を送信しました。${emailWarning}`
-        : "応募を送信しました。安全なマッチングのため、企業からの返答をお待ちください。履歴はマイページから確認できます。";
-      document.getElementById("applicationSuccess").classList.remove("hidden");
-      if (data) {
-        accountApplications.unshift(data);
-        renderAccountDashboard();
-      } else {
-        accountDataUserId = null;
-        await loadAccountData(currentUser);
-      }
     }
 
     async function generateAIDuties() {
@@ -2966,44 +2843,6 @@
         console.error("AI生成エラー:", error);
         status.innerText = "❌ AI文章の作成に失敗しました。時間をおいて再度お試しください。";
       }
-    }
-
-    function setAppTemplate(text) {
-      const textarea = document.getElementById("applicationMessage");
-      textarea.value = text;
-      textarea.focus();
-    }
-
-    // LINE応募
-    function applyViaLINE() {
-      if (!selectedJob || !selectedJob.line) return;
-      let lineUrl = selectedJob.line;
-      if (!lineUrl.startsWith("http")) {
-        lineUrl = `https://line.me/R/ti/p/~${selectedJob.line}`;
-      }
-      window.open(lineUrl, '_blank');
-    }
-
-    // SMS応募
-    function applyViaSMS() {
-      if (!selectedJob || !selectedJob.phone) return;
-
-      let message = "";
-
-      if (seekerProfileData) {
-        const p = seekerProfileData;
-        message = `【求人応募】${selectedJob.title}の募集を見て連絡しました。氏名:${p.name} / 経験:${p.expYears} / 資格:${p.licenses ? p.licenses.join(',') : 'なし'}。よろしくお願いします。`;
-      } else {
-        message = `【求人応募】${selectedJob.title}の募集を見て連絡しました。詳細をお伺いできますでしょうか？`;
-      }
-
-      window.location.href = `sms:${selectedJob.phone}?body=${encodeURIComponent(message)}`;
-    }
-
-    // 直接電話
-    function applyViaPhone() {
-      if (!selectedJob || !selectedJob.phone) return;
-      window.location.href = `tel:${selectedJob.phone}`;
     }
 
     function closeModal() {
