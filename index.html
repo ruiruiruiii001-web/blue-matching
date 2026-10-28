@@ -1852,22 +1852,23 @@
         `).join("")
         : '<div class="text-center py-10 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200"><p class="text-xs text-gray-400 font-bold uppercase tracking-widest">No Favorites Yet</p></div>';
 
-            const submitted = accountApplications.filter(application => application.applicant_id === currentUser.id);
+      const submitted = accountApplications.filter(application => application.applicant_id === currentUser.id);
+      const employerIdsByJobId = new Map(cachedJobs.map(job => [String(job.id), job.owner_id]));
       const applicationsContainer = document.getElementById("dashboardApplications");
       applicationsContainer.innerHTML = accountApplicationsError
         ? `<p class="text-sm text-red-700">${escapeHtml(accountApplicationsError)}</p>`
         : `
         ${submitted.length
           ? submitted.map(application => `
-            <article class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm mb-4 transition-all hover:shadow-md">
-              <div class="flex flex-wrap items-center justify-between gap-3 mb-4 pb-4 border-b border-gray-50">
-                <p class="font-black text-gray-900 text-lg leading-tight">${escapeHtml(application.job_title)}</p>
-                <div class="flex items-center gap-2">
-                  ${application.status === 'reviewed' ? `
-                    <button type="button" onclick="openReviewModal('${application.id}', '${application.employer_id}', 'employer')" class="px-3 py-1 bg-amber-50 text-amber-600 text-[10px] font-black rounded-lg border border-amber-100 hover:bg-amber-100 transition-colors uppercase tracking-widest">
-                      ⭐ 評価する
-                    </button>
-                  ` : ''}
+          <article class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm mb-4 transition-all hover:shadow-md">
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-4 pb-4 border-b border-gray-50">
+              <p class="font-black text-gray-900 text-lg leading-tight">${escapeHtml(application.job_title)}</p>
+              <div class="flex items-center gap-2">
+                ${application.status === 'reviewed' && employerIdsByJobId.get(String(application.job_id)) ? `
+                  <button type="button" onclick="openReviewModal('${application.id}', '${employerIdsByJobId.get(String(application.job_id))}', 'employer')" class="px-3 py-1 bg-amber-50 text-amber-600 text-[10px] font-black rounded-lg border border-amber-100 hover:bg-amber-100 transition-colors uppercase tracking-widest">
+                  ⭐ 評価する
+                  </button>
+                ` : ''}
                   <span class="inline-flex rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest ${formatApplicationStatusClass(application.status)}">${formatApplicationStatus(application.status)}</span>
                 </div>
               </div>
@@ -3296,7 +3297,7 @@
 
           const [profileResult, appsResult, favsResult, notifsResult, seekerReqsResult, reviewsResult, blocksResult] = await Promise.all([
             supabaseClient.from("seeker_profiles").select("*").eq("user_id", userId).maybeSingle(),
-            supabaseClient.from("job_applications").select("*").or(`applicant_id.eq.${userId},employer_id.eq.${userId}`).order("created_at", { ascending: false }),
+            supabaseClient.from("job_applications").select("*").order("created_at", { ascending: false }),
             supabaseClient.from("job_favorites").select("job_id").eq("user_id", userId),
             supabaseClient.from("app_notifications").select("*").eq("recipient_id", userId).order("created_at", { ascending: false }),
             accountType === "seeker"
