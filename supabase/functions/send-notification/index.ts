@@ -55,12 +55,13 @@ Deno.serve(async request => {
   } catch {
     return response(400, { error: "Invalid JSON body" }, corsHeaders);
   }
-  if (
-    !["job_application", "contact_request", "contact_reply"].includes(payload.event_type || "") ||
-    !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(payload.record_id || "")
+    if (
+    !["job_application", "contact_request", "contact_reply", "application_reviewed"].includes(payload.event_type || "") ||
+    (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(payload.record_id || "") && !/^\d+$/.test(payload.record_id || ""))
   ) {
     return response(400, { error: "Invalid notification event" }, corsHeaders);
   }
+
 
   const admin = createClient(supabaseUrl, serviceRoleKey, {
     auth: { autoRefreshToken: false, persistSession: false }
@@ -80,19 +81,36 @@ Deno.serve(async request => {
     return response(200, { sent: true, already_sent: true }, corsHeaders);
   }
 
-  let actorId: string | null = null;
-  if (notification.event_type === "job_application") {
+    let actorId: string | null = null;
+  if (notification.event_type === "job_application" || notification.event_type === "application_reviewed") {
     const { data: application, error } = await admin
       .from("job_applications")
-      .select("applicant_id")
+      .select("applicant_id, job_id")
       .eq("id", notification.related_id)
       .maybeSingle();
     if (error) {
       console.error("Application lookup failed:", error.message);
       return response(500, { error: "Could not verify application" }, corsHeaders);
     }
-    actorId = application?.applicant_id || null;
+    if (!application) return response(404, { error: "Target application not found" }, corsHeaders);
+
+    if (notification.event_type === "job_application") {
+      actorId = application.applicant_id;
+    } else {
+      // application_reviewed: 求人の所有者がステータスを更新した
+      const { data: job, error: jobError } = await admin
+        .from("published_jobs")
+        .select("owner_id")
+        .eq("id", application.job_id)
+        .maybeSingle();
+      if (jobError) {
+        console.error("Job lookup failed:", jobError.message);
+        return response(500, { error: "Could not verify job owner" }, corsHeaders);
+      }
+      actorId = job?.owner_id || null;
+    }
   } else {
+
     const { data: contactRequest, error } = await admin
       .from("seeker_contact_requests")
       .select("seeker_id, employer_id, status")
@@ -130,16 +148,19 @@ Deno.serve(async request => {
     return response(500, { error: "Could not find recipient email" }, corsHeaders);
   }
 
-  const subjectByEvent = {
+    const subjectByEvent = {
     job_application: "求人に新しい応募が届きました",
     contact_request: "企業から連絡リクエストが届きました",
-    contact_reply: "連絡リクエストの状況が更新されました"
+    contact_reply: "連絡リクエストの状況が更新されました",
+    application_reviewed: "応募状況が「確認済み」になりました"
   };
   const messageByEvent = {
     job_application: "企業マイページを開き、新しい応募内容をご確認ください。",
     contact_request: "求職者マイページを開き、企業からの連絡をご確認ください。",
-    contact_reply: "企業向け画面を開き、連絡リクエストの状況をご確認ください。"
+    contact_reply: "企業向け画面を開き、連絡リクエストの状況をご確認ください。",
+    application_reviewed: "マイページの応募履歴を確認してください。企業があなたの応募内容を確認しました。"
   };
+
   const subject = subjectByEvent[notification.event_type as keyof typeof subjectByEvent];
   const message = messageByEvent[notification.event_type as keyof typeof messageByEvent];
   const html = `<p>${message}</p><p><a href="${appUrl}">blue-matchingを開く</a></p><p>このメールには応募内容・メッセージ・連絡先は含まれていません。</p>`;

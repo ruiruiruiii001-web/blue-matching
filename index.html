@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
@@ -7,9 +7,13 @@
   <title>現場直結！職人＆親方の求人マッチング</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Supabase JS SDK -->
+    <!-- Supabase JS SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Confetti library -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
+
+
 <body class="bg-gray-100 min-h-screen text-gray-800 pb-20 font-sans">
 
   <!-- ヘッダー -->
@@ -196,10 +200,18 @@
             <input type="text" id="jobLocation" maxlength="100" placeholder="例: 東京都新宿区 / 神奈川県横浜市" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
           </div>
 
-          <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium mb-1">働き方 <span class="text-red-500">*</span></label>
+              <select id="jobWorkStyle" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                <option value="short">⚡ 単期・単発（アルバイト）</option>
+                <option value="regular" selected>🤝 常用・正社員（長く働ける）</option>
+              </select>
+            </div>
             <div>
               <label class="block text-sm font-medium mb-1">募集人数</label>
               <select id="jobCapacity" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+
                 <option value="1">1〜3名（少人数・ピンポイント）</option>
                 <option value="4" selected>4〜6名（チーム・中規模）</option>
                 <option value="7">7〜10名（大規模）</option>
@@ -237,17 +249,18 @@
             </div>
           </div>
 
-          <div>
-            <label class="block text-sm font-medium mb-1">現場写真のURL (任意)</label>
-            <input type="url" id="jobImageUrl" placeholder="https://example.com/photo.jpg" class="w-full border rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-            <p class="text-[10px] text-gray-500 mt-1">現場の雰囲気がわかる写真のリンクを貼ると応募が増えやすくなります。</p>
-          </div>
+                  <div>
+                    <label class="block text-sm font-medium mb-1">現場写真 <span class="text-xs text-gray-400">(任意)</span></label>
+                    <div class="flex items-center gap-3">
+                      <input type="file" id="jobImageFile" accept="image/*" class="hidden" onchange="uploadImage(this, 'jobImageUrl', 'jobImageStatus')">
+                      <button type="button" onclick="document.getElementById('jobImageFile').click()" class="flex-1 h-12 border-2 border-dashed border-gray-200 rounded-xl flex items-center justify-center gap-2 text-gray-500 hover:bg-gray-50 transition-all text-sm font-bold">
+                        📸 写真を選択・撮影
+                      </button>
+                      <input type="hidden" id="jobImageUrl">
+                    </div>
+                    <p id="jobImageStatus" class="text-[10px] text-gray-500 mt-1">写真は自動的に圧縮して保存されます。</p>
+                  </div>
 
-          <div>
-            <label class="block text-sm font-medium mb-1">現場写真のURL (任意)</label>
-            <input type="url" id="jobImageUrl" placeholder="https://example.com/photo.jpg" class="w-full border rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-            <p class="text-[10px] text-gray-500 mt-1">現場の雰囲気がわかる写真のリンクを貼ると応募が増えやすくなります。</p>
-          </div>
 
           <!-- 現場特化タグ選択 (12種類) -->
           <div>
@@ -301,8 +314,11 @@
         <nav id="dashboardNavigation" role="tablist" aria-label="マイページの表示切替" class="sticky top-0 z-10 flex shrink-0 gap-2 overflow-x-auto border-b bg-gray-100 py-2">
           <button type="button" role="tab" aria-selected="true" aria-controls="dashboardView-profile" data-dashboard-view="profile" onclick="showDashboardView('profile')" class="dashboard-menu-button h-11 shrink-0 rounded-lg bg-blue-600 px-3 font-bold text-sm text-white">プロフィール</button>
           <button type="button" role="tab" aria-selected="false" aria-controls="dashboardView-favorites" data-dashboard-view="favorites" onclick="showDashboardView('favorites')" class="dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 font-bold text-sm text-gray-700">お気に入り</button>
-          <button type="button" role="tab" aria-selected="false" aria-controls="dashboardView-applications" data-dashboard-view="applications" onclick="showDashboardView('applications')" class="dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 font-bold text-sm text-gray-700">応募履歴</button>
+                              <button type="button" role="tab" aria-selected="false" aria-controls="dashboardView-applications" data-dashboard-view="applications" onclick="showDashboardView('applications')" class="dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 font-bold text-sm text-gray-700">応募履歴</button>
+          <button type="button" role="tab" aria-selected="false" aria-controls="dashboardView-blocks" data-dashboard-view="blocks" onclick="showDashboardView('blocks')" class="dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 font-bold text-sm text-gray-700">ブロック中</button>
           <button id="seekerNotificationsTab" type="button" role="tab" aria-selected="false" aria-controls="dashboardView-notifications" data-dashboard-view="notifications" onclick="showDashboardView('notifications')" class="dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 font-bold text-sm text-gray-700">連絡・通知</button>
+
+
         </nav>
 
         <div class="min-w-0">
@@ -329,11 +345,18 @@
           </div>
         </div>
 
-        <div>
-          <label class="block text-sm font-medium mb-1">プロフィール写真のURL (任意)</label>
-          <input type="url" id="seekerAvatarUrl" placeholder="https://example.com/my-photo.jpg" class="w-full border rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-          <p class="text-[10px] text-gray-500 mt-1">あなたの顔写真や、仕事中の様子の写真リンクを貼ると信頼がアップします。</p>
+                <div>
+          <label class="block text-sm font-medium mb-1">プロフィール写真 <span class="text-xs text-gray-400">(任意)</span></label>
+          <div class="flex items-center gap-3">
+            <input type="file" id="seekerAvatarFile" accept="image/*" class="hidden" onchange="uploadImage(this, 'seekerAvatarUrl', 'seekerAvatarStatus')">
+            <button type="button" onclick="document.getElementById('seekerAvatarFile').click()" class="flex-1 h-12 border-2 border-dashed border-gray-200 rounded-xl flex items-center justify-center gap-2 text-gray-500 hover:bg-gray-50 transition-all text-sm font-bold">
+              👤 写真を選択・撮影
+            </button>
+            <input type="hidden" id="seekerAvatarUrl">
+          </div>
+          <p id="seekerAvatarStatus" class="text-[10px] text-gray-500 mt-1">顔写真や仕事中の写真を設定してください。</p>
         </div>
+
 
         <div>
           <label class="block text-sm font-medium mb-1">希望職種</label>
@@ -426,11 +449,17 @@
               <h3 class="font-bold text-sm mb-2">お気に入り求人</h3>
               <div id="dashboardFavorites" class="space-y-2 text-sm"></div>
             </section>
-            <section id="dashboardView-applications" class="hidden rounded border p-3">
+                        <section id="dashboardView-applications" class="hidden rounded border p-3">
               <h3 class="font-bold text-sm mb-2">応募履歴・応募者</h3>
               <div id="dashboardApplications" class="space-y-2 text-sm"></div>
             </section>
+            <section id="dashboardView-blocks" class="hidden rounded border p-3">
+              <h3 class="font-bold text-sm mb-2">ブロック中のユーザー</h3>
+              <p class="mb-3 text-xs text-gray-600">ブロックしたユーザーの求人やプロフィールは表示されません。ここで解除できます。</p>
+              <div id="dashboardBlocks" class="space-y-2 text-sm"></div>
+            </section>
             <section id="dashboardView-notifications" class="hidden rounded border p-3">
+
               <h3 class="font-bold text-sm mb-2">企業からの連絡・通知</h3>
               <p class="mb-3 text-xs text-gray-600">企業からの連絡にはここから返信または見送りできます。返信しても、名前・電話番号・メールアドレスは企業に共有されません。</p>
               <p id="seekerNotificationsStatus" role="status" aria-live="polite" class="hidden text-sm text-red-700"></p>
@@ -569,7 +598,47 @@
 
   </main>
 
-  <!-- 求人詳細 & ワンタップ直通応募モーダル -->
+    <!-- 評価（レビュー）モーダル -->
+  <div id="reviewModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center hidden z-[70] p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 relative">
+      <button type="button" onclick="closeReviewModal()" class="absolute right-4 top-4 text-gray-400 hover:text-gray-600">
+        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+      
+      <div class="text-center mb-6">
+        <div id="reviewTargetIcon" class="mx-auto h-16 w-16 rounded-full bg-blue-50 flex items-center justify-center text-3xl mb-3">👷</div>
+        <h3 id="reviewTitle" class="text-xl font-black text-gray-800">評価を投稿</h3>
+        <p id="reviewSubtitle" class="text-xs text-gray-500 font-bold mt-1 uppercase tracking-widest">Job Matching Review</p>
+      </div>
+
+      <form onsubmit="submitReview(event)" class="space-y-6">
+        <div>
+          <label class="block text-sm font-black text-gray-700 mb-3 text-center">満足度を選んでください</label>
+          <div class="flex justify-center gap-2">
+            <template id="starTemplate">
+              <button type="button" class="star-btn text-4xl transition-transform hover:scale-110 focus:outline-none">⭐</button>
+            </template>
+            <div id="starContainer" class="flex gap-1">
+              <!-- 5 stars generated by JS -->
+            </div>
+          </div>
+          <input type="hidden" id="reviewRating" value="5" required>
+        </div>
+
+        <div>
+          <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">コメント（任意）</label>
+          <textarea id="reviewComment" rows="3" maxlength="500" class="w-full rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="「対応が丁寧でした」「紹介通りの内容でした」など"></textarea>
+        </div>
+
+        <div id="reviewStatus" class="hidden text-center text-xs font-bold py-2"></div>
+
+        <button type="submit" id="reviewSubmitButton" class="w-full h-14 rounded-xl bg-blue-600 text-white font-black text-lg hover:bg-blue-700 transition-all shadow-lg shadow-blue-100 flex items-center justify-center gap-2">
+          <span>🚀 評価を送信する</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
   <div id="jobModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 p-4">
     <div class="bg-white rounded-lg shadow-xl max-w-xl w-full max-h-[90vh] overflow-y-auto p-6 relative">
       
@@ -699,7 +768,7 @@
     let seekerContactRequestsError = "";
     let employerContactRequests = [];
     let employerContactRequestsError = "";
-    let accountDataUserId = null;
+        let accountDataUserId = null;
     let loadingAccountUserId = null;
     let activeDashboardView = "profile";
     let editingJobId = null;
@@ -728,6 +797,14 @@
 
     let displayLimitJobs = 10;
     let displayLimitProfiles = 10;
+
+        let reviewContext = null; // { applicationId, revieweeId, targetType, existingId }
+    let blockedUserIds = []; // 自分がブロックしているユーザーID
+    let avgRatings = {}; // { userId: { avg, count } }
+    let accountReviews = []; // 自分が書いたレビュー
+
+
+
 
     document.addEventListener("DOMContentLoaded", () => {
       switchTab("guest");
@@ -1500,8 +1577,10 @@
       }
 
             const jobData = {
-        title, location, salary, phone: normalizedPhone, line, duties, capacity,
-        pay_type: payType || null,
+              title, location, salary, phone: normalizedPhone, line, duties, capacity,
+              work_style: document.getElementById("jobWorkStyle").value,
+              pay_type: payType || null,
+
         pay_amount: payAmount,
         tags: checkedTags,
         image_url: document.getElementById("jobImageUrl").value.trim() || null,
@@ -1521,17 +1600,28 @@
       const wasEditing = editingJobId !== null;
       cancelJobEdit();
 
-      alert(wasEditing ? "求人情報を更新しました！" : "クラウド上に求人を掲載しました！");
+            alert(wasEditing ? "求人情報を更新しました！" : "クラウド上に求人を掲載しました！");
+      if (!wasEditing) {
+        confetti({
+          particleCount: 150,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ['#2563eb', '#3b82f6', '#60a5fa', '#ffffff']
+        });
+      }
       await fetchJobs();
+
     }
 
     function editJob(id) {
       const job = cachedJobs.find(item => item.id === id);
       if (!currentUser || accountType !== "employer" || !job || job.owner_id !== currentUser.id) return;
 
-      editingJobId = id;
+            editingJobId = id;
       document.getElementById("jobTitle").value = job.title || "";
+      document.getElementById("jobWorkStyle").value = job.work_style || "regular";
       document.getElementById("jobImageUrl").value = job.image_url || "";
+
       document.getElementById("jobLocation").value = job.location || "";
       document.getElementById("jobSalary").value = job.salary || "";
       document.getElementById("jobPayType").value = getJobPayType(job);
@@ -1550,10 +1640,12 @@
       document.getElementById("employerJobForm").scrollIntoView({ behavior: "smooth" });
     }
 
-    function cancelJobEdit() {
+        function cancelJobEdit() {
             editingJobId = null;
       document.getElementById("jobTitle").value = "";
+      document.getElementById("jobWorkStyle").value = "regular";
       document.getElementById("jobImageUrl").value = "";
+
       document.getElementById("jobLocation").value = "";
       document.getElementById("jobSalary").value = "";
       document.getElementById("jobPayType").value = "";
@@ -1609,9 +1701,10 @@
         return;
       }
       
-      const profile = {
+            const profile = {
         name: document.getElementById("seekerName").value.trim(),
         phone: normalizeJapanesePhone(document.getElementById("seekerPhone").value.trim()),
+        avatarUrl: document.getElementById("seekerAvatarUrl").value.trim(),
         jobType: document.getElementById("seekerJobType").value.trim(),
         location: document.getElementById("seekerLocation").value.trim(),
         payType: preferredPayType,
@@ -1620,6 +1713,7 @@
         expYears: document.getElementById("seekerExpYears").value,
         stamina: document.getElementById("seekerStamina").value
       };
+
 
       if (!profile.name) {
         alert("お名前を入力してください。");
@@ -1642,12 +1736,13 @@
         }
       }
 
-      const { error } = await supabaseClient
+            const { error } = await supabaseClient
         .from("seeker_profiles")
         .upsert({
           user_id: currentUser.id,
           name: profile.name,
           phone: profile.phone || null,
+          avatar_url: profile.avatarUrl || null,
           job_type: profile.jobType,
           location: profile.location,
           pay_type: profile.payType || null,
@@ -1658,14 +1753,16 @@
           is_public: isPublic,
           updated_at: new Date().toISOString()
         }, { onConflict: "user_id" });
+
       if (error) {
         alert(`プロフィールを保存できませんでした: ${error.message}`);
         return;
       }
 
-      const publicProfileResult = isPublic
+            const publicProfileResult = isPublic
         ? await supabaseClient.from("seeker_public_profiles").upsert({
           user_id: currentUser.id,
+          avatar_url: profile.avatarUrl || null,
           job_type: profile.jobType,
           location: profile.location,
           pay_type: profile.payType || null,
@@ -1675,6 +1772,7 @@
           stamina: profile.stamina,
           updated_at: new Date().toISOString()
         }, { onConflict: "user_id" })
+
         : { error: null };
       if (publicProfileResult.error) {
         alert(`プロフィール本体は保存しましたが、公開設定を更新できませんでした: ${publicProfileResult.error.message}`);
@@ -1690,11 +1788,13 @@
       renderJobList();
     }
 
-    function loadSeekerProfile(profile) {
+        function loadSeekerProfile(profile) {
       if (!profile) return;
       document.getElementById("seekerName").value = profile.name || "";
       document.getElementById("seekerPhone").value = profile.phone || "";
+      document.getElementById("seekerAvatarUrl").value = profile.avatarUrl || "";
       document.getElementById("seekerJobType").value = profile.jobType || "";
+
       document.getElementById("seekerLocation").value = profile.location || "";
       document.getElementById("seekerPayType").value = profile.payType || "";
       document.getElementById("seekerMinimumSalary").value = profile.minimumSalary ?? "";
@@ -1710,11 +1810,13 @@
       }
     }
 
-    function clearSeekerProfileForm() {
+        function clearSeekerProfileForm() {
       seekerProfileData = null;
       document.getElementById("seekerName").value = "";
       document.getElementById("seekerPhone").value = "";
+      document.getElementById("seekerAvatarUrl").value = "";
       document.getElementById("seekerJobType").value = "";
+
       document.getElementById("seekerLocation").value = "";
       document.getElementById("seekerPayType").value = "";
       document.getElementById("seekerMinimumSalary").value = "";
@@ -1750,7 +1852,7 @@
         `).join("")
         : '<div class="text-center py-10 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200"><p class="text-xs text-gray-400 font-bold uppercase tracking-widest">No Favorites Yet</p></div>';
 
-      const submitted = accountApplications.filter(application => application.applicant_id === currentUser.id);
+            const submitted = accountApplications.filter(application => application.applicant_id === currentUser.id);
       const applicationsContainer = document.getElementById("dashboardApplications");
       applicationsContainer.innerHTML = accountApplicationsError
         ? `<p class="text-sm text-red-700">${escapeHtml(accountApplicationsError)}</p>`
@@ -1760,7 +1862,14 @@
             <article class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm mb-4 transition-all hover:shadow-md">
               <div class="flex flex-wrap items-center justify-between gap-3 mb-4 pb-4 border-b border-gray-50">
                 <p class="font-black text-gray-900 text-lg leading-tight">${escapeHtml(application.job_title)}</p>
-                <span class="inline-flex rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest ${formatApplicationStatusClass(application.status)}">${formatApplicationStatus(application.status)}</span>
+                <div class="flex items-center gap-2">
+                  ${application.status === 'reviewed' ? `
+                    <button type="button" onclick="openReviewModal('${application.id}', '${application.employer_id}', 'employer')" class="px-3 py-1 bg-amber-50 text-amber-600 text-[10px] font-black rounded-lg border border-amber-100 hover:bg-amber-100 transition-colors uppercase tracking-widest">
+                      ⭐ 評価する
+                    </button>
+                  ` : ''}
+                  <span class="inline-flex rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest ${formatApplicationStatusClass(application.status)}">${formatApplicationStatus(application.status)}</span>
+                </div>
               </div>
               <div class="flex items-center justify-between">
                 <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
@@ -1774,15 +1883,37 @@
           `).join("")
           : '<div class="text-center py-12 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200"><p class="text-xs text-gray-400 font-bold uppercase tracking-widest">No Applications Yet</p></div>'}
       `;
+
       const unreadNotifications = appNotifications.filter(notification => !notification.read_at).length;
       document.getElementById("seekerNotificationsTab").innerText = unreadNotifications
         ? `通知 (${unreadNotifications})`
         : "連絡・通知";
-      renderNotifications("seekerDashboardNotifications", "seekerNotificationsStatus");
+            renderNotifications("seekerDashboardNotifications", "seekerNotificationsStatus");
+      renderBlocks();
       renderLoginNotificationBanner();
     }
 
+        function renderBlocks() {
+      const container = document.getElementById("dashboardBlocks");
+      if (!container) return;
+      
+      container.innerHTML = blockedUserIds.length 
+        ? blockedUserIds.map(id => `
+          <div class="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100 shadow-sm mb-2">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">🚫</span>
+              <p class="text-xs font-bold text-gray-500 uppercase tracking-widest">ユーザー: ${id.slice(0,8)}...</p>
+            </div>
+            <button type="button" onclick="unblockUser('${id}')" class="px-3 py-2 text-[10px] font-black text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors uppercase tracking-widest">
+              ブロック解除
+            </button>
+          </div>
+        `).join("")
+        : '<div class="text-center py-10 bg-gray-50 rounded-2xl border border-dashed border-gray-200"><p class="text-xs text-gray-400 font-bold uppercase tracking-widest">ブロック中のユーザーはいません</p></div>';
+    }
+
     function renderLoginNotificationBanner() {
+
       const banner = document.getElementById("loginNotificationBanner");
       if (!banner || loginNotificationBannerDismissed || !currentUser || !accountType || appNotificationsError) {
         banner?.classList.add("hidden");
@@ -1994,41 +2125,59 @@
       const seekerSearchKeyword = document.getElementById("employerSeekerKeyword")?.value.trim().toLocaleLowerCase("ja-JP") || "";
       const seekerExperienceFilter = document.getElementById("employerSeekerExperience")?.value || "";
             const filteredPublicProfiles = publicSeekerProfiles.filter(profile => {
-        const searchableProfile = [
-          profile.job_type,
-          profile.location,
-          profile.exp_years,
-          profile.stamina,
-          ...(Array.isArray(profile.licenses) ? profile.licenses : [])
-        ].join(" ").toLocaleLowerCase("ja-JP");
-        return (!seekerSearchKeyword || searchableProfile.includes(seekerSearchKeyword)) &&
-          (!seekerExperienceFilter || profile.exp_years === seekerExperienceFilter);
+            const searchableProfile = [
+              profile.job_type,
+              profile.location,
+              profile.exp_years,
+              profile.stamina,
+              ...(Array.isArray(profile.licenses) ? profile.licenses : [])
+            ].join(" ").toLocaleLowerCase("ja-JP");
+            return (!seekerSearchKeyword || searchableProfile.includes(seekerSearchKeyword)) &&
+              (!seekerExperienceFilter || profile.exp_years === seekerExperienceFilter) &&
+              (!currentUser || !blockedUserIds.includes(profile.user_id));
       });
+
 
       const displayProfiles = filteredPublicProfiles.slice(0, displayLimitProfiles);
 
       document.getElementById("employerSeekerProfileCount").innerText = publicSeekerProfiles.length
         ? `${filteredPublicProfiles.length} / ${publicSeekerProfiles.length}件を表示中`
         : "";
-            container.innerHTML = ownedJobs.length
+                  // 掲載中の自分の求人描画
+      container.innerHTML = ownedJobs.length
         ? ownedJobs.map(job => `
-          <article class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm mb-4 transition-all hover:border-blue-200">
-            <div class="flex items-center justify-between gap-4">
-              <div class="min-w-0">
-                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">${escapeHtml(formatJobFreshness(job))}</p>
-                <p class="font-black text-gray-800 text-lg leading-tight truncate">${escapeHtml(String(job.title || ""))}</p>
-                <div class="flex flex-wrap gap-2 mt-2">
-                  <span class="px-2 py-0.5 rounded-full bg-gray-50 border border-gray-100 text-[10px] font-bold text-gray-500 uppercase">📍 ${escapeHtml(String(job.location || "未設定"))}</span>
-                  <span class="px-2 py-0.5 rounded-full ${job.is_closed ? 'bg-gray-100 text-gray-400' : 'bg-emerald-50 text-emerald-600'} text-[10px] font-bold border border-current/10 uppercase">${job.is_closed ? "募集終了" : "募集中"}</span>
+          <article class="bg-white rounded-2xl border border-gray-100 shadow-sm mb-4 transition-all hover:border-blue-200 group overflow-hidden">
+            <div class="flex">
+              ${job.image_url ? `
+                <div class="w-24 shrink-0 bg-gray-100 overflow-hidden hidden sm:block">
+                  <img src="${escapeHtml(job.image_url)}" alt="" class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300">
+                </div>
+              ` : ''}
+              <div class="flex-1 p-5 min-w-0">
+                <div class="flex items-start justify-between gap-4">
+                  <div class="min-w-0 flex-1">
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">${escapeHtml(formatJobFreshness(job))}</p>
+                    <h4 class="font-black text-gray-800 text-lg leading-tight truncate group-hover:text-blue-600 transition-colors">${escapeHtml(String(job.title || ""))}</h4>
+                    <div class="flex flex-wrap gap-2 mt-2">
+                      <span class="px-2 py-0.5 rounded-full bg-gray-50 border border-gray-100 text-[10px] font-bold text-gray-500">📍 ${escapeHtml(String(job.location || "未設定"))}</span>
+                      <span class="px-2 py-0.5 rounded-full ${job.is_closed ? 'bg-gray-100 text-gray-400' : 'bg-emerald-50 text-emerald-600'} text-[10px] font-bold border border-current/10 uppercase">${job.is_closed ? "募集終了" : "募集中"}</span>
+                    </div>
+                  </div>
+                  <div class="flex gap-1.5">
+                    <button type="button" onclick="editJob(${job.id})" class="h-9 w-9 flex items-center justify-center rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors" title="求人を編集">
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                    </button>
+                    <button type="button" onclick="toggleJobClosed(${job.id})" class="h-9 w-9 flex items-center justify-center rounded-lg bg-gray-50 text-gray-600 hover:bg-gray-100 transition-colors" title="${job.is_closed ? '募集を再開' : '募集を終了'}">
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+                    </button>
+                  </div>
                 </div>
               </div>
-              <button type="button" onclick="editJob(${job.id})" class="shrink-0 h-11 w-11 flex items-center justify-center rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors shadow-sm" title="求人を編集">
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-              </button>
             </div>
           </article>
         `).join("")
         : '<div class="text-center py-10 bg-gray-50 rounded-2xl border border-dashed border-gray-200"><p class="text-xs text-gray-400">掲載中の求人はまだありません。</p></div>';
+
 
       const applicationCount = document.getElementById("employerApplicationCount");
       const applicationsStatus = document.getElementById("employerApplicationsStatus");
@@ -2036,49 +2185,76 @@
       applicationCount.innerText = receivedApplications.length ? `${receivedApplications.length}件` : "";
       applicationsStatus.innerText = accountApplicationsError;
       applicationsStatus.classList.toggle("hidden", !accountApplicationsError);
-            applicationsContainer.innerHTML = accountApplicationsError
+                  // 受け取った応募描画
+      applicationsContainer.innerHTML = accountApplicationsError
         ? ""
         : receivedApplications.length
           ? receivedApplications.map(application => `
-            <article class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm mb-4 transition-all hover:border-blue-200">
-              <div class="flex flex-wrap items-start justify-between gap-3 mb-4 pb-4 border-b border-gray-50">
-                <div class="min-w-0 flex-1">
-                  <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">求人: ${escapeHtml(String(application.job_title || "求人"))}</p>
-                  <p class="font-black text-gray-900 text-lg leading-tight">👷 ${escapeHtml(String(application.applicant_name || ""))}</p>
+            <article class="bg-white rounded-2xl border border-gray-100 shadow-sm mb-4 transition-all hover:border-blue-200 overflow-hidden">
+              <div class="p-5">
+                <div class="flex flex-wrap items-start justify-between gap-3 mb-4 pb-4 border-b border-gray-50">
+                  <div class="min-w-0 flex-1">
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">求人: ${escapeHtml(String(application.job_title || "求人"))}</p>
+                    <h4 class="font-black text-gray-900 text-lg leading-tight">👷 ${escapeHtml(String(application.applicant_name || ""))}</h4>
+                    <p class="mt-1 text-[10px] text-gray-400 uppercase tracking-widest font-bold">応募日時: ${formatDashboardDate(application.created_at)}</p>
+                  </div>
+                  <div class="flex flex-col items-end gap-2 shrink-0">
+                    <span class="inline-flex rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-widest ${formatApplicationStatusClass(application.status)}">${formatApplicationStatus(application.status)}</span>
+                    <a href="tel:${escapeHtml(String(application.applicant_phone || ""))}" class="h-10 px-4 flex items-center justify-center rounded-xl bg-blue-600 text-white font-bold text-sm hover:bg-blue-700 transition-colors shadow-lg shadow-blue-100">
+                      📞 ${escapeHtml(String(application.applicant_phone || ""))}
+                    </a>
+                  </div>
                 </div>
-                <div class="flex flex-col items-end gap-2">
-                  <span class="inline-flex rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-widest ${formatApplicationStatusClass(application.status)}">${formatApplicationStatus(application.status)}</span>
-                  <a href="tel:${escapeHtml(String(application.applicant_phone || ""))}" class="font-black text-blue-600 text-sm hover:underline flex items-center gap-1">
-                    <span class="text-base">📞</span> ${escapeHtml(String(application.applicant_phone || ""))}
-                  </a>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs mb-4 bg-gray-50/80 p-4 rounded-xl border border-gray-100">
+                  <div class="flex items-center gap-2">
+                    <span class="text-base">💪</span>
+                    <div>
+                      <p class="text-[9px] font-bold text-gray-400 uppercase leading-none mb-1">現場経験</p>
+                      <p class="font-bold text-gray-700">${escapeHtml(String(application.experience || "未登録"))}</p>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-base">🔧</span>
+                    <div>
+                      <p class="text-[9px] font-bold text-gray-400 uppercase leading-none mb-1">保有資格</p>
+                      <p class="font-bold text-gray-700 truncate">${Array.isArray(application.licenses) && application.licenses.length ? application.licenses.join("、") : "未登録"}</p>
+                    </div>
+                  </div>
                 </div>
+                ${application.message 
+                  ? `<div class="relative bg-white p-4 rounded-xl border border-gray-100 italic text-sm text-gray-700 leading-relaxed">
+                      <span class="absolute -top-2 left-4 px-2 bg-gray-50 text-[9px] font-bold text-gray-400 uppercase tracking-widest border border-gray-100 rounded">Message</span>
+                      "${escapeHtml(String(application.message))}"
+                     </div>` 
+                  : '<p class="text-center py-2 text-[10px] text-gray-300 font-bold uppercase tracking-widest">No Message</p>'}
+                
+                                ${application.status === "pending" ? `
+                  <div class="mt-5 flex gap-3">
+                    <button type="button" onclick="updateApplicationStatus('${escapeHtml(String(application.id))}', 'reviewed')" class="flex-1 h-11 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-black text-white hover:bg-emerald-700 transition-all shadow-md shadow-emerald-100">確認済みにする</button>
+                    <button type="button" onclick="updateApplicationStatus('${escapeHtml(String(application.id))}', 'dismissed')" class="flex-1 h-11 rounded-xl border border-gray-200 bg-white px-4 py-2 text-xs font-black text-gray-500 hover:bg-gray-50 transition-all">対応不要</button>
+                  </div>
+                ` : `
+                  <div class="mt-5 border-t border-gray-50 pt-4 flex justify-between items-center">
+                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Status: ${formatApplicationStatus(application.status)}</p>
+                    <button type="button" onclick="openReviewModal('${application.id}', '${application.applicant_id}', 'seeker')" class="px-4 py-2 bg-amber-50 text-amber-600 text-xs font-black rounded-xl border border-amber-100 hover:bg-amber-100 transition-all">
+                      ⭐ 職人を評価する
+                    </button>
+                  </div>
+                `}
+
               </div>
-              <div class="grid grid-cols-2 gap-4 text-xs mb-4 bg-gray-50/50 p-4 rounded-xl">
-                <p><span class="text-[10px] font-bold text-gray-400 uppercase block mb-1">現場経験</span>💪 ${escapeHtml(String(application.experience || "未登録"))}</p>
-                <p><span class="text-[10px] font-bold text-gray-400 uppercase block mb-1">保有資格</span>🔧 ${Array.isArray(application.licenses) && application.licenses.length ? application.licenses.join("、") : "未登録"}</p>
-              </div>
-              ${application.message 
-                ? `<div class="relative bg-blue-50/30 p-4 rounded-xl border border-blue-50 italic text-sm text-blue-900 leading-relaxed">
-                    <span class="absolute -top-2 left-4 px-2 bg-white text-[9px] font-bold text-blue-400 uppercase tracking-widest border border-blue-50 rounded">Message</span>
-                    "${escapeHtml(String(application.message))}"
-                   </div>` 
-                : '<p class="text-center py-2 text-[10px] text-gray-300 font-bold uppercase tracking-widest">No Message Provided</p>'}
-              
-              ${application.status === "pending" ? `
-                <div class="mt-5 flex gap-3">
-                  <button type="button" onclick="updateApplicationStatus('${escapeHtml(String(application.id))}', 'reviewed')" class="flex-1 min-h-11 rounded-xl bg-blue-600 px-4 py-2 text-xs font-black text-white hover:bg-blue-700 transition-all shadow-md shadow-blue-100">確認済みにする</button>
-                  <button type="button" onclick="updateApplicationStatus('${escapeHtml(String(application.id))}', 'dismissed')" class="flex-1 min-h-11 rounded-xl border border-gray-200 bg-white px-4 py-2 text-xs font-black text-gray-500 hover:bg-gray-50 transition-all">対応不要</button>
-                </div>
-              ` : ""}
             </article>
           `).join("")
           : '<div class="text-center py-10 bg-gray-50 rounded-2xl border border-dashed border-gray-200"><p class="text-xs text-gray-400">受け取った応募はまだありません。</p></div>';
 
+
+            // 公開プロフィール一覧描画
       if (publicSeekerProfilesUserId === currentUser.id) {
         profilesContainer.innerHTML = publicSeekerProfilesError
           ? `<p class="text-sm text-red-600">${escapeHtml(publicSeekerProfilesError)}</p>`
           : displayProfiles.length
           ? `${employerContactRequestsError ? `<p class="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">${escapeHtml(employerContactRequestsError)}</p>` : ""}
+          <div class="grid grid-cols-1 gap-4">
           ${displayProfiles.map(profile => {
             const payTypeLabels = { hourly: "時給", daily: "日給", monthly: "月給" };
             const pay = profile.pay_type
@@ -2089,63 +2265,109 @@
               : "登録なし";
             const contactRequest = employerContactRequests.find(request => request.seeker_id === profile.user_id);
             return `
-              <article class="rounded-xl border border-emerald-100 bg-white p-4 shadow-sm mb-3">
-                <div class="grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-2">
-                  <p class="sm:col-span-2 text-base"><span class="font-bold text-emerald-900">希望職種:</span> ${escapeHtml(String(profile.job_type || "未設定"))}</p>
-                  <p><span class="font-bold">希望勤務地:</span> ${escapeHtml(String(profile.location || "未設定"))}</p>
-                  <p><span class="font-bold">希望給与:</span> ${escapeHtml(pay)}</p>
-                  <p class="sm:col-span-2"><span class="font-bold">保有資格:</span> ${licenses}</p>
-                  <p><span class="font-bold">現場経験:</span> ${escapeHtml(String(profile.exp_years || "未設定"))}</p>
-                  <p><span class="font-bold">アピール:</span> ${escapeHtml(String(profile.stamina || "未設定"))}</p>
-                </div>
-                <p class="mt-2 text-xs text-gray-500">プロフィール更新: ${escapeHtml(formatDashboardDate(profile.updated_at) || "日付不明")}</p>
-                <div class="mt-4 border-t border-gray-100 pt-3">
-                  ${contactRequest
-                    ? `<p class="text-sm font-bold ${contactRequest.status === "responded" ? "text-emerald-800" : contactRequest.status === "declined" ? "text-gray-600" : "text-amber-800"}">${contactRequest.status === "responded" ? "求職者から返信が届いています" : contactRequest.status === "declined" ? "求職者は連絡を見送りました" : "連絡リクエストを送信済みです"}</p>
-                       ${contactRequest.seeker_reply ? `<p class="mt-2 whitespace-pre-wrap rounded bg-emerald-50 p-3 text-sm">${escapeHtml(contactRequest.seeker_reply)}</p>` : ""}
-                       <p class="mt-1 text-xs text-gray-500">${formatDashboardDate(contactRequest.created_at)}</p>`
-                    : employerContactRequestsError
-                      ? ""
-                      : `<label class="block text-sm font-medium">連絡リクエストを送る
-                          <textarea id="contactMessage-${escapeHtml(profile.user_id)}" maxlength="1000" rows="3" class="mt-1 w-full rounded border px-3 py-2 text-sm" placeholder="プロフィールを見て連絡した理由や求人の案内を入力"></textarea>
-                        </label>
-                        <p class="mt-1 text-xs text-gray-500">連絡先は共有されません。メッセージは求職者のマイページに届きます。</p>
-                        <button type="button" onclick="sendSeekerContactRequest('${escapeHtml(profile.user_id)}', this)" class="mt-2 min-h-10 rounded-lg bg-emerald-700 px-3 py-2 text-sm font-bold text-white hover:bg-emerald-800">連絡を送る</button>
-                        <p id="contactRequestStatus-${escapeHtml(profile.user_id)}" class="mt-2 hidden text-sm" role="status" aria-live="polite"></p>`
-                  }
+              <article class="bg-white rounded-2xl border border-emerald-100 shadow-sm transition-all hover:shadow-md overflow-hidden">
+                <div class="p-5">
+                  <div class="flex items-center gap-4 mb-4 pb-4 border-b border-gray-50">
+                    <div class="h-14 w-14 shrink-0 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center text-2xl overflow-hidden">
+                      ${profile.avatar_url ? `<img src="${escapeHtml(profile.avatar_url)}" alt="" class="h-full w-full object-cover">` : '👷'}
+                    </div>
+                                                            <div class="min-w-0 flex-1">
+                      <p class="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mb-1">希望職種</p>
+                      <div class="flex items-center gap-2">
+                        <h4 class="font-black text-gray-900 text-lg leading-tight truncate">${escapeHtml(String(profile.job_type || "未設定"))}</h4>
+                        ${renderRatingBadge(profile.user_id)}
+                      </div>
+                    </div>
+
+
+                  </div>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
+                    <div class="flex items-start gap-3">
+                      <span class="text-base shrink-0">📍</span>
+                      <div>
+                        <p class="text-[9px] font-bold text-gray-400 uppercase leading-none mb-1">希望勤務地</p>
+                        <p class="font-bold text-gray-700">${escapeHtml(String(profile.location || "未設定"))}</p>
+                      </div>
+                    </div>
+                    <div class="flex items-start gap-3">
+                      <span class="text-base shrink-0">💰</span>
+                      <div>
+                        <p class="text-[9px] font-bold text-gray-400 uppercase leading-none mb-1">希望給与</p>
+                        <p class="font-bold text-gray-700">${escapeHtml(pay)}</p>
+                      </div>
+                    </div>
+                    <div class="flex items-start gap-3">
+                      <span class="text-base shrink-0">🔧</span>
+                      <div>
+                        <p class="text-[9px] font-bold text-gray-400 uppercase leading-none mb-1">保有資格</p>
+                        <p class="font-bold text-gray-700">${licenses}</p>
+                      </div>
+                    </div>
+                    <div class="flex items-start gap-3">
+                      <span class="text-base shrink-0">💪</span>
+                      <div>
+                        <p class="text-[9px] font-bold text-gray-400 uppercase leading-none mb-1">現場経験 / アピール</p>
+                        <p class="font-bold text-gray-700">${escapeHtml(String(profile.exp_years || "未設定"))}・${escapeHtml(String(profile.stamina || "未設定"))}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <p class="mt-4 text-[10px] text-gray-400 font-bold uppercase tracking-widest">最終更新: ${escapeHtml(formatDashboardDate(profile.updated_at) || "日付不明")}</p>
+                  <div class="mt-5 border-t border-gray-50 pt-5">
+                    ${contactRequest
+                      ? `<div class="rounded-xl ${contactRequest.status === "responded" ? "bg-emerald-50 border-emerald-100" : "bg-gray-50 border-gray-100"} border p-4">
+                          <p class="text-xs font-black ${contactRequest.status === "responded" ? "text-emerald-800" : contactRequest.status === "declined" ? "text-gray-600" : "text-amber-800"} uppercase tracking-wider mb-2">
+                            ${contactRequest.status === "responded" ? "✅ 求職者から返信が届いています" : contactRequest.status === "declined" ? "🚫 求職者は連絡を見送りました" : "⏳ 連絡リクエストを送信済み"}
+                          </p>
+                          ${contactRequest.seeker_reply ? `<p class="whitespace-pre-wrap text-sm text-gray-700 leading-relaxed italic border-l-4 border-emerald-200 pl-3">"${escapeHtml(contactRequest.seeker_reply)}"</p>` : ""}
+                          <p class="mt-2 text-[9px] text-gray-400 font-bold uppercase">${formatDashboardDate(contactRequest.created_at)}</p>
+                         </div>`
+                      : employerContactRequestsError
+                        ? ""
+                        : `<div>
+                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">この職人に連絡リクエストを送る</label>
+                            <textarea id="contactMessage-${escapeHtml(profile.user_id)}" maxlength="1000" rows="3" class="w-full rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none transition-all" placeholder="プロフィールを見て連絡した理由や求人の案内を入力"></textarea>
+                            <p class="mt-2 text-[10px] text-gray-400 font-medium leading-relaxed">※ 連絡先は共有されません。メッセージは求職者のマイページに届きます。名前を伏せて連絡できます。</p>
+                            <button type="button" onclick="sendSeekerContactRequest('${escapeHtml(profile.user_id)}', this)" class="mt-3 w-full h-11 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-black text-white hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-100">🚀 メッセージを送信する</button>
+                            <p id="contactRequestStatus-${escapeHtml(profile.user_id)}" class="mt-3 hidden text-xs font-bold" role="status" aria-live="polite"></p>
+                          </div>`
+                    }
+                  </div>
                 </div>
               </article>
             `;
           }).join("")}
+          </div>
           ${filteredPublicProfiles.length > displayLimitProfiles ? `
-            <button type="button" onclick="loadMoreProfiles()" class="w-full py-3 mt-4 bg-emerald-50 text-emerald-700 font-bold rounded-xl hover:bg-emerald-100 transition-colors border border-emerald-100">
+            <button type="button" onclick="loadMoreProfiles()" class="w-full h-14 mt-6 bg-white border border-emerald-100 text-emerald-700 font-black rounded-2xl hover:bg-emerald-50 transition-all shadow-sm">
               もっとプロフィールを見る (${filteredPublicProfiles.length - displayLimitProfiles}件)
             </button>
           ` : ""}
           `
           : publicSeekerProfiles.length
-            ? '<p class="rounded-lg border border-dashed border-emerald-200 bg-white p-5 text-center text-sm text-gray-600">条件に合うプロフィールがありません。検索条件を変更してください。</p>'
-            : '<p class="text-xs text-gray-500">現在公開中の求職者プロフィールはありません。</p>';
+            ? '<div class="text-center py-12 bg-white rounded-2xl border border-dashed border-gray-200"><p class="text-sm text-gray-500 font-bold uppercase tracking-widest">No matching profiles found</p></div>'
+            : '<div class="text-center py-12 bg-white rounded-2xl border border-dashed border-gray-200"><p class="text-sm text-gray-500 font-bold uppercase tracking-widest">No public profiles available</p></div>';
       } else if (loadingPublicSeekerProfilesUserId !== currentUser.id) {
-        profilesContainer.innerHTML = '<p class="text-xs text-gray-500">公開プロフィールを読み込んでいます。</p>';
+        profilesContainer.innerHTML = '<div class="flex items-center justify-center py-10"><span class="animate-pulse text-xs font-bold text-gray-400 uppercase tracking-widest">Loading Profiles...</span></div>';
         loadPublicSeekerProfiles(currentUser);
       }
+
     }
 
-    async function loadPublicSeekerProfiles(user) {
+        async function loadPublicSeekerProfiles(user) {
       if (!user || currentUser?.id !== user.id || accountType !== "employer" ||
           loadingPublicSeekerProfilesUserId === user.id || publicSeekerProfilesUserId === user.id) return;
       loadingPublicSeekerProfilesUserId = user.id;
       const [profilesResult, requestsResult] = await Promise.all([
         supabaseClient
           .from("seeker_public_profiles")
-          .select("user_id, job_type, location, pay_type, minimum_salary, licenses, exp_years, stamina, updated_at"),
+          .select("user_id, avatar_url, job_type, location, pay_type, minimum_salary, licenses, exp_years, stamina, updated_at"),
         supabaseClient
           .from("seeker_contact_requests")
           .select("*")
           .eq("employer_id", user.id)
           .order("created_at", { ascending: false })
       ]);
+
       if (currentUser?.id !== user.id || accountType !== "employer") {
         loadingPublicSeekerProfilesUserId = null;
         return;
@@ -2213,8 +2435,8 @@
       if (emailWarning) alert(emailWarning);
     }
 
-    function showDashboardView(view) {
-      const views = ["profile", "favorites", "applications", "notifications"];
+        function showDashboardView(view) {
+      const views = ["profile", "favorites", "applications", "notifications", "blocks"];
       if (!views.includes(view)) return;
       activeDashboardView = view;
       views.forEach(item => {
@@ -2228,7 +2450,9 @@
         button.classList.toggle("text-gray-700", !isActive);
         button.setAttribute("aria-selected", String(isActive));
       });
+      renderAccountDashboard();
     }
+
 
     function formatDashboardDate(value) {
       const date = new Date(value);
@@ -2264,7 +2488,7 @@
       }[status] || "応募状況を確認できません。";
     }
 
-    async function updateApplicationStatus(applicationId, status) {
+        async function updateApplicationStatus(applicationId, status) {
       if (!currentUser || accountType !== "employer" || !["pending", "reviewed", "dismissed"].includes(status)) return;
       const employerId = currentUser.id;
       const { error } = await supabaseClient
@@ -2276,8 +2500,15 @@
         alert(`応募状況を更新できませんでした: ${error.message}`);
         return;
       }
+      
+      // 状態が変更されたら求職者に通知（非同期で実行）
+      if (status === 'reviewed') {
+        sendNotificationEmail("application_reviewed", applicationId);
+      }
+
       await loadAccountData(currentUser);
     }
+
 
     function normalizeJapanesePhone(phone) {
       return phone.replace(/[()\s-]/g, "");
@@ -2319,7 +2550,7 @@
       const preferredLocation = activeTab === "seeker" && seekerProfile ? seekerProfile.location || "" : "";
       const matchProfile = activeTab === "seeker" ? seekerProfile : null;
 
-            const filteredJobs = cachedJobs
+                        const filteredJobs = cachedJobs
         .filter(job =>
           (!keyword ||
             (job.title || "").toLowerCase().includes(keyword) ||
@@ -2331,8 +2562,10 @@
             (!locationFilter || (job.location || "").trim() === locationFilter) &&
             (!salaryTypeFilter || getJobPayType(job) === salaryTypeFilter) &&
             (!minimumSalary || (salaryTypeFilter && getJobPayAmount(job) >= minimumSalary)) &&
-            (!selectedTags.length || (Array.isArray(job.tags) && selectedTags.some(tag => job.tags.includes(tag))))
+            (!selectedTags.length || (Array.isArray(job.tags) && selectedTags.some(tag => job.tags.includes(tag)))) &&
+            (!currentUser || !blockedUserIds.includes(job.owner_id))
         )
+
         .sort((a, b) => {
           if (sortBy === "recommended" && matchProfile) {
             const matchDifference = getJobMatchScore(b, matchProfile) - getJobMatchScore(a, matchProfile);
@@ -2396,14 +2629,21 @@
         <article onclick="openModal(${job.id})" class="cursor-pointer group relative bg-white rounded-2xl border border-gray-100 p-5 transition-all hover:shadow-md hover:border-blue-200 sm:p-6 mb-4">
           <div class="flex items-start justify-between gap-3">
             <div class="min-w-0 flex-1">
-              <div class="mb-3 flex flex-wrap gap-2">
+                            <div class="mb-3 flex flex-wrap gap-2">
+                <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-wider uppercase ${job.work_style === 'short' ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700'}">${job.work_style === 'short' ? '⚡ 単発・短期' : '🤝 常用・正社員'}</span>
                 <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-wider uppercase ${isJobClosed(job) ? 'bg-gray-100 text-gray-500' : 'bg-emerald-50 text-emerald-700'}">${isJobClosed(job) ? '募集終了' : '募集中'}</span>
+
                 ${job.capacity <= 0 ? '' : `<span class="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-[10px] font-bold text-blue-700 uppercase">募集人数 ${formatJobCapacity(job.capacity)}</span>`}
                 ${matchProfile && getJobMatchScore(job, matchProfile) > 0 ? '<span class="inline-flex items-center rounded-full bg-purple-50 px-2.5 py-0.5 text-[10px] font-bold text-purple-700 uppercase">希望条件に一致</span>' : ''}
               </div>
-              <h3 class="break-words text-lg font-extrabold leading-tight text-gray-900 sm:text-xl group-hover:text-blue-700 transition-colors">${escapeHtml(job.title)}</h3>
-              <p class="mt-2 text-[10px] font-medium text-gray-400 uppercase tracking-widest">${escapeHtml(formatJobFreshness(job))}</p>
+                                          <h3 class="break-words text-lg font-extrabold leading-tight text-gray-900 sm:text-xl group-hover:text-blue-700 transition-colors">${escapeHtml(job.title)}</h3>
+              <div class="flex items-center gap-2 mt-1">
+                <p class="text-[10px] font-medium text-gray-400 uppercase tracking-widest">${escapeHtml(formatJobFreshness(job))}</p>
+                ${renderRatingBadge(job.owner_id)}
+              </div>
             </div>
+
+
             <button type="button" aria-label="${isFavorite(job.id) ? 'お気に入りから削除' : 'お気に入りに追加'}" aria-pressed="${isFavorite(job.id)}" onclick="event.stopPropagation(); toggleFavorite(${job.id})" class="z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-amber-100 bg-amber-50/50 text-xl text-amber-500 hover:bg-amber-100 hover:text-amber-600 transition-all" title="${isFavorite(job.id) ? 'お気に入りから削除' : 'お気に入りに追加'}">${isFavorite(job.id) ? '★' : '☆'}</button>
           </div>
           <div class="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -2648,8 +2888,17 @@
         ? await sendNotificationEmail("job_application", data.id)
         : "";
       if (currentUser?.id !== applicantId || accountType !== "seeker") return;
-      document.getElementById("jobApplicationForm").classList.add("hidden");
-            document.getElementById("applicationSuccess").innerText = emailWarning
+            document.getElementById("jobApplicationForm").classList.add("hidden");
+      
+      confetti({
+        particleCount: 100,
+        spread: 60,
+        origin: { y: 0.8 },
+        colors: ['#2563eb', '#10b981', '#ffffff']
+      });
+
+      document.getElementById("applicationSuccess").innerText = emailWarning
+
         ? `応募を送信しました。${emailWarning}`
         : "応募を送信しました。安全なマッチングのため、企業からの返答をお待ちください。履歴はマイページから確認できます。";
       document.getElementById("applicationSuccess").classList.remove("hidden");
@@ -2913,7 +3162,269 @@
       closeModal();
     }
 
+        async function blockUser(blockedId) {
+          if (!currentUser) return;
+          if (blockedId === currentUser.id) return;
+          if (!confirm("このユーザーをブロックしますか？\nブロックすると、このユーザーの求人やプロフィールが表示されなくなります。")) return;
+
+          const { error } = await supabaseClient
+            .from("user_blocks")
+            .insert({ blocker_id: currentUser.id, blocked_id: blockedId });
+
+          if (error) {
+            alert("ブロックに失敗しました: " + error.message);
+            return;
+          }
+      
+          blockedUserIds.push(blockedId);
+          renderJobList();
+          renderEmployerDashboard();
+          alert("ユーザーをブロックしました。");
+        }
+
+        async function unblockUser(blockedId) {
+          if (!currentUser) return;
+          const { error } = await supabaseClient
+            .from("user_blocks")
+            .delete()
+            .eq("blocker_id", currentUser.id)
+            .eq("blocked_id", blockedId);
+
+          if (error) {
+            alert("ブロック解除に失敗しました: " + error.message);
+            return;
+          }
+
+          blockedUserIds = blockedUserIds.filter(id => id !== blockedId);
+          renderJobList();
+          renderEmployerDashboard();
+        }
+
+        function openReviewModal(applicationId, revieweeId, targetType, existingId = null, existingRating = 5, existingComment = "") {
+          reviewContext = { applicationId, revieweeId, targetType, existingId };
+          document.getElementById("reviewModal").classList.remove("hidden");
+          document.getElementById("reviewTargetIcon").innerText = targetType === 'seeker' ? '👷' : '🏢';
+          document.getElementById("reviewTitle").innerText = existingId ? '評価を修正' : (targetType === 'seeker' ? '職人を評価' : '企業を評価');
+          document.getElementById("reviewComment").value = existingComment;
+          document.getElementById("reviewSubmitButton").innerText = existingId ? '🔄 評価を更新する' : '🚀 評価を送信する';
+          updateStars(existingRating);
+        }
+
+
+    function closeReviewModal() {
+      document.getElementById("reviewModal").classList.add("hidden");
+      document.getElementById("reviewStatus").classList.add("hidden");
+      reviewContext = null;
+    }
+
+    function updateStars(rating) {
+      document.getElementById("reviewRating").value = rating;
+      const container = document.getElementById("starContainer");
+      container.innerHTML = "";
+      for (let i = 1; i <= 5; i++) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = `text-4xl transition-transform hover:scale-110 focus:outline-none ${i <= rating ? "" : "grayscale opacity-30"}`;
+        btn.innerText = "⭐";
+        btn.onclick = () => updateStars(i);
+        container.appendChild(btn);
+      }
+    }
+
+        async function submitReview(event) {
+      event.preventDefault();
+      if (!currentUser || !reviewContext) return;
+
+      const rating = parseInt(document.getElementById("reviewRating").value);
+      const comment = document.getElementById("reviewComment").value.trim();
+      const status = document.getElementById("reviewStatus");
+      const submitBtn = document.getElementById("reviewSubmitButton");
+
+      status.innerText = "送信中...";
+      status.className = "text-center text-xs font-bold py-2 text-blue-600";
+      status.classList.remove("hidden");
+      submitBtn.disabled = true;
+
+      let result;
+      if (reviewContext.existingId) {
+        // 更新
+        result = await supabaseClient
+          .from("job_reviews")
+          .update({ rating, comment })
+          .eq("id", reviewContext.existingId);
+      } else {
+        // 新規挿入
+        result = await supabaseClient
+          .from("job_reviews")
+          .insert({
+            application_id: reviewContext.applicationId,
+            reviewer_id: currentUser.id,
+            reviewee_id: reviewContext.revieweeId,
+            target_type: reviewContext.targetType,
+            rating,
+            comment
+          });
+      }
+
+      if (result.error) {
+        status.innerText = result.error.code === "23505" ? "すでに評価済みです。" : `エラー: ${result.error.message}`;
+        status.className = "text-center text-xs font-bold py-2 text-red-600";
+        submitBtn.disabled = false;
+        return;
+      }
+
+
+      status.innerText = "評価を送信しました！";
+      status.className = "text-center text-xs font-bold py-2 text-green-600";
+      
+      confetti({
+        particleCount: 50,
+        spread: 30,
+        origin: { y: 0.7 }
+      });
+
+      setTimeout(() => {
+        closeReviewModal();
+        submitBtn.disabled = false;
+      }, 1500);
+    }
+
+        async function loadAccountData(user) {
+          if (!user || currentUser?.id !== user.id || loadingAccountUserId === user.id) return;
+          loadingAccountUserId = user.id;
+          const userId = user.id;
+
+          const [profileResult, appsResult, favsResult, notifsResult, seekerReqsResult, reviewsResult, blocksResult] = await Promise.all([
+            supabaseClient.from("seeker_profiles").select("*").eq("user_id", userId).maybeSingle(),
+            supabaseClient.from("job_applications").select("*").or(`applicant_id.eq.${userId},employer_id.eq.${userId}`).order("created_at", { ascending: false }),
+            supabaseClient.from("job_favorites").select("job_id").eq("user_id", userId),
+            supabaseClient.from("app_notifications").select("*").eq("recipient_id", userId).order("created_at", { ascending: false }),
+            accountType === "seeker"
+              ? supabaseClient.from("seeker_contact_requests").select("*").eq("seeker_id", userId).order("created_at", { ascending: false })
+              : Promise.resolve({ data: [], error: null }),
+            supabaseClient.from("job_reviews").select("*").eq("reviewer_id", userId),
+            supabaseClient.from("user_blocks").select("blocked_id").eq("blocker_id", userId)
+          ]);
+
+          if (currentUser?.id !== userId) {
+            loadingAccountUserId = null;
+            return;
+          }
+          loadingAccountUserId = null;
+
+          if (profileResult.data) {
+            seekerProfileData = {
+              name: profileResult.data.name,
+              phone: profileResult.data.phone,
+              avatarUrl: profileResult.data.avatar_url,
+              jobType: profileResult.data.job_type,
+              location: profileResult.data.location,
+              payType: profileResult.data.pay_type,
+              minimumSalary: profileResult.data.minimum_salary,
+              licenses: profileResult.data.licenses,
+              expYears: profileResult.data.exp_years,
+              stamina: profileResult.data.stamina,
+              isPublic: profileResult.data.is_public
+            };
+            if (!dashboardOpen) loadSeekerProfile(seekerProfileData);
+          }
+          accountApplications = appsResult.data || [];
+          accountReviews = reviewsResult.data || [];
+          blockedUserIds = (blocksResult.data || []).map(b => b.blocked_id);
+          accountApplicationsError = appsResult.error ? `応募履歴を読み込めませんでした: ${appsResult.error.message}` : "";
+
+          favoriteJobIds = (favsResult.data || []).map(f => String(f.job_id));
+          appNotifications = (notifsResult.data || []).map(n => ({ ...n, legacy: false }));
+          appNotificationsError = notifsResult.error ? `通知を読み込めませんでした: ${notifsResult.error.message}` : "";
+          seekerContactRequests = seekerReqsResult.data || [];
+          seekerContactRequestsError = seekerReqsResult.error ? `連絡リクエストを読み込めませんでした: ${seekerReqsResult.error.message}` : "";
+      
+          accountDataUserId = userId;
+          await fetchAvgRatings(); 
+          renderAccountDashboard();
+          renderEmployerDashboard();
+          renderJobList();
+        }
+
+        async function fetchAvgRatings() {
+          const { data, error } = await supabaseClient
+            .from("job_reviews")
+            .select("reviewee_id, rating");
+      
+          if (error) return;
+      
+          const scores = {};
+          data.forEach(r => {
+            if (!scores[r.reviewee_id]) scores[r.reviewee_id] = { sum: 0, count: 0 };
+            scores[r.reviewee_id].sum += r.rating;
+            scores[r.reviewee_id].count += 1;
+          });
+
+          Object.keys(scores).forEach(id => {
+            avgRatings[id] = {
+              avg: (scores[id].sum / scores[id].count).toFixed(1),
+              count: scores[id].count
+            };
+          });
+        }
+
+        function renderRatingBadge(userId) {
+          const rating = avgRatings[userId];
+          if (!rating) return '';
+          return `
+            <div class="flex items-center gap-1 bg-amber-50 px-2 py-0.5 rounded border border-amber-100 shadow-sm">
+              <span class="text-amber-500 text-[10px]">⭐</span>
+              <span class="text-amber-700 font-black text-[10px] leading-none">${rating.avg}</span>
+              <span class="text-gray-400 text-[8px] font-bold">(${rating.count})</span>
+            </div>
+          `;
+        }
+
+        async function uploadImage(fileInput, targetId, statusId) {
+
+      const file = fileInput.files[0];
+      const status = document.getElementById(statusId);
+      if (!file) return;
+
+      if (!currentUser) {
+        alert("写真をアップロードするにはログインが必要です。");
+        return;
+      }
+
+      status.innerText = "⏳ アップロード中...";
+      status.className = "text-[10px] text-blue-600 font-bold animate-pulse";
+
+      try {
+        // ファイル名をユニークにする (userId_timestamp_name)
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${currentUser.id}_${Date.now()}.${fileExt}`;
+        const filePath = `uploads/${fileName}`;
+
+        // Supabase Storage にアップロード
+        const { data, error } = await supabaseClient.storage
+          .from('job-media')
+          .upload(filePath, file);
+
+        if (error) throw error;
+
+        // 公開URLを取得
+        const { data: { publicUrl } } = supabaseClient.storage
+          .from('job-media')
+          .getPublicUrl(filePath);
+
+        document.getElementById(targetId).value = publicUrl;
+        status.innerText = "✅ アップロード完了";
+        status.className = "text-[10px] text-green-600 font-bold";
+      } catch (error) {
+        console.error("Upload error:", error);
+        status.innerText = "❌ アップロード失敗: " + error.message;
+        status.className = "text-[10px] text-red-600 font-bold";
+      }
+    }
+
     function escapeHtml(str) {
+
+
       if (!str) return '';
       return str.replace(/[&<>"']/g, (m) => ({
         '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
