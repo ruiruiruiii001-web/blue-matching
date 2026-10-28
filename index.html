@@ -792,6 +792,7 @@
     let loadingPublicSeekerProfilesUserId = null;
     let turnstileToken = null;
     let turnstileWidgetId = null;
+    let turnstileReady = false;
         let reportTurnstileToken = null;
     let reportTurnstileWidgetId = null;
 
@@ -859,6 +860,19 @@
         return;
       }
 
+      turnstileReady = true;
+      if (loginPanelOpen) {
+        renderEmployerTurnstile();
+      } else {
+        setTurnstileStatus("ログイン画面を開くとCAPTCHAを表示します。");
+      }
+    }
+
+    function renderEmployerTurnstile() {
+      if (!turnstileReady || turnstileWidgetId !== null || !loginPanelOpen) return;
+      const container = document.getElementById("employerTurnstile");
+      if (!container || !container.getClientRects().length) return;
+      const siteKey = document.querySelector('meta[name="cloudflare-turnstile-sitekey"]').content.trim();
       turnstileWidgetId = window.turnstile.render("#employerTurnstile", {
         sitekey: siteKey,
         callback: token => {
@@ -875,7 +889,7 @@
           return true;
         }
       });
-      setTurnstileStatus("CAPTCHAを確認してから新規登録してください。");
+      setTurnstileStatus("CAPTCHAを確認してからログインまたは新規登録してください。");
     }
 
     function setTurnstileStatus(message, isError = false) {
@@ -1148,6 +1162,7 @@
       overlay.classList.remove("hidden");
       overlay.classList.add("flex");
       updateHeaderAccountButton();
+      renderEmployerTurnstile();
       document.getElementById("employerEmail").focus();
     }
 
