@@ -55,7 +55,8 @@
 
 Vercelのプロジェクト設定 **Settings → Environment Variables** に、Production用として次の環境変数を追加し、再デプロイしてください。値はGitHubやチャットに貼らないでください。
 
-- `CLOUDFLARE_TURNSTILE_SECRET_KEY`: TurnstileのSecret key
+- `TURNSTILE_SECRET_KEY`: TurnstileのSecret key（推奨）
+- `CLOUDFLARE_TURNSTILE_SECRET_KEY`: 既存設定との互換用。`TURNSTILE_SECRET_KEY`が未設定の場合に使用
 - `SUPABASE_URL`: `https://qefqlbkqewvahtqzqmfp.supabase.co`
 - `SUPABASE_SERVICE_ROLE_KEY`: Supabaseのサーバー専用service_role key（ブラウザー用publishable/anon keyではありません）
 

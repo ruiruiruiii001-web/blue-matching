@@ -52,7 +52,9 @@ export default async function handler(req) {
     return jsonResponse({ error: '入力内容を確認してください。' }, 400);
   }
 
-  const turnstileSecret = process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY;
+  const turnstileSecret =
+    process.env.TURNSTILE_SECRET_KEY || process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY;
+
   const supabaseUrl = process.env.SUPABASE_URL;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!turnstileSecret || !supabaseUrl || !serviceRoleKey) {
