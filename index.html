@@ -130,7 +130,7 @@
             <button type="button" onclick="hidePasswordResetRequest()" class="text-sm text-gray-600 underline">ログインに戻る</button>
           </div>
           <div id="employerTurnstile" class="min-h-4"></div>
-          <p id="turnstileStatus" role="status" aria-live="polite" class="text-xs text-gray-500">新規登録にはCAPTCHA確認が必要です。現在、設定準備中です。</p>
+          <p id="turnstileStatus" role="status" aria-live="polite" class="text-xs text-gray-500">ログイン・新規登録にはCAPTCHA確認が必要です。現在、設定準備中です。</p>
           <p class="text-xs text-gray-500">新規登録後、確認メールが届いた場合はメール内のリンクを開いてからログインしてください。</p>
         </div>
         <div id="employerLoggedIn" class="hidden items-center justify-between gap-3">
@@ -1353,8 +1353,17 @@
         setAuthMessage("メールアドレスとパスワードを入力してください。", true);
         return;
       }
+      if (!turnstileToken) {
+        setAuthMessage("ログインの前にCAPTCHA確認を完了してください。", true);
+        return;
+      }
 
-      const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+      const { error } = await supabaseClient.auth.signInWithPassword({
+        email,
+        password,
+        options: { captchaToken: turnstileToken }
+      });
+      resetEmployerTurnstile();
       if (error) {
         setAuthMessage(`ログインに失敗しました: ${error.message}`, true);
         return;
