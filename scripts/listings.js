@@ -24,8 +24,25 @@ function renderJobList(resetLimit = false) {
   });
   const salaryTypeFilter = document.getElementById("salaryTypeFilter").value;
   const minimumSalary = Number(document.getElementById("minimumSalary").value) || 0;
-  const sortBy = document.getElementById("jobSort").value;
   const seekerProfile = seekerProfileData;
+  const sortSelect = document.getElementById("jobSort");
+  const recommendedSortOption = sortSelect.querySelector('option[value="recommended"]');
+  const hasSeekerPreferences = Boolean(seekerProfile && (
+    String(seekerProfile.jobType || "").trim() ||
+    String(seekerProfile.location || "").trim() ||
+    seekerProfile.payType ||
+    Number(seekerProfile.minimumSalary) > 0 ||
+    (Array.isArray(seekerProfile.workPreferences) && seekerProfile.workPreferences.length > 0)
+  ));
+  const canRecommend = activeTab === "seeker" && hasSeekerPreferences;
+  recommendedSortOption.disabled = !canRecommend;
+  recommendedSortOption.textContent = canRecommend
+    ? "おすすめ順"
+    : activeTab === "seeker"
+      ? "おすすめ順（希望条件登録後）"
+      : "おすすめ順（求職者ログイン時）";
+  if (!canRecommend && sortSelect.value === "recommended") sortSelect.value = "newest";
+  const sortBy = sortSelect.value;
   const preferredLocation = activeTab === "seeker" && seekerProfile ? seekerProfile.location || "" : "";
   const matchProfile = activeTab === "seeker" ? seekerProfile : null;
 
@@ -51,14 +68,6 @@ function renderJobList(resetLimit = false) {
         const matchDifference = getJobMatchScore(b, matchProfile) - getJobMatchScore(a, matchProfile);
         if (matchDifference !== 0) return matchDifference;
       }
-      if (preferredLocation) {
-        const locationDifference = getLocationMatchScore(b.location, preferredLocation) - getLocationMatchScore(a.location, preferredLocation);
-        if (locationDifference !== 0) return locationDifference;
-      }
-      if (selectedTags.length > 0) {
-        const matchDifference = getTagMatchCount(b, selectedTags) - getTagMatchCount(a, selectedTags);
-        if (matchDifference !== 0) return matchDifference;
-      }
       if (sortBy === "capacity") {
         const capacityDifference = getCapacitySortValue(a.capacity) - getCapacitySortValue(b.capacity);
         if (capacityDifference !== 0) return capacityDifference;
@@ -66,6 +75,16 @@ function renderJobList(resetLimit = false) {
       if (sortBy === "salary") {
         const salaryDifference = getJobPayAmount(b) - getJobPayAmount(a);
         if (salaryDifference !== 0) return salaryDifference;
+      }
+      if (sortBy === "recommended") {
+        if (preferredLocation) {
+          const locationDifference = getLocationMatchScore(b.location, preferredLocation) - getLocationMatchScore(a.location, preferredLocation);
+          if (locationDifference !== 0) return locationDifference;
+        }
+        if (selectedTags.length > 0) {
+          const matchDifference = getTagMatchCount(b, selectedTags) - getTagMatchCount(a, selectedTags);
+          if (matchDifference !== 0) return matchDifference;
+        }
       }
       return compareJobsByNewest(a, b);
     });
