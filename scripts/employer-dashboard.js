@@ -127,12 +127,13 @@ function renderEmployerApplicationDetails(application) {
 }
 
 function showEmployerDashboardView(view) {
-  const views = ["jobs", "messages"];
+  const views = ["jobs", "messages", "job-editor"];
   if (!views.includes(view)) return;
 
   views.forEach(item => {
     document.getElementById(`employerDashboardView-${item}`).classList.toggle("hidden", item !== view);
   });
+  document.getElementById("employerDashboardNavigation").classList.toggle("hidden", view === "job-editor");
   document.querySelectorAll(".employer-dashboard-menu-button").forEach(button => {
     const isActive = button.dataset.employerDashboardView === view;
     button.classList.toggle("bg-blue-600", isActive);

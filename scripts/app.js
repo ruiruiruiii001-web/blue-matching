@@ -62,6 +62,8 @@ document.addEventListener("keydown", event => {
   if (event.key === "Escape") {
     if (applicationDetailOpen) closeApplicationNotification();
     else if (!document.getElementById("jobModal").classList.contains("hidden")) closeModal();
+    else if (dashboardOpen &&
+        !document.getElementById("employerDashboardView-job-editor").classList.contains("hidden")) cancelJobEdit();
     else if (dashboardOpen) closeAccountPanel();
     else if (loginPanelOpen) closeLoginPanel();
     return;

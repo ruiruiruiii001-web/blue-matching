@@ -166,7 +166,7 @@ function editJob(id) {
   if (!currentUser || accountType !== "employer" || !job || job.owner_id !== currentUser.id) return;
 
   if (!dashboardOpen) openAccountPanel();
-  showEmployerDashboardView("jobs");
+  showEmployerDashboardView("job-editor");
   editingJobId = id;
   document.getElementById("jobTitle").value = job.title || "";
   setCheckedValues("jobWorkPreference", job.work_preferences);
@@ -203,19 +203,19 @@ function editJob(id) {
   document.getElementById("cancelEditButton").classList.remove("hidden");
   document.getElementById("cancelEditButton").innerText = "編集をキャンセル";
   document.getElementById("employerJobForm").classList.remove("hidden");
-  document.getElementById("employerJobForm").scrollIntoView({ behavior: "smooth" });
+  document.getElementById("myPageOverlayContent").scrollTop = 0;
   document.getElementById("jobTitle").focus({ preventScroll: true });
 }
 
 function openEmployerJobForm() {
   if (!currentUser || accountType !== "employer") return;
   if (!dashboardOpen) openAccountPanel();
-  showEmployerDashboardView("jobs");
   cancelJobEdit();
+  showEmployerDashboardView("job-editor");
   document.getElementById("cancelEditButton").classList.remove("hidden");
   document.getElementById("cancelEditButton").innerText = "キャンセル";
   document.getElementById("employerJobForm").classList.remove("hidden");
-  document.getElementById("employerJobForm").scrollIntoView({ behavior: "smooth" });
+  document.getElementById("myPageOverlayContent").scrollTop = 0;
   document.getElementById("jobTitle").focus({ preventScroll: true });
 }
 
@@ -249,6 +249,7 @@ function cancelJobEdit() {
   document.querySelectorAll('input[name="jobTag"]').forEach(cb => cb.checked = false);
   document.getElementById("jobFormHeading").innerText = "現場求人のクラウド投稿";
   document.getElementById("jobSubmitButton").innerText = "🔥 クラウドに求人を今すぐ掲載する";
+  if (dashboardOpen) showEmployerDashboardView("jobs");
 }
 
 async function toggleJobClosed(id) {

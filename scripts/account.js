@@ -123,7 +123,10 @@ function updateEmployerAuth(session) {
       setTimeout(() => loadAccountType(user), 0);
     } else switchTab("guest");
   }
-  if (!currentUser && editingJobId !== null) cancelJobEdit();
+  if (!currentUser &&
+      !document.getElementById("employerDashboardView-job-editor").classList.contains("hidden")) {
+    cancelJobEdit();
+  }
   updateHeaderAccountButton();
   updateAccountTypeUI();
   renderJobList();
