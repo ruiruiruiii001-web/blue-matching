@@ -145,7 +145,7 @@ function renderJobList(resetLimit = false) {
       <div class="mt-5 flex items-center justify-between pt-4">
          <div class="flex items-center text-xs font-bold text-blue-600">
            詳細を見る
-           <svg class="ml-1 w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="9 5l7 7-7 7"/></svg>
+           <svg class="ml-1 w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
          </div>
          ${activeTab === "employer" && currentUser && job.owner_id === currentUser.id ? `
           <div class="flex gap-2">
