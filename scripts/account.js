@@ -99,16 +99,14 @@ function updateEmployerAuth(session) {
     document.getElementById("loginNotificationBanner").classList.add("hidden");
     accountTypeLoadUserId = null;
     accountTypeLoading = Boolean(currentUser);
-    publicSeekerProfiles = [];
-    publicSeekerProfilesUserId = null;
-    publicSeekerProfilesError = "";
-    loadingPublicSeekerProfilesUserId = null;
     accountDataUserId = null;
     loadingAccountUserId = null;
     favoriteJobIds = [];
     seekerProfileData = null;
     accountApplications = [];
     accountApplicationsError = "";
+    applicationMessages = [];
+    applicationMessagesError = "";
     appNotifications = [];
     appNotificationsError = "";
     seekerContactRequests = [];
@@ -149,7 +147,7 @@ function updateAccountTypeUI() {
   document.getElementById("seekerDashboard").classList.toggle("hidden", !hasUser || !isSeeker || !dashboardOpen);
   document.getElementById("seekerAccountPrompt").classList.toggle("hidden", hasUser && isSeeker);
   document.getElementById("seekerAccountPromptText").innerText = hasUser
-    ? "求職者プロフィールは求職者アカウントで利用できます。企業アカウントでは、本人が公開を許可した匿名プロフィールだけを閲覧できます。"
+    ? "求職者プロフィールは求職者アカウントで利用できます。"
     : "プロフィール・お気に入り・応募履歴をアカウントに保存するにはログインしてください。";
 }
 

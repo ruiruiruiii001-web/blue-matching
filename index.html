@@ -156,9 +156,7 @@
         <p id="employerDashboardStatus" role="status" aria-live="polite" class="hidden text-sm text-red-600"></p>
         <nav id="employerDashboardNavigation" role="tablist" aria-label="企業マイページの表示切替" class="sticky top-0 z-10 flex shrink-0 gap-2 overflow-x-auto border-b bg-gray-100 py-2">
           <button type="button" role="tab" aria-selected="true" aria-controls="employerDashboardView-jobs" data-employer-dashboard-view="jobs" onclick="showEmployerDashboardView('jobs')" class="employer-dashboard-menu-button h-11 shrink-0 rounded-lg bg-blue-600 px-3 text-sm font-bold text-white">求人管理</button>
-          <button type="button" role="tab" aria-selected="false" aria-controls="employerDashboardView-applications" data-employer-dashboard-view="applications" onclick="showEmployerDashboardView('applications')" class="employer-dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 text-sm font-bold text-gray-700">応募 <span id="employerApplicationCount"></span></button>
-          <button type="button" role="tab" aria-selected="false" aria-controls="employerDashboardView-profiles" data-employer-dashboard-view="profiles" onclick="showEmployerDashboardView('profiles')" class="employer-dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 text-sm font-bold text-gray-700">求職者検索</button>
-          <button type="button" role="tab" aria-selected="false" aria-controls="employerDashboardView-notifications" data-employer-dashboard-view="notifications" onclick="showEmployerDashboardView('notifications')" class="employer-dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 text-sm font-bold text-gray-700">連絡・通知 <span id="employerNotificationCount"></span></button>
+          <button type="button" role="tab" aria-selected="false" aria-controls="employerDashboardView-messages" data-employer-dashboard-view="messages" onclick="showEmployerDashboardView('messages')" class="employer-dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 text-sm font-bold text-gray-700">応募・メッセージ <span id="employerApplicationCount"></span></button>
         </nav>
 
         <section id="employerDashboardView-jobs" class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
@@ -172,51 +170,25 @@
               <li>求人を投稿し、勤務地・給与・仕事内容・待遇タグを具体的に記入します。</li>
               <li>応募者の経験・資格・メッセージを確認し、「確認済み」または「対応不要」に更新してください。</li>
               <li>対応状況は応募者の応募履歴に表示されます。新しい応募はマイページの通知で確認できます。</li>
-              <li>求職者検索から希望職種や地域を絞り、公開プロフィールに連絡リクエストを送れます。</li>
             </ol>
-            <p class="mt-2 border-t border-blue-200 pt-2 text-xs leading-relaxed text-blue-950">応募に電話番号は含まれず、応募への個別返信機能はありません。連絡が必要な場合は、求職者が公開しているプロフィールから連絡リクエストを送ってください。</p>
+            <p class="mt-2 border-t border-blue-200 pt-2 text-xs leading-relaxed text-blue-950">応募に電話番号は含まれません。応募者とは「応募・メッセージ」からサイト内で連絡できます。</p>
           </details>
           <div id="employerDashboardJobFormSlot"></div>
           <div id="employerDashboardJobs" class="space-y-3 text-sm"></div>
         </section>
 
-        <section id="employerDashboardView-applications" class="hidden rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
-          <h3 class="mb-3 border-b border-gray-100 pb-3 text-lg font-bold text-blue-600">受け取った応募</h3>
-          <p class="mb-3 text-sm leading-relaxed text-gray-600">応募者の経験・資格・メッセージを確認し、「確認済みにする」または「対応不要」を選んでください。状況は応募者の応募履歴に表示されます。</p>
-          <p id="employerApplicationsStatus" role="status" aria-live="polite" class="hidden text-sm text-red-700"></p>
-          <div id="employerDashboardApplications" class="space-y-3 text-sm"></div>
-        </section>
-
-        <section id="employerDashboardView-profiles" class="hidden rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
-          <h3 class="mb-3 border-b border-gray-100 pb-3 text-lg font-bold text-emerald-700">求職者を探す</h3>
-          <section id="employerSeekerProfilesPanel" class="rounded-xl border border-emerald-200 bg-emerald-50 p-4 sm:p-5">
-            <p class="mb-4 border-b border-emerald-200 pb-3 text-sm leading-5 text-emerald-900">本人が公開を選んだ匿名プロフィールのみ表示しています。名前・電話番号は表示されません。企業アカウントの事業者本人確認は行っていないため、表示情報の取り扱いにご注意ください。</p>
-            <div class="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_14rem]">
-              <label class="text-sm font-medium text-gray-700">希望職種・地域・資格で検索
-                <input id="employerSeekerKeyword" type="search" oninput="renderEmployerDashboard(true)" placeholder="例: 足場、横浜、玉掛け" class="mt-1 w-full rounded-lg border border-emerald-200 bg-white px-3 py-2.5">
-              </label>
-              <label class="text-sm font-medium text-gray-700">現場経験
-                <select id="employerSeekerExperience" onchange="renderEmployerDashboard(true)" class="mt-1 w-full rounded-lg border border-emerald-200 bg-white px-3 py-2.5">
-                  <option value="">すべて</option>
-                  <option value="未経験（やる気あり）">未経験</option>
-                  <option value="1〜2年">1〜2年</option>
-                  <option value="3〜5年（即戦力）">3〜5年</option>
-                  <option value="5年以上（ベテラン）">5年以上</option>
-                </select>
-              </label>
-            </div>
-            <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
-              <p id="employerSeekerProfileCount" class="text-xs text-emerald-900" aria-live="polite"></p>
-              <button type="button" onclick="resetEmployerSeekerFilters()" class="min-h-10 rounded-lg border border-emerald-300 bg-white px-3 py-2 text-xs font-bold text-emerald-900 hover:bg-emerald-100">条件をクリア</button>
-            </div>
-            <div id="employerSeekerProfiles" class="space-y-3 text-sm"></div>
+        <section id="employerDashboardView-messages" class="hidden rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
+          <h3 class="mb-3 border-b border-gray-100 pb-3 text-lg font-bold text-blue-600">応募・メッセージ</h3>
+          <section class="mb-6 border-b border-gray-100 pb-5">
+            <h4 class="mb-2 font-bold text-sm">通知</h4>
+            <p id="employerNotificationsStatus" role="status" aria-live="polite" class="hidden text-sm text-red-700"></p>
+            <div id="employerDashboardNotifications" class="divide-y divide-gray-100 text-sm"></div>
           </section>
-        </section>
-
-        <section id="employerDashboardView-notifications" class="hidden rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
-          <h3 class="mb-3 border-b border-gray-100 pb-3 text-lg font-bold text-blue-600">連絡・通知</h3>
-          <p id="employerNotificationsStatus" role="status" aria-live="polite" class="hidden text-sm text-red-700"></p>
-          <div id="employerDashboardNotifications" class="divide-y divide-gray-100 text-sm"></div>
+          <h4 class="mb-3 font-bold text-sm">受け取った応募</h4>
+          <p class="mb-3 text-sm leading-relaxed text-gray-600">応募者の経験・資格・メッセージを確認し、「確認済みにする」または「対応不要」を選んでください。状況は応募者の応募履歴に表示されます。メッセージでは電話番号やメールアドレスを送らないでください。</p>
+          <p id="employerApplicationsStatus" role="status" aria-live="polite" class="hidden text-sm text-red-700"></p>
+          <p id="applicationMessagesStatus" role="status" aria-live="polite" class="hidden text-sm text-red-700"></p>
+          <div id="employerDashboardApplications" class="space-y-3 text-sm"></div>
         </section>
       </section>
 
@@ -485,7 +457,9 @@
             </section>
                         <section id="dashboardView-applications" class="hidden rounded border p-3">
               <h3 class="font-bold text-sm mb-2">応募履歴・応募者</h3>
+              <p class="mb-3 text-xs text-gray-600">応募後の進捗はこの画面で確認できます。企業から連絡が届いた場合は「連絡・通知」をご確認ください。</p>
               <p id="dashboardApplicationsStatus" role="status" aria-live="polite" class="mb-3 hidden text-sm"></p>
+              <p id="seekerApplicationMessagesStatus" role="status" aria-live="polite" class="mb-3 hidden text-sm text-red-700"></p>
               <div id="dashboardApplications" class="space-y-2 text-sm"></div>
             </section>
             <section id="dashboardView-blocks" class="hidden rounded border p-3">

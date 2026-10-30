@@ -20,9 +20,13 @@ function renderAccountDashboard() {
   const submitted = accountApplications.filter(application => application.applicant_id === currentUser.id);
   const employerIdsByJobId = new Map(cachedJobs.map(job => [String(job.id), job.owner_id]));
   const applicationsContainer = document.getElementById("dashboardApplications");
+  const messagesStatus = document.getElementById("seekerApplicationMessagesStatus");
+  messagesStatus.innerText = applicationMessagesError;
+  messagesStatus.classList.toggle("hidden", !applicationMessagesError);
   applicationsContainer.innerHTML = accountApplicationsError
     ? `<p class="text-sm text-red-700">${escapeHtml(accountApplicationsError)}</p>`
     : `
+    <p class="mb-4 rounded-lg border border-blue-100 bg-blue-50 p-3 text-xs leading-relaxed text-blue-900">応募後の進捗や企業とのメッセージをこの画面で確認できます。電話番号は応募先へ共有されません。</p>
     ${submitted.length
       ? submitted.map(application => `
       <article class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm mb-4 transition-all hover:shadow-md">
@@ -50,6 +54,7 @@ function renderAccountDashboard() {
               応募を取り下げる
             </button>
           ` : ""}
+          ${renderApplicationConversation(application)}
         </article>
       `).join("")
       : '<div class="text-center py-12 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200"><p class="text-xs text-gray-400 font-bold uppercase tracking-widest">No Applications Yet</p></div>'}

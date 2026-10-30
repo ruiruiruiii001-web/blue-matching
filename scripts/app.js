@@ -10,6 +10,8 @@ let favoriteJobIds = [];
 let seekerProfileData = null;
 let accountApplications = [];
 let accountApplicationsError = "";
+let applicationMessages = [];
+let applicationMessagesError = "";
 let appNotifications = [];
 let appNotificationsError = "";
 let seekerContactRequests = [];
@@ -34,10 +36,6 @@ let previousBodyOverflow = "";
 let loginPanelPreviousBodyOverflow = "";
 let accountTypeLoadUserId = null;
 let accountTypeLoading = false;
-let publicSeekerProfiles = [];
-let publicSeekerProfilesUserId = null;
-let publicSeekerProfilesError = "";
-let loadingPublicSeekerProfilesUserId = null;
 let turnstileToken = null;
 let turnstileWidgetId = null;
 let turnstileReady = false;
@@ -45,7 +43,6 @@ let reportTurnstileToken = null;
 let reportTurnstileWidgetId = null;
 
 let displayLimitJobs = 10;
-let displayLimitProfiles = 10;
 
 let reviewContext = null; // { applicationId, revieweeId, targetType, existingId }
 let blockedUserIds = []; // 自分がブロックしているユーザーID

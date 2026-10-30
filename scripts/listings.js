@@ -494,8 +494,3 @@ function loadMoreJobs() {
   displayLimitJobs += 10;
   renderJobList();
 }
-
-function loadMoreProfiles() {
-  displayLimitProfiles += 10;
-  renderEmployerDashboard();
-}
