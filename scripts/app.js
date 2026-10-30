@@ -1,9 +1,3 @@
-// Supabase 設定
-const SUPABASE_URL = 'https://qefqlbkqewvahtqzqmfp.supabase.co';
-// ※通常のanonキーはeyJから始まりますが、お持ちのキーをそのままセットしています
-const SUPABASE_KEY = 'sb_publishable_RljFK2XPFMXkP-_yoRQs6w_HK3F1k60';
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
 let cachedJobs = [];
 let selectedJob = null;
 let favoriteJobIds = [];

@@ -24,7 +24,7 @@
         <p class="text-xs text-blue-100">クラウド同期・現場特化型</p>
       </div>
       <div class="flex items-center gap-2">
-        <button id="headerAccountButton" type="button" aria-haspopup="dialog" aria-controls="myPageOverlay loginOverlay" aria-expanded="false" onclick="openAccountPanel()" class="rounded-lg bg-white px-3 py-2 text-xs font-bold text-blue-700">ログイン / 登録</button>
+        <button id="headerAccountButton" type="button" aria-haspopup="dialog" aria-controls="myPageOverlay loginOverlay" aria-expanded="false" onclick="openAccountPanel()" class="rounded-lg bg-white px-3 py-2 text-xs font-bold text-blue-700">ログイン</button>
         <span class="hidden sm:inline-block text-xs bg-blue-700 px-3 py-1.5 rounded-full font-bold">クラウド版</span>
       </div>
     </div>
@@ -60,7 +60,7 @@
     <button type="button" aria-label="ログイン画面を閉じる" aria-hidden="true" tabindex="-1" onclick="closeLoginPanel()" class="absolute inset-0 h-full w-full bg-black/60"></button>
     <section role="dialog" aria-modal="true" aria-labelledby="loginOverlayTitle" class="relative z-10 flex max-h-[92vh] w-full max-w-lg flex-col overflow-y-auto rounded-2xl bg-gray-100 shadow-2xl">
       <div class="flex shrink-0 items-center justify-between border-b bg-white px-4 py-3 sm:px-6">
-        <h2 id="loginOverlayTitle" class="text-lg font-bold text-gray-900">ログイン / 新規登録</h2>
+        <h2 id="loginOverlayTitle" class="text-lg font-bold text-gray-900">ログイン</h2>
         <button id="loginOverlayClose" type="button" aria-label="ログイン画面を閉じる" onclick="closeLoginPanel()" class="flex h-11 w-11 items-center justify-center rounded-full text-2xl font-bold text-gray-600 hover:bg-gray-100">×</button>
       </div>
       <div id="loginOverlayContent" class="overflow-y-auto p-3 sm:p-5"></div>
@@ -121,18 +121,8 @@
             <label for="employerPassword" class="block text-sm font-medium mb-1">パスワード（8文字以上）</label>
             <input type="password" id="employerPassword" autocomplete="current-password" minlength="8" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
           </div>
-          <label class="block text-sm font-medium">登録するアカウントの種類
-            <select id="signupAccountType" class="mt-1 w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-              <option value="">選択してください</option>
-              <option value="seeker">求職者</option>
-              <option value="employer">企業・親方</option>
-            </select>
-          </label>
-          <p class="-mt-2 text-xs text-gray-500">求職者は求人への応募、企業・親方は求人投稿や公開プロフィールの閲覧に使います。企業の実在確認はありません。登録後に変更できません。</p>
-          <div class="grid grid-cols-2 gap-3">
-            <button onclick="signInEmployer()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg transition">ログイン</button>
-            <button onclick="signUpEmployer()" class="border border-blue-600 text-blue-600 hover:bg-blue-50 font-bold py-2.5 rounded-lg transition">新規登録</button>
-          </div>
+          <button type="button" onclick="signInEmployer()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg transition">ログイン</button>
+          <a href="signup.html" class="block text-center text-sm font-bold text-blue-700 underline">新規登録はこちら</a>
           <button type="button" onclick="showPasswordResetRequest()" class="text-sm text-blue-700 underline">パスワードを忘れた場合</button>
           <div id="passwordResetRequestPanel" class="hidden border-t pt-3 space-y-2">
             <p class="text-sm font-medium">登録したメールアドレスに再設定リンクを送ります。</p>
@@ -140,8 +130,7 @@
             <button type="button" onclick="hidePasswordResetRequest()" class="text-sm text-gray-600 underline">ログインに戻る</button>
           </div>
           <div id="employerTurnstile" class="min-h-4"></div>
-          <p id="turnstileStatus" role="status" aria-live="polite" class="text-xs text-gray-500">ログイン・新規登録にはCAPTCHA確認が必要です。現在、設定準備中です。</p>
-          <p class="text-xs text-gray-500">新規登録後、確認メールが届いた場合はメール内のリンクを開いてからログインしてください。</p>
+          <p id="turnstileStatus" role="status" aria-live="polite" class="text-xs text-gray-500">ログインにはCAPTCHA確認が必要です。現在、設定準備中です。</p>
         </div>
         <div id="employerLoggedIn" class="hidden items-center justify-between gap-3">
           <p class="text-sm text-gray-700">ログイン中: <span id="employerAccountEmail" class="font-medium"></span></p>
@@ -668,8 +657,8 @@
       </div>
 
       <div class="border-t mt-4 pt-4">
-        <p id="applicationLoginPrompt" class="text-xs text-gray-600">応募履歴を保存するにはログインが必要です。職人・求職者向けタブの「ログイン / アカウント登録へ」からログインしてください。</p>
-        <button id="applicationLoginButton" type="button" onclick="closeModal(); openAccountPanel()" class="hidden mt-3 rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white">ログイン / 新規登録</button>
+        <p id="applicationLoginPrompt" class="text-xs text-gray-600">応募履歴を保存するにはログインが必要です。</p>
+        <button id="applicationLoginButton" type="button" onclick="closeModal(); openAccountPanel()" class="hidden mt-3 rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white">ログイン</button>
         <a id="applicationContinueButton" href="#" class="hidden mt-3 w-full rounded-xl bg-blue-600 px-4 py-3.5 text-center font-bold text-white hover:bg-blue-700">応募画面に進む</a>
       </div>
 
@@ -702,6 +691,7 @@
     </div>
   </div>
 
+  <script src="scripts/supabase-client.js"></script>
   <script src="scripts/shared.js"></script>
   <script src="scripts/account.js"></script>
   <script src="scripts/jobs.js"></script>

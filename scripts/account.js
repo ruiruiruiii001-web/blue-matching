@@ -47,7 +47,7 @@ function renderEmployerTurnstile() {
       return true;
     }
   });
-  setTurnstileStatus("CAPTCHAを確認してからログインまたは新規登録してください。");
+  setTurnstileStatus("CAPTCHAを確認してからログインしてください。");
 }
 
 function setTurnstileStatus(message, isError = false) {
@@ -155,7 +155,7 @@ function updateHeaderAccountButton() {
   const button = document.getElementById("headerAccountButton");
   if (!button) return;
   button.innerText = !currentUser
-    ? "ログイン / 登録"
+    ? "ログイン"
     : accountType === "employer" || accountType === "seeker"
       ? "マイページ"
       : "アカウント設定";
@@ -441,53 +441,6 @@ async function signInEmployer() {
     return;
   }
   setAuthMessage("ログインしました。");
-}
-
-async function signUpEmployer() {
-  const email = document.getElementById("employerEmail").value.trim();
-  const password = document.getElementById("employerPassword").value;
-  const selectedType = document.getElementById("signupAccountType").value;
-  const siteKey = document.querySelector('meta[name="cloudflare-turnstile-sitekey"]').content.trim();
-  if (!siteKey) {
-    setAuthMessage("新規登録の安全対策を準備中です。設定完了までお待ちください。", true);
-    return;
-  }
-  if (!email || !password) {
-    setAuthMessage("メールアドレスとパスワードを入力してください。", true);
-    return;
-  }
-  if (password.length < 8) {
-    setAuthMessage("パスワードは8文字以上で入力してください。", true);
-    return;
-  }
-  if (!["seeker", "employer"].includes(selectedType)) {
-    setAuthMessage("新規登録するアカウントの種類を選択してください。", true);
-    return;
-  }
-  if (!turnstileToken) {
-    setAuthMessage("新規登録の前にCAPTCHA確認を完了してください。", true);
-    return;
-  }
-
-  const { data, error } = await supabaseClient.auth.signUp({
-    email,
-    password,
-    options: {
-      captchaToken: turnstileToken,
-      data: { account_type: selectedType }
-    }
-  });
-  if (error) {
-    resetEmployerTurnstile("CAPTCHAをもう一度確認してください。");
-    setAuthMessage(`新規登録に失敗しました: ${error.message}`, true);
-    return;
-  }
-  resetEmployerTurnstile("CAPTCHAをもう一度確認してください。");
-  if (!data.session) {
-    setAuthMessage("登録を受け付けました。確認メールが届いた場合は、メール内のリンクを開いてからログインしてください。");
-  } else {
-    setAuthMessage("アカウントを作成し、ログインしました。");
-  }
 }
 
 async function signOutEmployer() {

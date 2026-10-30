@@ -91,7 +91,7 @@ function renderJobList(resetLimit = false) {
           <div class="text-3xl mb-3">⭐</div>
           <p class="text-sm text-gray-500">${currentUser
             ? `お気に入りの求人はありません。<br><button type="button" onclick="resetJobFilters()" class="mt-4 font-bold text-blue-600 underline">条件をリセット</button>`
-            : `お気に入りを見るにはログインしてください。<br><button type="button" onclick="openAccountPanel()" class="mt-4 font-bold text-blue-600 underline">ログイン / 新規登録</button>`}</p>
+            : `お気に入りを見るにはログインしてください。<br><button type="button" onclick="openAccountPanel()" class="mt-4 font-bold text-blue-600 underline">ログイン</button>`}</p>
         </div>`
       : `<div class="rounded-2xl border border-dashed border-gray-300 bg-white px-4 py-12 text-center shadow-sm">
           <div class="text-3xl mb-3">🔍</div>
@@ -268,7 +268,7 @@ function openModal(id) {
     selectedJob.owner_id === currentUser?.id || alreadyApplied);
   document.getElementById("applicationLoginButton").innerText = currentUser
     ? "アカウント画面を開く"
-    : "ログイン / 新規登録";
+    : "ログイン";
   if (!currentUser) {
     document.getElementById("applicationLoginPrompt").innerText = "応募画面に進むには、求職者アカウントでログインしてください。";
   } else if (accountType !== "seeker") {

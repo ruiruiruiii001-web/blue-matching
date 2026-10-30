@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="cloudflare-turnstile-sitekey" content="0x4AAAAAAFmKntPFXSdCMP-V">
+  <title>新規登録 | 現場直結！職人＆親方の求人マッチング</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="scripts/supabase-client.js"></script>
+  <script src="scripts/signup.js" defer></script>
+</head>
+<body class="min-h-screen bg-gray-100 font-sans text-gray-800">
+  <header class="bg-blue-600 text-white shadow">
+    <div class="mx-auto flex max-w-3xl items-center justify-between gap-3 px-4 py-4">
+      <h1 class="text-lg font-bold">新規登録</h1>
+      <a href="index.html" class="rounded-lg bg-white px-3 py-2 text-sm font-bold text-blue-700">ログインへ戻る</a>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-xl px-4 py-8">
+    <section class="rounded-2xl bg-white p-5 shadow-md sm:p-8">
+      <h2 class="text-xl font-bold text-gray-900">アカウントを作成</h2>
+      <p class="mt-2 text-sm leading-relaxed text-gray-600">登録時にアカウントの種類を選択してください。登録後は変更できません。</p>
+
+      <form id="signupForm" class="mt-6 space-y-4">
+        <label for="signupAccountType" class="block text-sm font-medium">
+          アカウントの種類
+          <select id="signupAccountType" name="accountType" required class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200">
+            <option value="">選択してください</option>
+            <option value="seeker">求職者（求人への応募・プロフィール管理）</option>
+            <option value="employer">企業・親方（求人投稿・応募者対応）</option>
+          </select>
+        </label>
+        <p class="-mt-2 text-xs leading-relaxed text-gray-500">企業・親方アカウントは自己申告区分です。事業者の本人確認は行っていません。</p>
+
+        <label for="signupEmail" class="block text-sm font-medium">
+          メールアドレス
+          <input id="signupEmail" name="email" type="email" autocomplete="email" required class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200">
+        </label>
+
+        <label for="signupPassword" class="block text-sm font-medium">
+          パスワード（8文字以上）
+          <input id="signupPassword" name="password" type="password" autocomplete="new-password" minlength="8" required class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200">
+        </label>
+
+        <label for="signupPasswordConfirmation" class="block text-sm font-medium">
+          パスワード（確認）
+          <input id="signupPasswordConfirmation" name="passwordConfirmation" type="password" autocomplete="new-password" minlength="8" required class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200">
+        </label>
+
+        <div id="signupTurnstile" class="min-h-4"></div>
+        <p id="signupStatus" role="status" aria-live="polite" class="text-sm text-gray-600">登録にはCAPTCHA確認が必要です。</p>
+        <button id="signupSubmit" type="submit" class="min-h-12 w-full rounded-lg bg-blue-600 px-4 py-3 font-bold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60">アカウントを作成</button>
+      </form>
+
+      <p class="mt-5 text-center text-sm text-gray-600">すでにアカウントをお持ちですか？ <a href="index.html" class="font-bold text-blue-700 underline">ログイン</a></p>
+    </section>
+  </main>
+</body>
+</html>
