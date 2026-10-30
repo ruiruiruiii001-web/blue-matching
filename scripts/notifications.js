@@ -8,7 +8,7 @@ function renderLoginNotificationBanner() {
   const pendingContactCount = accountType === "seeker"
     ? seekerContactRequests.filter(request => request.status === "pending").length
     : 0;
-  const unreadCount = appNotifications.filter(notification => !notification.read_at).length;
+  const unreadCount = getVisibleNotifications().filter(notification => !notification.read_at).length;
   if (!pendingContactCount && !unreadCount) {
     banner.classList.add("hidden");
     return;
@@ -22,6 +22,19 @@ function renderLoginNotificationBanner() {
 function dismissLoginNotificationBanner() {
   loginNotificationBannerDismissed = true;
   document.getElementById("loginNotificationBanner").classList.add("hidden");
+}
+
+function getVisibleNotifications() {
+  return appNotifications.filter(notification => {
+    if (accountType !== "employer" || !["job_application", "application_message"].includes(notification.event_type)) {
+      return true;
+    }
+    const applicationId = notification.event_type === "application_message"
+      ? notification.context_id
+      : notification.related_id;
+    const application = accountApplications.find(item => String(item.id) === String(applicationId));
+    return !application || application.status !== "withdrawn";
+  });
 }
 
     let applicationNotificationReturnFocus = null;
@@ -40,10 +53,11 @@ function dismissLoginNotificationBanner() {
   ].filter(Boolean).join(" ");
   status.innerText = notificationStatusText;
   status.classList.toggle("hidden", !notificationStatusText);
+  const notifications = getVisibleNotifications();
   container.innerHTML = notificationError
     ? ""
-    : appNotifications.length
-      ? appNotifications.map(notification => `
+    : notifications.length
+      ? notifications.map(notification => `
         <article class="p-5 rounded-2xl border border-gray-100 shadow-sm mb-3 transition-all ${notification.read_at ? "bg-white" : "bg-blue-50/40 border-blue-100"}">
           <div class="flex items-start justify-between gap-3">
             <div class="min-w-0">
@@ -106,7 +120,8 @@ function openApplicationNotification(applicationId, notificationId, trigger) {
     String(item.id) === String(applicationId)
   );
   const canAccessApplication = accountType === "employer"
-    ? cachedJobs.some(job => job.owner_id === currentUser?.id && String(job.id) === String(application?.job_id))
+    ? application?.status !== "withdrawn" &&
+      cachedJobs.some(job => job.owner_id === currentUser?.id && String(job.id) === String(application?.job_id))
     : accountType === "seeker" && application?.applicant_id === currentUser?.id;
   if (!currentUser || !application || !canAccessApplication) {
     const status = document.getElementById(accountType === "employer" ? "employerApplicationsStatus" : "dashboardApplicationsStatus");
@@ -131,6 +146,7 @@ function openApplicationNotification(applicationId, notificationId, trigger) {
 function renderApplicationNotificationView(application, messageStatus) {
   const content = document.getElementById("applicationDetailContent");
   if (!content) return;
+  document.getElementById("applicationDetailTitle").innerText = "応募内容・メッセージ";
   if (accountType === "employer") {
     content.innerHTML = `${renderEmployerApplicationDetails(application)}
       ${messageStatus ? `<p role="status" aria-live="polite" class="mt-2 text-sm text-emerald-700">${escapeHtml(messageStatus)}</p>` : ""}`;
@@ -147,8 +163,11 @@ function renderApplicationNotificationView(application, messageStatus) {
         <span class="inline-flex rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest ${application.status === "withdrawn" ? "bg-rose-100 text-rose-800" : formatApplicationStatusClass(application.status)}">${application.status === "withdrawn" ? "取り下げ" : escapeHtml(formatApplicationStatus(application.status))}</span>
       </div>
       <p class="mb-4 text-sm text-gray-600">${escapeHtml(formatApplicationStatusDescription(application.status))}</p>
+      ${application.dismissal_reason
+        ? `<p class="mb-4 whitespace-pre-wrap rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700"><span class="mb-1 block text-xs font-bold text-gray-500">対応不要の理由</span>${escapeHtml(String(application.dismissal_reason))}</p>`
+        : ""}
       ${application.status === "pending"
-        ? `<button type="button" onclick="withdrawApplication('${escapeHtml(String(application.id))}')" class="mb-4 min-h-11 w-full rounded-xl border border-rose-200 bg-white px-4 py-2 text-sm font-bold text-rose-700 hover:bg-rose-50">応募を取り下げる</button>`
+        ? `<button type="button" onclick="withdrawApplication('${escapeHtml(String(application.id))}')" class="mb-4 min-h-11 w-full rounded-xl border border-rose-200 bg-white px-4 py-2 text-sm font-bold text-rose-700 hover:bg-rose-50">応募を取り消す</button>`
         : ""}
       ${application.status === "reviewed" && employerId
         ? `<button type="button" onclick="openReviewModal('${escapeHtml(String(application.id))}', '${escapeHtml(String(employerId))}', 'employer')" class="mb-4 rounded-lg border border-amber-100 bg-amber-50 px-3 py-2 text-xs font-black text-amber-600 hover:bg-amber-100">⭐ 企業を評価する</button>`
@@ -157,6 +176,44 @@ function renderApplicationNotificationView(application, messageStatus) {
       <p id="applicationDetailMessageStatus" role="status" aria-live="polite" class="mt-2 ${messageStatus ? "text-sm text-emerald-700" : "hidden text-sm"}">${escapeHtml(messageStatus || "")}</p>
     </article>
   `;
+}
+
+function openApplicationDismissalForm(applicationId) {
+  if (!currentUser || accountType !== "employer") return;
+  const application = accountApplications.find(item =>
+    String(item.id) === String(applicationId) &&
+    item.status === "pending" &&
+    cachedJobs.some(job => job.owner_id === currentUser.id && String(job.id) === String(item.job_id))
+  );
+  const content = document.getElementById("applicationDetailContent");
+  if (!application || String(openApplicationNotificationId) !== String(applicationId) || !content) return;
+  document.getElementById("applicationDetailTitle").innerText = "対応不要の理由を入力";
+  content.innerHTML = `
+    <section class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+      <p class="mb-1 text-sm font-bold text-gray-900">${escapeHtml(String(application.applicant_name || "応募者"))} さんへの対応</p>
+      <p class="mb-4 text-sm text-gray-600">対応不要にする理由を入力してください。理由は応募者の応募履歴に表示されます。</p>
+      <form onsubmit="submitApplicationDismissal(event, '${escapeHtml(String(application.id))}')">
+        <label for="applicationDismissalReason" class="block text-sm font-medium text-gray-800">対応不要の理由（必須）</label>
+        <textarea id="applicationDismissalReason" required maxlength="500" rows="5" class="mt-2 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm" placeholder="例：募集条件との兼ね合いにより、今回は選考を見送らせていただきます。"></textarea>
+        <p class="mt-1 text-xs text-gray-500">1〜500文字で入力してください。</p>
+        <div class="mt-5 flex flex-wrap justify-end gap-2">
+          <button type="button" onclick="refreshApplicationNotificationView('${escapeHtml(String(application.id))}')" class="min-h-11 rounded-lg border border-gray-200 px-4 py-2 text-sm font-bold text-gray-700 hover:bg-gray-50">戻る</button>
+          <button type="submit" class="min-h-11 rounded-lg bg-gray-700 px-4 py-2 text-sm font-bold text-white hover:bg-gray-800">理由を送って対応不要にする</button>
+        </div>
+      </form>
+    </section>
+  `;
+  document.getElementById("applicationDismissalReason").focus();
+}
+
+async function submitApplicationDismissal(event, applicationId) {
+  event.preventDefault();
+  const reason = document.getElementById("applicationDismissalReason").value.trim();
+  if (!reason || reason.length > 500) {
+    document.getElementById("applicationDismissalReason").focus();
+    return;
+  }
+  await updateApplicationStatus(applicationId, "dismissed", reason);
 }
 
 function refreshApplicationNotificationView(applicationId, messageStatus) {

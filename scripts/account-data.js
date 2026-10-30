@@ -78,7 +78,7 @@ async function loadAccountData(user) {
     }
 
 function renderApplicationConversation(application) {
-  const canSend = ["pending", "reviewed"].includes(application.status);
+  const canSend = application.status === "reviewed";
   const messages = applicationMessages.filter(message =>
     String(message.application_id) === String(application.id)
   );
@@ -106,7 +106,9 @@ function renderApplicationConversation(application) {
           <p class="mt-1 text-xs text-gray-600">電話番号・メールアドレスなどの連絡先は入力しないでください。</p>
           <button type="button" onclick="sendApplicationMessage('${escapeHtml(String(application.id))}', this)" class="mt-3 min-h-11 w-full rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white hover:bg-blue-700">メッセージを送信</button>
           <p data-application-message-status role="status" aria-live="polite" class="mt-2 hidden text-sm"></p>`
-        : '<p class="mt-3 text-xs text-gray-600">この応募は取り下げ済み、または対応不要のため、メッセージを送信できません。</p>'}
+        : `<p class="mt-3 text-xs text-gray-600">${application.status === "pending"
+          ? "企業が応募を確認済みにすると、メッセージを送信できます。"
+          : "この応募は終了しているため、メッセージを送信できません。"}</p>`}
     </section>
   `;
 }
@@ -120,7 +122,7 @@ async function sendApplicationMessage(applicationId, button) {
       ? item.applicant_id === userId
       : cachedJobs.some(job => job.owner_id === userId && String(job.id) === String(item.job_id)))
   );
-  if (!application || !["pending", "reviewed"].includes(application.status)) return;
+  if (!application || application.status !== "reviewed") return;
 
   const thread = button.closest("[data-application-thread]");
   const input = thread?.querySelector("[data-application-message-input]");
@@ -170,29 +172,44 @@ async function sendApplicationMessage(applicationId, button) {
   refreshApplicationNotificationView(application.id, "メッセージを送信しました。");
 }
 
-async function updateApplicationStatus(applicationId, status) {
+async function updateApplicationStatus(applicationId, status, dismissalReason = "") {
   if (!currentUser || accountType !== "employer" || !["pending", "reviewed", "dismissed"].includes(status)) return;
+  const reason = typeof dismissalReason === "string" ? dismissalReason.trim() : "";
+  if (status === "dismissed" && (!reason || reason.length > 500)) {
+    alert("対応不要の理由を1〜500文字で入力してください。");
+    return;
+  }
+  if (status !== "dismissed" && dismissalReason) return;
   const employerId = currentUser.id;
-  const { error } = await supabaseClient
+  const update = { status };
+  if (status === "dismissed") update.dismissal_reason = reason;
+  const { data, error } = await supabaseClient
     .from("job_applications")
-    .update({ status })
-    .eq("id", applicationId);
+    .update(update)
+    .eq("id", applicationId)
+    .eq("status", "pending")
+    .select("*")
+    .maybeSingle();
   if (currentUser?.id !== employerId || accountType !== "employer") return;
   if (error) {
     alert(`応募状況を更新できませんでした: ${error.message}`);
     return;
   }
-
-  // 状態が変更されたら求職者に通知（非同期で実行）
-  if (status === 'reviewed') {
-    sendNotificationEmail("application_reviewed", applicationId);
+  if (!data) {
+    alert("応募状況がすでに更新されているため、変更できませんでした。画面を再読み込みしてください。");
+    await loadAccountData(currentUser);
+    return;
   }
 
+  const notificationWarning = status === "reviewed"
+    ? await sendNotificationEmail("application_reviewed", applicationId)
+    : "";
+  if (currentUser?.id !== employerId || accountType !== "employer") return;
+  await loadAccountData(currentUser);
   refreshApplicationNotificationView(applicationId);
   if (notificationWarning) {
     alert(notificationWarning);
   }
-  await loadAccountData(currentUser);
 }
 
 async function withdrawApplication(applicationId) {
@@ -203,13 +220,13 @@ async function withdrawApplication(applicationId) {
     item.status === "pending"
   );
   if (!application) return;
-  if (!confirm(`「${application.job_title}」への応募を取り下げますか？取り下げ後は元に戻せません。`)) return;
+  if (!confirm(`「${application.job_title}」への応募を取り消しますか？応募履歴とメッセージも削除され、元に戻せません。`)) return;
 
   const applicantId = currentUser.id;
   const statusElement = document.getElementById("dashboardApplicationsStatus");
   const { data, error } = await supabaseClient
     .from("job_applications")
-    .update({ status: "withdrawn" })
+    .delete()
     .eq("id", application.id)
     .eq("applicant_id", applicantId)
     .eq("status", "pending")
@@ -219,19 +236,27 @@ async function withdrawApplication(applicationId) {
   if (currentUser?.id !== applicantId || accountType !== "seeker") return;
   if (error) {
     console.error("応募取り下げエラー:", error);
-    statusElement.innerText = `応募を取り下げられませんでした: ${error.message}`;
+    statusElement.innerText = `応募を削除できませんでした: ${error.message}`;
     statusElement.className = "mb-3 text-sm text-red-700";
     return;
   }
   if (!data) {
-    statusElement.innerText = "応募状況が更新されているため、取り下げられませんでした。画面を再読み込みしてください。";
+    statusElement.innerText = "応募状況が更新されているため、削除できませんでした。画面を再読み込みしてください。";
     statusElement.className = "mb-3 text-sm text-red-700";
     return;
   }
 
-  accountApplications = accountApplications.map(item => item.id === data.id ? data : item);
-  statusElement.innerText = "応募を取り下げました。";
+  accountApplications = accountApplications.filter(item => item.id !== data.id);
+  applicationMessages = applicationMessages.filter(message =>
+    String(message.application_id) !== String(data.id)
+  );
+  appNotifications = appNotifications.filter(notification =>
+    String(notification.related_id) !== String(data.id) &&
+    String(notification.context_id) !== String(data.id)
+  );
+  statusElement.innerText = "応募を取り消し、応募履歴と会話から削除しました。";
   statusElement.className = "mb-3 text-sm text-emerald-700";
-  refreshApplicationNotificationView(applicationId);
+  closeApplicationNotification();
   renderAccountDashboard();
+  renderEmployerDashboard();
 }

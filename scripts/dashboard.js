@@ -49,9 +49,12 @@ function renderAccountDashboard() {
               ${application.status === 'reviewed' ? '✅' : application.status === 'withdrawn' ? '↩️' : '⏳'} ${application.status === 'withdrawn' ? '応募を取り下げました。企業にも取り下げ済みとして表示されます。' : formatApplicationStatusDescription(application.status)}
             </p>
           </div>
-          ${application.status === "pending" ? `
+            ${application.status === "dismissed" && application.dismissal_reason
+              ? `<p class="mt-3 whitespace-pre-wrap rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700"><span class="mb-1 block text-xs font-bold text-gray-500">企業からの理由</span>${escapeHtml(String(application.dismissal_reason))}</p>`
+              : ""}
+            ${application.status === "pending" ? `
             <button type="button" onclick="withdrawApplication('${escapeHtml(String(application.id))}')" class="mt-4 min-h-11 w-full rounded-xl border border-rose-200 bg-white px-4 py-2 text-sm font-bold text-rose-700 hover:bg-rose-50 transition-colors">
-              応募を取り下げる
+              応募を取り消す
             </button>
           ` : ""}
           ${renderApplicationConversation(application)}
@@ -60,7 +63,7 @@ function renderAccountDashboard() {
       : '<div class="text-center py-12 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200"><p class="text-xs text-gray-400 font-bold uppercase tracking-widest">No Applications Yet</p></div>'}
   `;
 
-  const unreadNotifications = appNotifications.filter(notification => !notification.read_at).length;
+  const unreadNotifications = getVisibleNotifications().filter(notification => !notification.read_at).length;
   document.getElementById("seekerNotificationsTab").innerText = unreadNotifications
     ? `通知 (${unreadNotifications})`
     : "連絡・通知";
@@ -89,7 +92,7 @@ function renderAccountDashboard() {
 }
 
 function showDashboardView(view) {
-  const views = ["profile", "favorites", "applications", "notifications", "blocks"];
+  const views = ["profile", "favorites", "applications", "notifications"];
   if (!views.includes(view)) return;
   activeDashboardView = view;
   views.forEach(item => {

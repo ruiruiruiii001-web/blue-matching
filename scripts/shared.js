@@ -26,9 +26,9 @@ function formatApplicationStatusClass(status) {
 
 function formatApplicationStatusDescription(status) {
   return {
-    pending: "企業からの確認を待っています。",
-    reviewed: "企業が応募を確認しました。以降の連絡は企業からの案内をご確認ください。",
-    dismissed: "企業が今回は対応不要と判断しました。"
+    pending: "応募を受け付けました。企業の確認後にメッセージを送信できます。進捗はマイページの応募履歴で確認できます。",
+    reviewed: "企業が応募を確認しました。メッセージで連絡できます。",
+    dismissed: "企業が今回は選考を見送りました。理由を応募履歴で確認できます。"
   }[status] || "応募状況を確認できません。";
 }
 

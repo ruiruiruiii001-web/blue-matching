@@ -6,13 +6,14 @@ function renderEmployerDashboard() {
     return;
   }
 
-  const unreadNotifications = appNotifications.filter(notification => !notification.read_at).length;
+  const unreadNotifications = getVisibleNotifications().filter(notification => !notification.read_at).length;
   renderNotifications("employerDashboardNotifications", "employerNotificationsStatus");
 
   const ownedJobs = cachedJobs.filter(job => job.owner_id === currentUser.id);
   const ownedJobIds = new Set(ownedJobs.map(job => String(job.id)));
   const receivedApplications = accountApplications.filter(application =>
-    ownedJobIds.has(String(application.job_id))
+    ownedJobIds.has(String(application.job_id)) &&
+    application.status !== "withdrawn"
   );
 
   container.innerHTML = ownedJobs.length
@@ -70,7 +71,7 @@ function renderEmployerApplicationDetails(application) {
     ? `
       <div class="mt-5 flex gap-3">
         <button type="button" onclick="updateApplicationStatus('${applicationId}', 'reviewed')" class="flex-1 h-11 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-black text-white hover:bg-emerald-700 transition-all shadow-md shadow-emerald-100">確認済みにする</button>
-        <button type="button" onclick="updateApplicationStatus('${applicationId}', 'dismissed')" class="flex-1 h-11 rounded-xl border border-gray-200 bg-white px-4 py-2 text-xs font-black text-gray-500 hover:bg-gray-50 transition-all">対応不要</button>
+        <button type="button" onclick="openApplicationDismissalForm('${applicationId}')" class="flex-1 h-11 rounded-xl border border-gray-200 bg-white px-4 py-2 text-xs font-black text-gray-500 hover:bg-gray-50 transition-all">対応不要</button>
       </div>
     `
     : application.status === "withdrawn"
@@ -114,6 +115,9 @@ function renderEmployerApplicationDetails(application) {
               "${escapeHtml(String(application.message))}"
              </div>`
           : '<p class="text-center py-2 text-[10px] text-gray-300 font-bold uppercase tracking-widest">No Message</p>'}
+        ${application.dismissal_reason
+          ? `<p class="mt-4 whitespace-pre-wrap rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700"><span class="mb-1 block text-xs font-bold text-gray-500">対応不要の理由</span>${escapeHtml(String(application.dismissal_reason))}</p>`
+          : ""}
         ${renderApplicationConversation(application)}
         ${statusActions}
       </div>

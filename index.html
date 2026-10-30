@@ -330,7 +330,6 @@
           <button type="button" role="tab" aria-selected="true" aria-controls="dashboardView-profile" data-dashboard-view="profile" onclick="showDashboardView('profile')" class="dashboard-menu-button h-11 shrink-0 rounded-lg bg-blue-600 px-3 font-bold text-sm text-white">プロフィール</button>
           <button type="button" role="tab" aria-selected="false" aria-controls="dashboardView-favorites" data-dashboard-view="favorites" onclick="showDashboardView('favorites')" class="dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 font-bold text-sm text-gray-700">お気に入り</button>
                               <button type="button" role="tab" aria-selected="false" aria-controls="dashboardView-applications" data-dashboard-view="applications" onclick="showDashboardView('applications')" class="dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 font-bold text-sm text-gray-700">応募履歴</button>
-          <button type="button" role="tab" aria-selected="false" aria-controls="dashboardView-blocks" data-dashboard-view="blocks" onclick="showDashboardView('blocks')" class="dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 font-bold text-sm text-gray-700">ブロック中</button>
           <button id="seekerNotificationsTab" type="button" role="tab" aria-selected="false" aria-controls="dashboardView-notifications" data-dashboard-view="notifications" onclick="showDashboardView('notifications')" class="dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 font-bold text-sm text-gray-700">連絡・通知</button>
 
 
@@ -458,6 +457,11 @@
       <div id="profileSavedMessage" class="mt-4 p-3 bg-blue-50 border border-blue-200 text-blue-800 rounded text-xs hidden">
         👍 プロフィールをアカウントに保存しました。
       </div>
+      <details class="mt-6 rounded-xl border border-gray-200 bg-gray-50 p-4">
+        <summary class="cursor-pointer text-sm font-bold text-gray-800">ブロックしたユーザー</summary>
+        <p class="mt-2 mb-3 text-xs text-gray-600">ブロックしたユーザーの求人やプロフィールは表示されません。必要な場合はここから解除できます。</p>
+        <div id="dashboardBlocks" class="space-y-2 text-sm"></div>
+      </details>
             </section>
 
             <section id="dashboardView-favorites" class="hidden rounded border p-3">
@@ -470,11 +474,6 @@
               <p id="dashboardApplicationsStatus" role="status" aria-live="polite" class="mb-3 hidden text-sm"></p>
               <p id="seekerApplicationMessagesStatus" role="status" aria-live="polite" class="mb-3 hidden text-sm text-red-700"></p>
               <div id="dashboardApplications" class="space-y-2 text-sm"></div>
-            </section>
-            <section id="dashboardView-blocks" class="hidden rounded border p-3">
-              <h3 class="font-bold text-sm mb-2">ブロック中のユーザー</h3>
-              <p class="mb-3 text-xs text-gray-600">ブロックしたユーザーの求人やプロフィールは表示されません。ここで解除できます。</p>
-              <div id="dashboardBlocks" class="space-y-2 text-sm"></div>
             </section>
             <section id="dashboardView-notifications" class="hidden rounded border p-3">
 

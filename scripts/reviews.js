@@ -14,6 +14,7 @@ async function blockUser(blockedId) {
 
       blockedUserIds.push(blockedId);
       renderJobList();
+      renderAccountDashboard();
       renderEmployerDashboard();
       alert("ユーザーをブロックしました。");
     }
@@ -33,6 +34,7 @@ async function blockUser(blockedId) {
 
       blockedUserIds = blockedUserIds.filter(id => id !== blockedId);
       renderJobList();
+      renderAccountDashboard();
       renderEmployerDashboard();
     }
 
