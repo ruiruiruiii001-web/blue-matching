@@ -131,9 +131,32 @@ function initializeJobRequirementControls() {
           : "jobRequiredLicense";
         const counterpart = [...document.querySelectorAll(`input[name="${counterpartName}"]`)]
           .find(option => option.value === input.value);
-        if (counterpart) counterpart.checked = false;
+        if (counterpart) {
+          counterpart.checked = false;
+          updateSelectionDetails(counterpartName);
+        }
       });
     });
+  });
+}
+
+function updateSelectionDetails(inputName, expandSelected = false) {
+  document.querySelectorAll("details[data-selection-name]").forEach(details => {
+    if (details.dataset.selectionName !== inputName) return;
+    const selectedCount = details.querySelectorAll('input[type="checkbox"]:checked').length;
+    const count = details.querySelector("[data-selected-count]");
+    if (count) count.textContent = `選択済み ${selectedCount}件`;
+    if (expandSelected) details.open = selectedCount > 0;
+  });
+}
+
+function initializeSelectionDetails() {
+  document.querySelectorAll("details[data-selection-name]").forEach(details => {
+    const inputName = details.dataset.selectionName;
+    details.querySelectorAll('input[type="checkbox"]').forEach(input => {
+      input.addEventListener("change", () => updateSelectionDetails(inputName));
+    });
+    updateSelectionDetails(inputName);
   });
 }
 
@@ -147,6 +170,7 @@ function setCheckedValues(inputName, values) {
   document.querySelectorAll(`input[name="${inputName}"]`).forEach(input => {
     input.checked = selectedValues.has(input.value);
   });
+  updateSelectionDetails(inputName, true);
 }
 
 function getWorkPreferenceLabels(values) {
@@ -187,6 +211,7 @@ function initializeProfileOptionControls() {
   initializeJobRequirementControls();
   renderWorkPreferenceOptions("seekerWorkPreferences", "seekerWorkPreference");
   renderWorkPreferenceOptions("jobWorkPreferences", "jobWorkPreference");
+  initializeSelectionDetails();
 }
 
 function formatDashboardDate(value) {

@@ -197,9 +197,7 @@ function editJob(id) {
   document.getElementById("jobDuties").value = job.duties || "";
   document.getElementById("jobCapacity").value = getCapacityOptionValue(job.capacity);
   const jobTags = getNormalizedJobTags(job.tags);
-  document.querySelectorAll('input[name="jobTag"]').forEach(cb => {
-    cb.checked = jobTags.includes(cb.value);
-  });
+  setCheckedValues("jobTag", jobTags);
   document.getElementById("jobFormHeading").innerText = "求人情報を編集";
   document.getElementById("jobSubmitButton").innerText = "変更を保存";
   document.getElementById("cancelEditButton").classList.remove("hidden");

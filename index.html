@@ -224,11 +224,16 @@
             </div>
           </div>
 
-          <fieldset class="rounded-xl border border-blue-100 bg-blue-50 p-4">
-            <legend class="px-1 text-sm font-bold text-gray-800">働き方（複数選択可）</legend>
-            <p class="mb-3 text-xs text-gray-600">勤務形態・週の勤務日数・勤務時間帯を設定できます。選択した条件は求職者の希望条件とのおすすめ表示に使われます。</p>
-            <div id="jobWorkPreferences" class="space-y-4"></div>
-          </fieldset>
+          <details data-selection-name="jobWorkPreference" class="rounded-xl border border-blue-100 bg-blue-50">
+            <summary class="flex cursor-pointer list-none items-center justify-between gap-3 p-4 text-sm font-bold text-gray-800">
+              <span>働き方（複数選択可）</span>
+              <span data-selected-count class="shrink-0 text-xs font-normal text-gray-600">選択済み 0件</span>
+            </summary>
+            <div class="px-4 pb-4">
+              <p class="mb-3 text-xs text-gray-600">勤務形態・週の勤務日数・勤務時間帯を設定できます。選択した条件は求職者の希望条件とのおすすめ表示に使われます。</p>
+              <div id="jobWorkPreferences" class="space-y-4"></div>
+            </div>
+          </details>
 
           <fieldset class="rounded-xl border border-gray-200 p-4">
             <legend class="px-1 text-sm font-bold text-gray-800">勤務時間・手当（任意）</legend>
@@ -277,14 +282,20 @@
             <p class="mb-3 text-xs text-gray-600">資格は「必須」と「歓迎」を分けて設定できます。該当する場合だけ選択してください。</p>
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <details>
-                  <summary class="cursor-pointer rounded-lg bg-gray-50 px-3 py-2 text-sm font-bold text-gray-700">必須資格を選ぶ</summary>
+                <details data-selection-name="jobRequiredLicense">
+                  <summary class="flex cursor-pointer list-none items-center justify-between gap-2 rounded-lg bg-gray-50 px-3 py-2 text-sm font-bold text-gray-700">
+                    <span>必須資格を選ぶ</span>
+                    <span data-selected-count class="shrink-0 text-xs font-normal">選択済み 0件</span>
+                  </summary>
                   <div id="jobRequiredLicenseOptions" class="mt-2 grid grid-cols-1 gap-2"></div>
                 </details>
               </div>
               <div>
-                <details>
-                  <summary class="cursor-pointer rounded-lg bg-gray-50 px-3 py-2 text-sm font-bold text-gray-700">歓迎資格を選ぶ</summary>
+                <details data-selection-name="jobPreferredLicense">
+                  <summary class="flex cursor-pointer list-none items-center justify-between gap-2 rounded-lg bg-gray-50 px-3 py-2 text-sm font-bold text-gray-700">
+                    <span>歓迎資格を選ぶ</span>
+                    <span data-selected-count class="shrink-0 text-xs font-normal">選択済み 0件</span>
+                  </summary>
                   <div id="jobPreferredLicenseOptions" class="mt-2 grid grid-cols-1 gap-2"></div>
                 </details>
               </div>
@@ -326,10 +337,14 @@
 
 
           <!-- 現場特化タグ選択 -->
-          <div>
-            <label class="block text-sm font-medium mb-1">現場アピールタグ（複数選択可）</label>
-            <p class="mb-2 text-xs text-gray-500">該当する条件を実際に提供できる場合だけ選択してください。金額や対象条件は手当・給与欄に詳しく記載できます。</p>
-            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+          <details data-selection-name="jobTag" class="rounded-xl border border-gray-200">
+            <summary class="flex cursor-pointer list-none items-center justify-between gap-3 p-3 text-sm font-bold text-gray-800">
+              <span>現場アピールタグ（複数選択可）</span>
+              <span data-selected-count class="shrink-0 text-xs font-normal text-gray-600">選択済み 0件</span>
+            </summary>
+            <div class="px-3 pb-3">
+              <p class="mb-2 text-xs text-gray-500">該当する条件を実際に提供できる場合だけ選択してください。金額や対象条件は手当・給与欄に詳しく記載できます。</p>
+              <div class="grid grid-cols-2 gap-2 text-xs sm:grid-cols-3">
               <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="日払いOK"> <span>💰 日払いOK</span></label>
               <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="手渡しOK"> <span>💴 給与手渡しOK</span></label>
               <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="現場直行直帰OK"> <span>🚗 現場直行直帰</span></label>
@@ -349,8 +364,9 @@
               <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="日曜休み"> <span>🌤️ 日曜休み</span></label>
               <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="送迎あり"> <span>🚐 送迎あり</span></label>
               <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="ミドル・シニア活躍中"> <span>👴 ミドル・シニア活躍</span></label>
+              </div>
             </div>
-          </div>
+          </details>
 
                     <div>
             <div class="flex justify-between items-center mb-1">
@@ -429,8 +445,13 @@
 
 
         <div>
-          <label class="mb-1 block text-sm font-medium">希望職種（複数選択可）</label>
-          <div id="seekerJobTypeOptions" class="grid grid-cols-1 gap-2 sm:grid-cols-2"></div>
+          <details data-selection-name="seekerJobTypeOption">
+            <summary class="flex cursor-pointer list-none items-center justify-between gap-3 rounded-lg bg-gray-50 px-3 py-2 text-sm font-bold text-gray-800">
+              <span>希望職種（複数選択可）</span>
+              <span data-selected-count class="shrink-0 text-xs font-normal text-gray-600">選択済み 0件</span>
+            </summary>
+            <div id="seekerJobTypeOptions" class="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2"></div>
+          </details>
           <label class="mt-2 block text-sm">その他・具体的な職種
             <input type="text" id="seekerJobType" maxlength="100" placeholder="例: 足場、解体、塗装" class="mt-1 w-full rounded border px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
           </label>
@@ -465,9 +486,13 @@
 
         <!-- 資格チェックボックス -->
         <div>
-          <label class="block text-sm font-medium mb-1">保有資格（該当するものをチェック）</label>
-          <div id="seekerLicenseOptions" class="grid grid-cols-1 gap-2 text-xs sm:grid-cols-2">
-          </div>
+          <details data-selection-name="seekerLic">
+            <summary class="flex cursor-pointer list-none items-center justify-between gap-3 rounded-lg bg-gray-50 px-3 py-2 text-sm font-bold text-gray-800">
+              <span>保有資格（該当するものを選択）</span>
+              <span data-selected-count class="shrink-0 text-xs font-normal text-gray-600">選択済み 0件</span>
+            </summary>
+            <div id="seekerLicenseOptions" class="mt-2 grid grid-cols-1 gap-2 text-xs sm:grid-cols-2"></div>
+          </details>
           <label class="mt-2 block text-sm">その他の資格
             <input id="seekerOtherLicenses" type="text" maxlength="300" placeholder="複数ある場合は「、」で区切って入力" class="mt-1 w-full rounded border px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
           </label>
@@ -505,11 +530,16 @@
             </div>
           </div>
         </div>
-        <fieldset class="rounded-xl border border-blue-100 bg-blue-50 p-4">
-          <legend class="px-1 text-sm font-bold text-gray-800">希望する働き方（複数選択可）</legend>
-          <p class="mb-3 text-xs text-gray-600">勤務形態・週の勤務日数・勤務時間帯を選ぶと、求人のおすすめ順に反映されます。</p>
-          <div id="seekerWorkPreferences" class="space-y-4"></div>
-        </fieldset>
+        <details data-selection-name="seekerWorkPreference" class="rounded-xl border border-blue-100 bg-blue-50">
+          <summary class="flex cursor-pointer list-none items-center justify-between gap-3 p-4 text-sm font-bold text-gray-800">
+            <span>希望する働き方（複数選択可）</span>
+            <span data-selected-count class="shrink-0 text-xs font-normal text-gray-600">選択済み 0件</span>
+          </summary>
+          <div class="px-4 pb-4">
+            <p class="mb-3 text-xs text-gray-600">勤務形態・週の勤務日数・勤務時間帯を選ぶと、求人のおすすめ順に反映されます。</p>
+            <div id="seekerWorkPreferences" class="space-y-4"></div>
+          </div>
+        </details>
 
         <fieldset class="rounded-lg border border-amber-300 bg-amber-50 p-4">
           <legend class="px-1 text-sm font-bold text-amber-950">企業へのプロフィール公開（任意）</legend>
