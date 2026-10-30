@@ -14,6 +14,9 @@ function renderEmployerDashboard() {
   const receivedApplications = accountApplications.filter(application =>
     ownedJobIds.has(String(application.job_id))
   );
+  const selectedApplication = receivedApplications.find(application =>
+    String(application.id) === String(selectedEmployerApplicationId)
+  );
 
   container.innerHTML = ownedJobs.length
     ? ownedJobs.map(job => `
@@ -61,58 +64,58 @@ function renderEmployerDashboard() {
 
   applicationsContainer.innerHTML = accountApplicationsError
     ? ""
-    : receivedApplications.length
-      ? receivedApplications.map(application => `
-        <article class="bg-white rounded-2xl border border-gray-100 shadow-sm mb-4 transition-all hover:border-blue-200 overflow-hidden">
+    : selectedApplication
+      ? `
+        <article id="application-card-${escapeHtml(String(selectedApplication.id))}" class="bg-white rounded-2xl border border-gray-100 shadow-sm mb-4 transition-all hover:border-blue-200 overflow-hidden">
           <div class="p-5">
             <div class="flex flex-wrap items-start justify-between gap-3 mb-4 pb-4 border-b border-gray-50">
               <div class="min-w-0 flex-1">
-                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">求人: ${escapeHtml(String(application.job_title || "求人"))}</p>
-                <h4 class="font-black text-gray-900 text-lg leading-tight">👷 ${escapeHtml(String(application.applicant_name || ""))}</h4>
-                <p class="mt-1 text-[10px] text-gray-400 uppercase tracking-widest font-bold">応募日時: ${formatDashboardDate(application.created_at)}</p>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">求人: ${escapeHtml(String(selectedApplication.job_title || "求人"))}</p>
+                <h4 class="font-black text-gray-900 text-lg leading-tight">👷 ${escapeHtml(String(selectedApplication.applicant_name || ""))}</h4>
+                <p class="mt-1 text-[10px] text-gray-400 uppercase tracking-widest font-bold">応募日時: ${formatDashboardDate(selectedApplication.created_at)}</p>
               </div>
-              <span class="inline-flex rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-widest ${application.status === "withdrawn" ? "bg-rose-100 text-rose-800" : formatApplicationStatusClass(application.status)}">${application.status === "withdrawn" ? "取り下げ" : formatApplicationStatus(application.status)}</span>
+              <span class="inline-flex rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-widest ${selectedApplication.status === "withdrawn" ? "bg-rose-100 text-rose-800" : formatApplicationStatusClass(selectedApplication.status)}">${selectedApplication.status === "withdrawn" ? "取り下げ" : formatApplicationStatus(selectedApplication.status)}</span>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs mb-4 bg-gray-50/80 p-4 rounded-xl border border-gray-100">
               <div class="flex items-center gap-2">
                 <span class="text-base">💪</span>
                 <div>
                   <p class="text-[9px] font-bold text-gray-400 uppercase leading-none mb-1">現場経験</p>
-                  <p class="font-bold text-gray-700">${escapeHtml(String(application.experience || "未登録"))}</p>
+                  <p class="font-bold text-gray-700">${escapeHtml(String(selectedApplication.experience || "未登録"))}</p>
                 </div>
               </div>
               <div class="flex items-center gap-2">
                 <span class="text-base">🔧</span>
                 <div>
                   <p class="text-[9px] font-bold text-gray-400 uppercase leading-none mb-1">保有資格</p>
-                  <p class="font-bold text-gray-700 truncate">${Array.isArray(application.licenses) && application.licenses.length ? application.licenses.map(license => escapeHtml(String(license))).join("、") : "未登録"}</p>
+                  <p class="font-bold text-gray-700 truncate">${Array.isArray(selectedApplication.licenses) && selectedApplication.licenses.length ? selectedApplication.licenses.map(license => escapeHtml(String(license))).join("、") : "未登録"}</p>
                 </div>
               </div>
             </div>
-            ${application.message
+            ${selectedApplication.message
               ? `<div class="relative bg-white p-4 rounded-xl border border-gray-100 italic text-sm text-gray-700 leading-relaxed">
                   <span class="absolute -top-2 left-4 px-2 bg-gray-50 text-[9px] font-bold text-gray-400 uppercase tracking-widest border border-gray-100 rounded">Message</span>
-                  "${escapeHtml(String(application.message))}"
+                  "${escapeHtml(String(selectedApplication.message))}"
                  </div>`
               : '<p class="text-center py-2 text-[10px] text-gray-300 font-bold uppercase tracking-widest">No Message</p>'}
-            ${renderApplicationConversation(application)}
-            ${application.status === "pending" ? `
+            ${renderApplicationConversation(selectedApplication)}
+            ${selectedApplication.status === "pending" ? `
               <div class="mt-5 flex gap-3">
-                <button type="button" onclick="updateApplicationStatus('${escapeHtml(String(application.id))}', 'reviewed')" class="flex-1 h-11 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-black text-white hover:bg-emerald-700 transition-all shadow-md shadow-emerald-100">確認済みにする</button>
-                <button type="button" onclick="updateApplicationStatus('${escapeHtml(String(application.id))}', 'dismissed')" class="flex-1 h-11 rounded-xl border border-gray-200 bg-white px-4 py-2 text-xs font-black text-gray-500 hover:bg-gray-50 transition-all">対応不要</button>
+                <button type="button" onclick="updateApplicationStatus('${escapeHtml(String(selectedApplication.id))}', 'reviewed')" class="flex-1 h-11 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-black text-white hover:bg-emerald-700 transition-all shadow-md shadow-emerald-100">確認済みにする</button>
+                <button type="button" onclick="updateApplicationStatus('${escapeHtml(String(selectedApplication.id))}', 'dismissed')" class="flex-1 h-11 rounded-xl border border-gray-200 bg-white px-4 py-2 text-xs font-black text-gray-500 hover:bg-gray-50 transition-all">対応不要</button>
               </div>
-            ` : application.status === "withdrawn" ? `
+            ` : selectedApplication.status === "withdrawn" ? `
               <p class="mt-5 rounded-lg bg-rose-50 px-3 py-2 text-sm font-bold text-rose-800">応募者が応募を取り下げました。</p>
             ` : `
               <div class="mt-5 border-t border-gray-50 pt-4 flex justify-between items-center">
-                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Status: ${formatApplicationStatus(application.status)}</p>
-                <button type="button" onclick="openReviewModal('${escapeHtml(String(application.id))}', '${escapeHtml(String(application.applicant_id))}', 'seeker')" class="px-4 py-2 bg-amber-50 text-amber-600 text-xs font-black rounded-xl border border-amber-100 hover:bg-amber-100 transition-all">⭐ 職人を評価する</button>
+                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Status: ${formatApplicationStatus(selectedApplication.status)}</p>
+                <button type="button" onclick="openReviewModal('${escapeHtml(String(selectedApplication.id))}', '${escapeHtml(String(selectedApplication.applicant_id))}', 'seeker')" class="px-4 py-2 bg-amber-50 text-amber-600 text-xs font-black rounded-xl border border-amber-100 hover:bg-amber-100 transition-all">⭐ 職人を評価する</button>
               </div>
             `}
           </div>
         </article>
-      `).join("")
-      : '<div class="text-center py-10 bg-gray-50 rounded-2xl border border-dashed border-gray-200"><p class="text-xs text-gray-400">受け取った応募はまだありません。</p></div>';
+      `
+      : '<p class="rounded-lg border border-dashed border-gray-200 bg-gray-50 p-4 text-sm text-gray-600">応募通知を選ぶと、応募内容とメッセージがここに表示されます。</p>';
 }
 
 function showEmployerDashboardView(view) {

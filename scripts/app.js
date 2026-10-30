@@ -18,6 +18,7 @@ let seekerContactRequests = [];
 let seekerContactRequestsError = "";
 let employerContactRequests = [];
 let employerContactRequestsError = "";
+let selectedEmployerApplicationId = null;
 let accountDataUserId = null;
 let loadingAccountUserId = null;
 let activeDashboardView = "profile";

@@ -48,21 +48,46 @@ function dismissLoginNotificationBanner() {
                 <span class="flex h-2 w-2 rounded-full ${notification.read_at ? "bg-gray-300" : "bg-blue-600 animate-pulse"}"></span>
                 <p class="font-black text-gray-900">${escapeHtml(String(notification.title || "通知"))}</p>
               </div>
-              <p class="mt-1 text-sm text-gray-600 leading-relaxed">${escapeHtml(notification.event_type === "contact_reply" ? "求職者から届いた連絡への返信です。" : String(notification.body || ""))}</p>
+              ${["job_application", "application_message"].includes(notification.event_type)
+                ? renderApplicationNotificationDetails(notification)
+                : `<p class="mt-1 text-sm text-gray-600 leading-relaxed">${escapeHtml(notification.event_type === "contact_reply" ? "求職者から届いた連絡への返信です。" : String(notification.body || ""))}</p>`}
               <p class="mt-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest">${formatDashboardDate(notification.created_at)}</p>
               ${notification.event_type === "contact_request" ? renderContactRequestNotification(notification.related_id) : ""}
               ${notification.event_type === "contact_reply" ? renderContactReplyNotification(notification.related_id) : ""}
-              ${notification.event_type === "application_message"
-                ? `<button type="button" onclick="openApplicationConversation('${escapeHtml(String(notification.context_id || ""))}', '${escapeHtml(String(notification.id))}')" class="mt-3 min-h-10 rounded-lg bg-blue-600 px-3 py-2 text-xs font-bold text-white hover:bg-blue-700">メッセージを開く</button>`
+              ${["job_application", "application_message"].includes(notification.event_type)
+                ? `<button type="button" onclick="openApplicationNotification('${escapeHtml(String(notification.event_type === "application_message" ? notification.context_id || "" : notification.related_id || ""))}', '${escapeHtml(String(notification.id))}')" class="mt-3 min-h-10 rounded-lg bg-blue-600 px-3 py-2 text-xs font-bold text-white hover:bg-blue-700">応募内容とメッセージを見る</button>`
                 : ""}
             </div>
-            ${notification.read_at
+            ${["job_application", "application_message"].includes(notification.event_type)
+              ? ""
+              : notification.read_at
               ? '<span class="shrink-0 text-[10px] font-bold text-gray-300 uppercase tracking-tighter">Read</span>'
               : `<button type="button" onclick="markNotificationRead('${escapeHtml(String(notification.id))}')" class="shrink-0 rounded-xl bg-blue-600 px-3 py-1.5 text-[10px] font-bold text-white hover:bg-blue-700 transition-all shadow-md shadow-blue-100">${notification.legacy ? "確認" : "既読にする"}</button>`}
           </div>
         </article>
       `).join("")
       : '<div class="text-center py-10 bg-gray-50 rounded-2xl border border-dashed border-gray-200"><p class="text-xs text-gray-400">新しい通知はありません。</p></div>';
+}
+
+function renderApplicationNotificationDetails(notification) {
+  const applicationId = notification.event_type === "application_message"
+    ? notification.context_id
+    : notification.related_id;
+  const application = accountApplications.find(item =>
+    String(item.id) === String(applicationId)
+  );
+  if (!application) {
+    return `<p class="mt-1 text-sm text-gray-600 leading-relaxed">${escapeHtml(String(notification.body || ""))}</p>`;
+  }
+  const applicantDetail = accountType === "employer"
+    ? `<div><dt class="inline font-medium text-gray-500">応募者：</dt><dd class="inline font-bold text-gray-800">${escapeHtml(String(application.applicant_name || "名前未登録"))}</dd></div>`
+    : "";
+  return `
+    <dl class="mt-2 grid grid-cols-1 gap-1 rounded-lg bg-white/80 p-3 text-sm sm:grid-cols-2">
+      ${applicantDetail}
+      <div><dt class="inline font-medium text-gray-500">求人：</dt><dd class="inline font-bold text-gray-800">${escapeHtml(String(application.job_title || "求人"))}</dd></div>
+    </dl>
+  `;
 }
 
 function renderContactReplyNotification(requestId) {
@@ -73,21 +98,31 @@ function renderContactReplyNotification(requestId) {
     : '<p class="mt-3 rounded-lg bg-white p-3 text-sm text-gray-600">求職者は連絡を見送りました。</p>';
 }
 
-function openApplicationConversation(applicationId, notificationId) {
+function openApplicationNotification(applicationId, notificationId) {
   const application = accountApplications.find(item =>
     String(item.id) === String(applicationId)
   );
   if (!currentUser || !application) {
     const status = document.getElementById(accountType === "employer" ? "employerApplicationsStatus" : "dashboardApplicationsStatus");
-    status.innerText = "応募メッセージを確認できませんでした。画面を再読み込みしてください。";
-    status.classList.remove("hidden");
+    if (status) {
+      status.innerText = "応募内容を確認できませんでした。画面を再読み込みしてください。";
+      status.classList.remove("hidden");
+    }
     return;
   }
-  if (accountType === "employer") showEmployerDashboardView("messages");
-  else showDashboardView("applications");
+  if (accountType === "employer") {
+    selectedEmployerApplicationId = String(application.id);
+    showEmployerDashboardView("messages");
+    renderEmployerDashboard();
+  } else {
+    showDashboardView("applications");
+  }
   if (notificationId) markNotificationRead(notificationId);
   setTimeout(() => {
-    document.getElementById(`application-thread-${applicationId}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+    const targetId = accountType === "employer"
+      ? `application-card-${applicationId}`
+      : `application-thread-${applicationId}`;
+    document.getElementById(targetId)?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, 0);
 }
 
