@@ -124,7 +124,15 @@ async function sendNotificationEmail(eventType, recordId) {
     });
     if (!error) return "";
     console.error("メール通知の送信エラー:", error);
-    return `操作は保存されましたが、通知メールを送信できませんでした。通知用SQL移行とメール設定を確認してください (${error.message})`;
+    let errorDetail = error.message;
+    if (error.context instanceof Response) {
+      errorDetail = `HTTP ${error.context.status}: ${error.message}`;
+      const responseBody = await error.context.clone().json().catch(() => null);
+      if (typeof responseBody?.error === "string") {
+        errorDetail = `HTTP ${error.context.status}: ${responseBody.error}`;
+      }
+    }
+    return `操作は保存されましたが、通知メールを送信できませんでした。通知用SQL移行とメール設定を確認してください (${errorDetail})`;
   } catch (error) {
     console.error("メール通知への接続エラー:", error);
     return "操作は保存されましたが、通知メールサービスに接続できませんでした。通知用SQL移行とメール設定を確認してください。";
