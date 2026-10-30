@@ -225,9 +225,9 @@
           </div>
 
           <details data-selection-name="jobWorkPreference" class="rounded-xl border border-blue-100 bg-blue-50">
-            <summary class="flex cursor-pointer list-none items-center justify-between gap-3 p-4 text-sm font-bold text-gray-800">
-              <span>働き方（複数選択可）</span>
-              <span class="flex shrink-0 items-center gap-2 text-xs font-normal">
+            <summary class="flex flex-wrap cursor-pointer list-none items-center justify-between gap-2 p-4 text-sm font-bold text-gray-800">
+              <span class="min-w-0">働き方（複数選択可）</span>
+              <span class="flex min-w-0 max-w-full flex-wrap items-center justify-end gap-x-2 gap-y-1 text-xs font-normal">
                 <span data-selected-count class="text-gray-600">選択済み 0件</span>
                 <span class="rounded-full bg-white px-2 py-1 font-bold text-blue-700 shadow-sm" data-toggle-label>選択肢を開く</span>
                 <span class="text-blue-700" data-toggle-icon aria-hidden="true">▼</span>
@@ -239,21 +239,19 @@
             </div>
           </details>
 
-          <fieldset class="rounded-xl border border-gray-200 p-4">
+          <fieldset class="min-w-0 max-w-full overflow-hidden rounded-xl border border-gray-200 p-4">
             <legend class="px-1 text-sm font-bold text-gray-800">勤務時間・手当（任意）</legend>
-            <div class="grid grid-cols-2 gap-3">
-              <label class="text-sm">始業時間
-                <span class="mt-1 block text-xs text-gray-500">勤務を開始する時刻</span>
-                <input id="jobStartTime" type="time" class="mt-1 h-11 w-full rounded border px-3 py-2.5">
+            <div class="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2">
+              <label class="block min-w-0 text-sm font-medium">始業時間（開始）
+                <input id="jobStartTime" type="time" aria-label="始業時間（開始）" class="mt-1 block h-12 min-w-0 max-w-full w-full rounded-lg border border-gray-300 bg-white px-3 text-base text-gray-900 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
               </label>
-              <label class="text-sm">終業時間
-                <span class="mt-1 block text-xs text-gray-500">勤務を終了する時刻</span>
-                <input id="jobEndTime" type="time" class="mt-1 h-11 w-full rounded border px-3 py-2.5">
+              <label class="block min-w-0 text-sm font-medium">終業時間（終了）
+                <input id="jobEndTime" type="time" aria-label="終業時間（終了）" class="mt-1 block h-12 min-w-0 max-w-full w-full rounded-lg border border-gray-300 bg-white px-3 text-base text-gray-900 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
               </label>
-              <label class="col-span-2 text-sm sm:col-span-1">休憩時間（分）
+              <label class="min-w-0 text-sm">休憩時間（分）
                 <input id="jobBreakMinutes" type="number" min="0" max="1440" step="1" placeholder="例: 60" class="mt-1 w-full rounded border px-3 py-2.5">
               </label>
-              <label class="col-span-2 text-sm sm:col-span-1">残業の目安
+              <label class="min-w-0 text-sm">残業の目安
                 <input id="jobOvertimeDetails" type="text" maxlength="300" placeholder="例: 月平均10時間、繁忙期のみ" class="mt-1 w-full rounded border px-3 py-2.5">
               </label>
             </div>
@@ -289,9 +287,9 @@
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <details data-selection-name="jobRequiredLicense">
-                  <summary class="flex cursor-pointer list-none items-center justify-between gap-2 rounded-lg bg-gray-50 px-3 py-2 text-sm font-bold text-gray-700">
+                  <summary class="flex flex-wrap cursor-pointer list-none items-center justify-between gap-2 rounded-lg bg-gray-50 px-3 py-2 text-sm font-bold text-gray-700">
                     <span>必須資格を選ぶ</span>
-                    <span class="flex shrink-0 items-center gap-2 text-xs font-normal">
+                    <span class="flex min-w-0 max-w-full flex-wrap items-center justify-end gap-x-2 gap-y-1 text-xs font-normal">
                       <span data-selected-count>選択済み 0件</span>
                       <span class="rounded-full bg-white px-2 py-1 font-bold text-blue-700 shadow-sm" data-toggle-label>選択肢を開く</span>
                       <span class="text-blue-700" data-toggle-icon aria-hidden="true">▼</span>
@@ -302,9 +300,9 @@
               </div>
               <div>
                 <details data-selection-name="jobPreferredLicense">
-                  <summary class="flex cursor-pointer list-none items-center justify-between gap-2 rounded-lg bg-gray-50 px-3 py-2 text-sm font-bold text-gray-700">
+                  <summary class="flex flex-wrap cursor-pointer list-none items-center justify-between gap-2 rounded-lg bg-gray-50 px-3 py-2 text-sm font-bold text-gray-700">
                     <span>歓迎資格を選ぶ</span>
-                    <span class="flex shrink-0 items-center gap-2 text-xs font-normal">
+                    <span class="flex min-w-0 max-w-full flex-wrap items-center justify-end gap-x-2 gap-y-1 text-xs font-normal">
                       <span data-selected-count>選択済み 0件</span>
                       <span class="rounded-full bg-white px-2 py-1 font-bold text-blue-700 shadow-sm" data-toggle-label>選択肢を開く</span>
                       <span class="text-blue-700" data-toggle-icon aria-hidden="true">▼</span>
@@ -352,9 +350,9 @@
 
           <!-- 現場特化タグ選択 -->
           <details data-selection-name="jobTag" class="rounded-xl border border-gray-200">
-            <summary class="flex cursor-pointer list-none items-center justify-between gap-3 p-3 text-sm font-bold text-gray-800">
-              <span>現場アピールタグ（複数選択可）</span>
-              <span class="flex shrink-0 items-center gap-2 text-xs font-normal">
+            <summary class="flex flex-wrap cursor-pointer list-none items-center justify-between gap-2 p-3 text-sm font-bold text-gray-800">
+              <span class="min-w-0">現場アピールタグ（複数選択可）</span>
+              <span class="flex min-w-0 max-w-full flex-wrap items-center justify-end gap-x-2 gap-y-1 text-xs font-normal">
                 <span data-selected-count class="text-gray-600">選択済み 0件</span>
                 <span class="rounded-full bg-blue-50 px-2 py-1 font-bold text-blue-700" data-toggle-label>選択肢を開く</span>
                 <span class="text-blue-700" data-toggle-icon aria-hidden="true">▼</span>
@@ -464,9 +462,9 @@
 
         <div>
           <details data-selection-name="seekerJobTypeOption" data-selection-extra-input="seekerJobType">
-            <summary class="flex cursor-pointer list-none items-center justify-between gap-3 rounded-lg bg-gray-50 px-3 py-2 text-sm font-bold text-gray-800">
-              <span>希望職種（複数選択可）</span>
-              <span class="flex shrink-0 items-center gap-2 text-xs font-normal">
+            <summary class="flex flex-wrap cursor-pointer list-none items-center justify-between gap-2 rounded-lg bg-gray-50 px-3 py-2 text-sm font-bold text-gray-800">
+              <span class="min-w-0">希望職種（複数選択可）</span>
+              <span class="flex min-w-0 max-w-full flex-wrap items-center justify-end gap-x-2 gap-y-1 text-xs font-normal">
                 <span data-selected-count class="text-gray-600">選択済み 0件</span>
                 <span class="rounded-full bg-gray-100 px-2 py-1 font-bold text-blue-700" data-toggle-label>選択肢を開く</span>
                 <span class="text-blue-700" data-toggle-icon aria-hidden="true">▼</span>
@@ -481,9 +479,9 @@
         </div>
 
         <details id="seekerLocationPreferences" data-selection-name="seekerLocationPrefecture" class="rounded-xl border border-blue-100 bg-blue-50">
-          <summary class="flex cursor-pointer list-none items-center justify-between gap-3 p-4 text-sm font-bold text-gray-800">
-            <span>希望勤務地（複数選択可）</span>
-            <span class="flex shrink-0 items-center gap-2 text-xs font-normal">
+          <summary class="flex flex-wrap cursor-pointer list-none items-center justify-between gap-2 p-4 text-sm font-bold text-gray-800">
+            <span class="min-w-0">希望勤務地（複数選択可）</span>
+            <span class="flex min-w-0 max-w-full flex-wrap items-center justify-end gap-x-2 gap-y-1 text-xs font-normal">
               <span data-selected-count class="text-gray-600">希望エリア 0件</span>
               <span class="rounded-full bg-white px-2 py-1 font-bold text-blue-700 shadow-sm" data-toggle-label>選択肢を開く</span>
               <span class="text-blue-700" data-toggle-icon aria-hidden="true">▼</span>
@@ -521,9 +519,9 @@
         <!-- 資格チェックボックス -->
         <div>
           <details data-selection-name="seekerLic" data-selection-extra-input="seekerOtherLicenses">
-            <summary class="flex cursor-pointer list-none items-center justify-between gap-3 rounded-lg bg-gray-50 px-3 py-2 text-sm font-bold text-gray-800">
-              <span>保有資格（該当するものを選択）</span>
-              <span class="flex shrink-0 items-center gap-2 text-xs font-normal">
+            <summary class="flex flex-wrap cursor-pointer list-none items-center justify-between gap-2 rounded-lg bg-gray-50 px-3 py-2 text-sm font-bold text-gray-800">
+              <span class="min-w-0">保有資格（該当するものを選択）</span>
+              <span class="flex min-w-0 max-w-full flex-wrap items-center justify-end gap-x-2 gap-y-1 text-xs font-normal">
                 <span data-selected-count class="text-gray-600">選択済み 0件</span>
                 <span class="rounded-full bg-white px-2 py-1 font-bold text-blue-700 shadow-sm" data-toggle-label>選択肢を開く</span>
                 <span class="text-blue-700" data-toggle-icon aria-hidden="true">▼</span>
@@ -569,9 +567,9 @@
           </div>
         </div>
         <details data-selection-name="seekerWorkPreference" class="rounded-xl border border-blue-100 bg-blue-50">
-          <summary class="flex cursor-pointer list-none items-center justify-between gap-3 p-4 text-sm font-bold text-gray-800">
-            <span>希望する働き方（複数選択可）</span>
-            <span class="flex shrink-0 items-center gap-2 text-xs font-normal">
+          <summary class="flex flex-wrap cursor-pointer list-none items-center justify-between gap-2 p-4 text-sm font-bold text-gray-800">
+            <span class="min-w-0">希望する働き方（複数選択可）</span>
+            <span class="flex min-w-0 max-w-full flex-wrap items-center justify-end gap-x-2 gap-y-1 text-xs font-normal">
               <span data-selected-count class="text-gray-600">選択済み 0件</span>
               <span class="rounded-full bg-white px-2 py-1 font-bold text-blue-700 shadow-sm" data-toggle-label>選択肢を開く</span>
               <span class="text-blue-700" data-toggle-icon aria-hidden="true">▼</span>
