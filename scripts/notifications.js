@@ -125,11 +125,21 @@ async function sendNotificationEmail(eventType, recordId) {
     if (!error) return "";
     console.error("メール通知の送信エラー:", error);
     let errorDetail = error.message;
-    if (error.context instanceof Response) {
-      errorDetail = `HTTP ${error.context.status}: ${error.message}`;
-      const responseBody = await error.context.clone().json().catch(() => null);
-      if (typeof responseBody?.error === "string") {
-        errorDetail = `HTTP ${error.context.status}: ${responseBody.error}`;
+    const context = error.context;
+    if (typeof context?.status === "number") {
+      errorDetail = `HTTP ${context.status}: ${error.message}`;
+      if (typeof context.clone === "function") {
+        const responseText = await context.clone().text().catch(() => "");
+        try {
+          const responseBody = JSON.parse(responseText);
+          if (typeof responseBody.error === "string") {
+            errorDetail = `HTTP ${context.status}: ${responseBody.error}`;
+          }
+        } catch {
+          if (responseText) {
+            errorDetail = `HTTP ${context.status}: ${responseText.slice(0, 300)}`;
+          }
+        }
       }
     }
     return `操作は保存されましたが、通知メールを送信できませんでした。通知用SQL移行とメール設定を確認してください (${errorDetail})`;
