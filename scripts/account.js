@@ -493,10 +493,17 @@ function switchTab(tab) {
   const seekerSection = document.getElementById("seekerSection");
   const jobListSection = document.getElementById("jobListSection");
   const jobSearchPanel = document.getElementById("jobSearchPanel");
+  const jobSearchTitle = document.getElementById("jobSearchTitle");
+  const jobSearchDescription = document.getElementById("jobSearchDescription");
   const jobList = document.getElementById("jobList");
   const jobCount = document.getElementById("jobCount");
   const tabEmployerBtn = document.getElementById("tabEmployerBtn");
   const tabSeekerBtn = document.getElementById("tabSeekerBtn");
+  const isSeekerTab = tab === "seeker";
+  jobSearchTitle.innerText = isSeekerTab ? "おすすめ求人を条件で絞り込む" : "求人を検索・絞り込み";
+  jobSearchDescription.innerText = isSeekerTab
+    ? "プロフィールに登録した希望条件を参考に、おすすめ順で表示しています。条件を選ぶと求人をさらに絞り込めます。"
+    : "キーワードや条件を指定して、希望に合う求人を探せます。";
 
   if (tab === "guest") {
     employerSection.classList.add("hidden");
