@@ -193,6 +193,95 @@ function renderApplicationNotificationView(application, messageStatus) {
   `;
 }
 
+async function openApplicantPublicProfile(applicationId) {
+  const application = accountApplications.find(item =>
+    String(item.id) === String(applicationId)
+  );
+  const ownsApplication = application &&
+    cachedJobs.some(job =>
+      job.owner_id === currentUser?.id &&
+      String(job.id) === String(application.job_id)
+    );
+  const content = document.getElementById("applicationDetailContent");
+  if (!currentUser || accountType !== "employer" || !application ||
+      application.status === "withdrawn" || !ownsApplication ||
+      String(openApplicationNotificationId) !== String(application.id) || !content) return;
+
+  const employerId = currentUser.id;
+  const applicantId = application.applicant_id;
+  document.getElementById("applicationDetailTitle").innerText = "応募者プロフィール";
+  content.innerHTML = `
+    <button type="button" onclick="returnToApplicationDetails('${escapeHtml(String(application.id))}')" class="mb-4 min-h-10 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-bold text-gray-700 hover:bg-gray-50">← 応募内容に戻る</button>
+    <p role="status" aria-live="polite" class="rounded-xl bg-blue-50 p-4 text-sm text-blue-800">公開プロフィールを確認しています...</p>
+  `;
+
+  const { data, error } = await supabaseClient
+    .from("seeker_public_profiles")
+    .select("job_type, location, pay_type, minimum_salary, licenses, exp_years, stamina, updated_at")
+    .eq("user_id", applicantId)
+    .maybeSingle();
+
+  if (currentUser?.id !== employerId ||
+      String(openApplicationNotificationId) !== String(application.id)) return;
+  if (error) {
+    console.error("応募者公開プロフィール読み込みエラー:", error);
+    content.innerHTML = `
+      <button type="button" onclick="returnToApplicationDetails('${escapeHtml(String(application.id))}')" class="mb-4 min-h-10 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-bold text-gray-700 hover:bg-gray-50">← 応募内容に戻る</button>
+      <div role="alert" class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+        <p>プロフィールを読み込めませんでした: ${escapeHtml(error.message)}</p>
+        <button type="button" onclick="openApplicantPublicProfile('${escapeHtml(String(application.id))}')" class="mt-3 font-bold underline">再読み込み</button>
+      </div>
+    `;
+    return;
+  }
+  if (!data) {
+    content.innerHTML = `
+      <button type="button" onclick="returnToApplicationDetails('${escapeHtml(String(application.id))}')" class="mb-4 min-h-10 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-bold text-gray-700 hover:bg-gray-50">← 応募内容に戻る</button>
+      <article class="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-amber-950">
+        <h3 class="text-lg font-black">企業向けプロフィールは公開されていません</h3>
+        <p class="mt-2 text-sm leading-relaxed">この方は匿名プロフィールを企業向けに公開していないか、公開プロフィールを登録していません。応募時に共有された経験・資格・メッセージは、応募内容に戻って確認できます。</p>
+      </article>
+    `;
+    return;
+  }
+
+  const payTypeLabels = { hourly: "時給", daily: "日給", monthly: "月給" };
+  const pay = data.pay_type
+    ? `${payTypeLabels[data.pay_type] || "給与"}${data.minimum_salary ? `・希望最低額 ${Number(data.minimum_salary).toLocaleString()}円` : ""}`
+    : "指定なし";
+  const licenses = Array.isArray(data.licenses) && data.licenses.length
+    ? data.licenses.map(license => `<span class="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-800">${escapeHtml(String(license))}</span>`).join("")
+    : '<span class="text-sm text-gray-500">登録なし</span>';
+  content.innerHTML = `
+    <button type="button" onclick="returnToApplicationDetails('${escapeHtml(String(application.id))}')" class="mb-4 min-h-10 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-bold text-gray-700 hover:bg-gray-50">← 応募内容に戻る</button>
+    <article class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+      <div class="border-b border-gray-100 pb-4">
+        <h3 class="text-lg font-black text-gray-900">${escapeHtml(String(application.applicant_name || "応募者"))} さんのプロフィール</h3>
+        <p class="mt-1 text-xs text-gray-500">本人が企業向け公開に同意したプロフィール情報です。氏名・連絡先は公開プロフィールから取得していません。</p>
+      </div>
+      <dl class="mt-4 grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
+        <div><dt class="text-xs font-bold text-gray-500">希望職種</dt><dd class="mt-1 font-medium text-gray-800">${escapeHtml(String(data.job_type || "未設定"))}</dd></div>
+        <div><dt class="text-xs font-bold text-gray-500">希望勤務地</dt><dd class="mt-1 font-medium text-gray-800">${escapeHtml(String(data.location || "未設定"))}</dd></div>
+        <div><dt class="text-xs font-bold text-gray-500">希望給与</dt><dd class="mt-1 font-medium text-gray-800">${escapeHtml(pay)}</dd></div>
+        <div><dt class="text-xs font-bold text-gray-500">現場経験</dt><dd class="mt-1 font-medium text-gray-800">${escapeHtml(String(data.exp_years || "未設定"))}</dd></div>
+        <div><dt class="text-xs font-bold text-gray-500">体力自信度</dt><dd class="mt-1 font-medium text-gray-800">${escapeHtml(String(data.stamina || "未設定"))}</dd></div>
+        <div><dt class="text-xs font-bold text-gray-500">資格</dt><dd class="mt-1 flex flex-wrap gap-1.5">${licenses}</dd></div>
+      </dl>
+      <p class="mt-4 border-t border-gray-100 pt-3 text-[10px] font-medium text-gray-400">プロフィール更新: ${formatDashboardDate(data.updated_at)}</p>
+    </article>
+  `;
+}
+
+function returnToApplicationDetails(applicationId) {
+  if (String(openApplicationNotificationId) !== String(applicationId)) return;
+  const application = accountApplications.find(item =>
+    String(item.id) === String(applicationId)
+  );
+  if (!application) return;
+  renderApplicationNotificationView(application);
+  document.getElementById("applicationDetailTitle").innerText = "応募内容・メッセージ";
+}
+
 function openApplicationDismissalForm(applicationId) {
   if (!currentUser || accountType !== "employer") return;
   const application = accountApplications.find(item =>

@@ -104,7 +104,23 @@ function renderJobList(resetLimit = false) {
 
   const displayJobs = filteredJobs.slice(0, displayLimitJobs);
 
-  jobList.innerHTML = displayJobs.map(job => `
+  jobList.innerHTML = displayJobs.map(job => {
+    const matchDetails = matchProfile ? getJobMatchDetails(job, matchProfile) : null;
+    const matchSummary = matchDetails
+      ? `<div class="mt-4 rounded-lg ${matchDetails.score >= 7 ? "bg-emerald-50 text-emerald-900" : matchDetails.score >= 4 ? "bg-amber-50 text-amber-900" : "bg-gray-50 text-gray-700"} p-3">
+          <div class="flex items-center justify-between gap-3">
+            <span class="text-sm font-bold">プロフィール条件との一致</span>
+            <span class="text-sm font-black">${matchDetails.score}点</span>
+          </div>
+          <p class="mt-1 text-xs">${matchDetails.reasons.length
+            ? `一致: ${escapeHtml(matchDetails.reasons.join("・"))}`
+            : matchDetails.compared
+              ? "登録済みの希望条件と一致する項目はありません"
+              : "比較できる希望条件が未登録です"}</p>
+          <p class="mt-1 text-[10px] opacity-75">希望職種・勤務地・給与条件で算出する目安です。</p>
+        </div>`
+      : "";
+    return `
     <article onclick="openModal(${job.id})" class="cursor-pointer group relative bg-white rounded-2xl border border-gray-100 p-5 transition-all hover:shadow-md hover:border-blue-200 sm:p-6 mb-4">
       <div class="flex items-start justify-between gap-3">
         <div class="min-w-0 flex-1">
@@ -113,7 +129,7 @@ function renderJobList(resetLimit = false) {
             <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-wider uppercase ${isJobClosed(job) ? 'bg-gray-100 text-gray-500' : 'bg-emerald-50 text-emerald-700'}">${isJobClosed(job) ? '募集終了' : '募集中'}</span>
 
             ${job.capacity <= 0 ? '' : `<span class="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-[10px] font-bold text-blue-700 uppercase">募集人数 ${formatJobCapacity(job.capacity)}</span>`}
-            ${matchProfile && getJobMatchScore(job, matchProfile) > 0 ? '<span class="inline-flex items-center rounded-full bg-purple-50 px-2.5 py-0.5 text-[10px] font-bold text-purple-700 uppercase">希望条件に一致</span>' : ''}
+            ${matchDetails?.score > 0 ? '<span class="inline-flex items-center rounded-full bg-purple-50 px-2.5 py-0.5 text-[10px] font-bold text-purple-700 uppercase">希望条件に一致</span>' : ''}
           </div>
                                       <h3 class="break-words text-lg font-extrabold leading-tight text-gray-900 sm:text-xl group-hover:text-blue-700 transition-colors">${escapeHtml(job.title)}</h3>
           <div class="flex items-center gap-2 mt-1">
@@ -141,6 +157,7 @@ function renderJobList(resetLimit = false) {
           </div>
         </div>
       </div>
+      ${matchSummary}
       ${Array.isArray(job.tags) && job.tags.length ? `<div class="mt-5 flex flex-wrap gap-1.5">${job.tags.slice(0, 5).map(tag => `<span class="rounded-lg bg-blue-50/50 px-2.5 py-1 text-[10px] font-bold text-blue-600 ring-1 ring-inset ring-blue-100/50">${escapeHtml(tag)}</span>`).join("")}${job.tags.length > 5 ? '<span class="text-[10px] text-gray-400 self-center">...</span>' : ''}</div>` : ''}
       <div class="mt-5 flex items-center justify-between pt-4">
          <div class="flex items-center text-xs font-bold text-blue-600">
@@ -155,7 +172,8 @@ function renderJobList(resetLimit = false) {
         ` : ""}
       </div>
     </article>
-  `).join("");
+  `;
+  }).join("");
 
   if (filteredJobs.length > displayLimitJobs) {
     const loadMoreBtn = document.createElement("button");
@@ -440,19 +458,49 @@ function getLocationMatchScore(jobLocation, preferredLocation) {
 }
 
 function getJobMatchScore(job, profile) {
+  return getJobMatchDetails(job, profile).score;
+}
+
+function getJobMatchDetails(job, profile) {
   let score = 0;
+  let compared = 0;
+  const reasons = [];
   const preferredJobTypes = String(profile.jobType || "")
     .split(/[,、，]/)
     .map(jobType => jobType.trim().toLocaleLowerCase())
     .filter(Boolean);
   const jobDescription = `${job.title || ""} ${job.duties || ""}`.toLocaleLowerCase();
-  if (preferredJobTypes.some(jobType => jobDescription.includes(jobType))) score += 4;
+  if (preferredJobTypes.length) {
+    compared += 1;
+    if (preferredJobTypes.some(jobType => jobDescription.includes(jobType))) {
+      score += 4;
+      reasons.push("希望職種が一致");
+    }
+  }
 
-  score += getLocationMatchScore(job.location, profile.location) * 2;
+  if (String(profile.location || "").trim() && String(job.location || "").trim()) {
+    compared += 1;
+    const locationScore = getLocationMatchScore(job.location, profile.location);
+    score += locationScore * 2;
+    if (locationScore === 2) reasons.push("希望勤務地が一致");
+    else if (locationScore === 1) reasons.push("希望都道府県が一致");
+  }
 
-  if (profile.payType && getJobPayType(job) === profile.payType) score += 1;
-  if (profile.minimumSalary && getJobPayAmount(job) >= Number(profile.minimumSalary)) score += 1;
-  return score;
+  if (profile.payType && getJobPayType(job)) {
+    compared += 1;
+    if (getJobPayType(job) === profile.payType) {
+      score += 1;
+      reasons.push("希望給与区分が一致");
+    }
+  }
+  if (Number(profile.minimumSalary) > 0 && getJobPayAmount(job) > 0) {
+    compared += 1;
+    if (getJobPayAmount(job) >= Number(profile.minimumSalary)) {
+      score += 1;
+      reasons.push("求人給与が希望最低額以上");
+    }
+  }
+  return { score, compared, reasons };
 }
 
 function getPrefecture(location) {

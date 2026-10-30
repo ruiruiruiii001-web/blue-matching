@@ -89,6 +89,7 @@ function renderEmployerApplicationDetails(application) {
           <div class="min-w-0 flex-1">
             <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">求人: ${escapeHtml(String(application.job_title || "求人"))}</p>
             <h4 class="font-black text-gray-900 text-lg leading-tight">👷 ${escapeHtml(String(application.applicant_name || ""))}</h4>
+            <button type="button" onclick="openApplicantPublicProfile('${applicationId}')" class="mt-2 min-h-10 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-bold text-blue-700 hover:bg-blue-100">応募者プロフィールを見る</button>
             <p class="mt-1 text-[10px] text-gray-400 uppercase tracking-widest font-bold">応募日時: ${formatDashboardDate(application.created_at)}</p>
           </div>
           <span class="inline-flex rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-widest ${application.status === "withdrawn" ? "bg-rose-100 text-rose-800" : formatApplicationStatusClass(application.status)}">${application.status === "withdrawn" ? "取り下げ" : escapeHtml(formatApplicationStatus(application.status))}</span>

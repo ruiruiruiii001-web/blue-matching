@@ -244,7 +244,7 @@ function renderEmployerSeekerSearch(resetLimit = false) {
             <span class="text-sm font-bold">条件一致スコア</span>
             <span class="text-lg font-black">${match.score}点</span>
           </div>
-          <p class="mt-1 text-xs">${match.reasons.length ? escapeHtml(match.reasons.join("・")) : "職種・勤務地・給与条件に一致する項目はありません"}</p>
+          <p class="mt-1 text-xs">${match.reasons.length ? `一致: ${escapeHtml(match.reasons.join("・"))}` : "登録済みの希望条件と一致する項目はありません"}</p>
           <p class="mt-1 text-[10px] opacity-75">最大10点。登録済みの希望条件だけで算出する目安です。</p>
         </div>`
       : matchedJob
@@ -287,7 +287,7 @@ function getSeekerJobMatch(job, profile) {
     const jobDescription = `${job.title || ""} ${job.duties || ""}`.toLocaleLowerCase();
     if (preferredJobTypes.some(jobType => jobDescription.includes(jobType))) {
       score += 4;
-      reasons.push("希望職種");
+      reasons.push("希望職種が一致");
     }
   }
 
@@ -295,8 +295,8 @@ function getSeekerJobMatch(job, profile) {
     maximumScore += 4;
     const locationScore = getLocationMatchScore(job.location, profile.location);
     score += locationScore * 2;
-    if (locationScore === 2) reasons.push("勤務地");
-    else if (locationScore === 1) reasons.push("都道府県");
+    if (locationScore === 2) reasons.push("希望勤務地が一致");
+    else if (locationScore === 1) reasons.push("希望都道府県が一致");
   }
 
   const profilePayType = profile.pay_type || "";
@@ -305,7 +305,7 @@ function getSeekerJobMatch(job, profile) {
     maximumScore += 1;
     if (profilePayType === jobPayType) {
       score += 1;
-      reasons.push("給与区分");
+      reasons.push("希望給与区分が一致");
     }
   }
 
@@ -315,7 +315,7 @@ function getSeekerJobMatch(job, profile) {
     maximumScore += 1;
     if (jobSalary >= minimumSalary) {
       score += 1;
-      reasons.push("希望最低額");
+      reasons.push("求人給与が希望最低額以上");
     }
   }
 
