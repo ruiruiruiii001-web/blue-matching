@@ -502,7 +502,7 @@ function switchTab(tab) {
   const isSeekerTab = tab === "seeker";
   jobSearchTitle.innerText = isSeekerTab ? "おすすめ求人を条件で絞り込む" : "求人を検索・絞り込み";
   jobSearchDescription.innerText = isSeekerTab
-    ? "プロフィールに登録した希望条件を参考に、おすすめ順で表示しています。条件を選ぶと求人をさらに絞り込めます。"
+    ? "並び替えで「おすすめ順」を選ぶと、プロフィールに登録した希望条件を参考に表示します。条件を選ぶと求人をさらに絞り込めます。"
     : "キーワードや条件を指定して、希望に合う求人を探せます。";
 
   if (tab === "guest") {
