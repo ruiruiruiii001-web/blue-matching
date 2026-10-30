@@ -13,6 +13,19 @@ const LICENSE_OPTIONS = [
   "フルハーネス特別教育"
 ];
 
+const LEGACY_JOB_TAG_ALIASES = {
+  "日払い・手渡しOK": ["日払いOK", "手渡しOK"],
+  "雨天時給料保証あり": ["雨天時休業補償あり"],
+  "未経験・即日OK": ["未経験歓迎", "即日勤務OK"],
+  "夜勤・高収入": ["夜勤あり"],
+  "週1〜OK・シフト自由": ["週1日〜OK", "シフト相談可"]
+};
+
+function getNormalizedJobTags(values) {
+  const tags = Array.isArray(values) ? values : [];
+  return [...new Set(tags.flatMap(tag => LEGACY_JOB_TAG_ALIASES[tag] || [tag]))];
+}
+
 const WORK_PREFERENCE_GROUPS = [
   {
     key: "employment",
@@ -105,6 +118,25 @@ function renderWorkPreferenceOptions(containerId, inputName) {
   }));
 }
 
+function initializeJobRequirementControls() {
+  renderCheckboxOptions("jobRequiredLicenseOptions", "jobRequiredLicense", LICENSE_OPTIONS);
+  renderCheckboxOptions("jobPreferredLicenseOptions", "jobPreferredLicense", LICENSE_OPTIONS);
+
+  ["jobRequiredLicense", "jobPreferredLicense"].forEach(inputName => {
+    document.querySelectorAll(`input[name="${inputName}"]`).forEach(input => {
+      input.addEventListener("change", () => {
+        if (!input.checked) return;
+        const counterpartName = inputName === "jobRequiredLicense"
+          ? "jobPreferredLicense"
+          : "jobRequiredLicense";
+        const counterpart = [...document.querySelectorAll(`input[name="${counterpartName}"]`)]
+          .find(option => option.value === input.value);
+        if (counterpart) counterpart.checked = false;
+      });
+    });
+  });
+}
+
 function getCheckedValues(inputName) {
   return Array.from(document.querySelectorAll(`input[name="${inputName}"]:checked`))
     .map(input => input.value);
@@ -152,6 +184,7 @@ function getWorkPreferenceMatch(jobPreferences, seekerPreferences) {
 function initializeProfileOptionControls() {
   renderCheckboxOptions("seekerJobTypeOptions", "seekerJobTypeOption", JOB_TYPE_OPTIONS);
   renderCheckboxOptions("seekerLicenseOptions", "seekerLic", LICENSE_OPTIONS);
+  initializeJobRequirementControls();
   renderWorkPreferenceOptions("seekerWorkPreferences", "seekerWorkPreference");
   renderWorkPreferenceOptions("jobWorkPreferences", "jobWorkPreference");
 }

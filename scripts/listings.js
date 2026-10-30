@@ -12,7 +12,7 @@ function renderJobList(resetLimit = false) {
   document.querySelectorAll("[data-quick-job-tag]").forEach(button => {
     const tag = button.dataset.quickJobTag;
     const selected = selectedTags.includes(tag);
-    const available = cachedJobs.some(job => Array.isArray(job.tags) && job.tags.includes(tag));
+    const available = cachedJobs.some(job => getNormalizedJobTags(job.tags).includes(tag));
     button.setAttribute("aria-pressed", String(selected));
     button.disabled = !available;
     button.classList.toggle("bg-blue-700", selected);
@@ -35,14 +35,14 @@ function renderJobList(resetLimit = false) {
         (job.title || "").toLowerCase().includes(keyword) ||
         (job.location || "").toLowerCase().includes(keyword) ||
         getWorkPreferenceLabels(job.work_preferences).some(value => value.toLocaleLowerCase().includes(keyword)) ||
-        (job.tags && job.tags.some(t => t.toLowerCase().includes(keyword)))) &&
+        getNormalizedJobTags(job.tags).some(tag => tag.toLocaleLowerCase().includes(keyword))) &&
       (!openJobsOnly || !isJobClosed(job)) &&
         (!favoritesOnly || isFavorite(job.id)) &&
         (!capacityFilter || getCapacityOptionValue(job.capacity) === capacityFilter) &&
         (!locationFilter || (job.location || "").trim() === locationFilter) &&
         (!salaryTypeFilter || getJobPayType(job) === salaryTypeFilter) &&
         (!minimumSalary || (salaryTypeFilter && getJobPayAmount(job) >= minimumSalary)) &&
-        (!selectedTags.length || (Array.isArray(job.tags) && selectedTags.some(tag => job.tags.includes(tag)))) &&
+        (!selectedTags.length || selectedTags.some(tag => getNormalizedJobTags(job.tags).includes(tag))) &&
         (!currentUser || !blockedUserIds.includes(job.owner_id))
     )
 
@@ -154,13 +154,13 @@ function renderJobList(resetLimit = false) {
           <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 text-sm">💰</div>
           <div class="min-w-0">
             <p class="text-[10px] font-bold text-emerald-600/50 uppercase">給与</p>
-            <p class="truncate text-base font-black text-emerald-700">${escapeHtml(job.salary || '給与応相談')}</p>
+            <p class="truncate text-base font-black text-emerald-700">${escapeHtml(formatJobSalary(job))}</p>
           </div>
         </div>
       </div>
       ${matchSummary}
       ${workPreferences.length ? `<div class="mt-4 flex flex-wrap gap-1.5">${workPreferences.slice(0, 6).map(value => `<span class="rounded-full bg-indigo-50 px-2.5 py-1 text-[10px] font-bold text-indigo-800">${escapeHtml(value)}</span>`).join("")}${workPreferences.length > 6 ? `<span class="self-center text-[10px] text-gray-400">ほか${workPreferences.length - 6}件</span>` : ""}</div>` : ""}
-      ${Array.isArray(job.tags) && job.tags.length ? `<div class="mt-5 flex flex-wrap gap-1.5">${job.tags.slice(0, 5).map(tag => `<span class="rounded-lg bg-blue-50/50 px-2.5 py-1 text-[10px] font-bold text-blue-600 ring-1 ring-inset ring-blue-100/50">${escapeHtml(tag)}</span>`).join("")}${job.tags.length > 5 ? '<span class="text-[10px] text-gray-400 self-center">...</span>' : ''}</div>` : ''}
+      ${getNormalizedJobTags(job.tags).length ? `<div class="mt-5 flex flex-wrap gap-1.5">${getNormalizedJobTags(job.tags).slice(0, 5).map(tag => `<span class="rounded-lg bg-blue-50/50 px-2.5 py-1 text-[10px] font-bold text-blue-600 ring-1 ring-inset ring-blue-100/50">${escapeHtml(tag)}</span>`).join("")}${getNormalizedJobTags(job.tags).length > 5 ? '<span class="text-[10px] text-gray-400 self-center">...</span>' : ''}</div>` : ''}
       <div class="mt-5 flex items-center justify-between pt-4">
          <div class="flex items-center text-xs font-bold text-blue-600">
            詳細を見る
@@ -217,8 +217,8 @@ function isJobClosed(job) {
 }
 
 function getTagMatchCount(job, selectedTags) {
-  if (!Array.isArray(job.tags)) return 0;
-  return selectedTags.filter(tag => job.tags.includes(tag)).length;
+  const jobTags = getNormalizedJobTags(job.tags);
+  return selectedTags.filter(tag => jobTags.includes(tag)).length;
 }
 
 function updateJobFilterOptions() {
@@ -234,7 +234,7 @@ function updateJobFilterOptions() {
   const previousTags = new Set(
     Array.from(tagOptions.querySelectorAll('input[name="tagFilter"]:checked')).map(input => input.value)
   );
-  const tags = [...new Set(cachedJobs.flatMap(job => Array.isArray(job.tags) ? job.tags : []))]
+  const tags = [...new Set(cachedJobs.flatMap(job => getNormalizedJobTags(job.tags)))]
     .sort((a, b) => a.localeCompare(b, "ja"));
   tagOptions.replaceChildren();
   if (tags.length === 0) {
@@ -310,7 +310,7 @@ function openModal(id) {
   document.getElementById("modalTitle").innerText = selectedJob.title;
   document.getElementById("modalJobFreshness").innerText = formatJobFreshness(selectedJob);
   document.getElementById("modalLocation").innerText = selectedJob.location ? `📍 ${selectedJob.location}` : "";
-  document.getElementById("modalSalary").innerText = selectedJob.salary || "給与応相談";
+  document.getElementById("modalSalary").innerText = formatJobSalary(selectedJob);
   document.getElementById("modalCapacity").innerText = `募集人数: ${formatJobCapacity(selectedJob.capacity)}`;
   document.getElementById("modalCapacity").classList.toggle("hidden", selectedJob.capacity <= 0);
   document.getElementById("modalDuties").innerText = selectedJob.duties || "特記事項なし";
@@ -329,18 +329,60 @@ function openModal(id) {
   if (selectedJob.allowance_details) {
     workConditions.push(`<p class="whitespace-pre-wrap"><span class="font-bold">手当・待遇:</span> ${escapeHtml(String(selectedJob.allowance_details))}</p>`);
   }
+  if (selectedJob.pay_condition_details) {
+    workConditions.push(`<p class="whitespace-pre-wrap"><span class="font-bold">給与の支給条件:</span> ${escapeHtml(String(selectedJob.pay_condition_details))}</p>`);
+  }
   document.getElementById("modalWorkConditionsContent").innerHTML = workConditions.join("");
   document.getElementById("modalWorkConditions").classList.toggle("hidden", workConditions.length === 0);
+
+  const requirementDetails = [];
+  const requiredLicenses = Array.isArray(selectedJob.required_licenses)
+    ? [...new Set(selectedJob.required_licenses)]
+    : [];
+  const requiredLicenseSet = new Set(requiredLicenses);
+  const preferredLicenses = Array.isArray(selectedJob.preferred_licenses)
+    ? [...new Set(selectedJob.preferred_licenses)].filter(license => !requiredLicenseSet.has(license))
+    : [];
+  if (requiredLicenses.length) {
+    requirementDetails.push(`<p><span class="font-bold">必須資格:</span> ${requiredLicenses.map(escapeHtml).join("、")}</p>`);
+  }
+  if (preferredLicenses.length) {
+    requirementDetails.push(`<p><span class="font-bold">歓迎資格:</span> ${preferredLicenses.map(escapeHtml).join("、")}</p>`);
+  }
+  if (selectedJob.experience_requirement === "required") {
+    requirementDetails.push('<p><span class="font-bold">実務経験:</span> 必須</p>');
+  } else if (selectedJob.experience_requirement === "preferred") {
+    requirementDetails.push('<p><span class="font-bold">実務経験:</span> 経験者歓迎（未経験可）</p>');
+  }
+  if (selectedJob.experience_requirement_details) {
+    requirementDetails.push(`<p class="whitespace-pre-wrap"><span class="font-bold">経験の詳細:</span> ${escapeHtml(String(selectedJob.experience_requirement_details))}</p>`);
+  }
+  document.getElementById("modalApplicationRequirementsContent").innerHTML = requirementDetails.join("");
+  document.getElementById("modalApplicationRequirements").classList.toggle("hidden", requirementDetails.length === 0);
   document.getElementById("modalClosed").classList.toggle("hidden", !selectedJobIsClosed);
   updateModalFavoriteButton();
 
   const tagsContainer = document.getElementById("modalTags");
-  tagsContainer.innerHTML = selectedJob.tags ? selectedJob.tags.map(t => `<span class="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded font-bold">${escapeHtml(t)}</span>`).join("") : '';
+  tagsContainer.innerHTML = getNormalizedJobTags(selectedJob.tags).map(tag => `<span class="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded font-bold">${escapeHtml(tag)}</span>`).join("");
 
   const modal = document.getElementById("jobModal");
   modal.classList.remove("hidden");
   modal.classList.add("flex");
   document.getElementById("jobModalContent").scrollTop = 0;
+}
+
+function formatJobSalary(job) {
+  const payTypeLabels = { hourly: "時給", daily: "日給", monthly: "月給" };
+  const payType = getJobPayType(job);
+  const minimum = Number(job.pay_amount) || 0;
+  const maximum = Number(job.pay_amount_max) || 0;
+  if (payType && (minimum > 0 || maximum > 0)) {
+    const range = minimum > 0
+      ? `${minimum.toLocaleString()}円${maximum > 0 ? `〜${maximum.toLocaleString()}円` : "〜"}`
+      : `〜${maximum.toLocaleString()}円`;
+    return `${payTypeLabels[payType]} ${range}`;
+  }
+  return job.salary || "給与応相談";
 }
 
 async function generateAIDuties() {

@@ -261,10 +261,45 @@
                 <option value="daily">日給</option>
                 <option value="monthly">月給</option>
               </select>
-              <input type="number" id="jobPayAmount" min="1" max="100000000" step="1" placeholder="金額（円）" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+              <input type="number" id="jobPayAmount" min="1" max="100000000" step="1" placeholder="下限金額（円）" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
             </div>
-            <p class="text-xs text-gray-500 mt-1">給与額で検索できるよう、区分と金額を入力してください。</p>
+            <label class="mt-2 block text-sm">上限金額（任意・円）
+              <input type="number" id="jobPayAmountMax" min="1" max="100000000" step="1" placeholder="例: 20000" class="mt-1 w-full rounded border px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+            </label>
+            <label class="mt-2 block text-sm">給与の支給条件（任意）
+              <textarea id="jobPayConditionDetails" rows="2" maxlength="500" placeholder="例: 毎月末締め・翌月25日払い／昇給あり／賞与年2回" class="mt-1 w-full rounded border px-3 py-2.5 text-sm"></textarea>
+            </label>
+            <p class="text-xs text-gray-500 mt-1">給与区分・金額の単位を明記できます。上限を入力する場合は下限も入力してください。支給日や昇給・賞与なども記載できます。</p>
           </div>
+
+          <fieldset class="rounded-xl border border-gray-200 p-4">
+            <legend class="px-1 text-sm font-bold text-gray-800">資格・経験の応募条件（任意）</legend>
+            <p class="mb-3 text-xs text-gray-600">資格は「必須」と「歓迎」を分けて設定できます。該当する場合だけ選択してください。</p>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <details>
+                  <summary class="cursor-pointer rounded-lg bg-gray-50 px-3 py-2 text-sm font-bold text-gray-700">必須資格を選ぶ</summary>
+                  <div id="jobRequiredLicenseOptions" class="mt-2 grid grid-cols-1 gap-2"></div>
+                </details>
+              </div>
+              <div>
+                <details>
+                  <summary class="cursor-pointer rounded-lg bg-gray-50 px-3 py-2 text-sm font-bold text-gray-700">歓迎資格を選ぶ</summary>
+                  <div id="jobPreferredLicenseOptions" class="mt-2 grid grid-cols-1 gap-2"></div>
+                </details>
+              </div>
+            </div>
+            <label class="mt-4 block text-sm">実務経験
+              <select id="jobExperienceRequirement" class="mt-1 w-full rounded border px-3 py-2.5 text-sm">
+                <option value="none">指定なし</option>
+                <option value="preferred">経験者歓迎（未経験可）</option>
+                <option value="required">実務経験必須</option>
+              </select>
+            </label>
+            <label class="mt-3 block text-sm">必要・歓迎する経験の詳細（任意）
+              <textarea id="jobExperienceRequirementDetails" rows="2" maxlength="500" placeholder="例: 足場の組立経験がある方歓迎。未経験の方には先輩が指導します。" class="mt-1 w-full rounded border px-3 py-2.5 text-sm"></textarea>
+            </label>
+          </fieldset>
 
           <div class="grid grid-cols-2 gap-4">
             <div>
@@ -290,21 +325,29 @@
                   </div>
 
 
-          <!-- 現場特化タグ選択 (12種類) -->
+          <!-- 現場特化タグ選択 -->
           <div>
             <label class="block text-sm font-medium mb-1">現場アピールタグ（複数選択可）</label>
+            <p class="mb-2 text-xs text-gray-500">該当する条件を実際に提供できる場合だけ選択してください。金額や対象条件は手当・給与欄に詳しく記載できます。</p>
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
-              <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="日払い・手渡しOK"> <span>💰 日払い・手渡し</span></label>
+              <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="日払いOK"> <span>💰 日払いOK</span></label>
+              <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="手渡しOK"> <span>💴 給与手渡しOK</span></label>
               <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="現場直行直帰OK"> <span>🚗 現場直行直帰</span></label>
               <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="マイカー・バイク通勤可"> <span>🅿️ マイカー通勤可</span></label>
-              <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="雨天時給料保証あり"> <span>☔️ 雨天給料保証</span></label>
+              <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="雨天時休業補償あり"> <span>☔️ 雨天時の休業補償</span></label>
               <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="寮・社宅完備"> <span>🏠 寮・社宅あり</span></label>
-              <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="未経験・即日OK"> <span>⚡️ 即日・未経験OK</span></label>
-              <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="夜勤・高収入"> <span>🌙 夜勤・高収入</span></label>
-              <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="残業ほぼナシ"> <span>⏰ 残業ほぼナシ</span></label>
+              <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="未経験歓迎"> <span>🌱 未経験歓迎</span></label>
+              <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="即日勤務OK"> <span>⚡️ 即日勤務OK</span></label>
+              <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="夜勤あり"> <span>🌙 夜勤あり</span></label>
+              <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="残業ほぼナシ"> <span>⏰ 残業ほぼなし</span></label>
               <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="道具・作業着支給"> <span>🧰 道具・作業着支給</span></label>
               <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="資格取得支援"> <span>🎓 資格取得支援</span></label>
-              <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="週1〜OK・シフト自由"> <span>📅 週1〜・シフト自由</span></label>
+              <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="週1日〜OK"> <span>📅 週1日〜OK</span></label>
+              <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="シフト相談可"> <span>🗓️ シフト相談可</span></label>
+              <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="交通費支給"> <span>🚃 交通費支給</span></label>
+              <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="社会保険完備"> <span>🛡️ 社会保険完備</span></label>
+              <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="日曜休み"> <span>🌤️ 日曜休み</span></label>
+              <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="送迎あり"> <span>🚐 送迎あり</span></label>
               <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="ミドル・シニア活躍中"> <span>👴 ミドル・シニア活躍</span></label>
             </div>
           </div>
@@ -602,7 +645,7 @@
         <fieldset class="mb-4">
           <legend class="mb-2 text-sm font-bold text-gray-700">人気の条件から探す</legend>
           <div class="flex flex-wrap gap-2">
-            <button type="button" data-quick-job-tag="未経験・即日OK" aria-pressed="false" onclick="toggleQuickJobTag('未経験・即日OK')" class="min-h-10 rounded-full border border-blue-200 bg-white px-3 py-2 text-sm font-medium text-blue-900 hover:bg-blue-100">未経験歓迎</button>
+            <button type="button" data-quick-job-tag="未経験歓迎" aria-pressed="false" onclick="toggleQuickJobTag('未経験歓迎')" class="min-h-10 rounded-full border border-blue-200 bg-white px-3 py-2 text-sm font-medium text-blue-900 hover:bg-blue-100">未経験歓迎</button>
             <button type="button" data-quick-job-tag="寮・社宅完備" aria-pressed="false" onclick="toggleQuickJobTag('寮・社宅完備')" class="min-h-10 rounded-full border border-blue-200 bg-white px-3 py-2 text-sm font-medium text-blue-900 hover:bg-blue-100">寮・社宅あり</button>
             <button type="button" data-quick-job-tag="資格取得支援" aria-pressed="false" onclick="toggleQuickJobTag('資格取得支援')" class="min-h-10 rounded-full border border-blue-200 bg-white px-3 py-2 text-sm font-medium text-blue-900 hover:bg-blue-100">資格取得支援</button>
           </div>
@@ -760,8 +803,13 @@
       </div>
 
       <section id="modalWorkConditions" class="mb-6 hidden rounded-lg border border-gray-200 bg-gray-50 p-4">
-        <h3 class="mb-2 text-sm font-bold text-gray-900">勤務時間・手当</h3>
+        <h3 class="mb-2 text-sm font-bold text-gray-900">勤務時間・給与条件・手当</h3>
         <div id="modalWorkConditionsContent" class="space-y-2 text-sm leading-6 text-gray-700"></div>
+      </section>
+
+      <section id="modalApplicationRequirements" class="mb-6 hidden rounded-lg border border-blue-100 bg-blue-50 p-4">
+        <h3 class="mb-2 text-sm font-bold text-gray-900">資格・経験の応募条件</h3>
+        <div id="modalApplicationRequirementsContent" class="space-y-2 text-sm leading-6 text-gray-700"></div>
       </section>
 
       <div class="border-t mt-4 pt-4">

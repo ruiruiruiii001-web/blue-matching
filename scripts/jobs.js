@@ -32,6 +32,15 @@ async function publishJob() {
   const payType = document.getElementById("jobPayType").value;
   const payAmountValue = document.getElementById("jobPayAmount").value;
   const payAmount = payAmountValue ? Number(payAmountValue) : null;
+  const payAmountMaxValue = document.getElementById("jobPayAmountMax").value;
+  const payAmountMax = payAmountMaxValue ? Number(payAmountMaxValue) : null;
+  const payConditionDetails = document.getElementById("jobPayConditionDetails").value.trim();
+  const requiredLicenses = getCheckedValues("jobRequiredLicense");
+  const requiredLicenseSet = new Set(requiredLicenses);
+  const preferredLicenses = getCheckedValues("jobPreferredLicense")
+    .filter(license => !requiredLicenseSet.has(license));
+  const experienceRequirement = document.getElementById("jobExperienceRequirement").value;
+  const experienceRequirementDetails = document.getElementById("jobExperienceRequirementDetails").value.trim();
   const breakMinutesValue = document.getElementById("jobBreakMinutes").value.trim();
   const breakMinutes = breakMinutesValue ? Number(breakMinutesValue) : null;
   const overtimeDetails = document.getElementById("jobOvertimeDetails").value.trim();
@@ -47,8 +56,9 @@ async function publishJob() {
   }
 
   if (title.length > 80 || location.length > 100 || salary.length > 100 || duties.length > 2000 ||
-      overtimeDetails.length > 300 || allowanceDetails.length > 1000) {
-    alert("職種名は80文字、勤務地と給与表記は100文字、仕事内容は2,000文字、残業の目安は300文字、手当・待遇は1,000文字以内で入力してください。");
+      overtimeDetails.length > 300 || allowanceDetails.length > 1000 ||
+      payConditionDetails.length > 500 || experienceRequirementDetails.length > 500) {
+    alert("入力欄の文字数上限を超えています。求人情報を短くして再度お試しください。");
     return;
   }
 
@@ -95,6 +105,13 @@ async function publishJob() {
     return;
   }
 
+  if ((payAmountMax !== null &&
+       (!payType || !Number.isInteger(payAmountMax) || payAmountMax <= 0 || payAmountMax > 100000000 || !payAmount)) ||
+      (payAmount !== null && payAmountMax !== null && payAmountMax < payAmount)) {
+    alert("給与上限を入力する場合は、給与区分と下限も入力し、上限を下限以上にしてください。金額は1〜100,000,000円の整数です。");
+    return;
+  }
+
   const jobData = {
     title, location, salary, phone: normalizedPhone, line, duties, capacity,
     work_style: workPreferences.some(value => ["employment:spot", "employment:short_term"].includes(value)) ? "short" : "regular",
@@ -107,7 +124,13 @@ async function publishJob() {
     pay_type: payType || null,
 
     pay_amount: payAmount,
-    tags: checkedTags,
+    pay_amount_max: payAmountMax,
+    pay_condition_details: payConditionDetails,
+    required_licenses: requiredLicenses,
+    preferred_licenses: preferredLicenses,
+    experience_requirement: experienceRequirement,
+    experience_requirement_details: experienceRequirementDetails,
+    tags: getNormalizedJobTags(checkedTags),
     image_url: document.getElementById("jobImageUrl").value.trim() || null,
     ...(!editingJobId && { owner_id: currentUser.id })
   };
@@ -159,12 +182,23 @@ function editJob(id) {
   document.getElementById("jobPayType").value = getJobPayType(job);
   const payAmount = getJobPayAmount(job);
   document.getElementById("jobPayAmount").value = payAmount > 0 ? String(payAmount) : "";
+  document.getElementById("jobPayAmountMax").value = job.pay_amount_max ?? "";
+  document.getElementById("jobPayConditionDetails").value = job.pay_condition_details || "";
+  const requiredLicenses = Array.isArray(job.required_licenses) ? [...new Set(job.required_licenses)] : [];
+  const requiredLicenseSet = new Set(requiredLicenses);
+  const preferredLicenses = (Array.isArray(job.preferred_licenses) ? [...new Set(job.preferred_licenses)] : [])
+    .filter(license => !requiredLicenseSet.has(license));
+  setCheckedValues("jobRequiredLicense", requiredLicenses);
+  setCheckedValues("jobPreferredLicense", preferredLicenses);
+  document.getElementById("jobExperienceRequirement").value = job.experience_requirement || "none";
+  document.getElementById("jobExperienceRequirementDetails").value = job.experience_requirement_details || "";
   document.getElementById("jobPhone").value = job.phone || "";
   document.getElementById("jobLine").value = job.line || "";
   document.getElementById("jobDuties").value = job.duties || "";
   document.getElementById("jobCapacity").value = getCapacityOptionValue(job.capacity);
+  const jobTags = getNormalizedJobTags(job.tags);
   document.querySelectorAll('input[name="jobTag"]').forEach(cb => {
-    cb.checked = Array.isArray(job.tags) && job.tags.includes(cb.value);
+    cb.checked = jobTags.includes(cb.value);
   });
   document.getElementById("jobFormHeading").innerText = "求人情報を編集";
   document.getElementById("jobSubmitButton").innerText = "変更を保存";
@@ -204,6 +238,12 @@ function cancelJobEdit() {
   document.getElementById("jobAllowanceDetails").value = "";
   document.getElementById("jobPayType").value = "";
   document.getElementById("jobPayAmount").value = "";
+  document.getElementById("jobPayAmountMax").value = "";
+  document.getElementById("jobPayConditionDetails").value = "";
+  setCheckedValues("jobRequiredLicense", []);
+  setCheckedValues("jobPreferredLicense", []);
+  document.getElementById("jobExperienceRequirement").value = "none";
+  document.getElementById("jobExperienceRequirementDetails").value = "";
   document.getElementById("jobPhone").value = "";
   document.getElementById("jobLine").value = "";
   document.getElementById("jobDuties").value = "";
