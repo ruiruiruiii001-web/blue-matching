@@ -32,11 +32,11 @@
   </header>
 
   <aside id="loginNotificationBanner" class="hidden border-b border-amber-200 bg-amber-50 px-4 py-3" role="status" aria-live="polite">
-    <div class="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2">
-      <p id="loginNotificationMessage" class="text-sm font-medium text-amber-950"></p>
-      <div class="flex items-center gap-3">
-        <button type="button" onclick="openAccountNotifications()" class="min-h-10 rounded-lg bg-amber-700 px-3 py-2 text-xs font-bold text-white hover:bg-amber-800">マイページで確認</button>
-        <button type="button" aria-label="通知案内を閉じる" onclick="dismissLoginNotificationBanner()" class="flex h-10 w-10 items-center justify-center rounded-full text-xl text-amber-900 hover:bg-amber-100">×</button>
+    <div class="mx-auto flex max-w-5xl flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <p id="loginNotificationMessage" class="min-w-0 text-sm font-medium text-amber-950"></p>
+      <div class="flex shrink-0 items-center justify-end gap-2">
+        <button type="button" onclick="openAccountNotifications()" class="min-h-10 rounded-lg bg-amber-700 px-4 py-2 text-xs font-bold text-white hover:bg-amber-800">マイページで確認</button>
+        <button type="button" aria-label="通知案内を閉じる" onclick="dismissLoginNotificationBanner()" class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xl text-amber-900 hover:bg-amber-100">×</button>
       </div>
     </div>
   </aside>

@@ -211,6 +211,7 @@ function openAccountPanel() {
 function openAccountNotifications() {
   if (!dashboardOpen) openAccountPanel();
   if (accountType === "seeker") showDashboardView("notifications");
+  else if (accountType === "employer") showEmployerDashboardView("messages");
 }
 
 function openLoginPanel(toggle = true) {
