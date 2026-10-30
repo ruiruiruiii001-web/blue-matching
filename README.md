@@ -87,3 +87,5 @@ Supabase標準メール送信はテスト向けで送信数が非常に限られ
 - [`supabase/migrations/20261026_add_job_status.sql`](./supabase/migrations/20261026_add_job_status.sql)
 - [`supabase/migrations/20261026_add_job_location.sql`](./supabase/migrations/20261026_add_job_location.sql)
 - [`supabase/migrations/20261026_add_job_pay.sql`](./supabase/migrations/20261026_add_job_pay.sql)
+
+応募を取り下げる機能を有効にするには、上記の応募・RLS移行の後に `supabase/migrations/20261030_allow_application_withdrawal.sql` をSupabase SQL Editorで一度実行してください。求職者は企業が確認する前の応募だけを取り下げられ、取り下げ後も企業側には状態が残ります。応募記録は削除せず、同じ求人への再応募もできません。

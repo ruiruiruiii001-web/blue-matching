@@ -34,17 +34,22 @@ function renderAccountDashboard() {
               ⭐ 評価する
               </button>
             ` : ''}
-              <span class="inline-flex rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest ${formatApplicationStatusClass(application.status)}">${formatApplicationStatus(application.status)}</span>
+              <span class="inline-flex rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest ${application.status === "withdrawn" ? "bg-rose-100 text-rose-800" : formatApplicationStatusClass(application.status)}">${application.status === "withdrawn" ? "取り下げ" : formatApplicationStatus(application.status)}</span>
             </div>
           </div>
           <div class="flex items-center justify-between">
             <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
               Applied on: <span class="text-gray-600">${formatDashboardDate(application.created_at)}</span>
             </div>
-            <p class="text-xs font-bold ${application.status === 'reviewed' ? 'text-emerald-600' : 'text-blue-500'} flex items-center gap-1">
-              ${application.status === 'reviewed' ? '✅' : '⏳'} ${formatApplicationStatusDescription(application.status)}
+            <p class="text-xs font-bold ${application.status === 'reviewed' ? 'text-emerald-600' : application.status === 'withdrawn' ? 'text-rose-700' : 'text-blue-500'} flex items-center gap-1">
+              ${application.status === 'reviewed' ? '✅' : application.status === 'withdrawn' ? '↩️' : '⏳'} ${application.status === 'withdrawn' ? '応募を取り下げました。企業にも取り下げ済みとして表示されます。' : formatApplicationStatusDescription(application.status)}
             </p>
           </div>
+          ${application.status === "pending" ? `
+            <button type="button" onclick="withdrawApplication('${escapeHtml(String(application.id))}')" class="mt-4 min-h-11 w-full rounded-xl border border-rose-200 bg-white px-4 py-2 text-sm font-bold text-rose-700 hover:bg-rose-50 transition-colors">
+              応募を取り下げる
+            </button>
+          ` : ""}
         </article>
       `).join("")
       : '<div class="text-center py-12 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200"><p class="text-xs text-gray-400 font-bold uppercase tracking-widest">No Applications Yet</p></div>'}

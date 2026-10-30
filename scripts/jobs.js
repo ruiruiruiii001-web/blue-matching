@@ -124,7 +124,8 @@ function editJob(id) {
   const job = cachedJobs.find(item => item.id === id);
   if (!currentUser || accountType !== "employer" || !job || job.owner_id !== currentUser.id) return;
 
-        editingJobId = id;
+  if (dashboardOpen) closeAccountPanel();
+  editingJobId = id;
   document.getElementById("jobTitle").value = job.title || "";
   document.getElementById("jobWorkStyle").value = job.work_style || "regular";
   document.getElementById("jobImageUrl").value = job.image_url || "";

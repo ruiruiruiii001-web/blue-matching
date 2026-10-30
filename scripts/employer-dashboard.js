@@ -60,12 +60,12 @@ function renderEmployerDashboard(resetLimit = false) {
                   <span class="px-2 py-0.5 rounded-full ${job.is_closed ? 'bg-gray-100 text-gray-400' : 'bg-emerald-50 text-emerald-600'} text-[10px] font-bold border border-current/10 uppercase">${job.is_closed ? "募集終了" : "募集中"}</span>
                 </div>
               </div>
-              <div class="flex gap-1.5">
-                <button type="button" onclick="editJob(${job.id})" class="h-9 w-9 flex items-center justify-center rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors" title="求人を編集">
-                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+              <div class="flex flex-wrap justify-end gap-2">
+                <button type="button" onclick="editJob(${job.id})" class="min-h-10 rounded-lg bg-blue-50 px-3 py-2 text-xs font-bold text-blue-700 hover:bg-blue-100 transition-colors">
+                  編集
                 </button>
-                <button type="button" onclick="toggleJobClosed(${job.id})" class="h-9 w-9 flex items-center justify-center rounded-lg bg-gray-50 text-gray-600 hover:bg-gray-100 transition-colors" title="${job.is_closed ? '募集を再開' : '募集を終了'}">
-                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+                <button type="button" onclick="toggleJobClosed(${job.id})" class="min-h-10 rounded-lg bg-gray-50 px-3 py-2 text-xs font-bold text-gray-700 hover:bg-gray-100 transition-colors">
+                  ${job.is_closed ? "募集を再開" : "募集を終了"}
                 </button>
               </div>
             </div>
@@ -96,7 +96,7 @@ function renderEmployerDashboard(resetLimit = false) {
                 <p class="mt-1 text-[10px] text-gray-400 uppercase tracking-widest font-bold">応募日時: ${formatDashboardDate(application.created_at)}</p>
               </div>
               <div class="flex flex-col items-end gap-2 shrink-0">
-                <span class="inline-flex rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-widest ${formatApplicationStatusClass(application.status)}">${formatApplicationStatus(application.status)}</span>
+                <span class="inline-flex rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-widest ${application.status === "withdrawn" ? "bg-rose-100 text-rose-800" : formatApplicationStatusClass(application.status)}">${application.status === "withdrawn" ? "取り下げ" : formatApplicationStatus(application.status)}</span>
               </div>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs mb-4 bg-gray-50/80 p-4 rounded-xl border border-gray-100">
@@ -127,6 +127,8 @@ function renderEmployerDashboard(resetLimit = false) {
                 <button type="button" onclick="updateApplicationStatus('${escapeHtml(String(application.id))}', 'reviewed')" class="flex-1 h-11 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-black text-white hover:bg-emerald-700 transition-all shadow-md shadow-emerald-100">確認済みにする</button>
                 <button type="button" onclick="updateApplicationStatus('${escapeHtml(String(application.id))}', 'dismissed')" class="flex-1 h-11 rounded-xl border border-gray-200 bg-white px-4 py-2 text-xs font-black text-gray-500 hover:bg-gray-50 transition-all">対応不要</button>
               </div>
+            ` : application.status === "withdrawn" ? `
+              <p class="mt-5 rounded-lg bg-rose-50 px-3 py-2 text-sm font-bold text-rose-800">応募者が応募を取り下げました。</p>
             ` : `
               <div class="mt-5 border-t border-gray-50 pt-4 flex justify-between items-center">
                 <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Status: ${formatApplicationStatus(application.status)}</p>

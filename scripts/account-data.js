@@ -75,3 +75,43 @@ async function updateApplicationStatus(applicationId, status) {
 
   await loadAccountData(currentUser);
 }
+
+async function withdrawApplication(applicationId) {
+  if (!currentUser || accountType !== "seeker") return;
+  const application = accountApplications.find(item =>
+    String(item.id) === String(applicationId) &&
+    item.applicant_id === currentUser.id &&
+    item.status === "pending"
+  );
+  if (!application) return;
+  if (!confirm(`「${application.job_title}」への応募を取り下げますか？取り下げ後は元に戻せません。`)) return;
+
+  const applicantId = currentUser.id;
+  const statusElement = document.getElementById("dashboardApplicationsStatus");
+  const { data, error } = await supabaseClient
+    .from("job_applications")
+    .update({ status: "withdrawn" })
+    .eq("id", application.id)
+    .eq("applicant_id", applicantId)
+    .eq("status", "pending")
+    .select("*")
+    .maybeSingle();
+
+  if (currentUser?.id !== applicantId || accountType !== "seeker") return;
+  if (error) {
+    console.error("応募取り下げエラー:", error);
+    statusElement.innerText = `応募を取り下げられませんでした: ${error.message}`;
+    statusElement.className = "mb-3 text-sm text-red-700";
+    return;
+  }
+  if (!data) {
+    statusElement.innerText = "応募状況が更新されているため、取り下げられませんでした。画面を再読み込みしてください。";
+    statusElement.className = "mb-3 text-sm text-red-700";
+    return;
+  }
+
+  accountApplications = accountApplications.map(item => item.id === data.id ? data : item);
+  statusElement.innerText = "応募を取り下げました。";
+  statusElement.className = "mb-3 text-sm text-emerald-700";
+  renderAccountDashboard();
+}
