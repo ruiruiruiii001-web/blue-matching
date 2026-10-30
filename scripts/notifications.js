@@ -53,37 +53,52 @@ function getVisibleNotifications() {
   ].filter(Boolean).join(" ");
   status.innerText = notificationStatusText;
   status.classList.toggle("hidden", !notificationStatusText);
-  const notifications = getVisibleNotifications();
+  const notifications = getVisibleNotifications().sort((left, right) => {
+    const readOrder = Number(Boolean(left.read_at)) - Number(Boolean(right.read_at));
+    if (readOrder !== 0) return readOrder;
+    return new Date(right.created_at).getTime() - new Date(left.created_at).getTime();
+  });
+  const unreadNotifications = notifications.filter(notification => !notification.read_at);
+  const readNotifications = notifications.filter(notification => notification.read_at);
+  const renderNotificationGroup = (groupTitle, groupNotifications, isRead) => groupNotifications.length
+    ? `<section aria-label="${groupTitle}" class="mb-6 last:mb-0">
+      <h3 class="mb-3 text-sm font-bold ${isRead ? "text-gray-500" : "text-blue-800"}">${groupTitle}（${groupNotifications.length}件）</h3>
+      ${groupNotifications.map(notification => `
+      <article class="p-5 rounded-2xl border border-gray-100 shadow-sm mb-3 transition-all ${notification.read_at ? "bg-white" : "bg-blue-50/40 border-blue-100"}">
+        <div class="flex items-start justify-between gap-3">
+          <div class="min-w-0">
+            <div class="flex flex-wrap items-center gap-2 mb-1">
+              <span class="flex h-2 w-2 rounded-full ${notification.read_at ? "bg-gray-300" : "bg-blue-600 animate-pulse"}"></span>
+              <p class="font-black text-gray-900">${escapeHtml(String(notification.title || "通知"))}</p>
+              <span class="rounded-full px-2 py-0.5 text-[10px] font-bold ${notification.read_at ? "bg-gray-100 text-gray-600" : "bg-blue-100 text-blue-800"}">${notification.read_at ? "通知既読" : "通知未読"}</span>
+            </div>
+            ${["job_application", "application_message"].includes(notification.event_type)
+              ? renderApplicationNotificationDetails(notification)
+              : `<p class="mt-1 text-sm text-gray-600 leading-relaxed">${escapeHtml(notification.event_type === "contact_reply" ? "求職者から届いた連絡への返信です。" : String(notification.body || ""))}</p>`}
+            <p class="mt-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest">${formatDashboardDate(notification.created_at)}</p>
+            ${notification.event_type === "contact_request" ? renderContactRequestNotification(notification.related_id) : ""}
+            ${notification.event_type === "contact_reply" ? renderContactReplyNotification(notification.related_id) : ""}
+            ${["job_application", "application_message"].includes(notification.event_type)
+              ? `<button type="button" data-application-notification-id="${escapeHtml(String(notification.event_type === "application_message" ? notification.context_id || "" : notification.related_id || ""))}" onclick="openApplicationNotification('${escapeHtml(String(notification.event_type === "application_message" ? notification.context_id || "" : notification.related_id || ""))}', '${escapeHtml(String(notification.id))}', this)" class="mt-3 min-h-10 rounded-lg bg-blue-600 px-3 py-2 text-xs font-bold text-white hover:bg-blue-700">応募内容とメッセージを見る</button>`
+              : ""}
+          </div>
+          ${["job_application", "application_message"].includes(notification.event_type)
+            ? ""
+            : notification.read_at
+            ? ""
+            : `<button type="button" onclick="markNotificationRead('${escapeHtml(String(notification.id))}')" class="shrink-0 rounded-xl bg-blue-600 px-3 py-1.5 text-[10px] font-bold text-white hover:bg-blue-700 transition-all shadow-md shadow-blue-100">${notification.legacy ? "確認" : "既読にする"}</button>`}
+        </div>
+      </article>
+    `).join("")}
+    </section>`
+    : "";
   container.innerHTML = notificationError
     ? ""
     : notifications.length
-      ? notifications.map(notification => `
-        <article class="p-5 rounded-2xl border border-gray-100 shadow-sm mb-3 transition-all ${notification.read_at ? "bg-white" : "bg-blue-50/40 border-blue-100"}">
-          <div class="flex items-start justify-between gap-3">
-            <div class="min-w-0">
-              <div class="flex items-center gap-2 mb-1">
-                <span class="flex h-2 w-2 rounded-full ${notification.read_at ? "bg-gray-300" : "bg-blue-600 animate-pulse"}"></span>
-                <p class="font-black text-gray-900">${escapeHtml(String(notification.title || "通知"))}</p>
-              </div>
-              ${["job_application", "application_message"].includes(notification.event_type)
-                ? renderApplicationNotificationDetails(notification)
-                : `<p class="mt-1 text-sm text-gray-600 leading-relaxed">${escapeHtml(notification.event_type === "contact_reply" ? "求職者から届いた連絡への返信です。" : String(notification.body || ""))}</p>`}
-              <p class="mt-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest">${formatDashboardDate(notification.created_at)}</p>
-              ${notification.event_type === "contact_request" ? renderContactRequestNotification(notification.related_id) : ""}
-              ${notification.event_type === "contact_reply" ? renderContactReplyNotification(notification.related_id) : ""}
-              ${["job_application", "application_message"].includes(notification.event_type)
-                ? `<button type="button" data-application-notification-id="${escapeHtml(String(notification.event_type === "application_message" ? notification.context_id || "" : notification.related_id || ""))}" onclick="openApplicationNotification('${escapeHtml(String(notification.event_type === "application_message" ? notification.context_id || "" : notification.related_id || ""))}', '${escapeHtml(String(notification.id))}', this)" class="mt-3 min-h-10 rounded-lg bg-blue-600 px-3 py-2 text-xs font-bold text-white hover:bg-blue-700">応募内容とメッセージを見る</button>`
-                : ""}
-            </div>
-            ${["job_application", "application_message"].includes(notification.event_type)
-              ? ""
-              : notification.read_at
-              ? '<span class="shrink-0 text-[10px] font-bold text-gray-300 uppercase tracking-tighter">Read</span>'
-              : `<button type="button" onclick="markNotificationRead('${escapeHtml(String(notification.id))}')" class="shrink-0 rounded-xl bg-blue-600 px-3 py-1.5 text-[10px] font-bold text-white hover:bg-blue-700 transition-all shadow-md shadow-blue-100">${notification.legacy ? "確認" : "既読にする"}</button>`}
-          </div>
-        </article>
-      `).join("")
-      : '<div class="text-center py-10 bg-gray-50 rounded-2xl border border-dashed border-gray-200"><p class="text-xs text-gray-400">新しい通知はありません。</p></div>';
+    ? `<p class="mb-4 text-xs text-gray-500">通知を確認したかどうかの表示です。応募の「確認済み」とは別の状態です。</p>
+      ${renderNotificationGroup("未読のお知らせ", unreadNotifications, false)}
+      ${renderNotificationGroup("既読のお知らせ", readNotifications, true)}`
+    : '<div class="text-center py-10 bg-gray-50 rounded-2xl border border-dashed border-gray-200"><p class="text-xs text-gray-400">新しい通知はありません。</p></div>';
 }
 
 function renderApplicationNotificationDetails(notification) {
