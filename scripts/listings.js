@@ -509,13 +509,23 @@ function getJobPayAmount(job) {
 
 function getLocationMatchScore(jobLocation, preferredLocation) {
   const jobArea = String(jobLocation || "").trim();
-  const preferredArea = String(preferredLocation || "").trim();
-  if (!jobArea || !preferredArea) return 0;
-  if (jobArea.includes(preferredArea) || preferredArea.includes(jobArea)) return 2;
-
-  const jobPrefecture = getPrefecture(jobArea);
-  const preferredPrefecture = getPrefecture(preferredArea);
-  return jobPrefecture && jobPrefecture === preferredPrefecture ? 1 : 0;
+  const normalizedJobArea = jobArea.replace(/\s+/g, "").toLocaleLowerCase();
+  if (!normalizedJobArea) return 0;
+  return getLocationPreferenceEntries(preferredLocation).reduce((bestScore, preferredArea) => {
+    const normalizedPreferredArea = preferredArea.replace(/\s+/g, "").toLocaleLowerCase();
+    const preferredPrefecture = getPrefecture(preferredArea);
+    const isPrefectureOnly = preferredPrefecture &&
+      normalizedPreferredArea === preferredPrefecture.toLocaleLowerCase();
+    if (normalizedJobArea.includes(normalizedPreferredArea)) {
+      return Math.max(bestScore, isPrefectureOnly ? 1 : 2);
+    }
+    if (normalizedPreferredArea.includes(normalizedJobArea)) {
+      return Math.max(bestScore, 1);
+    }
+    return preferredPrefecture && preferredPrefecture === getPrefecture(jobArea)
+      ? Math.max(bestScore, 1)
+      : bestScore;
+  }, 0);
 }
 
 function getJobMatchScore(job, profile) {

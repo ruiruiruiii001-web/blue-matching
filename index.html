@@ -243,10 +243,12 @@
             <legend class="px-1 text-sm font-bold text-gray-800">勤務時間・手当（任意）</legend>
             <div class="grid grid-cols-2 gap-3">
               <label class="text-sm">始業時間
-                <input id="jobStartTime" type="time" class="mt-1 w-full rounded border px-3 py-2.5">
+                <span class="mt-1 block text-xs text-gray-500">勤務を開始する時刻</span>
+                <input id="jobStartTime" type="time" class="mt-1 h-11 w-full rounded border px-3 py-2.5">
               </label>
               <label class="text-sm">終業時間
-                <input id="jobEndTime" type="time" class="mt-1 w-full rounded border px-3 py-2.5">
+                <span class="mt-1 block text-xs text-gray-500">勤務を終了する時刻</span>
+                <input id="jobEndTime" type="time" class="mt-1 h-11 w-full rounded border px-3 py-2.5">
               </label>
               <label class="col-span-2 text-sm sm:col-span-1">休憩時間（分）
                 <input id="jobBreakMinutes" type="number" min="0" max="1440" step="1" placeholder="例: 60" class="mt-1 w-full rounded border px-3 py-2.5">
@@ -324,15 +326,15 @@
             </label>
           </fieldset>
 
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-medium mb-1">連絡用電話番号 <span class="text-red-500">*</span></label>
-              <input type="tel" id="jobPhone" maxlength="20" required placeholder="例: 09012345678" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-            </div>
-            <div>
-              <label class="block text-sm font-medium mb-1">LINE ID / 公式URL (任意)</label>
-              <input type="text" id="jobLine" maxlength="200" placeholder="例: line_id_123" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-            </div>
+          <div class="grid grid-cols-2 items-end gap-4">
+            <label class="flex flex-col text-sm font-medium">
+              <span class="mb-1 flex min-h-10 items-end">連絡用電話番号 <span class="ml-1 text-red-500">*</span></span>
+              <input type="tel" id="jobPhone" maxlength="20" required placeholder="例: 09012345678" class="h-11 w-full rounded border px-3 py-2.5 text-sm font-normal focus:ring-2 focus:ring-blue-500 outline-none">
+            </label>
+            <label class="flex flex-col text-sm font-medium">
+              <span class="mb-1 flex min-h-10 items-end">LINE ID / 公式URL（任意）</span>
+              <input type="text" id="jobLine" maxlength="200" placeholder="例: line_id_123" class="h-11 w-full rounded border px-3 py-2.5 text-sm font-normal focus:ring-2 focus:ring-blue-500 outline-none">
+            </label>
           </div>
 
                   <div>
@@ -478,11 +480,23 @@
           <p class="text-xs text-gray-500 mt-1">選んだ職種と求人の職種名・仕事内容の一致をおすすめ順に反映します。</p>
         </div>
 
-        <div>
-          <label class="block text-sm font-medium mb-1">希望勤務地（都道府県・市区町村まで）</label>
-          <input type="text" id="seekerLocation" maxlength="100" placeholder="例: 神奈川県横浜市" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-          <p class="text-xs text-gray-500 mt-1">番地・建物名など詳しい住所は入力しないでください。登録した地域に近い求人を一覧で優先します（距離計算ではありません）。</p>
-        </div>
+        <details id="seekerLocationPreferences" data-selection-name="seekerLocationPrefecture" class="rounded-xl border border-blue-100 bg-blue-50">
+          <summary class="flex cursor-pointer list-none items-center justify-between gap-3 p-4 text-sm font-bold text-gray-800">
+            <span>希望勤務地（複数選択可）</span>
+            <span class="flex shrink-0 items-center gap-2 text-xs font-normal">
+              <span data-selected-count class="text-gray-600">希望エリア 0件</span>
+              <span class="rounded-full bg-white px-2 py-1 font-bold text-blue-700 shadow-sm" data-toggle-label>選択肢を開く</span>
+              <span class="text-blue-700" data-toggle-icon aria-hidden="true">▼</span>
+            </span>
+          </summary>
+          <div class="space-y-3 px-4 pb-4">
+            <p class="text-xs leading-5 text-gray-600">地方を開いて都道府県を選び、必要なら市区町村を入力してください。希望地のいずれかに合う求人をおすすめ順で優先します。番地・建物名は入力しないでください。</p>
+            <div id="seekerLocationPrefectureOptions" class="space-y-2"></div>
+            <label class="block text-sm">その他の希望地域（任意）
+              <input type="text" id="seekerLocation" maxlength="100" placeholder="例: 横浜市周辺、東京都内" class="mt-1 h-11 w-full rounded border px-3 py-2.5 text-sm font-normal focus:ring-2 focus:ring-blue-500 outline-none">
+            </label>
+          </div>
+        </details>
 
         <div class="bg-blue-50 p-3 rounded border border-blue-100 space-y-3">
           <p class="text-sm font-bold text-gray-700">希望給与条件（任意）</p>

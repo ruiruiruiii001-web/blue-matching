@@ -148,7 +148,9 @@ function renderEmployerSeekerSearch(resetLimit = false) {
   if (seekerSearchFilterOptionsUserId !== currentUser.id &&
       employerPublicSeekersUserId === currentUser.id) {
     const selectedLocation = location;
-    const locations = [...new Set(employerPublicSeekers.map(profile => String(profile.location || "").trim()).filter(Boolean))]
+    const locations = [...new Set(employerPublicSeekers.flatMap(profile =>
+      getLocationPreferenceEntries(profile.location)
+    ))]
       .sort((left, right) => left.localeCompare(right, "ja"));
     const locationSelect = document.getElementById("seekerSearchLocation");
     locationSelect.innerHTML = '<option value="">すべての勤務地</option>';
@@ -181,7 +183,7 @@ function renderEmployerSeekerSearch(resetLimit = false) {
         ...(Array.isArray(profile.licenses) ? profile.licenses : [])
       ].join(" ").toLocaleLowerCase();
       return (!keyword || searchableText.includes(keyword)) &&
-        (!location || String(profile.location || "").trim() === location) &&
+        (!location || getLocationPreferenceEntries(profile.location).includes(location)) &&
         (!experience || profile.exp_years === experience) &&
         (!payType || profile.pay_type === payType) &&
         (!selectedLicenses.length ||

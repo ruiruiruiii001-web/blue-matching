@@ -32,7 +32,7 @@ async function saveSeekerProfile() {
     phone: normalizeJapanesePhone(document.getElementById("seekerPhone").value.trim()),
     avatarUrl: document.getElementById("seekerAvatarUrl").value.trim(),
     jobType,
-    location: document.getElementById("seekerLocation").value.trim(),
+    location: getLocationPreferencesFromForm(),
     payType: preferredPayType,
     minimumSalary: preferredMinimumSalary,
     licenses: checkedLic,
@@ -49,6 +49,10 @@ async function saveSeekerProfile() {
   }
   if (profile.phone && !isValidJapanesePhone(profile.phone)) {
     alert("電話番号は日本の電話番号を入力してください（例: 09012345678）。");
+    return;
+  }
+  if (profile.location.length > 500) {
+    alert("希望勤務地は全体で500文字以内にしてください。");
     return;
   }
 
@@ -130,7 +134,7 @@ function loadSeekerProfile(profile) {
     .filter(value => !JOB_TYPE_OPTIONS.includes(value))
     .join("、");
 
-  document.getElementById("seekerLocation").value = profile.location || "";
+  setLocationPreferences(profile.location || "");
   document.getElementById("seekerPayType").value = profile.payType || "";
   document.getElementById("seekerMinimumSalary").value = profile.minimumSalary ?? "";
   setCheckedValues("seekerWorkPreference", profile.workPreferences);
@@ -161,7 +165,7 @@ function loadSeekerProfile(profile) {
   setCheckedValues("seekerJobTypeOption", []);
   document.getElementById("seekerOtherLicenses").value = "";
 
-  document.getElementById("seekerLocation").value = "";
+  setLocationPreferences("");
   document.getElementById("seekerPayType").value = "";
   document.getElementById("seekerMinimumSalary").value = "";
   setCheckedValues("seekerLic", []);

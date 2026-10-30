@@ -21,6 +21,18 @@ const LEGACY_JOB_TAG_ALIASES = {
   "週1〜OK・シフト自由": ["週1日〜OK", "シフト相談可"]
 };
 
+const PREFECTURE_GROUPS = [
+  ["北海道・東北", ["北海道", "青森県", "岩手県", "宮城県", "秋田県", "山形県", "福島県"]],
+  ["関東", ["茨城県", "栃木県", "群馬県", "埼玉県", "千葉県", "東京都", "神奈川県"]],
+  ["中部", ["新潟県", "富山県", "石川県", "福井県", "山梨県", "長野県", "岐阜県", "静岡県", "愛知県"]],
+  ["近畿", ["三重県", "滋賀県", "京都府", "大阪府", "兵庫県", "奈良県", "和歌山県"]],
+  ["中国", ["鳥取県", "島根県", "岡山県", "広島県", "山口県"]],
+  ["四国", ["徳島県", "香川県", "愛媛県", "高知県"]],
+  ["九州・沖縄", ["福岡県", "佐賀県", "長崎県", "熊本県", "大分県", "宮崎県", "鹿児島県", "沖縄県"]]
+];
+
+const PREFECTURES = PREFECTURE_GROUPS.flatMap(([, prefectures]) => prefectures);
+
 function getNormalizedJobTags(values) {
   const tags = Array.isArray(values) ? values : [];
   return [...new Set(tags.flatMap(tag => LEGACY_JOB_TAG_ALIASES[tag] || [tag]))];
@@ -118,6 +130,139 @@ function renderWorkPreferenceOptions(containerId, inputName) {
   }));
 }
 
+function renderLocationPreferenceOptions() {
+  const container = document.getElementById("seekerLocationPrefectureOptions");
+  if (!container) return;
+  container.replaceChildren(...PREFECTURE_GROUPS.map(([region, prefectures], regionIndex) => {
+    const regionDetails = document.createElement("details");
+    regionDetails.dataset.prefectureRegion = "";
+    regionDetails.className = "rounded-lg border border-blue-100 bg-white";
+    const summary = document.createElement("summary");
+    summary.className = "flex cursor-pointer list-none items-center justify-between px-3 py-2 text-sm font-bold text-gray-700";
+    const regionLabel = document.createElement("span");
+    regionLabel.textContent = region;
+    const icon = document.createElement("span");
+    icon.dataset.regionIcon = "";
+    icon.className = "text-blue-700";
+    icon.setAttribute("aria-hidden", "true");
+    icon.textContent = "▼";
+    summary.append(regionLabel, icon);
+
+    const options = document.createElement("div");
+    options.className = "grid grid-cols-1 gap-2 p-3 sm:grid-cols-2";
+    prefectures.forEach((prefecture, prefectureIndex) => {
+      const option = document.createElement("div");
+      option.className = "rounded-lg border border-gray-100 bg-gray-50 p-2";
+      const label = document.createElement("label");
+      label.className = "flex min-h-9 items-center gap-2 text-sm";
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.name = "seekerLocationPrefecture";
+      checkbox.value = prefecture;
+      checkbox.dataset.prefecture = prefecture;
+      checkbox.id = `seekerLocationPrefecture-${regionIndex}-${prefectureIndex}`;
+      checkbox.className = "h-4 w-4 shrink-0 rounded text-blue-600 focus:ring-blue-500";
+      const text = document.createElement("span");
+      text.textContent = prefecture;
+      label.htmlFor = checkbox.id;
+      label.append(checkbox, text);
+
+      const cityContainer = document.createElement("div");
+      cityContainer.dataset.cityContainer = "";
+      cityContainer.className = "mt-2 hidden";
+      const cityLabel = document.createElement("label");
+      cityLabel.className = "block text-xs text-gray-600";
+      cityLabel.textContent = "市区町村（任意・複数は「、」区切り）";
+      const cityInput = document.createElement("input");
+      cityInput.type = "text";
+      cityInput.maxLength = 100;
+      cityInput.dataset.prefectureCity = prefecture;
+      cityInput.placeholder = "例: 横浜市、川崎市";
+      cityInput.className = "mt-1 h-10 w-full rounded border px-3 py-2 text-sm text-gray-900";
+      cityLabel.append(cityInput);
+      cityContainer.append(cityLabel);
+      option.append(label, cityContainer);
+      options.append(option);
+
+      checkbox.addEventListener("change", () => {
+        cityContainer.classList.toggle("hidden", !checkbox.checked);
+        if (!checkbox.checked) cityInput.value = "";
+        updateSelectionDetails("seekerLocationPrefecture");
+      });
+      cityInput.addEventListener("input", () => updateSelectionDetails("seekerLocationPrefecture"));
+    });
+    regionDetails.append(summary, options);
+    regionDetails.addEventListener("toggle", () => {
+      icon.textContent = regionDetails.open ? "▲" : "▼";
+    });
+    return regionDetails;
+  }));
+}
+
+function getLocationPreferenceEntries(location) {
+  return [...new Set(String(location || "")
+    .split(/[,、，;\n]/)
+    .map(value => value.trim())
+    .filter(Boolean))];
+}
+
+function parseLocationPreferences(location) {
+  const preferences = new Map();
+  const otherLocations = [];
+  getLocationPreferenceEntries(location).forEach(entry => {
+    const prefecture = PREFECTURES.find(value => entry.includes(value));
+    if (!prefecture) {
+      otherLocations.push(entry);
+      return;
+    }
+    const city = entry.slice(entry.indexOf(prefecture) + prefecture.length).trim();
+    const cities = preferences.get(prefecture) || [];
+    if (city) cities.push(city);
+    preferences.set(prefecture, cities);
+  });
+  return { preferences, otherLocations };
+}
+
+function getLocationPreferencesFromForm() {
+  const entries = [];
+  document.querySelectorAll('input[name="seekerLocationPrefecture"]:checked').forEach(checkbox => {
+    const prefecture = checkbox.value;
+    const cityInput = [...document.querySelectorAll("[data-prefecture-city]")]
+      .find(input => input.dataset.prefectureCity === prefecture);
+    const cities = cityInput ? getLocationPreferenceEntries(cityInput.value) : [];
+    if (cities.length) {
+      cities.forEach(city => entries.push(`${prefecture} ${city}`));
+    } else {
+      entries.push(prefecture);
+    }
+  });
+  entries.push(...getLocationPreferenceEntries(document.getElementById("seekerLocation").value));
+  return [...new Set(entries)].join("、");
+}
+
+function setLocationPreferences(location) {
+  const { preferences, otherLocations } = parseLocationPreferences(location);
+  document.querySelectorAll('input[name="seekerLocationPrefecture"]').forEach(checkbox => {
+    const cities = preferences.get(checkbox.value);
+    checkbox.checked = Boolean(cities);
+    const cityContainer = checkbox.closest("div.rounded-lg").querySelector("[data-city-container]");
+    const cityInput = cityContainer.querySelector("[data-prefecture-city]");
+    cityInput.value = cities ? [...new Set(cities)].join("、") : "";
+    cityContainer.classList.toggle("hidden", !checkbox.checked);
+    const regionDetails = checkbox.closest("details[data-prefecture-region]");
+    if (checkbox.checked) regionDetails.open = true;
+    regionDetails.querySelector("[data-region-icon]").textContent = regionDetails.open ? "▲" : "▼";
+  });
+  if (!preferences.size) {
+    document.querySelectorAll("details[data-prefecture-region]").forEach(details => {
+      details.open = false;
+      details.querySelector("[data-region-icon]").textContent = "▼";
+    });
+  }
+  document.getElementById("seekerLocation").value = otherLocations.join("、");
+  updateSelectionDetails("seekerLocationPrefecture", true);
+}
+
 function initializeJobRequirementControls() {
   renderCheckboxOptions("jobRequiredLicenseOptions", "jobRequiredLicense", LICENSE_OPTIONS);
   renderCheckboxOptions("jobPreferredLicenseOptions", "jobPreferredLicense", LICENSE_OPTIONS);
@@ -143,6 +288,21 @@ function initializeJobRequirementControls() {
 function updateSelectionDetails(inputName, expandSelected = false) {
   document.querySelectorAll("details[data-selection-name]").forEach(details => {
     if (details.dataset.selectionName !== inputName) return;
+    if (inputName === "seekerLocationPrefecture") {
+      const areas = [];
+      document.querySelectorAll('input[name="seekerLocationPrefecture"]:checked').forEach(checkbox => {
+        const cityInput = [...document.querySelectorAll("[data-prefecture-city]")]
+          .find(input => input.dataset.prefectureCity === checkbox.value);
+        const cities = cityInput ? getLocationPreferenceEntries(cityInput.value) : [];
+        areas.push(...(cities.length ? cities.map(city => `${checkbox.value} ${city}`) : [checkbox.value]));
+      });
+      areas.push(...getLocationPreferenceEntries(document.getElementById("seekerLocation").value));
+      const count = details.querySelector("[data-selected-count]");
+      if (count) count.textContent = `希望エリア ${new Set(areas).size}件`;
+      if (expandSelected) details.open = areas.length > 0;
+      updateSelectionDisclosure(details);
+      return;
+    }
     const extraInput = document.getElementById(details.dataset.selectionExtraInput);
     const selectedValues = new Set(
       [...details.querySelectorAll('input[type="checkbox"]:checked')]
@@ -182,6 +342,8 @@ function initializeSelectionDetails() {
     details.addEventListener("toggle", () => updateSelectionDisclosure(details));
     updateSelectionDetails(inputName);
   });
+  const otherLocation = document.getElementById("seekerLocation");
+  otherLocation.addEventListener("input", () => updateSelectionDetails("seekerLocationPrefecture"));
 }
 
 function getCheckedValues(inputName) {
@@ -235,6 +397,7 @@ function initializeProfileOptionControls() {
   initializeJobRequirementControls();
   renderWorkPreferenceOptions("seekerWorkPreferences", "seekerWorkPreference");
   renderWorkPreferenceOptions("jobWorkPreferences", "jobWorkPreference");
+  renderLocationPreferenceOptions();
   initializeSelectionDetails();
 }
 
