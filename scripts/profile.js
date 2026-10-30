@@ -76,7 +76,6 @@ async function saveSeekerProfile() {
         const publicProfileResult = isPublic
     ? await supabaseClient.from("seeker_public_profiles").upsert({
       user_id: currentUser.id,
-      avatar_url: profile.avatarUrl || null,
       job_type: profile.jobType,
       location: profile.location,
       pay_type: profile.payType || null,

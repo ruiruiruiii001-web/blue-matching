@@ -482,12 +482,76 @@
           <h2 id="jobListTitle" class="text-xl font-black text-gray-800">現場求人一覧</h2>
           <span id="jobCount" class="text-xs bg-blue-600 text-white px-3 py-1 rounded-full font-bold shadow-sm shadow-blue-100">0件</span>
         </div>
-        <p class="mt-3 text-[11px] font-medium text-amber-700 flex items-center gap-1.5">
+        <p id="jobTrustNotice" class="mt-3 text-[11px] font-medium text-amber-700 flex items-center gap-1.5">
           <span class="text-base">⚠️</span> 掲載企業の本人確認は行っていません。応募前に条件や連絡先をご確認ください。
         </p>
-        <p id="jobListDescription" class="mt-3 text-xs text-gray-500 hidden leading-relaxed">希望職種・勤務地・給与条件に合う求人をAIがおすすめ順に表示します。検索条件は以下のパネルから自由に変更できます。</p>
+        <p id="jobListDescription" class="mt-3 text-xs text-gray-500 hidden leading-relaxed">希望職種・勤務地・給与条件の一致度を目安に求人をおすすめ順で表示します。検索条件は以下のパネルから自由に変更できます。</p>
       </div>
-      <div id="jobSearchPanel" role="search" class="mt-5 mb-8 rounded-2xl border border-blue-200 bg-blue-50 p-4 shadow-sm sm:p-5">
+        <section id="employerSeekerSearch" class="hidden mt-5 mb-8 rounded-2xl border border-blue-200 bg-blue-50 p-4 shadow-sm sm:p-5">
+          <div class="mb-4">
+            <h3 class="text-base font-bold text-blue-900">求職者を検索・絞り込み</h3>
+            <p class="mt-1 text-sm leading-relaxed text-blue-800">企業へのプロフィール公開を許可した求職者だけが表示されます。氏名・電話番号・メールアドレスは表示されません。</p>
+          </div>
+          <label for="seekerSearchJob" class="mb-2 block text-sm font-bold text-gray-700">マッチさせる自社求人</label>
+          <select id="seekerSearchJob" onchange="renderEmployerSeekerSearch(true)" class="mb-2 w-full rounded-xl border border-blue-300 bg-white px-4 py-3 text-base shadow-sm outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="">求人を選ぶとマッチ度順に表示</option>
+          </select>
+          <p class="mb-4 text-xs leading-relaxed text-gray-600">職種・勤務地・給与条件の一致度を目安として並べます。経験・資格は候補者情報として表示し、順位の判定には使いません。</p>
+          <label for="seekerSearchKeyword" class="mb-2 block text-sm font-bold text-gray-700">キーワード</label>
+          <input type="search" id="seekerSearchKeyword" oninput="renderEmployerSeekerSearch(true)" placeholder="希望職種・地域・資格・経験で検索" class="mb-4 w-full rounded-xl border border-blue-300 bg-white px-4 py-3 text-base shadow-sm outline-none focus:ring-2 focus:ring-blue-500">
+          <details class="rounded-xl border border-blue-200 bg-white">
+            <summary class="cursor-pointer select-none rounded-xl px-4 py-3 text-sm font-bold text-blue-900 hover:bg-blue-100">詳細条件を追加</summary>
+            <div class="grid grid-cols-1 gap-3 border-t border-blue-100 p-4 sm:grid-cols-2">
+              <label class="text-sm text-gray-700">
+                <span class="mb-1 block">希望勤務地</span>
+                <select id="seekerSearchLocation" onchange="renderEmployerSeekerSearch(true)" class="w-full rounded-lg border px-3 py-2.5 text-base focus:ring-2 focus:ring-blue-500 outline-none">
+                  <option value="">すべての勤務地</option>
+                </select>
+              </label>
+              <fieldset class="text-sm text-gray-700">
+                <legend class="mb-1">保有資格（複数選択可）</legend>
+                <p class="mb-2 text-xs text-gray-500">選んだ資格のいずれかを持つ求職者を表示します。</p>
+                <div id="seekerSearchLicenses" class="max-h-36 space-y-1 overflow-y-auto rounded border p-2">
+                  <p class="text-xs text-gray-400">公開プロフィールを読み込むと表示されます。</p>
+                </div>
+              </fieldset>
+              <label class="text-sm text-gray-700">
+                <span class="mb-1 block">現場経験</span>
+                <select id="seekerSearchExperience" onchange="renderEmployerSeekerSearch(true)" class="w-full rounded-lg border px-3 py-2.5 text-base focus:ring-2 focus:ring-blue-500 outline-none">
+                  <option value="">すべて</option>
+                  <option value="未経験（やる気あり）">未経験</option>
+                  <option value="1〜2年">1〜2年</option>
+                  <option value="3〜5年（即戦力）">3〜5年</option>
+                  <option value="5年以上（ベテラン）">5年以上</option>
+                </select>
+              </label>
+              <label class="text-sm text-gray-700">
+                <span class="mb-1 block">希望給与区分</span>
+                <select id="seekerSearchPayType" onchange="renderEmployerSeekerSearch(true)" class="w-full rounded-lg border px-3 py-2.5 text-base focus:ring-2 focus:ring-blue-500 outline-none">
+                  <option value="">すべて</option>
+                  <option value="hourly">時給</option>
+                  <option value="daily">日給</option>
+                  <option value="monthly">月給</option>
+                </select>
+              </label>
+              <label class="text-sm text-gray-700 sm:col-span-2">
+                <span class="mb-1 block">並び替え</span>
+                <select id="seekerSearchSort" onchange="renderEmployerSeekerSearch(true)" class="w-full rounded-lg border px-3 py-2.5 text-base focus:ring-2 focus:ring-blue-500 outline-none">
+                  <option value="match">マッチ度が高い順</option>
+                  <option value="newest">更新が新しい順</option>
+                  <option value="salary">希望最低額が高い順</option>
+                </select>
+              </label>
+            </div>
+          </details>
+          <div id="activeSeekerFilters" class="mt-4 hidden items-center justify-between gap-2 text-sm">
+            <p id="activeSeekerFilterSummary" class="text-gray-600" aria-live="polite"></p>
+            <button type="button" onclick="resetEmployerSeekerFilters()" class="min-h-10 rounded-lg border border-blue-200 bg-white px-3 py-2 font-bold text-blue-700 hover:bg-blue-50">条件をリセット</button>
+          </div>
+          <div id="employerSeekerSearchStatus" role="status" aria-live="polite" class="mt-4 hidden text-sm text-red-700"></div>
+          <div id="employerSeekerSearchResults" class="mt-6 space-y-4" aria-live="polite"></div>
+        </section>
+        <div id="jobSearchPanel" role="search" class="mt-5 mb-8 rounded-2xl border border-blue-200 bg-blue-50 p-4 shadow-sm sm:p-5">
         <div class="mb-4">
           <h3 class="text-base font-bold text-blue-900">求人を検索・絞り込み</h3>
           <p class="mt-1 text-sm text-blue-800">キーワードや条件を指定して、希望に合う求人を探せます。</p>
@@ -701,6 +765,7 @@
   <script src="scripts/dashboard.js"></script>
   <script src="scripts/employer-dashboard.js"></script>
   <script src="scripts/account-data.js"></script>
+  <script src="scripts/employer-seeker-search.js"></script>
   <script src="scripts/reports.js"></script>
   <script src="scripts/reviews.js"></script>
   <script src="scripts/app.js"></script>

@@ -94,6 +94,7 @@ function updateEmployerAuth(session) {
     if (dashboardOpen) closeAccountPanel();
     if (loginPanelOpen) closeLoginPanel(false);
     accountType = null;
+    resetEmployerSeekerSearch();
     dashboardOpen = false;
     loginNotificationBannerDismissed = false;
     document.getElementById("loginNotificationBanner").classList.add("hidden");
@@ -149,6 +150,7 @@ function updateAccountTypeUI() {
   document.getElementById("seekerAccountPromptText").innerText = hasUser
     ? "求職者プロフィールは求職者アカウントで利用できます。"
     : "プロフィール・お気に入り・応募履歴をアカウントに保存するにはログインしてください。";
+  updateAccountSearchSurface();
 }
 
 function updateHeaderAccountButton() {
@@ -327,6 +329,7 @@ async function loadAccountType(user) {
   if (accountType) switchTab(accountType);
   renderEmployerDashboard();
   if (accountType && accountDataUserId !== user.id) loadAccountData(user);
+  if (accountType === "employer") loadPublicSeekerProfiles(user);
 }
 
 async function saveAccountType() {
@@ -350,6 +353,7 @@ async function saveAccountType() {
   switchTab(accountType);
   renderEmployerDashboard();
   loadAccountData(currentUser);
+  if (accountType === "employer") loadPublicSeekerProfiles(currentUser);
 }
 
 function setAuthMessage(message, isError = false) {
@@ -486,6 +490,7 @@ function switchTab(tab) {
     jobCount.classList.remove("hidden");
     document.getElementById("jobListTitle").innerText = "現場求人一覧";
     document.getElementById("jobListDescription").classList.add("hidden");
+    updateAccountSearchSurface();
     renderJobList();
     return;
   }
@@ -516,4 +521,5 @@ function switchTab(tab) {
     document.getElementById("jobListDescription").classList.remove("hidden");
   }
   renderJobList();
+  updateAccountSearchSurface();
 }
