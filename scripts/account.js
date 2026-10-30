@@ -113,7 +113,6 @@ function updateEmployerAuth(session) {
     seekerContactRequestsError = "";
     employerContactRequests = [];
     employerContactRequestsError = "";
-    selectedEmployerApplicationId = null;
     activeDashboardView = "profile";
     showDashboardView(activeDashboardView);
     clearSeekerProfileForm();

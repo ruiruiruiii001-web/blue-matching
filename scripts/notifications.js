@@ -24,6 +24,9 @@ function dismissLoginNotificationBanner() {
   document.getElementById("loginNotificationBanner").classList.add("hidden");
 }
 
+    let applicationNotificationReturnFocus = null;
+    let openApplicationNotificationId = null;
+
     function renderNotifications(containerId, statusId) {
   const container = document.getElementById(containerId);
   const status = document.getElementById(statusId);
@@ -55,7 +58,7 @@ function dismissLoginNotificationBanner() {
               ${notification.event_type === "contact_request" ? renderContactRequestNotification(notification.related_id) : ""}
               ${notification.event_type === "contact_reply" ? renderContactReplyNotification(notification.related_id) : ""}
               ${["job_application", "application_message"].includes(notification.event_type)
-                ? `<button type="button" onclick="openApplicationNotification('${escapeHtml(String(notification.event_type === "application_message" ? notification.context_id || "" : notification.related_id || ""))}', '${escapeHtml(String(notification.id))}')" class="mt-3 min-h-10 rounded-lg bg-blue-600 px-3 py-2 text-xs font-bold text-white hover:bg-blue-700">応募内容とメッセージを見る</button>`
+                ? `<button type="button" data-application-notification-id="${escapeHtml(String(notification.event_type === "application_message" ? notification.context_id || "" : notification.related_id || ""))}" onclick="openApplicationNotification('${escapeHtml(String(notification.event_type === "application_message" ? notification.context_id || "" : notification.related_id || ""))}', '${escapeHtml(String(notification.id))}', this)" class="mt-3 min-h-10 rounded-lg bg-blue-600 px-3 py-2 text-xs font-bold text-white hover:bg-blue-700">応募内容とメッセージを見る</button>`
                 : ""}
             </div>
             ${["job_application", "application_message"].includes(notification.event_type)
@@ -98,11 +101,14 @@ function renderContactReplyNotification(requestId) {
     : '<p class="mt-3 rounded-lg bg-white p-3 text-sm text-gray-600">求職者は連絡を見送りました。</p>';
 }
 
-function openApplicationNotification(applicationId, notificationId) {
+function openApplicationNotification(applicationId, notificationId, trigger) {
   const application = accountApplications.find(item =>
     String(item.id) === String(applicationId)
   );
-  if (!currentUser || !application) {
+  const canAccessApplication = accountType === "employer"
+    ? cachedJobs.some(job => job.owner_id === currentUser?.id && String(job.id) === String(application?.job_id))
+    : accountType === "seeker" && application?.applicant_id === currentUser?.id;
+  if (!currentUser || !application || !canAccessApplication) {
     const status = document.getElementById(accountType === "employer" ? "employerApplicationsStatus" : "dashboardApplicationsStatus");
     if (status) {
       status.innerText = "応募内容を確認できませんでした。画面を再読み込みしてください。";
@@ -110,20 +116,77 @@ function openApplicationNotification(applicationId, notificationId) {
     }
     return;
   }
-  if (accountType === "employer") {
-    selectedEmployerApplicationId = String(application.id);
-    showEmployerDashboardView("messages");
-    renderEmployerDashboard();
-  } else {
-    showDashboardView("applications");
-  }
+  const overlay = document.getElementById("applicationDetailOverlay");
+  const content = document.getElementById("applicationDetailContent");
+  if (!overlay || !content) return;
+  applicationNotificationReturnFocus = trigger instanceof HTMLElement ? trigger : null;
+  openApplicationNotificationId = String(application.id);
+  renderApplicationNotificationView(application);
+  overlay.classList.remove("hidden");
+  overlay.classList.add("flex");
+  document.getElementById("applicationDetailClose").focus();
   if (notificationId) markNotificationRead(notificationId);
-  setTimeout(() => {
-    const targetId = accountType === "employer"
-      ? `application-card-${applicationId}`
-      : `application-thread-${applicationId}`;
-    document.getElementById(targetId)?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, 0);
+}
+
+function renderApplicationNotificationView(application, messageStatus) {
+  const content = document.getElementById("applicationDetailContent");
+  if (!content) return;
+  if (accountType === "employer") {
+    content.innerHTML = `${renderEmployerApplicationDetails(application)}
+      ${messageStatus ? `<p role="status" aria-live="polite" class="mt-2 text-sm text-emerald-700">${escapeHtml(messageStatus)}</p>` : ""}`;
+    return;
+  }
+  const employerId = cachedJobs.find(job => String(job.id) === String(application.job_id))?.owner_id;
+  content.innerHTML = `
+    <article class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+      <div class="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 pb-4">
+        <div>
+          <h3 class="text-lg font-black text-gray-900">${escapeHtml(String(application.job_title || "求人"))}</h3>
+          <p class="mt-1 text-xs text-gray-500">応募日時: ${formatDashboardDate(application.created_at)}</p>
+        </div>
+        <span class="inline-flex rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest ${application.status === "withdrawn" ? "bg-rose-100 text-rose-800" : formatApplicationStatusClass(application.status)}">${application.status === "withdrawn" ? "取り下げ" : escapeHtml(formatApplicationStatus(application.status))}</span>
+      </div>
+      <p class="mb-4 text-sm text-gray-600">${escapeHtml(formatApplicationStatusDescription(application.status))}</p>
+      ${application.status === "pending"
+        ? `<button type="button" onclick="withdrawApplication('${escapeHtml(String(application.id))}')" class="mb-4 min-h-11 w-full rounded-xl border border-rose-200 bg-white px-4 py-2 text-sm font-bold text-rose-700 hover:bg-rose-50">応募を取り下げる</button>`
+        : ""}
+      ${application.status === "reviewed" && employerId
+        ? `<button type="button" onclick="openReviewModal('${escapeHtml(String(application.id))}', '${escapeHtml(String(employerId))}', 'employer')" class="mb-4 rounded-lg border border-amber-100 bg-amber-50 px-3 py-2 text-xs font-black text-amber-600 hover:bg-amber-100">⭐ 企業を評価する</button>`
+        : ""}
+      ${renderApplicationConversation(application)}
+      <p id="applicationDetailMessageStatus" role="status" aria-live="polite" class="mt-2 ${messageStatus ? "text-sm text-emerald-700" : "hidden text-sm"}">${escapeHtml(messageStatus || "")}</p>
+    </article>
+  `;
+}
+
+function refreshApplicationNotificationView(applicationId, messageStatus) {
+  if (String(openApplicationNotificationId) !== String(applicationId)) return;
+  const application = accountApplications.find(item => String(item.id) === String(applicationId));
+  if (application) renderApplicationNotificationView(application, messageStatus);
+}
+
+function closeApplicationNotification() {
+  const overlay = document.getElementById("applicationDetailOverlay");
+  if (!overlay || overlay.classList.contains("hidden")) return;
+  overlay.classList.add("hidden");
+  overlay.classList.remove("flex");
+  document.getElementById("applicationDetailContent").innerHTML = "";
+  const applicationId = openApplicationNotificationId;
+  openApplicationNotificationId = null;
+  const returnFocus = applicationNotificationReturnFocus;
+  applicationNotificationReturnFocus = null;
+  if (returnFocus?.isConnected) returnFocus.focus();
+  else {
+    const notificationButton = Array.from(document.querySelectorAll("[data-application-notification-id]"))
+      .find(button => button.dataset.applicationNotificationId === applicationId);
+    if (notificationButton) notificationButton.focus();
+    else if (dashboardOpen) document.getElementById("myPageOverlayClose")?.focus();
+    else document.getElementById("headerAccountButton")?.focus();
+  }
+}
+
+function handleApplicationDetailOverlayClick(event) {
+  if (event.target === document.getElementById("applicationDetailOverlay")) closeApplicationNotification();
 }
 
 function renderContactRequestNotification(requestId) {

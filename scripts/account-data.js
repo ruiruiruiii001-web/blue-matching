@@ -84,7 +84,7 @@ function renderApplicationConversation(application) {
   );
   const otherParticipant = accountType === "employer" ? "求職者" : "企業";
   return `
-    <section id="application-thread-${escapeHtml(String(application.id))}" class="mt-5 rounded-xl border border-blue-100 bg-blue-50/50 p-4">
+    <section data-application-thread="${escapeHtml(String(application.id))}" class="mt-5 rounded-xl border border-blue-100 bg-blue-50/50 p-4">
       <h5 class="mb-3 text-sm font-bold text-gray-800">メッセージ</h5>
       <div class="space-y-2">
         ${messages.length
@@ -101,11 +101,11 @@ function renderApplicationConversation(application) {
       </div>
       ${canSend
         ? `<label class="mt-3 block text-sm font-medium">メッセージを送る
-            <textarea id="applicationMessageInput-${escapeHtml(String(application.id))}" maxlength="2000" rows="3" class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm" placeholder="応募に関する連絡を入力（2,000文字以内）"></textarea>
+            <textarea data-application-message-input maxlength="2000" rows="3" class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm" placeholder="応募に関する連絡を入力（2,000文字以内）"></textarea>
           </label>
           <p class="mt-1 text-xs text-gray-600">電話番号・メールアドレスなどの連絡先は入力しないでください。</p>
           <button type="button" onclick="sendApplicationMessage('${escapeHtml(String(application.id))}', this)" class="mt-3 min-h-11 w-full rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white hover:bg-blue-700">メッセージを送信</button>
-          <p id="applicationConversationStatus-${escapeHtml(String(application.id))}" role="status" aria-live="polite" class="mt-2 hidden text-sm"></p>`
+          <p data-application-message-status role="status" aria-live="polite" class="mt-2 hidden text-sm"></p>`
         : '<p class="mt-3 text-xs text-gray-600">この応募は取り下げ済み、または対応不要のため、メッセージを送信できません。</p>'}
     </section>
   `;
@@ -122,8 +122,10 @@ async function sendApplicationMessage(applicationId, button) {
   );
   if (!application || !["pending", "reviewed"].includes(application.status)) return;
 
-  const input = document.getElementById(`applicationMessageInput-${applicationId}`);
-  const status = document.getElementById(`applicationConversationStatus-${applicationId}`);
+  const thread = button.closest("[data-application-thread]");
+  const input = thread?.querySelector("[data-application-message-input]");
+  const status = thread?.querySelector("[data-application-message-status]");
+  if (!input || !status) return;
   const body = input.value.trim();
   if (!body) {
     status.innerText = "メッセージを入力してください。";
@@ -165,6 +167,7 @@ async function sendApplicationMessage(applicationId, button) {
   status.className = "mt-2 text-sm text-emerald-700";
   renderAccountDashboard();
   renderEmployerDashboard();
+  refreshApplicationNotificationView(application.id, "メッセージを送信しました。");
 }
 
 async function updateApplicationStatus(applicationId, status) {
@@ -185,6 +188,10 @@ async function updateApplicationStatus(applicationId, status) {
     sendNotificationEmail("application_reviewed", applicationId);
   }
 
+  refreshApplicationNotificationView(applicationId);
+  if (notificationWarning) {
+    alert(notificationWarning);
+  }
   await loadAccountData(currentUser);
 }
 
@@ -225,5 +232,6 @@ async function withdrawApplication(applicationId) {
   accountApplications = accountApplications.map(item => item.id === data.id ? data : item);
   statusElement.innerText = "応募を取り下げました。";
   statusElement.className = "mb-3 text-sm text-emerald-700";
+  refreshApplicationNotificationView(applicationId);
   renderAccountDashboard();
 }

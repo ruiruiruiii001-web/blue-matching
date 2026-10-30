@@ -18,7 +18,6 @@ let seekerContactRequests = [];
 let seekerContactRequestsError = "";
 let employerContactRequests = [];
 let employerContactRequestsError = "";
-let selectedEmployerApplicationId = null;
 let accountDataUserId = null;
 let loadingAccountUserId = null;
 let activeDashboardView = "profile";
@@ -62,17 +61,22 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 document.addEventListener("keydown", event => {
+  const applicationDetailOverlay = document.getElementById("applicationDetailOverlay");
+  const applicationDetailOpen = applicationDetailOverlay && !applicationDetailOverlay.classList.contains("hidden");
   if (event.key === "Escape") {
-    if (!document.getElementById("jobModal").classList.contains("hidden")) closeModal();
+    if (applicationDetailOpen) closeApplicationNotification();
+    else if (!document.getElementById("jobModal").classList.contains("hidden")) closeModal();
     else if (dashboardOpen) closeAccountPanel();
     else if (loginPanelOpen) closeLoginPanel();
     return;
   }
-  if (event.key !== "Tab" || (!dashboardOpen && !loginPanelOpen)) return;
+  if (event.key !== "Tab" || (!applicationDetailOpen && !dashboardOpen && !loginPanelOpen)) return;
 
-  const dialog = document.querySelector(dashboardOpen
-    ? "#myPageOverlay [role='dialog']"
-    : "#loginOverlay [role='dialog']");
+  const dialog = applicationDetailOpen
+    ? applicationDetailOverlay.querySelector("[role='dialog']")
+    : document.querySelector(dashboardOpen
+      ? "#myPageOverlay [role='dialog']"
+      : "#loginOverlay [role='dialog']");
   const focusable = Array.from(dialog.querySelectorAll(
     'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
   )).filter(element => element.getClientRects().length > 0);
