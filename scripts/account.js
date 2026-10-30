@@ -145,7 +145,6 @@ function updateAccountTypeUI() {
   document.getElementById("employerAuthPanel").classList.toggle("hidden", hasUser && Boolean(accountType));
   document.getElementById("accountTypeSetup").classList.toggle("hidden", !hasUser || Boolean(accountType) || accountTypeLoading);
   document.getElementById("employerDashboard").classList.toggle("hidden", !hasUser || !isEmployer || !dashboardOpen);
-  document.getElementById("employerJobForm").classList.toggle("hidden", !hasUser || !isEmployer);
   document.getElementById("accountTypeMismatch").classList.toggle("hidden", !hasUser || !accountType || isEmployer);
   document.getElementById("seekerDashboard").classList.toggle("hidden", !hasUser || !isSeeker || !dashboardOpen);
   document.getElementById("seekerAccountPrompt").classList.toggle("hidden", hasUser && isSeeker);
@@ -178,6 +177,7 @@ function openAccountPanel() {
     dashboardReturnPlaceholder = document.createComment("my-page-return-point");
     dashboard.parentNode.insertBefore(dashboardReturnPlaceholder, dashboard);
     document.getElementById("myPageOverlayContent").append(dashboard);
+    if (accountType === "employer") showEmployerDashboardView("jobs");
     document.getElementById("myPageLogoutStatus").classList.add("hidden");
     document.getElementById("myPageLogoutStatus").innerText = "";
     updateMyPageAccountInfo();
@@ -522,7 +522,6 @@ function switchTab(tab) {
   const jobListSection = document.getElementById("jobListSection");
   const jobSearchPanel = document.getElementById("jobSearchPanel");
   const jobList = document.getElementById("jobList");
-  const seekerProfilesPanel = document.getElementById("employerSeekerProfilesPanel");
   const jobCount = document.getElementById("jobCount");
   const tabEmployerBtn = document.getElementById("tabEmployerBtn");
   const tabSeekerBtn = document.getElementById("tabSeekerBtn");
@@ -531,7 +530,6 @@ function switchTab(tab) {
     employerSection.classList.add("hidden");
     seekerSection.classList.add("hidden");
     jobListSection.classList.add("order-first", "md:col-span-2");
-    seekerProfilesPanel.classList.add("hidden");
     jobSearchPanel.classList.remove("hidden");
     jobList.classList.remove("hidden");
     jobCount.classList.remove("hidden");
@@ -548,21 +546,16 @@ function switchTab(tab) {
     jobListSection.classList.remove("order-first", "md:col-span-2");
     tabEmployerBtn.className = "flex-1 py-3.5 font-bold text-sm md:text-base border-b-2 border-blue-600 text-blue-600 focus:outline-none transition";
     tabSeekerBtn.className = "flex-1 py-3.5 font-bold text-sm md:text-base border-b-2 border-transparent text-gray-500 hover:text-blue-600 focus:outline-none transition";
-    const showSeekerProfiles = Boolean(currentUser && accountType === "employer");
-    seekerProfilesPanel.classList.toggle("hidden", !showSeekerProfiles);
-    jobSearchPanel.classList.toggle("hidden", showSeekerProfiles);
-    jobList.classList.toggle("hidden", showSeekerProfiles);
-    jobCount.classList.toggle("hidden", showSeekerProfiles);
-    document.getElementById("jobListTitle").innerText = showSeekerProfiles
-      ? "公開中の求職者プロフィール"
-      : "現場求人一覧 (クラウド)";
+    jobSearchPanel.classList.remove("hidden");
+    jobList.classList.remove("hidden");
+    jobCount.classList.remove("hidden");
+    document.getElementById("jobListTitle").innerText = "現場求人一覧";
     document.getElementById("jobListDescription").classList.add("hidden");
   } else {
     document.getElementById("jobSort").value = "recommended";
     employerSection.classList.add("hidden");
     seekerSection.classList.remove("hidden");
     jobListSection.classList.add("order-first", "md:col-span-2");
-    seekerProfilesPanel.classList.add("hidden");
     jobSearchPanel.classList.remove("hidden");
     jobList.classList.remove("hidden");
     jobCount.classList.remove("hidden");

@@ -54,6 +54,9 @@ let accountReviews = []; // 自分が書いたレビュー
 
 
 document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("employerDashboardJobFormSlot").append(
+    document.getElementById("employerJobForm")
+  );
   switchTab("guest");
   fetchJobs();
   initializeEmployerAuth();

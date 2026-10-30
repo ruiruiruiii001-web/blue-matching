@@ -287,6 +287,23 @@ function renderEmployerDashboard(resetLimit = false) {
   renderEmployerDashboard();
 }
 
+function showEmployerDashboardView(view) {
+  const views = ["jobs", "applications", "profiles", "notifications"];
+  if (!views.includes(view)) return;
+
+  views.forEach(item => {
+    document.getElementById(`employerDashboardView-${item}`).classList.toggle("hidden", item !== view);
+  });
+  document.querySelectorAll(".employer-dashboard-menu-button").forEach(button => {
+    const isActive = button.dataset.employerDashboardView === view;
+    button.classList.toggle("bg-blue-600", isActive);
+    button.classList.toggle("text-white", isActive);
+    button.classList.toggle("bg-gray-200", !isActive);
+    button.classList.toggle("text-gray-700", !isActive);
+    button.setAttribute("aria-selected", String(isActive));
+  });
+}
+
 async function sendSeekerContactRequest(seekerId, button) {
   if (!currentUser || accountType !== "employer" ||
       !publicSeekerProfiles.some(profile => profile.user_id === seekerId)) return;

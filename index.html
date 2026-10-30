@@ -152,42 +152,76 @@
         <p id="authMessage" role="status" aria-live="polite" class="text-sm mt-3 hidden"></p>
       </div>
 
-      <section id="employerDashboard" class="hidden scroll-mt-20 bg-white p-6 rounded-lg shadow-md">
-        <div class="flex flex-wrap items-center justify-between gap-3 mb-4 border-b pb-2">
-          <h2 class="text-lg font-bold text-blue-600">企業マイページ</h2>
-          <button type="button" onclick="closeAccountPanel(); document.getElementById('employerJobForm').scrollIntoView({ behavior: 'smooth' })" class="text-sm font-bold text-blue-700 underline">＋ 求人を新規投稿</button>
-        </div>
-        <details class="mb-5 rounded-lg border border-blue-200 bg-blue-50 p-3" open>
-          <summary class="cursor-pointer text-sm font-bold text-blue-900">企業アカウントの使い方（まずはこちら）</summary>
-          <ol class="mt-2 list-inside list-decimal space-y-1 text-sm text-blue-950">
-            <li>求人を投稿し、勤務地・給与・仕事内容・待遇タグを具体的に記入します。</li>
-            <li>応募はこのマイページで確認し、状態を「確認済み」または「対応不要」に更新します。</li>
-            <li>求職者一覧で希望職種や地域を絞り、公開プロフィールから連絡リクエストを送れます。</li>
-          </ol>
-        </details>
-        <section class="mb-6 border-b border-gray-200 pb-5">
-          <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
-            <h3 class="font-bold text-sm">通知</h3>
-            <span id="employerNotificationCount" class="text-xs text-gray-500"></span>
+      <section id="employerDashboard" class="hidden scroll-mt-20 space-y-4">
+        <p id="employerDashboardStatus" role="status" aria-live="polite" class="hidden text-sm text-red-600"></p>
+        <nav id="employerDashboardNavigation" role="tablist" aria-label="企業マイページの表示切替" class="sticky top-0 z-10 flex shrink-0 gap-2 overflow-x-auto border-b bg-gray-100 py-2">
+          <button type="button" role="tab" aria-selected="true" aria-controls="employerDashboardView-jobs" data-employer-dashboard-view="jobs" onclick="showEmployerDashboardView('jobs')" class="employer-dashboard-menu-button h-11 shrink-0 rounded-lg bg-blue-600 px-3 text-sm font-bold text-white">求人管理</button>
+          <button type="button" role="tab" aria-selected="false" aria-controls="employerDashboardView-applications" data-employer-dashboard-view="applications" onclick="showEmployerDashboardView('applications')" class="employer-dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 text-sm font-bold text-gray-700">応募 <span id="employerApplicationCount"></span></button>
+          <button type="button" role="tab" aria-selected="false" aria-controls="employerDashboardView-profiles" data-employer-dashboard-view="profiles" onclick="showEmployerDashboardView('profiles')" class="employer-dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 text-sm font-bold text-gray-700">求職者検索</button>
+          <button type="button" role="tab" aria-selected="false" aria-controls="employerDashboardView-notifications" data-employer-dashboard-view="notifications" onclick="showEmployerDashboardView('notifications')" class="employer-dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 text-sm font-bold text-gray-700">連絡・通知 <span id="employerNotificationCount"></span></button>
+        </nav>
+
+        <section id="employerDashboardView-jobs" class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
+          <div class="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 pb-3">
+            <h3 class="text-lg font-bold text-blue-600">自分の掲載求人</h3>
+            <button type="button" onclick="openEmployerJobForm()" class="min-h-11 rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white hover:bg-blue-700">＋ 求人を新規投稿</button>
           </div>
+          <details class="mb-5 rounded-lg border border-blue-200 bg-blue-50 p-3">
+            <summary class="cursor-pointer text-sm font-bold text-blue-900">企業アカウントの使い方</summary>
+            <ol class="mt-2 list-inside list-decimal space-y-1 text-sm text-blue-950">
+              <li>求人を投稿し、勤務地・給与・仕事内容・待遇タグを具体的に記入します。</li>
+              <li>応募者の経験・資格・メッセージを確認し、「確認済み」または「対応不要」に更新してください。</li>
+              <li>対応状況は応募者の応募履歴に表示されます。新しい応募はマイページの通知で確認できます。</li>
+              <li>求職者検索から希望職種や地域を絞り、公開プロフィールに連絡リクエストを送れます。</li>
+            </ol>
+            <p class="mt-2 border-t border-blue-200 pt-2 text-xs leading-relaxed text-blue-950">応募に電話番号は含まれず、応募への個別返信機能はありません。連絡が必要な場合は、求職者が公開しているプロフィールから連絡リクエストを送ってください。</p>
+          </details>
+          <div id="employerDashboardJobFormSlot"></div>
+          <div id="employerDashboardJobs" class="space-y-3 text-sm"></div>
+        </section>
+
+        <section id="employerDashboardView-applications" class="hidden rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
+          <h3 class="mb-3 border-b border-gray-100 pb-3 text-lg font-bold text-blue-600">受け取った応募</h3>
+          <p class="mb-3 text-sm leading-relaxed text-gray-600">応募者の経験・資格・メッセージを確認し、「確認済みにする」または「対応不要」を選んでください。状況は応募者の応募履歴に表示されます。</p>
+          <p id="employerApplicationsStatus" role="status" aria-live="polite" class="hidden text-sm text-red-700"></p>
+          <div id="employerDashboardApplications" class="space-y-3 text-sm"></div>
+        </section>
+
+        <section id="employerDashboardView-profiles" class="hidden rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
+          <h3 class="mb-3 border-b border-gray-100 pb-3 text-lg font-bold text-emerald-700">求職者を探す</h3>
+          <section id="employerSeekerProfilesPanel" class="rounded-xl border border-emerald-200 bg-emerald-50 p-4 sm:p-5">
+            <p class="mb-4 border-b border-emerald-200 pb-3 text-sm leading-5 text-emerald-900">本人が公開を選んだ匿名プロフィールのみ表示しています。名前・電話番号は表示されません。企業アカウントの事業者本人確認は行っていないため、表示情報の取り扱いにご注意ください。</p>
+            <div class="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_14rem]">
+              <label class="text-sm font-medium text-gray-700">希望職種・地域・資格で検索
+                <input id="employerSeekerKeyword" type="search" oninput="renderEmployerDashboard(true)" placeholder="例: 足場、横浜、玉掛け" class="mt-1 w-full rounded-lg border border-emerald-200 bg-white px-3 py-2.5">
+              </label>
+              <label class="text-sm font-medium text-gray-700">現場経験
+                <select id="employerSeekerExperience" onchange="renderEmployerDashboard(true)" class="mt-1 w-full rounded-lg border border-emerald-200 bg-white px-3 py-2.5">
+                  <option value="">すべて</option>
+                  <option value="未経験（やる気あり）">未経験</option>
+                  <option value="1〜2年">1〜2年</option>
+                  <option value="3〜5年（即戦力）">3〜5年</option>
+                  <option value="5年以上（ベテラン）">5年以上</option>
+                </select>
+              </label>
+            </div>
+            <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <p id="employerSeekerProfileCount" class="text-xs text-emerald-900" aria-live="polite"></p>
+              <button type="button" onclick="resetEmployerSeekerFilters()" class="min-h-10 rounded-lg border border-emerald-300 bg-white px-3 py-2 text-xs font-bold text-emerald-900 hover:bg-emerald-100">条件をクリア</button>
+            </div>
+            <div id="employerSeekerProfiles" class="space-y-3 text-sm"></div>
+          </section>
+        </section>
+
+        <section id="employerDashboardView-notifications" class="hidden rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
+          <h3 class="mb-3 border-b border-gray-100 pb-3 text-lg font-bold text-blue-600">連絡・通知</h3>
           <p id="employerNotificationsStatus" role="status" aria-live="polite" class="hidden text-sm text-red-700"></p>
           <div id="employerDashboardNotifications" class="divide-y divide-gray-100 text-sm"></div>
         </section>
-        <h3 class="font-bold text-sm mb-2">自分の掲載求人</h3>
-        <div id="employerDashboardJobs" class="divide-y divide-gray-100 text-sm"></div>
-        <section class="mt-6 border-t border-gray-200 pt-5">
-          <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
-            <h3 class="font-bold text-sm">受け取った応募</h3>
-            <span id="employerApplicationCount" class="text-xs text-gray-500"></span>
-          </div>
-          <p class="mb-3 text-xs text-gray-500">応募者の名前・経験・資格・メッセージを確認できます。「確認済み」などの状況は応募者のマイページにも表示されます。新しい応募はマイページの通知と登録メールでお知らせします。</p>
-          <p id="employerApplicationsStatus" role="status" aria-live="polite" class="hidden text-sm text-red-700"></p>
-          <div id="employerDashboardApplications" class="divide-y divide-gray-100 text-sm"></div>
-        </section>
       </section>
 
-      <div id="employerJobForm" class="bg-white p-6 rounded-lg shadow-md hidden">
-        <h2 id="jobFormHeading" class="text-lg font-bold mb-4 border-b pb-2 text-blue-600">現場求人のクラウド投稿</h2>
+      <div id="employerJobForm" class="hidden rounded-xl border border-blue-100 bg-white p-4 shadow-sm sm:p-5">
+        <h2 id="jobFormHeading" class="mb-4 border-b border-gray-100 pb-3 text-lg font-bold text-blue-600">現場求人のクラウド投稿</h2>
         
         <div class="space-y-4">
           <div>
@@ -482,29 +516,6 @@
         </p>
         <p id="jobListDescription" class="mt-3 text-xs text-gray-500 hidden leading-relaxed">希望職種・勤務地・給与条件に合う求人をAIがおすすめ順に表示します。検索条件は以下のパネルから自由に変更できます。</p>
       </div>
-      <section id="employerSeekerProfilesPanel" class="hidden mt-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm sm:p-5">
-        <p class="mb-4 border-b border-emerald-200 pb-3 text-sm leading-5 text-emerald-900">本人が公開を選んだ匿名プロフィールのみ表示しています。名前・電話番号は表示されません。企業アカウントは事業者の本人確認を行っていないため、表示情報の取り扱いにご注意ください。</p>
-                <div class="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_14rem]">
-          <label class="text-sm font-medium text-gray-700">希望職種・地域・資格で検索
-            <input id="employerSeekerKeyword" type="search" oninput="renderEmployerDashboard(true)" placeholder="例: 足場、横浜、玉掛け" class="mt-1 w-full rounded-lg border border-emerald-200 bg-white px-3 py-2.5">
-          </label>
-          <label class="text-sm font-medium text-gray-700">現場経験
-            <select id="employerSeekerExperience" onchange="renderEmployerDashboard(true)" class="mt-1 w-full rounded-lg border border-emerald-200 bg-white px-3 py-2.5">
-              <option value="">すべて</option>
-              <option value="未経験（やる気あり）">未経験</option>
-              <option value="1〜2年">1〜2年</option>
-              <option value="3〜5年（即戦力）">3〜5年</option>
-              <option value="5年以上（ベテラン）">5年以上</option>
-            </select>
-          </label>
-        </div>
-        <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
-          <p id="employerSeekerProfileCount" class="text-xs text-emerald-900" aria-live="polite"></p>
-          <button type="button" onclick="resetEmployerSeekerFilters()" class="min-h-10 rounded-lg border border-emerald-300 bg-white px-3 py-2 text-xs font-bold text-emerald-900 hover:bg-emerald-100">条件をクリア</button>
-        </div>
-        <div id="employerSeekerProfiles" class="space-y-3 text-sm"></div>
-      </section>
-
       <div id="jobSearchPanel" role="search" class="mt-5 mb-8 rounded-2xl border border-blue-200 bg-blue-50 p-4 shadow-sm sm:p-5">
         <div class="mb-4">
           <h3 class="text-base font-bold text-blue-900">求人を検索・絞り込み</h3>
