@@ -661,7 +661,7 @@
           <label for="seekerSearchKeyword" class="mb-2 block text-sm font-bold text-gray-700">キーワード</label>
           <input type="search" id="seekerSearchKeyword" oninput="renderEmployerSeekerSearch(true)" placeholder="希望職種・地域・資格・経験で検索" class="mb-4 w-full rounded-xl border border-blue-300 bg-white px-4 py-3 text-base shadow-sm outline-none focus:ring-2 focus:ring-blue-500">
           <details class="rounded-xl border border-blue-200 bg-white">
-            <summary class="cursor-pointer select-none rounded-xl px-4 py-3 text-sm font-bold text-blue-900 hover:bg-blue-100">詳細条件を追加</summary>
+            <summary class="cursor-pointer select-none rounded-xl px-4 py-3 text-sm font-bold text-blue-900 hover:bg-blue-100">絞り込み条件・並び替え</summary>
             <div class="grid grid-cols-1 gap-3 border-t border-blue-100 p-4 sm:grid-cols-2">
               <label class="text-sm text-gray-700">
                 <span class="mb-1 block">希望勤務地</span>
@@ -696,7 +696,8 @@
                 </select>
               </label>
               <label class="text-sm text-gray-700 sm:col-span-2">
-                <span class="mb-1 block">並び替え</span>
+                <span class="mb-1 block border-t border-blue-100 pt-3 font-bold">絞り込んだ求職者の中で、優先したい順</span>
+                <span class="mb-1 block text-xs text-gray-500">設定した条件に合う候補者の中で、選んだ項目を重視して表示します。</span>
                 <select id="seekerSearchSort" onchange="renderEmployerSeekerSearch(true)" class="w-full rounded-lg border px-3 py-2.5 text-base focus:ring-2 focus:ring-blue-500 outline-none">
                   <option value="match">マッチ度が高い順</option>
                   <option value="newest">更新が新しい順</option>
@@ -742,7 +743,7 @@
         </div>
 
         <details id="advancedJobFilters" class="rounded-xl border border-blue-200 bg-white">
-          <summary class="cursor-pointer select-none rounded-xl px-4 py-3 text-sm font-bold text-blue-900 hover:bg-blue-100">詳細条件を追加</summary>
+          <summary class="cursor-pointer select-none rounded-xl px-4 py-3 text-sm font-bold text-blue-900 hover:bg-blue-100">絞り込み条件・並び替え</summary>
                     <div class="grid grid-cols-1 gap-3 border-t border-blue-100 p-4 sm:grid-cols-2">
         <label class="text-sm text-gray-700">
           <span class="block mb-1">勤務地</span>
@@ -782,7 +783,8 @@
           <span class="block text-xs text-gray-500 mt-1">最低額で絞る場合は給与区分も選択してください。</span>
         </label>
         <label class="text-sm text-gray-700 sm:col-span-2">
-          <span class="block mb-1">並び替え</span>
+          <span class="mb-1 block border-t border-blue-100 pt-3 font-bold">絞り込んだ求人の中で、優先したい順</span>
+          <span class="mb-1 block text-xs text-gray-500">設定した条件に合う求人の中で、選んだ項目を重視して表示します。</span>
           <select id="jobSort" onchange="renderJobList(true)" class="w-full rounded-lg border px-3 py-2.5 text-base focus:ring-2 focus:ring-blue-500 outline-none">
             <option value="recommended">おすすめ順</option>
             <option value="newest" selected>新着順</option>
