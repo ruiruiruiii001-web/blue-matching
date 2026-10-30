@@ -43,14 +43,17 @@
   <div id="myPageOverlay" class="fixed inset-0 z-[60] hidden items-center justify-center p-0 sm:p-4" onclick="handleMyPageOverlayClick(event)">
     <button type="button" aria-label="マイページを閉じる" aria-hidden="true" tabindex="-1" onclick="closeAccountPanel()" class="absolute inset-0 h-full w-full bg-black/60"></button>
     <section role="dialog" aria-modal="true" aria-labelledby="myPageOverlayTitle" class="relative z-10 flex h-[100dvh] max-h-full w-full max-w-5xl flex-col overflow-hidden bg-gray-100 shadow-2xl sm:h-[92vh] sm:rounded-2xl">
-      <div class="relative flex min-h-[76px] shrink-0 items-start justify-between gap-3 border-b bg-white px-4 py-3 pr-20 sm:px-6 sm:pr-24">
-        <div class="min-w-0">
-          <h2 id="myPageOverlayTitle" class="text-lg font-bold text-gray-900">マイページ</h2>
-          <p id="myPageAccountInfo" class="mt-0.5 break-all text-xs text-gray-600"></p>
+      <header class="relative shrink-0 border-b bg-white">
+        <div class="relative flex min-h-[76px] items-start justify-between gap-3 px-4 py-3 pr-20 sm:px-6 sm:pr-24">
+          <div class="min-w-0">
+            <h2 id="myPageOverlayTitle" class="text-lg font-bold text-gray-900">マイページ</h2>
+            <p id="myPageAccountInfo" class="mt-0.5 break-all text-xs text-gray-600"></p>
+          </div>
+          <button id="myPageLogoutButton" type="button" onclick="signOutEmployer()" class="min-h-11 shrink-0 rounded-lg border border-red-200 px-3 py-2 text-sm font-bold text-red-700 hover:bg-red-50">ログアウト</button>
+          <button id="myPageOverlayClose" type="button" aria-label="マイページを閉じる" onclick="closeAccountPanel()" class="absolute right-3 top-3 flex h-11 w-11 items-center justify-center rounded-full text-2xl font-bold text-gray-600 hover:bg-gray-100" autofocus>×</button>
         </div>
-        <button id="myPageLogoutButton" type="button" onclick="signOutEmployer()" class="min-h-11 shrink-0 rounded-lg border border-red-200 px-3 py-2 text-sm font-bold text-red-700 hover:bg-red-50">ログアウト</button>
-        <button id="myPageOverlayClose" type="button" aria-label="マイページを閉じる" onclick="closeAccountPanel()" class="absolute right-3 top-3 flex h-11 w-11 items-center justify-center rounded-full text-2xl font-bold text-gray-600 hover:bg-gray-100" autofocus>×</button>
-      </div>
+        <div id="myPageNavigationSlot" class="hidden border-t border-gray-100 px-3 sm:px-6"></div>
+      </header>
       <p id="myPageLogoutStatus" role="status" aria-live="polite" class="hidden shrink-0 bg-red-50 px-4 py-2 text-sm text-red-700 sm:px-6"></p>
       <div id="myPageOverlayContent" class="min-h-0 flex-1 overflow-y-auto p-3 sm:p-6"></div>
     </section>
@@ -153,7 +156,7 @@
 
       <section id="employerDashboard" class="hidden scroll-mt-20 space-y-4">
         <p id="employerDashboardStatus" role="status" aria-live="polite" class="hidden text-sm text-red-600"></p>
-        <nav id="employerDashboardNavigation" role="tablist" aria-label="企業マイページの表示切替" class="sticky top-0 z-10 flex shrink-0 gap-2 overflow-x-auto border-b bg-gray-100 py-2">
+        <nav id="employerDashboardNavigation" role="tablist" aria-label="企業マイページの表示切替" class="flex shrink-0 gap-2 overflow-x-auto py-2">
           <button type="button" role="tab" aria-selected="true" aria-controls="employerDashboardView-jobs" data-employer-dashboard-view="jobs" onclick="showEmployerDashboardView('jobs')" class="employer-dashboard-menu-button h-11 shrink-0 rounded-lg bg-blue-600 px-3 text-sm font-bold text-white">求人管理</button>
           <button type="button" role="tab" aria-selected="false" aria-controls="employerDashboardView-messages" data-employer-dashboard-view="messages" onclick="showEmployerDashboardView('messages')" class="employer-dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 text-sm font-bold text-gray-700">応募・メッセージ <span id="employerApplicationCount"></span></button>
         </nav>
@@ -336,7 +339,7 @@
 
       <div id="seekerDashboard" class="hidden scroll-mt-20 space-y-4">
         <p id="accountDashboardStatus" role="status" aria-live="polite" class="hidden text-sm text-red-600"></p>
-        <nav id="dashboardNavigation" role="tablist" aria-label="マイページの表示切替" class="sticky top-0 z-10 flex shrink-0 gap-2 overflow-x-auto border-b bg-gray-100 py-2">
+        <nav id="dashboardNavigation" role="tablist" aria-label="マイページの表示切替" class="flex shrink-0 gap-2 overflow-x-auto py-2">
           <button type="button" role="tab" aria-selected="true" aria-controls="dashboardView-profile" data-dashboard-view="profile" onclick="showDashboardView('profile')" class="dashboard-menu-button h-11 shrink-0 rounded-lg bg-blue-600 px-3 font-bold text-sm text-white">プロフィール</button>
           <button type="button" role="tab" aria-selected="false" aria-controls="dashboardView-favorites" data-dashboard-view="favorites" onclick="showDashboardView('favorites')" class="dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 font-bold text-sm text-gray-700">お気に入り</button>
                               <button type="button" role="tab" aria-selected="false" aria-controls="dashboardView-applications" data-dashboard-view="applications" onclick="showDashboardView('applications')" class="dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 font-bold text-sm text-gray-700">応募履歴</button>

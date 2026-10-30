@@ -174,9 +174,15 @@ function openAccountPanel() {
     switchTab(accountType);
     updateAccountTypeUI();
     const dashboard = document.getElementById(accountType === "seeker" ? "seekerDashboard" : "employerDashboard");
+    const navigation = document.getElementById(accountType === "seeker" ? "dashboardNavigation" : "employerDashboardNavigation");
     dashboardReturnPlaceholder = document.createComment("my-page-return-point");
     dashboard.parentNode.insertBefore(dashboardReturnPlaceholder, dashboard);
     document.getElementById("myPageOverlayContent").append(dashboard);
+    dashboardNavigationReturnPlaceholder = document.createComment("my-page-navigation-return-point");
+    navigation.parentNode.insertBefore(dashboardNavigationReturnPlaceholder, navigation);
+    const navigationSlot = document.getElementById("myPageNavigationSlot");
+    navigationSlot.append(navigation);
+    navigationSlot.classList.remove("hidden");
     if (accountType === "employer") showEmployerDashboardView("jobs");
     document.getElementById("myPageLogoutStatus").classList.add("hidden");
     document.getElementById("myPageLogoutStatus").innerText = "";
@@ -251,6 +257,13 @@ function closeAccountPanel() {
   const dashboard = document.getElementById("seekerDashboard").parentNode === document.getElementById("myPageOverlayContent")
     ? document.getElementById("seekerDashboard")
     : document.getElementById("employerDashboard");
+  if (dashboardNavigationReturnPlaceholder?.parentNode) {
+    dashboardNavigationReturnPlaceholder.replaceWith(
+      document.getElementById(accountType === "seeker" ? "dashboardNavigation" : "employerDashboardNavigation")
+    );
+  }
+  dashboardNavigationReturnPlaceholder = null;
+  document.getElementById("myPageNavigationSlot").classList.add("hidden");
   if (dashboardReturnPlaceholder?.parentNode) {
     dashboardReturnPlaceholder.replaceWith(dashboard);
   }

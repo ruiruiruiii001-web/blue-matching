@@ -23,6 +23,7 @@ let dashboardOpen = false;
 let loginNotificationBannerDismissed = false;
 let loginPanelOpen = false;
 let dashboardReturnPlaceholder = null;
+let dashboardNavigationReturnPlaceholder = null;
 let loginPanelReturnPlaceholder = null;
 let dashboardScrollPosition = 0;
 let loginPanelScrollPosition = 0;
