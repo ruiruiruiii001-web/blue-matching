@@ -34,6 +34,7 @@ function renderJobList(resetLimit = false) {
       (!keyword ||
         (job.title || "").toLowerCase().includes(keyword) ||
         (job.location || "").toLowerCase().includes(keyword) ||
+        getWorkPreferenceLabels(job.work_preferences).some(value => value.toLocaleLowerCase().includes(keyword)) ||
         (job.tags && job.tags.some(t => t.toLowerCase().includes(keyword)))) &&
       (!openJobsOnly || !isJobClosed(job)) &&
         (!favoritesOnly || isFavorite(job.id)) &&
@@ -106,8 +107,9 @@ function renderJobList(resetLimit = false) {
 
   jobList.innerHTML = displayJobs.map(job => {
     const matchDetails = matchProfile ? getJobMatchDetails(job, matchProfile) : null;
+    const workPreferences = getWorkPreferenceLabels(job.work_preferences);
     const matchSummary = matchDetails
-      ? `<div class="mt-4 rounded-lg ${matchDetails.score >= 7 ? "bg-emerald-50 text-emerald-900" : matchDetails.score >= 4 ? "bg-amber-50 text-amber-900" : "bg-gray-50 text-gray-700"} p-3">
+      ? `<div class="mt-4 rounded-lg ${matchDetails.score >= 11 ? "bg-emerald-50 text-emerald-900" : matchDetails.score >= 6 ? "bg-amber-50 text-amber-900" : "bg-gray-50 text-gray-700"} p-3">
           <div class="flex items-center justify-between gap-3">
             <span class="text-sm font-bold">プロフィール条件との一致</span>
             <span class="text-sm font-black">${matchDetails.score}点</span>
@@ -117,7 +119,7 @@ function renderJobList(resetLimit = false) {
             : matchDetails.compared
               ? "登録済みの希望条件と一致する項目はありません"
               : "比較できる希望条件が未登録です"}</p>
-          <p class="mt-1 text-[10px] opacity-75">希望職種・勤務地・給与条件で算出する目安です。</p>
+          <p class="mt-1 text-[10px] opacity-75">最大14点。希望職種・勤務地・給与・働き方の参考目安です。</p>
         </div>`
       : "";
     return `
@@ -125,7 +127,6 @@ function renderJobList(resetLimit = false) {
       <div class="flex items-start justify-between gap-3">
         <div class="min-w-0 flex-1">
                         <div class="mb-3 flex flex-wrap gap-2">
-            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-wider uppercase ${job.work_style === 'short' ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700'}">${job.work_style === 'short' ? '⚡ 単発・短期' : '🤝 常用・正社員'}</span>
             <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-wider uppercase ${isJobClosed(job) ? 'bg-gray-100 text-gray-500' : 'bg-emerald-50 text-emerald-700'}">${isJobClosed(job) ? '募集終了' : '募集中'}</span>
 
             ${job.capacity <= 0 ? '' : `<span class="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-[10px] font-bold text-blue-700 uppercase">募集人数 ${formatJobCapacity(job.capacity)}</span>`}
@@ -158,6 +159,7 @@ function renderJobList(resetLimit = false) {
         </div>
       </div>
       ${matchSummary}
+      ${workPreferences.length ? `<div class="mt-4 flex flex-wrap gap-1.5">${workPreferences.slice(0, 6).map(value => `<span class="rounded-full bg-indigo-50 px-2.5 py-1 text-[10px] font-bold text-indigo-800">${escapeHtml(value)}</span>`).join("")}${workPreferences.length > 6 ? `<span class="self-center text-[10px] text-gray-400">ほか${workPreferences.length - 6}件</span>` : ""}</div>` : ""}
       ${Array.isArray(job.tags) && job.tags.length ? `<div class="mt-5 flex flex-wrap gap-1.5">${job.tags.slice(0, 5).map(tag => `<span class="rounded-lg bg-blue-50/50 px-2.5 py-1 text-[10px] font-bold text-blue-600 ring-1 ring-inset ring-blue-100/50">${escapeHtml(tag)}</span>`).join("")}${job.tags.length > 5 ? '<span class="text-[10px] text-gray-400 self-center">...</span>' : ''}</div>` : ''}
       <div class="mt-5 flex items-center justify-between pt-4">
          <div class="flex items-center text-xs font-bold text-blue-600">
@@ -312,6 +314,23 @@ function openModal(id) {
   document.getElementById("modalCapacity").innerText = `募集人数: ${formatJobCapacity(selectedJob.capacity)}`;
   document.getElementById("modalCapacity").classList.toggle("hidden", selectedJob.capacity <= 0);
   document.getElementById("modalDuties").innerText = selectedJob.duties || "特記事項なし";
+  const workConditions = [];
+  const startTime = selectedJob.start_time ? String(selectedJob.start_time).slice(0, 5) : "";
+  const endTime = selectedJob.end_time ? String(selectedJob.end_time).slice(0, 5) : "";
+  if (startTime || endTime) {
+    workConditions.push(`<p><span class="font-bold">勤務時間:</span> ${escapeHtml(startTime || "未設定")}〜${escapeHtml(endTime || "未設定")}</p>`);
+  }
+  if (selectedJob.break_minutes !== null && selectedJob.break_minutes !== undefined) {
+    workConditions.push(`<p><span class="font-bold">休憩:</span> ${escapeHtml(String(selectedJob.break_minutes))}分</p>`);
+  }
+  if (selectedJob.overtime_details) {
+    workConditions.push(`<p><span class="font-bold">残業の目安:</span> ${escapeHtml(String(selectedJob.overtime_details))}</p>`);
+  }
+  if (selectedJob.allowance_details) {
+    workConditions.push(`<p class="whitespace-pre-wrap"><span class="font-bold">手当・待遇:</span> ${escapeHtml(String(selectedJob.allowance_details))}</p>`);
+  }
+  document.getElementById("modalWorkConditionsContent").innerHTML = workConditions.join("");
+  document.getElementById("modalWorkConditions").classList.toggle("hidden", workConditions.length === 0);
   document.getElementById("modalClosed").classList.toggle("hidden", !selectedJobIsClosed);
   updateModalFavoriteButton();
 
@@ -500,6 +519,10 @@ function getJobMatchDetails(job, profile) {
       reasons.push("求人給与が希望最低額以上");
     }
   }
+  const workMatch = getWorkPreferenceMatch(job.work_preferences, profile.workPreferences);
+  score += workMatch.score;
+  compared += workMatch.maximumScore > 0 ? 1 : 0;
+  reasons.push(...workMatch.reasons);
   return { score, compared, reasons };
 }
 

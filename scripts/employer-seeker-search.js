@@ -82,7 +82,7 @@ async function loadPublicSeekerProfiles(user) {
   for (let offset = 0; ; offset += pageSize) {
     const { data, error } = await supabaseClient
       .from("seeker_public_profiles")
-      .select("job_type, location, pay_type, minimum_salary, licenses, exp_years, stamina, updated_at")
+      .select("job_type, location, pay_type, minimum_salary, licenses, exp_years, experience_details, stamina, work_preferences, updated_at")
       .order("updated_at", { ascending: false })
       .range(offset, offset + pageSize - 1);
     if (currentUser?.id !== user.id || accountType !== "employer") return;
@@ -175,7 +175,9 @@ function renderEmployerSeekerSearch(resetLimit = false) {
         profile.job_type,
         profile.location,
         profile.exp_years,
+        profile.experience_details,
         profile.stamina,
+        ...getWorkPreferenceLabels(profile.work_preferences),
         ...(Array.isArray(profile.licenses) ? profile.licenses : [])
       ].join(" ").toLocaleLowerCase();
       return (!keyword || searchableText.includes(keyword)) &&
@@ -237,15 +239,16 @@ function renderEmployerSeekerSearch(resetLimit = false) {
     const licenses = Array.isArray(profile.licenses) && profile.licenses.length
       ? profile.licenses.map(license => `<span class="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-800">${escapeHtml(String(license))}</span>`).join("")
       : '<span class="text-sm text-gray-500">登録なし</span>';
+    const workPreferences = getWorkPreferenceLabels(profile.work_preferences);
     const match = matchedJob ? getSeekerJobMatch(matchedJob, profile) : null;
     const matchLabel = match && match.maximumScore > 0
-      ? `<div class="mt-4 rounded-lg ${match.score >= 7 ? "bg-emerald-50 text-emerald-900" : match.score >= 4 ? "bg-amber-50 text-amber-900" : "bg-gray-50 text-gray-700"} p-3">
+      ? `<div class="mt-4 rounded-lg ${match.score >= 11 ? "bg-emerald-50 text-emerald-900" : match.score >= 6 ? "bg-amber-50 text-amber-900" : "bg-gray-50 text-gray-700"} p-3">
           <div class="flex items-center justify-between gap-3">
             <span class="text-sm font-bold">条件一致スコア</span>
             <span class="text-lg font-black">${match.score}点</span>
           </div>
           <p class="mt-1 text-xs">${match.reasons.length ? `一致: ${escapeHtml(match.reasons.join("・"))}` : "登録済みの希望条件と一致する項目はありません"}</p>
-          <p class="mt-1 text-[10px] opacity-75">最大10点。登録済みの希望条件だけで算出する目安です。</p>
+          <p class="mt-1 text-[10px] opacity-75">最大14点。登録済みの希望条件だけで算出する目安です。</p>
         </div>`
       : matchedJob
         ? '<p class="mt-4 rounded-lg bg-gray-50 p-3 text-xs text-gray-600">比較できる希望条件が未登録です。プロフィール内容を参考にしてください。</p>'
@@ -260,10 +263,17 @@ function renderEmployerSeekerSearch(resetLimit = false) {
       </div>
       <dl class="mt-4 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
         <div><dt class="text-xs font-bold text-gray-500">現場経験</dt><dd class="mt-1 font-medium text-gray-800">${escapeHtml(String(profile.exp_years || "未設定"))}</dd></div>
+        <div class="sm:col-span-2"><dt class="text-xs font-bold text-gray-500">経験した作業・できること</dt><dd class="mt-1 whitespace-pre-wrap font-medium text-gray-800">${escapeHtml(String(profile.experience_details || "未登録"))}</dd></div>
         <div><dt class="text-xs font-bold text-gray-500">希望給与</dt><dd class="mt-1 font-medium text-gray-800">${escapeHtml(pay)}</dd></div>
         <div><dt class="text-xs font-bold text-gray-500">体力自信度</dt><dd class="mt-1 font-medium text-gray-800">${escapeHtml(String(profile.stamina || "未設定"))}</dd></div>
         <div><dt class="text-xs font-bold text-gray-500">資格</dt><dd class="mt-1 flex flex-wrap gap-1.5">${licenses}</dd></div>
       </dl>
+      <div class="mt-4">
+        <p class="text-xs font-bold text-gray-500">希望する働き方</p>
+        <div class="mt-1 flex flex-wrap gap-1.5">${workPreferences.length
+          ? workPreferences.map(value => `<span class="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-800">${escapeHtml(value)}</span>`).join("")
+          : '<span class="text-sm text-gray-500">未設定</span>'}</div>
+      </div>
       ${matchLabel}
       <p class="mt-4 border-t border-gray-100 pt-3 text-[10px] font-medium text-gray-400">プロフィール更新: ${formatDashboardDate(profile.updated_at)}</p>
     </article>`;
@@ -318,6 +328,11 @@ function getSeekerJobMatch(job, profile) {
       reasons.push("求人給与が希望最低額以上");
     }
   }
+
+  const workMatch = getWorkPreferenceMatch(job.work_preferences, profile.work_preferences);
+  score += workMatch.score;
+  maximumScore += workMatch.maximumScore;
+  reasons.push(...workMatch.reasons);
 
   return {
     score,

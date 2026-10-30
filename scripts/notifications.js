@@ -217,7 +217,7 @@ async function openApplicantPublicProfile(applicationId) {
 
   const { data, error } = await supabaseClient
     .from("seeker_public_profiles")
-    .select("job_type, location, pay_type, minimum_salary, licenses, exp_years, stamina, updated_at")
+    .select("job_type, location, pay_type, minimum_salary, licenses, exp_years, experience_details, stamina, work_preferences, updated_at")
     .eq("user_id", applicantId)
     .maybeSingle();
 
@@ -252,6 +252,7 @@ async function openApplicantPublicProfile(applicationId) {
   const licenses = Array.isArray(data.licenses) && data.licenses.length
     ? data.licenses.map(license => `<span class="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-800">${escapeHtml(String(license))}</span>`).join("")
     : '<span class="text-sm text-gray-500">登録なし</span>';
+  const workPreferences = getWorkPreferenceLabels(data.work_preferences);
   content.innerHTML = `
     <button type="button" onclick="returnToApplicationDetails('${escapeHtml(String(application.id))}')" class="mb-4 min-h-10 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-bold text-gray-700 hover:bg-gray-50">← 応募内容に戻る</button>
     <article class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
@@ -264,8 +265,12 @@ async function openApplicantPublicProfile(applicationId) {
         <div><dt class="text-xs font-bold text-gray-500">希望勤務地</dt><dd class="mt-1 font-medium text-gray-800">${escapeHtml(String(data.location || "未設定"))}</dd></div>
         <div><dt class="text-xs font-bold text-gray-500">希望給与</dt><dd class="mt-1 font-medium text-gray-800">${escapeHtml(pay)}</dd></div>
         <div><dt class="text-xs font-bold text-gray-500">現場経験</dt><dd class="mt-1 font-medium text-gray-800">${escapeHtml(String(data.exp_years || "未設定"))}</dd></div>
+        <div class="sm:col-span-2"><dt class="text-xs font-bold text-gray-500">経験した作業・できること</dt><dd class="mt-1 whitespace-pre-wrap font-medium text-gray-800">${escapeHtml(String(data.experience_details || "未登録"))}</dd></div>
         <div><dt class="text-xs font-bold text-gray-500">体力自信度</dt><dd class="mt-1 font-medium text-gray-800">${escapeHtml(String(data.stamina || "未設定"))}</dd></div>
         <div><dt class="text-xs font-bold text-gray-500">資格</dt><dd class="mt-1 flex flex-wrap gap-1.5">${licenses}</dd></div>
+        <div class="sm:col-span-2"><dt class="text-xs font-bold text-gray-500">希望する働き方</dt><dd class="mt-1 flex flex-wrap gap-1.5">${workPreferences.length
+          ? workPreferences.map(value => `<span class="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-800">${escapeHtml(value)}</span>`).join("")
+          : '<span class="font-medium text-gray-800">未設定</span>'}</dd></div>
       </dl>
       <p class="mt-4 border-t border-gray-100 pt-3 text-[10px] font-medium text-gray-400">プロフィール更新: ${formatDashboardDate(data.updated_at)}</p>
     </article>

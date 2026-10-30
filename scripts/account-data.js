@@ -35,7 +35,9 @@ async function loadAccountData(user) {
           minimumSalary: profileResult.data.minimum_salary,
           licenses: profileResult.data.licenses,
           expYears: profileResult.data.exp_years,
+          experienceDetails: profileResult.data.experience_details || "",
           stamina: profileResult.data.stamina,
+          workPreferences: profileResult.data.work_preferences || [],
           isPublic: profileResult.data.is_public
         };
         if (!dashboardOpen) loadSeekerProfile(seekerProfileData);

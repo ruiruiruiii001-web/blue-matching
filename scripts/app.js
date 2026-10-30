@@ -45,6 +45,7 @@ let accountReviews = []; // 自分が書いたレビュー
 
 
 document.addEventListener("DOMContentLoaded", () => {
+  initializeProfileOptionControls();
   document.getElementById("employerDashboardJobFormSlot").append(
     document.getElementById("employerJobForm")
   );

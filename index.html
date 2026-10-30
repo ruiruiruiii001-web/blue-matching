@@ -204,14 +204,7 @@
             <input type="text" id="jobLocation" maxlength="100" placeholder="例: 東京都新宿区 / 神奈川県横浜市" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
           </div>
 
-                    <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-medium mb-1">働き方 <span class="text-red-500">*</span></label>
-              <select id="jobWorkStyle" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                <option value="short">⚡ 単期・単発（アルバイト）</option>
-                <option value="regular" selected>🤝 常用・正社員（長く働ける）</option>
-              </select>
-            </div>
+          <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-medium mb-1">募集人数</label>
               <select id="jobCapacity" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
@@ -227,6 +220,34 @@
               <input type="text" id="jobSalary" maxlength="100" placeholder="例: 日給 15,000円〜" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
             </div>
           </div>
+
+          <fieldset class="rounded-xl border border-blue-100 bg-blue-50 p-4">
+            <legend class="px-1 text-sm font-bold text-gray-800">働き方（複数選択可）</legend>
+            <p class="mb-3 text-xs text-gray-600">勤務形態・週の勤務日数・勤務時間帯を設定できます。選択した条件は求職者の希望条件とのおすすめ表示に使われます。</p>
+            <div id="jobWorkPreferences" class="space-y-4"></div>
+          </fieldset>
+
+          <fieldset class="rounded-xl border border-gray-200 p-4">
+            <legend class="px-1 text-sm font-bold text-gray-800">勤務時間・手当（任意）</legend>
+            <div class="grid grid-cols-2 gap-3">
+              <label class="text-sm">始業時間
+                <input id="jobStartTime" type="time" class="mt-1 w-full rounded border px-3 py-2.5">
+              </label>
+              <label class="text-sm">終業時間
+                <input id="jobEndTime" type="time" class="mt-1 w-full rounded border px-3 py-2.5">
+              </label>
+              <label class="col-span-2 text-sm sm:col-span-1">休憩時間（分）
+                <input id="jobBreakMinutes" type="number" min="0" max="1440" step="1" placeholder="例: 60" class="mt-1 w-full rounded border px-3 py-2.5">
+              </label>
+              <label class="col-span-2 text-sm sm:col-span-1">残業の目安
+                <input id="jobOvertimeDetails" type="text" maxlength="300" placeholder="例: 月平均10時間、繁忙期のみ" class="mt-1 w-full rounded border px-3 py-2.5">
+              </label>
+            </div>
+            <label class="mt-3 block text-sm">手当・待遇の詳細
+              <textarea id="jobAllowanceDetails" rows="3" maxlength="1000" class="mt-1 w-full rounded border px-3 py-2.5" placeholder="例: 交通費は月2万円まで支給／寮費は月3万円（水道光熱費別）／道具・作業着支給"></textarea>
+            </label>
+            <p class="mt-1 text-xs text-gray-500">金額や対象条件も具体的に記入すると、応募前に確認しやすくなります。</p>
+          </fieldset>
 
           <div>
             <label class="block text-sm font-medium mb-1">給与条件（絞り込み用・任意）</label>
@@ -362,9 +383,12 @@
 
 
         <div>
-          <label class="block text-sm font-medium mb-1">希望職種</label>
-          <input type="text" id="seekerJobType" maxlength="100" placeholder="例: 足場、解体、塗装" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-          <p class="text-xs text-gray-500 mt-1">求人の職種名や仕事内容に含まれるキーワードでおすすめします。</p>
+          <label class="mb-1 block text-sm font-medium">希望職種（複数選択可）</label>
+          <div id="seekerJobTypeOptions" class="grid grid-cols-1 gap-2 sm:grid-cols-2"></div>
+          <label class="mt-2 block text-sm">その他・具体的な職種
+            <input type="text" id="seekerJobType" maxlength="100" placeholder="例: 足場、解体、塗装" class="mt-1 w-full rounded border px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+          </label>
+          <p class="text-xs text-gray-500 mt-1">選んだ職種と求人の職種名・仕事内容の一致をおすすめ順に反映します。</p>
         </div>
 
         <div>
@@ -396,20 +420,23 @@
         <!-- 資格チェックボックス -->
         <div>
           <label class="block text-sm font-medium mb-1">保有資格（該当するものをチェック）</label>
-          <div class="grid grid-cols-2 gap-2 text-xs">
-            <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="seekerLic" value="普通自動車免許"> <span>🚗 普通自動車免許</span></label>
-            <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="seekerLic" value="中型/大型免許"> <span>🚚 中型/大型免許</span></label>
-            <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="seekerLic" value="玉掛け/クレーン"> <span>🏗 玉掛け・クレーン</span></label>
-            <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="seekerLic" value="足場組み立て"> <span>🪜 足場組み立て</span></label>
-            <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="seekerLic" value="車両系建設機械"> <span>🚜 車両系建設機械</span></label>
-            <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="seekerLic" value="施工管理技士"> <span>📋 施工管理技士</span></label>
+          <div id="seekerLicenseOptions" class="grid grid-cols-1 gap-2 text-xs sm:grid-cols-2">
           </div>
+          <label class="mt-2 block text-sm">その他の資格
+            <input id="seekerOtherLicenses" type="text" maxlength="300" placeholder="複数ある場合は「、」で区切って入力" class="mt-1 w-full rounded border px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+          </label>
+        </div>
+
+        <div>
+          <label for="seekerExperienceDetails" class="block text-sm font-medium mb-1">経験した作業・できること（任意）</label>
+          <textarea id="seekerExperienceDetails" rows="3" maxlength="1000" class="w-full rounded border px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="例: 足場の組立・解体を2年経験。車両系建設機械で掘削作業ができます。"></textarea>
+          <p class="mt-1 text-xs text-gray-500">担当した作業や扱える機材を記入できます。企業向け公開プロフィールにも同意した場合のみ表示されます。</p>
         </div>
 
         <!-- 即戦力メーター -->
         <div class="bg-gray-50 p-3 rounded border space-y-3">
           <p class="text-xs font-bold text-gray-700">💪 即戦力アピール</p>
-          <div class="grid grid-cols-2 gap-3 text-xs">
+          <div class="grid grid-cols-1 gap-3 text-xs sm:grid-cols-2">
             <div>
               <label class="block font-medium mb-1">現場経験年数</label>
               <select id="seekerExpYears" class="w-full border rounded p-2">
@@ -422,18 +449,27 @@
             <div>
               <label class="block font-medium mb-1">体力自信度</label>
               <select id="seekerStamina" class="w-full border rounded p-2">
-                <option value="★★★★★ (自信あり)">★★★★★ (自信あり)</option>
-                <option value="★★★☆☆ (普通)">★★★☆☆ (普通)</option>
+                <option value="">未回答</option>
+                <option value="★★★★★ (とても自信あり)">★★★★★ とても自信あり</option>
+                <option value="★★★★☆ (自信あり)">★★★★☆ 自信あり</option>
+                <option value="★★★☆☆ (普通)">★★★☆☆ 普通</option>
+                <option value="★★☆☆☆ (やや不安)">★★☆☆☆ やや不安</option>
+                <option value="★☆☆☆☆ (自信なし)">★☆☆☆☆ 自信なし</option>
               </select>
             </div>
           </div>
         </div>
+        <fieldset class="rounded-xl border border-blue-100 bg-blue-50 p-4">
+          <legend class="px-1 text-sm font-bold text-gray-800">希望する働き方（複数選択可）</legend>
+          <p class="mb-3 text-xs text-gray-600">勤務形態・週の勤務日数・勤務時間帯を選ぶと、求人のおすすめ順に反映されます。</p>
+          <div id="seekerWorkPreferences" class="space-y-4"></div>
+        </fieldset>
 
         <fieldset class="rounded-lg border border-amber-300 bg-amber-50 p-4">
           <legend class="px-1 text-sm font-bold text-amber-950">企業へのプロフィール公開（任意）</legend>
           <label class="flex items-start gap-2 text-sm text-amber-950">
             <input id="seekerProfilePublic" type="checkbox" class="mt-0.5 h-4 w-4 shrink-0">
-            <span><span class="font-bold">企業アカウントに匿名プロフィールを公開する</span><br>チェックを入れてプロフィールを保存すると、希望職種・都道府県/市区町村・希望給与区分と最低希望額・資格・経験・アピールが企業アカウントに表示されます。名前と電話番号は表示されません。一般公開ではありません。</span>
+            <span><span class="font-bold">企業アカウントに匿名プロフィールを公開する</span><br>チェックを入れてプロフィールを保存すると、希望職種・勤務地・希望給与・資格・経験年数・経験した作業・体力自信度・希望する働き方が企業アカウントに表示されます。名前と電話番号は表示されません。一般公開ではありません。</span>
           </label>
           <p class="mt-3 border-t border-amber-200 pt-3 text-xs leading-5 text-amber-900">公開は任意です。チェックを外して保存すると非公開になります。企業アカウントの利用者は本人確認されているとは限らないため、公開する情報に個人を特定できる内容を含めないでください。勤務地は市区町村までにしてください。</p>
         </fieldset>
@@ -720,10 +756,15 @@
         </div>
       </div>
 
+      <section id="modalWorkConditions" class="mb-6 hidden rounded-lg border border-gray-200 bg-gray-50 p-4">
+        <h3 class="mb-2 text-sm font-bold text-gray-900">勤務時間・手当</h3>
+        <div id="modalWorkConditionsContent" class="space-y-2 text-sm leading-6 text-gray-700"></div>
+      </section>
+
       <div class="border-t mt-4 pt-4">
         <p id="applicationLoginPrompt" class="text-xs text-gray-600">応募履歴を保存するにはログインが必要です。</p>
         <button id="applicationLoginButton" type="button" onclick="closeModal(); openAccountPanel()" class="hidden mt-3 rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white">ログイン</button>
-        <a id="applicationContinueButton" href="#" class="hidden mt-3 w-full rounded-xl bg-blue-600 px-4 py-3.5 text-center font-bold text-white hover:bg-blue-700">応募画面に進む</a>
+        <a id="applicationContinueButton" href="#" class="hidden mt-3 w-full rounded-xl bg-blue-600 px-4 py-3.5 text-center font-bold text-white hover:bg-blue-700">サイト内の応募フォームへ</a>
       </div>
 
       <div class="border-t mt-4 pt-4">

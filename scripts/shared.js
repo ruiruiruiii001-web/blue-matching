@@ -1,3 +1,161 @@
+const JOB_TYPE_OPTIONS = [
+  "大工・木造建築", "解体", "足場", "土木", "とび", "鉄筋", "型枠", "左官",
+  "塗装", "内装", "電気工事", "配管・設備", "造園", "重機オペレーター",
+  "現場監督・施工管理", "運搬・ドライバー", "清掃・養生"
+];
+
+const LICENSE_OPTIONS = [
+  "普通自動車免許", "準中型免許", "中型免許", "大型免許", "玉掛け",
+  "クレーン運転士", "小型移動式クレーン", "フォークリフト",
+  "足場の組立て等作業主任者", "足場特別教育", "車両系建設機械",
+  "高所作業車", "ガス溶接", "アーク溶接", "職長・安全衛生責任者",
+  "施工管理技士", "電気工事士", "配管技能士", "石綿作業主任者",
+  "フルハーネス特別教育"
+];
+
+const WORK_PREFERENCE_GROUPS = [
+  {
+    key: "employment",
+    label: "勤務形態",
+    reason: "希望する勤務形態が一致",
+    weight: 2,
+    options: [
+      ["spot", "単発・スポット"], ["short_term", "短期（1〜3か月）"],
+      ["long_term", "長期・常用"], ["full_time", "正社員"],
+      ["contract", "契約社員"], ["part_time", "アルバイト・パート"],
+      ["outsourcing", "業務委託"]
+    ]
+  },
+  {
+    key: "days",
+    label: "週の勤務日数",
+    reason: "週の勤務日数が一致",
+    weight: 1,
+    options: [
+      ["days_1", "週1日〜"], ["days_2_3", "週2〜3日"],
+      ["days_4_5", "週4〜5日"], ["days_6", "週6日"],
+      ["days_flexible", "勤務日数相談可"]
+    ]
+  },
+  {
+    key: "time",
+    label: "勤務時間帯",
+    reason: "勤務時間帯が一致",
+    weight: 1,
+    options: [
+      ["day", "日勤"], ["night", "夜勤"], ["early", "早朝"],
+      ["evening", "夕勤"], ["shift", "シフト制"],
+      ["time_flexible", "勤務時間相談可"]
+    ]
+  }
+];
+
+function renderCheckboxOptions(containerId, inputName, options) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.replaceChildren(...options.map((option, index) => {
+    const label = document.createElement("label");
+    label.className = "flex min-h-10 items-center gap-2 rounded-lg border border-gray-100 bg-gray-50 px-3 py-2 text-sm hover:bg-blue-50";
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.name = inputName;
+    checkbox.value = option.value || option;
+    checkbox.id = `${inputName}-${index}`;
+    checkbox.className = "h-4 w-4 shrink-0 rounded text-blue-600 focus:ring-blue-500";
+    const text = document.createElement("span");
+    text.textContent = option.label || option;
+    label.htmlFor = checkbox.id;
+    label.append(checkbox, text);
+    return label;
+  }));
+}
+
+function renderWorkPreferenceOptions(containerId, inputName) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.replaceChildren(...WORK_PREFERENCE_GROUPS.map(group => {
+    const fieldset = document.createElement("fieldset");
+    fieldset.className = "space-y-2";
+    const legend = document.createElement("legend");
+    legend.className = "mb-2 text-sm font-bold text-gray-700";
+    legend.textContent = group.label;
+    const options = document.createElement("div");
+    options.className = "grid grid-cols-1 gap-2 sm:grid-cols-2";
+    const groupOptions = group.options.map(([value, label]) => ({
+      value: `${group.key}:${value}`,
+      label
+    }));
+    options.append(...groupOptions.map((option, index) => {
+      const wrapper = document.createElement("label");
+      wrapper.className = "flex min-h-10 items-center gap-2 rounded-lg border border-gray-100 bg-gray-50 px-3 py-2 text-sm hover:bg-blue-50";
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.name = inputName;
+      checkbox.value = option.value;
+      checkbox.id = `${inputName}-${group.key}-${index}`;
+      checkbox.className = "h-4 w-4 shrink-0 rounded text-blue-600 focus:ring-blue-500";
+      const text = document.createElement("span");
+      text.textContent = option.label;
+      wrapper.htmlFor = checkbox.id;
+      wrapper.append(checkbox, text);
+      return wrapper;
+    }));
+    fieldset.append(legend, options);
+    return fieldset;
+  }));
+}
+
+function getCheckedValues(inputName) {
+  return Array.from(document.querySelectorAll(`input[name="${inputName}"]:checked`))
+    .map(input => input.value);
+}
+
+function setCheckedValues(inputName, values) {
+  const selectedValues = new Set(Array.isArray(values) ? values : []);
+  document.querySelectorAll(`input[name="${inputName}"]`).forEach(input => {
+    input.checked = selectedValues.has(input.value);
+  });
+}
+
+function getWorkPreferenceLabels(values) {
+  const labels = new Map(
+    WORK_PREFERENCE_GROUPS.flatMap(group =>
+      group.options.map(([value, label]) => [`${group.key}:${value}`, label])
+    )
+  );
+  return (Array.isArray(values) ? values : [])
+    .map(value => labels.get(value))
+    .filter(Boolean);
+}
+
+function getWorkPreferenceMatch(jobPreferences, seekerPreferences) {
+  const jobValues = new Set(Array.isArray(jobPreferences) ? jobPreferences : []);
+  const seekerValues = new Set(Array.isArray(seekerPreferences) ? seekerPreferences : []);
+  let score = 0;
+  let maximumScore = 0;
+  const reasons = [];
+
+  WORK_PREFERENCE_GROUPS.forEach(group => {
+    const groupValues = group.options.map(([value]) => `${group.key}:${value}`);
+    const jobGroup = groupValues.filter(value => jobValues.has(value));
+    const seekerGroup = groupValues.filter(value => seekerValues.has(value));
+    if (!jobGroup.length || !seekerGroup.length) return;
+    maximumScore += group.weight;
+    if (jobGroup.some(value => seekerValues.has(value))) {
+      score += group.weight;
+      reasons.push(group.reason);
+    }
+  });
+  return { score, maximumScore, reasons };
+}
+
+function initializeProfileOptionControls() {
+  renderCheckboxOptions("seekerJobTypeOptions", "seekerJobTypeOption", JOB_TYPE_OPTIONS);
+  renderCheckboxOptions("seekerLicenseOptions", "seekerLic", LICENSE_OPTIONS);
+  renderWorkPreferenceOptions("seekerWorkPreferences", "seekerWorkPreference");
+  renderWorkPreferenceOptions("jobWorkPreferences", "jobWorkPreference");
+}
+
 function formatDashboardDate(value) {
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? "" : date.toLocaleString("ja-JP");

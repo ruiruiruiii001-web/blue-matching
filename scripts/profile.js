@@ -4,7 +4,19 @@ async function saveSeekerProfile() {
     return;
   }
 
-  const checkedLic = Array.from(document.querySelectorAll('input[name="seekerLic"]:checked')).map(cb => cb.value);
+  const selectedJobTypes = getCheckedValues("seekerJobTypeOption");
+  const otherJobTypes = document.getElementById("seekerJobType").value
+    .split(/[,、，]/)
+    .map(value => value.trim())
+    .filter(Boolean);
+  const jobType = [...new Set([...selectedJobTypes, ...otherJobTypes])].join("、");
+  const selectedLicenses = getCheckedValues("seekerLic");
+  const otherLicenses = document.getElementById("seekerOtherLicenses").value
+    .split(/[,、，]/)
+    .map(value => value.trim())
+    .filter(Boolean);
+  const checkedLic = [...new Set([...selectedLicenses, ...otherLicenses])];
+  const workPreferences = getCheckedValues("seekerWorkPreference");
   const preferredPayType = document.getElementById("seekerPayType").value;
   const minimumSalaryValue = document.getElementById("seekerMinimumSalary").value;
   const preferredMinimumSalary = minimumSalaryValue ? Number(minimumSalaryValue) : null;
@@ -15,17 +27,19 @@ async function saveSeekerProfile() {
     return;
   }
 
-        const profile = {
+  const profile = {
     name: document.getElementById("seekerName").value.trim(),
     phone: normalizeJapanesePhone(document.getElementById("seekerPhone").value.trim()),
     avatarUrl: document.getElementById("seekerAvatarUrl").value.trim(),
-    jobType: document.getElementById("seekerJobType").value.trim(),
+    jobType,
     location: document.getElementById("seekerLocation").value.trim(),
     payType: preferredPayType,
     minimumSalary: preferredMinimumSalary,
     licenses: checkedLic,
     expYears: document.getElementById("seekerExpYears").value,
-    stamina: document.getElementById("seekerStamina").value
+    experienceDetails: document.getElementById("seekerExperienceDetails").value.trim(),
+    stamina: document.getElementById("seekerStamina").value,
+    workPreferences
   };
 
 
@@ -50,7 +64,7 @@ async function saveSeekerProfile() {
     }
   }
 
-        const { error } = await supabaseClient
+  const { error } = await supabaseClient
     .from("seeker_profiles")
     .upsert({
       user_id: currentUser.id,
@@ -63,7 +77,9 @@ async function saveSeekerProfile() {
       minimum_salary: profile.minimumSalary,
       licenses: profile.licenses,
       exp_years: profile.expYears,
+      experience_details: profile.experienceDetails,
       stamina: profile.stamina,
+      work_preferences: profile.workPreferences,
       is_public: isPublic,
       updated_at: new Date().toISOString()
     }, { onConflict: "user_id" });
@@ -73,7 +89,7 @@ async function saveSeekerProfile() {
     return;
   }
 
-        const publicProfileResult = isPublic
+  const publicProfileResult = isPublic
     ? await supabaseClient.from("seeker_public_profiles").upsert({
       user_id: currentUser.id,
       job_type: profile.jobType,
@@ -82,7 +98,9 @@ async function saveSeekerProfile() {
       minimum_salary: profile.minimumSalary,
       licenses: profile.licenses,
       exp_years: profile.expYears,
+      experience_details: profile.experienceDetails,
       stamina: profile.stamina,
+      work_preferences: profile.workPreferences,
       updated_at: new Date().toISOString()
     }, { onConflict: "user_id" })
 
@@ -101,26 +119,35 @@ async function saveSeekerProfile() {
   renderJobList();
 }
 
-    function loadSeekerProfile(profile) {
+function loadSeekerProfile(profile) {
   if (!profile) return;
   document.getElementById("seekerName").value = profile.name || "";
   document.getElementById("seekerPhone").value = profile.phone || "";
   document.getElementById("seekerAvatarUrl").value = profile.avatarUrl || "";
-  document.getElementById("seekerJobType").value = profile.jobType || "";
+  const jobTypes = String(profile.jobType || "").split(/[,、，]/).map(value => value.trim()).filter(Boolean);
+  setCheckedValues("seekerJobTypeOption", jobTypes.filter(value => JOB_TYPE_OPTIONS.includes(value)));
+  document.getElementById("seekerJobType").value = jobTypes
+    .filter(value => !JOB_TYPE_OPTIONS.includes(value))
+    .join("、");
 
   document.getElementById("seekerLocation").value = profile.location || "";
   document.getElementById("seekerPayType").value = profile.payType || "";
   document.getElementById("seekerMinimumSalary").value = profile.minimumSalary ?? "";
+  setCheckedValues("seekerWorkPreference", profile.workPreferences);
   applySeekerSalaryPreferences(profile);
   document.getElementById("seekerExpYears").value = profile.expYears || "未経験（やる気あり）";
-  document.getElementById("seekerStamina").value = profile.stamina || "★★★★★ (自信あり)";
+  document.getElementById("seekerExperienceDetails").value = profile.experienceDetails || "";
+  const stamina = profile.stamina === "★★★★★ (自信あり)"
+    ? "★★★★★ (とても自信あり)"
+    : profile.stamina || "";
+  document.getElementById("seekerStamina").value = stamina;
   document.getElementById("seekerProfilePublic").checked = Boolean(profile.isPublic);
 
-  if (profile.licenses) {
-    document.querySelectorAll('input[name="seekerLic"]').forEach(cb => {
-      cb.checked = profile.licenses.includes(cb.value);
-    });
-  }
+  const licenses = Array.isArray(profile.licenses) ? profile.licenses : [];
+  setCheckedValues("seekerLic", licenses.filter(value => LICENSE_OPTIONS.includes(value)));
+  document.getElementById("seekerOtherLicenses").value = licenses
+    .filter(value => !LICENSE_OPTIONS.includes(value))
+    .join("、");
 }
 
     function clearSeekerProfileForm() {
@@ -129,13 +156,17 @@ async function saveSeekerProfile() {
   document.getElementById("seekerPhone").value = "";
   document.getElementById("seekerAvatarUrl").value = "";
   document.getElementById("seekerJobType").value = "";
+  setCheckedValues("seekerJobTypeOption", []);
+  document.getElementById("seekerOtherLicenses").value = "";
 
   document.getElementById("seekerLocation").value = "";
   document.getElementById("seekerPayType").value = "";
   document.getElementById("seekerMinimumSalary").value = "";
-  document.querySelectorAll('input[name="seekerLic"]').forEach(input => input.checked = false);
+  setCheckedValues("seekerLic", []);
+  setCheckedValues("seekerWorkPreference", []);
   document.getElementById("seekerExpYears").value = "未経験（やる気あり）";
-  document.getElementById("seekerStamina").value = "★★★★★ (自信あり)";
+  document.getElementById("seekerExperienceDetails").value = "";
+  document.getElementById("seekerStamina").value = "";
   document.getElementById("seekerProfilePublic").checked = false;
   document.getElementById("profileSavedMessage").classList.add("hidden");
   applySeekerSalaryPreferences({});

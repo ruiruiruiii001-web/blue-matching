@@ -32,17 +32,29 @@ async function publishJob() {
   const payType = document.getElementById("jobPayType").value;
   const payAmountValue = document.getElementById("jobPayAmount").value;
   const payAmount = payAmountValue ? Number(payAmountValue) : null;
+  const breakMinutesValue = document.getElementById("jobBreakMinutes").value.trim();
+  const breakMinutes = breakMinutesValue ? Number(breakMinutesValue) : null;
+  const overtimeDetails = document.getElementById("jobOvertimeDetails").value.trim();
+  const allowanceDetails = document.getElementById("jobAllowanceDetails").value.trim();
   const normalizedPhone = normalizeJapanesePhone(phone);
 
   const checkedTags = Array.from(document.querySelectorAll('input[name="jobTag"]:checked')).map(cb => cb.value);
+  const workPreferences = getCheckedValues("jobWorkPreference");
 
   if (!title || !phone) {
     alert("「職種名」と「連絡用電話番号」は必須項目です。");
     return;
   }
 
-  if (title.length > 80 || location.length > 100 || salary.length > 100 || duties.length > 2000) {
-    alert("職種名は80文字、勤務地と給与表記は100文字、仕事内容は2,000文字以内で入力してください。");
+  if (title.length > 80 || location.length > 100 || salary.length > 100 || duties.length > 2000 ||
+      overtimeDetails.length > 300 || allowanceDetails.length > 1000) {
+    alert("職種名は80文字、勤務地と給与表記は100文字、仕事内容は2,000文字、残業の目安は300文字、手当・待遇は1,000文字以内で入力してください。");
+    return;
+  }
+
+  if (breakMinutes !== null &&
+      (!Number.isInteger(breakMinutes) || breakMinutes < 0 || breakMinutes > 1440)) {
+    alert("休憩時間は0〜1,440分の整数で入力してください。");
     return;
   }
 
@@ -83,10 +95,16 @@ async function publishJob() {
     return;
   }
 
-        const jobData = {
-          title, location, salary, phone: normalizedPhone, line, duties, capacity,
-          work_style: document.getElementById("jobWorkStyle").value,
-          pay_type: payType || null,
+  const jobData = {
+    title, location, salary, phone: normalizedPhone, line, duties, capacity,
+    work_style: workPreferences.some(value => ["employment:spot", "employment:short_term"].includes(value)) ? "short" : "regular",
+    work_preferences: workPreferences,
+    start_time: document.getElementById("jobStartTime").value || null,
+    end_time: document.getElementById("jobEndTime").value || null,
+    break_minutes: breakMinutes,
+    overtime_details: overtimeDetails,
+    allowance_details: allowanceDetails,
+    pay_type: payType || null,
 
     pay_amount: payAmount,
     tags: checkedTags,
@@ -107,7 +125,7 @@ async function publishJob() {
   const wasEditing = editingJobId !== null;
   cancelJobEdit();
 
-        alert(wasEditing ? "求人情報を更新しました！" : "クラウド上に求人を掲載しました！");
+  alert(wasEditing ? "求人情報を更新しました！" : "クラウド上に求人を掲載しました！");
   if (!wasEditing) {
     confetti({
       particleCount: 150,
@@ -128,11 +146,16 @@ function editJob(id) {
   showEmployerDashboardView("jobs");
   editingJobId = id;
   document.getElementById("jobTitle").value = job.title || "";
-  document.getElementById("jobWorkStyle").value = job.work_style || "regular";
+  setCheckedValues("jobWorkPreference", job.work_preferences);
   document.getElementById("jobImageUrl").value = job.image_url || "";
 
   document.getElementById("jobLocation").value = job.location || "";
   document.getElementById("jobSalary").value = job.salary || "";
+  document.getElementById("jobStartTime").value = job.start_time || "";
+  document.getElementById("jobEndTime").value = job.end_time || "";
+  document.getElementById("jobBreakMinutes").value = job.break_minutes ?? "";
+  document.getElementById("jobOvertimeDetails").value = job.overtime_details || "";
+  document.getElementById("jobAllowanceDetails").value = job.allowance_details || "";
   document.getElementById("jobPayType").value = getJobPayType(job);
   const payAmount = getJobPayAmount(job);
   document.getElementById("jobPayAmount").value = payAmount > 0 ? String(payAmount) : "";
@@ -169,11 +192,16 @@ function cancelJobEdit() {
   document.getElementById("employerJobForm").classList.add("hidden");
   document.getElementById("cancelEditButton").classList.add("hidden");
   document.getElementById("jobTitle").value = "";
-  document.getElementById("jobWorkStyle").value = "regular";
+  setCheckedValues("jobWorkPreference", []);
   document.getElementById("jobImageUrl").value = "";
 
   document.getElementById("jobLocation").value = "";
   document.getElementById("jobSalary").value = "";
+  document.getElementById("jobStartTime").value = "";
+  document.getElementById("jobEndTime").value = "";
+  document.getElementById("jobBreakMinutes").value = "";
+  document.getElementById("jobOvertimeDetails").value = "";
+  document.getElementById("jobAllowanceDetails").value = "";
   document.getElementById("jobPayType").value = "";
   document.getElementById("jobPayAmount").value = "";
   document.getElementById("jobPhone").value = "";
