@@ -148,6 +148,8 @@ function loadSeekerProfile(profile) {
   document.getElementById("seekerOtherLicenses").value = licenses
     .filter(value => !LICENSE_OPTIONS.includes(value))
     .join("、");
+  updateSelectionDetails("seekerJobTypeOption");
+  updateSelectionDetails("seekerLic");
 }
 
     function clearSeekerProfileForm() {
@@ -170,6 +172,8 @@ function loadSeekerProfile(profile) {
   document.getElementById("seekerProfilePublic").checked = false;
   document.getElementById("profileSavedMessage").classList.add("hidden");
   applySeekerSalaryPreferences({});
+  updateSelectionDetails("seekerJobTypeOption");
+  updateSelectionDetails("seekerLic");
 }
 
 function applySeekerSalaryPreferences(profile) {

@@ -143,11 +143,30 @@ function initializeJobRequirementControls() {
 function updateSelectionDetails(inputName, expandSelected = false) {
   document.querySelectorAll("details[data-selection-name]").forEach(details => {
     if (details.dataset.selectionName !== inputName) return;
-    const selectedCount = details.querySelectorAll('input[type="checkbox"]:checked').length;
+    const extraInput = document.getElementById(details.dataset.selectionExtraInput);
+    const selectedValues = new Set(
+      [...details.querySelectorAll('input[type="checkbox"]:checked')]
+        .map(input => input.value.trim())
+    );
+    if (extraInput) {
+      extraInput.value.split(/[,、，]/).forEach(value => {
+        const normalizedValue = value.trim();
+        if (normalizedValue) selectedValues.add(normalizedValue);
+      });
+    }
+    const selectedCount = selectedValues.size;
     const count = details.querySelector("[data-selected-count]");
     if (count) count.textContent = `選択済み ${selectedCount}件`;
     if (expandSelected) details.open = selectedCount > 0;
+    updateSelectionDisclosure(details);
   });
+}
+
+function updateSelectionDisclosure(details) {
+  const label = details.querySelector("[data-toggle-label]");
+  const icon = details.querySelector("[data-toggle-icon]");
+  if (label) label.textContent = details.open ? "閉じる" : "選択肢を開く";
+  if (icon) icon.textContent = details.open ? "▲" : "▼";
 }
 
 function initializeSelectionDetails() {
@@ -156,6 +175,11 @@ function initializeSelectionDetails() {
     details.querySelectorAll('input[type="checkbox"]').forEach(input => {
       input.addEventListener("change", () => updateSelectionDetails(inputName));
     });
+    const extraInput = document.getElementById(details.dataset.selectionExtraInput);
+    if (extraInput) {
+      extraInput.addEventListener("input", () => updateSelectionDetails(inputName));
+    }
+    details.addEventListener("toggle", () => updateSelectionDisclosure(details));
     updateSelectionDetails(inputName);
   });
 }
