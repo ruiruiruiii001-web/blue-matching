@@ -49,6 +49,7 @@ function renderEmployerDashboard() {
               </div>
               <div class="flex flex-wrap gap-2 sm:shrink-0 sm:justify-end">
                 <button type="button" onclick="editJob(${job.id})" class="min-h-10 rounded-lg bg-blue-50 px-3 py-2 text-xs font-bold text-blue-700 hover:bg-blue-100 transition-colors">編集</button>
+                <button type="button" onclick="duplicateJob(${job.id})" class="min-h-10 rounded-lg bg-blue-50 px-3 py-2 text-xs font-bold text-blue-700 hover:bg-blue-100 transition-colors">複製</button>
                 <button type="button" onclick="extendJob(${job.id})" class="min-h-10 rounded-lg ${getJobExpiryStatus(job)?.warning ? "bg-red-600 text-white hover:bg-red-700" : "bg-blue-50 text-blue-700 hover:bg-blue-100"} px-3 py-2 text-xs font-bold transition-colors">掲載を30日延長</button>
                 <button type="button" onclick="toggleJobClosed(${job.id})" class="min-h-10 rounded-lg bg-gray-50 px-3 py-2 text-xs font-bold text-gray-700 hover:bg-gray-100 transition-colors">${job.is_closed ? "募集を再開" : "募集を終了"}</button>
               </div>

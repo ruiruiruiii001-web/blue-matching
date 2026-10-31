@@ -135,7 +135,7 @@ function renderReports() {
       : job.is_hidden
         ? `非表示中${job.hidden_reason ? `（理由: ${job.hidden_reason}）` : ""}`
         : "公開中";
-    card.append(createElement("p", "mt-1 text-xs text-gray-600", `求人ID: ${report.job_id} ／ 状態: ${jobState}`));
+    card.append(createElement("p", "mt-1 text-xs text-gray-600", `求人ID: ${report.job_id} ／ 状態: ${jobState}${job?.owner_id && adminSuspendedIds.has(job.owner_id) ? " ／ 投稿者: 停止中" : ""}`));
     card.append(createElement("p", "mt-3 whitespace-pre-wrap break-words rounded-lg bg-gray-50 p-3 text-sm", report.details || "（詳細の記入なし）"));
 
     const actions = createElement("div", "mt-4 flex flex-wrap gap-2");
@@ -144,6 +144,14 @@ function renderReports() {
     }
     if (job?.is_hidden) {
       actions.append(createActionButton("非表示を解除", "bg-blue-600 text-white hover:bg-blue-700", () => setJobHidden(job.id, false, "")));
+    }
+    if (job?.owner_id) {
+      const suspended = adminSuspendedIds.has(job.owner_id);
+      if (suspended) {
+        actions.append(createActionButton("投稿者の停止を解除", "bg-blue-600 text-white hover:bg-blue-700", () => suspendOwner(job.owner_id, false)));
+      } else {
+        actions.append(createActionButton("投稿者のアカウントを停止", "bg-red-800 text-white hover:bg-red-900", () => suspendOwner(job.owner_id, true)));
+      }
     }
     if (report.status !== "reviewed") {
       actions.append(createActionButton("確認済みにする", "bg-emerald-600 text-white hover:bg-emerald-700", () => setReportStatus(report.id, "reviewed")));
@@ -181,6 +189,28 @@ async function setJobHidden(jobId, hidden, reason) {
   }
   await loadReports();
   return true;
+}
+
+async function suspendOwner(ownerId, suspended) {
+  let reason = "";
+  if (suspended) {
+    reason = window.prompt("この投稿者のアカウントを停止します。投稿者の求人はすべて非表示になり、投稿・応募・メッセージ送信ができなくなります。理由（200文字以内・運営用メモ）を入力してください。", "");
+    if (reason === null) return;
+    if (reason.length > 200) {
+      setAdminStatus("理由は200文字以内で入力してください。", true);
+      return;
+    }
+  }
+  const { error } = await supabaseClient.rpc("admin_set_user_suspended", {
+    p_user_id: ownerId,
+    p_suspended: suspended,
+    p_reason: reason
+  });
+  if (error) {
+    setAdminStatus(`アカウントの状態を変更できませんでした: ${error.message}`, true);
+    return;
+  }
+  await loadReports();
 }
 
 async function hideJob(report, job) {

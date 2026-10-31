@@ -416,6 +416,28 @@ function openModal(id) {
   document.getElementById("jobModalContent").scrollTop = 0;
 }
 
+function getJobShareUrl(job) {
+  return `${location.origin}/?job=${encodeURIComponent(String(job.id))}`;
+}
+
+function shareJobToLine() {
+  if (!selectedJob) return;
+  const text = `${selectedJob.title}${selectedJob.location ? `（${selectedJob.location}）` : ""}\n${getJobShareUrl(selectedJob)}`;
+  window.open(`https://line.me/R/share?text=${encodeURIComponent(text)}`, "_blank", "noopener");
+}
+
+async function copyJobLink() {
+  if (!selectedJob) return;
+  const button = document.getElementById("modalCopyLinkButton");
+  try {
+    await navigator.clipboard.writeText(getJobShareUrl(selectedJob));
+    button.innerText = "コピーしました";
+  } catch {
+    window.prompt("このリンクをコピーしてください", getJobShareUrl(selectedJob));
+  }
+  setTimeout(() => { button.innerText = "リンクをコピー"; }, 2000);
+}
+
 function formatJobSalary(job) {
   const payTypeLabels = { hourly: "時給", daily: "日給", monthly: "月給" };
   const payType = getJobPayType(job);

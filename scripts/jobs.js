@@ -13,6 +13,20 @@ async function fetchJobs() {
   renderJobList();
   renderEmployerDashboard();
   renderAccountDashboard();
+  openSharedJobFromUrl();
+}
+
+let sharedJobHandled = false;
+function openSharedJobFromUrl() {
+  if (sharedJobHandled) return;
+  sharedJobHandled = true;
+  const sharedId = new URLSearchParams(location.search).get("job");
+  if (!sharedId) return;
+  if (cachedJobs.some(job => String(job.id) === sharedId)) {
+    openModal(sharedId);
+  } else {
+    alert("この求人は見つかりませんでした。掲載が終了したか、非公開になっている可能性があります。");
+  }
 }
 
 // 求人投稿・編集（Supabaseへ保存）
@@ -189,6 +203,17 @@ function editJob(id) {
   document.getElementById("employerJobForm").classList.remove("hidden");
   document.getElementById("myPageOverlayContent").scrollTop = 0;
   document.getElementById("jobTitle").focus({ preventScroll: true });
+}
+
+function duplicateJob(id) {
+  const job = cachedJobs.find(item => item.id === id);
+  if (!currentUser || accountType !== "employer" || !job || job.owner_id !== currentUser.id) return;
+  editJob(id);
+  editingJobId = null;
+  setJobDurationControl(false);
+  document.getElementById("jobFormHeading").innerText = "求人を複製して新規投稿";
+  document.getElementById("jobSubmitButton").innerText = "🔥 この内容で新しく掲載する";
+  document.getElementById("cancelEditButton").innerText = "キャンセル";
 }
 
 function openEmployerJobForm() {
