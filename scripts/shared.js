@@ -130,8 +130,12 @@ function renderWorkPreferenceOptions(containerId, inputName) {
   }));
 }
 
-function renderLocationPreferenceOptions() {
-  const container = document.getElementById("seekerLocationPrefectureOptions");
+function renderLocationPreferenceOptions(
+  containerId = "seekerLocationPrefectureOptions",
+  inputName = "seekerLocationPrefecture",
+  selectionName = inputName
+) {
+  const container = document.getElementById(containerId);
   if (!container) return;
   container.replaceChildren(...PREFECTURE_GROUPS.map(([region, prefectures], regionIndex) => {
     const regionDetails = document.createElement("details");
@@ -152,15 +156,16 @@ function renderLocationPreferenceOptions() {
     options.className = "grid grid-cols-1 gap-2 p-3 sm:grid-cols-2";
     prefectures.forEach((prefecture, prefectureIndex) => {
       const option = document.createElement("div");
+      option.dataset.locationOption = "";
       option.className = "rounded-lg border border-gray-100 bg-gray-50 p-2";
       const label = document.createElement("label");
       label.className = "flex min-h-9 items-center gap-2 text-sm";
       const checkbox = document.createElement("input");
       checkbox.type = "checkbox";
-      checkbox.name = "seekerLocationPrefecture";
+      checkbox.name = inputName;
       checkbox.value = prefecture;
       checkbox.dataset.prefecture = prefecture;
-      checkbox.id = `seekerLocationPrefecture-${regionIndex}-${prefectureIndex}`;
+      checkbox.id = `${inputName}-${regionIndex}-${prefectureIndex}`;
       checkbox.className = "h-4 w-4 shrink-0 rounded text-blue-600 focus:ring-blue-500";
       const text = document.createElement("span");
       text.textContent = prefecture;
@@ -187,9 +192,9 @@ function renderLocationPreferenceOptions() {
       checkbox.addEventListener("change", () => {
         cityContainer.classList.toggle("hidden", !checkbox.checked);
         if (!checkbox.checked) cityInput.value = "";
-        updateSelectionDetails("seekerLocationPrefecture");
+        updateSelectionDetails(selectionName);
       });
-      cityInput.addEventListener("input", () => updateSelectionDetails("seekerLocationPrefecture"));
+      cityInput.addEventListener("input", () => updateSelectionDetails(selectionName));
     });
     regionDetails.append(summary, options);
     regionDetails.addEventListener("toggle", () => {
@@ -201,7 +206,7 @@ function renderLocationPreferenceOptions() {
 
 function getLocationPreferenceEntries(location) {
   return [...new Set(String(location || "")
-    .split(/[,、，;\n]/)
+    .split(/[,、，;／\/\n]/)
     .map(value => value.trim())
     .filter(Boolean))];
 }
@@ -223,12 +228,14 @@ function parseLocationPreferences(location) {
   return { preferences, otherLocations };
 }
 
-function getLocationPreferencesFromForm() {
+function getLocationPreferencesFromForm(
+  inputName = "seekerLocationPrefecture",
+  otherLocationId = "seekerLocation"
+) {
   const entries = [];
-  document.querySelectorAll('input[name="seekerLocationPrefecture"]:checked').forEach(checkbox => {
+  document.querySelectorAll(`input[name="${inputName}"]:checked`).forEach(checkbox => {
     const prefecture = checkbox.value;
-    const cityInput = [...document.querySelectorAll("[data-prefecture-city]")]
-      .find(input => input.dataset.prefectureCity === prefecture);
+    const cityInput = checkbox.closest("[data-location-option]")?.querySelector("[data-prefecture-city]");
     const cities = cityInput ? getLocationPreferenceEntries(cityInput.value) : [];
     if (cities.length) {
       cities.forEach(city => entries.push(`${prefecture} ${city}`));
@@ -236,16 +243,23 @@ function getLocationPreferencesFromForm() {
       entries.push(prefecture);
     }
   });
-  entries.push(...getLocationPreferenceEntries(document.getElementById("seekerLocation").value));
+  entries.push(...getLocationPreferenceEntries(document.getElementById(otherLocationId).value));
   return [...new Set(entries)].join("、");
 }
 
-function setLocationPreferences(location) {
+function setLocationPreferences(
+  location,
+  inputName = "seekerLocationPrefecture",
+  otherLocationId = "seekerLocation",
+  containerId = "seekerLocationPrefectureOptions",
+  selectionName = inputName
+) {
   const { preferences, otherLocations } = parseLocationPreferences(location);
-  document.querySelectorAll('input[name="seekerLocationPrefecture"]').forEach(checkbox => {
+  const container = document.getElementById(containerId);
+  container.querySelectorAll(`input[name="${inputName}"]`).forEach(checkbox => {
     const cities = preferences.get(checkbox.value);
     checkbox.checked = Boolean(cities);
-    const cityContainer = checkbox.closest("div.rounded-lg").querySelector("[data-city-container]");
+    const cityContainer = checkbox.closest("[data-location-option]").querySelector("[data-city-container]");
     const cityInput = cityContainer.querySelector("[data-prefecture-city]");
     cityInput.value = cities ? [...new Set(cities)].join("、") : "";
     cityContainer.classList.toggle("hidden", !checkbox.checked);
@@ -254,13 +268,13 @@ function setLocationPreferences(location) {
     regionDetails.querySelector("[data-region-icon]").textContent = regionDetails.open ? "▲" : "▼";
   });
   if (!preferences.size) {
-    document.querySelectorAll("details[data-prefecture-region]").forEach(details => {
+    container.querySelectorAll("details[data-prefecture-region]").forEach(details => {
       details.open = false;
       details.querySelector("[data-region-icon]").textContent = "▼";
     });
   }
-  document.getElementById("seekerLocation").value = otherLocations.join("、");
-  updateSelectionDetails("seekerLocationPrefecture", true);
+  document.getElementById(otherLocationId).value = otherLocations.join("、");
+  updateSelectionDetails(selectionName, true);
 }
 
 function initializeJobRequirementControls() {
@@ -288,17 +302,17 @@ function initializeJobRequirementControls() {
 function updateSelectionDetails(inputName, expandSelected = false) {
   document.querySelectorAll("details[data-selection-name]").forEach(details => {
     if (details.dataset.selectionName !== inputName) return;
-    if (inputName === "seekerLocationPrefecture") {
+    if (details.dataset.locationInputName === inputName) {
       const areas = [];
-      document.querySelectorAll('input[name="seekerLocationPrefecture"]:checked').forEach(checkbox => {
-        const cityInput = [...document.querySelectorAll("[data-prefecture-city]")]
-          .find(input => input.dataset.prefectureCity === checkbox.value);
+      details.querySelectorAll(`input[name="${inputName}"]:checked`).forEach(checkbox => {
+        const cityInput = checkbox.closest("[data-location-option]")?.querySelector("[data-prefecture-city]");
         const cities = cityInput ? getLocationPreferenceEntries(cityInput.value) : [];
         areas.push(...(cities.length ? cities.map(city => `${checkbox.value} ${city}`) : [checkbox.value]));
       });
-      areas.push(...getLocationPreferenceEntries(document.getElementById("seekerLocation").value));
+      const otherLocationId = details.dataset.locationOtherInput;
+      areas.push(...getLocationPreferenceEntries(document.getElementById(otherLocationId).value));
       const count = details.querySelector("[data-selected-count]");
-      if (count) count.textContent = `希望エリア ${new Set(areas).size}件`;
+      if (count) count.textContent = `${details.dataset.locationCountLabel} ${new Set(areas).size}件`;
       if (expandSelected) details.open = areas.length > 0;
       updateSelectionDisclosure(details);
       return;
@@ -342,8 +356,10 @@ function initializeSelectionDetails() {
     details.addEventListener("toggle", () => updateSelectionDisclosure(details));
     updateSelectionDetails(inputName);
   });
-  const otherLocation = document.getElementById("seekerLocation");
-  otherLocation.addEventListener("input", () => updateSelectionDetails("seekerLocationPrefecture"));
+  ["seekerLocation", "jobLocation"].forEach((inputId, index) => {
+    const inputName = index === 0 ? "seekerLocationPrefecture" : "jobLocationPrefecture";
+    document.getElementById(inputId).addEventListener("input", () => updateSelectionDetails(inputName));
+  });
 }
 
 function getCheckedValues(inputName) {
@@ -398,6 +414,11 @@ function initializeProfileOptionControls() {
   renderWorkPreferenceOptions("seekerWorkPreferences", "seekerWorkPreference");
   renderWorkPreferenceOptions("jobWorkPreferences", "jobWorkPreference");
   renderLocationPreferenceOptions();
+  renderLocationPreferenceOptions(
+    "jobLocationPrefectureOptions",
+    "jobLocationPrefecture",
+    "jobLocationPrefecture"
+  );
   initializeSelectionDetails();
 }
 

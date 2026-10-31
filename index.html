@@ -204,17 +204,30 @@
 
       <div id="employerJobForm" class="hidden rounded-xl border border-blue-100 bg-white p-4 shadow-sm sm:p-5">
         <h2 id="jobFormHeading" class="mb-4 border-b border-gray-100 pb-3 text-lg font-bold text-blue-600">現場求人のクラウド投稿</h2>
-        
+        <p class="mb-4 rounded-lg border border-blue-100 bg-blue-50 p-3 text-xs leading-relaxed text-blue-900">赤い「*」は必須項目です。詳細情報は入力できる範囲で構いません。応募者との連絡は「応募・メッセージ」から行えます。</p>
         <div class="space-y-4">
           <div>
             <label class="block text-sm font-medium mb-1">職種・現場名 <span class="text-red-500">*</span></label>
             <input type="text" id="jobTitle" maxlength="80" required placeholder="例: 解体現場の作業員・ダンプ運転手" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
           </div>
 
-          <div>
-            <label class="block text-sm font-medium mb-1">勤務地</label>
-            <input type="text" id="jobLocation" maxlength="100" placeholder="例: 東京都新宿区 / 神奈川県横浜市" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-          </div>
+          <details id="jobLocationPreferences" data-selection-name="jobLocationPrefecture" data-location-input-name="jobLocationPrefecture" data-location-other-input="jobLocation" data-location-count-label="勤務地" class="rounded-xl border border-blue-100 bg-blue-50">
+            <summary class="flex flex-wrap cursor-pointer list-none items-center justify-between gap-2 p-4 text-sm font-bold text-gray-800">
+              <span class="min-w-0">勤務地（複数選択可・任意）</span>
+              <span class="flex min-w-0 max-w-full flex-wrap items-center justify-end gap-x-2 gap-y-1 text-xs font-normal">
+                <span data-selected-count class="text-gray-600">勤務地 0件</span>
+                <span class="rounded-full bg-white px-2 py-1 font-bold text-blue-700 shadow-sm" data-toggle-label>選択肢を開く</span>
+                <span class="text-blue-700" data-toggle-icon aria-hidden="true">▼</span>
+              </span>
+            </summary>
+            <div class="space-y-3 px-4 pb-4">
+              <p class="text-xs leading-5 text-gray-600">地方を開いて都道府県を選び、市区町村を入力してください。複数現場は複数の都道府県・市区町村を登録できます。番地・建物名など、個人宅を特定できる情報は入力しないでください。</p>
+              <div id="jobLocationPrefectureOptions" class="space-y-2"></div>
+              <label class="block text-sm">その他の勤務地・現場の補足（任意）
+                <input type="text" id="jobLocation" maxlength="500" placeholder="例: 東京都内、関東一円" class="mt-1 h-11 w-full rounded border px-3 py-2.5 text-sm font-normal focus:ring-2 focus:ring-blue-500 outline-none">
+              </label>
+            </div>
+          </details>
 
           <div class="grid grid-cols-2 gap-4">
             <div>
@@ -333,16 +346,7 @@
             </label>
           </fieldset>
 
-          <div class="grid grid-cols-2 items-end gap-4">
-            <label class="flex flex-col text-sm font-medium">
-              <span class="mb-1 flex min-h-10 items-end">連絡用電話番号 <span class="ml-1 text-red-500">*</span></span>
-              <input type="tel" id="jobPhone" maxlength="20" required placeholder="例: 09012345678" class="h-11 w-full rounded border px-3 py-2.5 text-sm font-normal focus:ring-2 focus:ring-blue-500 outline-none">
-            </label>
-            <label class="flex flex-col text-sm font-medium">
-              <span class="mb-1 flex min-h-10 items-end">LINE ID / 公式URL（任意）</span>
-              <input type="text" id="jobLine" maxlength="200" placeholder="例: line_id_123" class="h-11 w-full rounded border px-3 py-2.5 text-sm font-normal focus:ring-2 focus:ring-blue-500 outline-none">
-            </label>
-          </div>
+          <p class="rounded-lg border border-blue-100 bg-blue-50 p-3 text-xs leading-relaxed text-blue-900">求人に電話番号・LINE IDは登録しません。応募者との連絡は「応募・メッセージ」から行えます。</p>
 
                   <div>
                     <label class="block text-sm font-medium mb-1">現場写真 <span class="text-xs text-gray-400">(任意)</span></label>
@@ -445,14 +449,19 @@
       </details>
       
       <div id="seekerProfileForm" class="space-y-4">
+        <div class="rounded-lg border border-blue-100 bg-blue-50 p-3 text-xs leading-relaxed text-blue-900">
+          <p>赤い「*」は必須項目です。経験・資格・希望条件は分かる範囲で登録できます。</p>
+          <p class="mt-1">企業へのプロフィール公開は初期状態でオフです。公開を選んだ場合も、氏名・電話番号・メールアドレスは企業向けプロフィールに表示されません。</p>
+        </div>
                 <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="block text-sm font-medium mb-1">お名前 / 通称 <span class="text-red-500">*</span></label>
             <input type="text" id="seekerName" placeholder="例: 職人 太郎" class="w-full border rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
           </div>
           <div>
-            <label class="block text-sm font-medium mb-1">携帯電話番号</label>
+            <label class="block text-sm font-medium mb-1">携帯電話番号（任意）</label>
             <input type="text" id="seekerPhone" placeholder="例: 090-XXXX-XXXX" class="w-full border rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+            <p class="mt-1 text-xs text-gray-500">企業には公開されません。現在、SMS認証や応募先への電話番号共有には使用していません。</p>
           </div>
         </div>
 
@@ -487,7 +496,7 @@
           <p class="text-xs text-gray-500 mt-1">選んだ職種と求人の職種名・仕事内容の一致をおすすめ順に反映します。</p>
         </div>
 
-        <details id="seekerLocationPreferences" data-selection-name="seekerLocationPrefecture" class="rounded-xl border border-blue-100 bg-blue-50">
+        <details id="seekerLocationPreferences" data-selection-name="seekerLocationPrefecture" data-location-input-name="seekerLocationPrefecture" data-location-other-input="seekerLocation" data-location-count-label="希望エリア" class="rounded-xl border border-blue-100 bg-blue-50">
           <summary class="flex flex-wrap cursor-pointer list-none items-center justify-between gap-2 p-4 text-sm font-bold text-gray-800">
             <span class="min-w-0">希望勤務地（複数選択可）</span>
             <span class="flex min-w-0 max-w-full flex-wrap items-center justify-end gap-x-2 gap-y-1 text-xs font-normal">
@@ -500,7 +509,7 @@
             <p class="text-xs leading-5 text-gray-600">地方を開いて都道府県を選び、必要なら市区町村を入力してください。希望地のいずれかに合う求人をおすすめ順で優先します。番地・建物名は入力しないでください。</p>
             <div id="seekerLocationPrefectureOptions" class="space-y-2"></div>
             <label class="block text-sm">その他の希望地域（任意）
-              <input type="text" id="seekerLocation" maxlength="100" placeholder="例: 横浜市周辺、東京都内" class="mt-1 h-11 w-full rounded border px-3 py-2.5 text-sm font-normal focus:ring-2 focus:ring-blue-500 outline-none">
+              <input type="text" id="seekerLocation" maxlength="500" placeholder="例: 横浜市周辺、東京都内" class="mt-1 h-11 w-full rounded border px-3 py-2.5 text-sm font-normal focus:ring-2 focus:ring-blue-500 outline-none">
             </label>
           </div>
         </details>
@@ -644,7 +653,7 @@
           <span id="jobCount" class="text-xs bg-blue-600 text-white px-3 py-1 rounded-full font-bold shadow-sm shadow-blue-100">0件</span>
         </div>
         <p id="jobTrustNotice" class="mt-3 text-[11px] font-medium text-amber-700 flex items-center gap-1.5">
-          <span class="text-base">⚠️</span> 掲載企業の本人確認は行っていません。応募前に条件や連絡先をご確認ください。
+          <span class="text-base">⚠️</span> 掲載企業の本人確認は行っていません。応募前に求人内容・条件をご確認ください。連絡は応募後にサイト内で行えます。
         </p>
         <p id="jobListDescription" class="mt-3 text-xs text-gray-500 hidden leading-relaxed">希望職種・勤務地・給与条件の一致度を目安に求人をおすすめ順で表示します。検索条件は以下のパネルから自由に変更できます。</p>
       </div>
@@ -860,7 +869,7 @@
         </div>
         <h2 id="modalTitle" class="text-2xl font-bold leading-snug text-gray-900"></h2>
         <p id="modalJobFreshness" class="mt-2 text-xs text-gray-500"></p>
-        <p class="mt-1 text-xs text-amber-800">掲載企業の本人確認は行っていません。応募前に条件や連絡先をご確認ください。</p>
+        <p class="mt-1 text-xs text-amber-800">掲載企業の本人確認は行っていません。応募前に求人内容・条件をご確認ください。連絡は応募後にサイト内で行えます。</p>
         <button id="modalFavoriteButton" type="button" onclick="toggleFavorite(selectedJob.id)" class="mt-3 min-h-11 rounded-lg border border-amber-300 px-4 py-2 text-sm font-bold text-amber-800 hover:bg-amber-50"></button>
       </div>
 

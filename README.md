@@ -6,7 +6,9 @@
 
 求人では給与区分と下限・上限、締日・支給日などを登録できます。資格は必須・歓迎を分け、実務経験も「指定なし」「経験者歓迎（未経験可）」「必須」から明記できます。これらの項目を保存するには、`supabase/migrations/20261031_add_job_pay_and_qualification_details.sql` をSupabase SQL Editorで実行してください。
 
-求職者は希望勤務地を地方別の都道府県から複数選び、選んだ都道府県ごとに市区町村を任意入力できます。既存の希望勤務地も引き続き表示・編集できます。複数勤務地の保存には `supabase/migrations/20261031_expand_seeker_location_length.sql` をSupabase SQL Editorで実行してください。
+求人・求職者の勤務地は地方別に都道府県を複数選び、選んだ都道府県ごとに市区町村を任意入力できます。既存の勤務地も引き続き表示・編集できます。求人・希望勤務地の保存にはそれぞれ500文字まで使えます。求職者の希望勤務地を500文字に拡張するには `supabase/migrations/20261031_expand_seeker_location_length.sql` をSupabase SQL Editorで実行してください。
+
+求人では電話番号・LINE IDを収集せず、応募者とはサイト内の「応募・メッセージ」で連絡します。既存求人に保存済みの連絡先は削除せず、公開APIから読めないようにするには `supabase/migrations/20261031_secure_job_contact_details.sql` を実行してください。
 
 ## 求人の編集・募集状態
 
@@ -26,7 +28,7 @@
 
 求人一覧では、求人ごとの囲み枠を使わず、余白・薄い区切り線・ホバー時の背景色で情報を見分けやすくします。募集状況・人数・職種・勤務地・給与を見比べやすく表示し、詳細条件は折りたたんでおき、必要なときだけ開けます。検索結果がない場合は理由と条件リセットを表示し、求人詳細では仕事内容・勤務地・給与を確認してから専用応募画面に進めます。スマートフォンでも操作しやすいボタンサイズと文字間隔にしています。未ログイン時は求人一覧だけが表示されます。
 
-求人検索には「未経験歓迎」「寮・社宅あり」「資格取得支援」のクイック条件があります。求人には掲載・更新日時を表示しますが、企業の本人確認は行っていないため、確認済みバッジは表示せず、応募前に条件・連絡先を確認するよう案内しています。求職者・企業それぞれのマイページには、最初の操作を案内する使い方ガイドがあります。
+求人検索には「未経験歓迎」「寮・社宅あり」「資格取得支援」のクイック条件があります。求人には掲載・更新日時を表示しますが、企業の本人確認は行っていないため、確認済みバッジは表示せず、応募前に求人内容・条件を確認するよう案内しています。求職者・企業それぞれのマイページには、最初の操作を案内する使い方ガイドがあります。
 
 マイページのテーブルを作成するには、Supabase SQL Editorで `supabase/migrations/20261026_add_user_dashboard.sql` を一度実行してください。先に `20261026_add_job_status.sql` と `20261026_secure_job_ownership.sql` を実行し、求人の `is_closed`・`owner_id` とRLSを設定する必要があります。このマイページ移行はプロフィール・お気に入り・応募履歴のテーブルを追加し、RLSにより利用者本人または該当求人の投稿者だけにアクセスを許可します。アカウント区分と匿名プロフィール機能を有効にするには、その後 `supabase/migrations/20261026_add_account_types_and_public_seekers.sql` を実行してください。企業からの連絡リクエストを有効にするには、続けて `supabase/migrations/20261026_add_seeker_contact_requests.sql` を実行してください。サイト内通知を保存するには、続けて `supabase/migrations/20261027_add_notifications.sql` をSupabase SQL Editorで実行してください。アカウント区分の選択後、既存アカウントの種類を後から変更する機能はありません。
 企業の求職者検索と公開同意のデータベース保護を有効にするには、アカウント種別・公開プロフィール移行の後に [`supabase/migrations/20261030_secure_public_seeker_search.sql`](./supabase/migrations/20261030_secure_public_seeker_search.sql) をSupabase SQL Editorで実行してください。このSQLは再実行可能で、以前の広い読み取りポリシーも削除します。非公開プロフィールの検索・読み取りを拒否し、本人が公開を許可したプロフィール項目だけを企業に表示します。企業は募集中の自社求人を選ぶと、希望職種・勤務地・給与区分・最低給与額・働き方の一致度を最大14点の参考スコアで確認し、点数順に求職者を並べ替えられます。経験・資格は候補者情報として表示しますが、マッチ順位の判定には使いません。求職者側もプロフィールの希望職種・勤務地・給与・働き方をおすすめ順に反映します。いずれのマッチ度も条件一致の目安であり、採用可能性を判定するものではありません。
@@ -56,6 +58,10 @@
 
 - [`supabase/migrations/20261026_secure_job_ownership.sql`](./supabase/migrations/20261026_secure_job_ownership.sql)
 
+求人の電話番号・LINE IDを公開APIから取得できないようにし、新規求人でそれらを不要にするには、求人スキーマと上記の所有権移行の後に次のSQLを実行してください。既存の電話番号・LINE IDは削除されず、APIからは取得できません。新しい画面を公開する前に実行してください。
+
+- [`supabase/migrations/20261031_secure_job_contact_details.sql`](./supabase/migrations/20261031_secure_job_contact_details.sql)
+
 公開登録を許可しているため、Supabase Auth のメール確認を有効にし、CAPTCHAやサインアップのレート制限も設定してください。移行SQLを実行するまでは、データベース側の権限保護は有効になりません。
 
 ### 新規登録のCAPTCHA（Cloudflare Turnstile）
@@ -67,7 +73,7 @@
 
 ### 求人の入力チェックと通報
 
-求人のタイトル・電話番号・給与表記・連絡先URLなどはブラウザー側で検証します。通報は求人詳細から送信でき、Cloudflare Turnstileをサーバー側で検証した後、Supabaseの `job_reports` テーブルに保存します。通報機能を公開する前に、次の移行SQLをSupabase SQL Editorで実行してください。
+求人のタイトル・勤務地・給与表記などはブラウザー側で検証します。求人の電話番号・LINE IDは収集しません。通報は求人詳細から送信でき、Cloudflare Turnstileをサーバー側で検証した後、Supabaseの `job_reports` テーブルに保存します。通報機能を公開する前に、次の移行SQLをSupabase SQL Editorで実行してください。
 
 - [`supabase/migrations/20261026_add_job_reports.sql`](./supabase/migrations/20261026_add_job_reports.sql)
 

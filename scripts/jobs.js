@@ -2,7 +2,7 @@
 async function fetchJobs() {
   const { data, error } = await supabaseClient
     .from('published_jobs')
-    .select('*')
+    .select('id, title, location, salary, duties, capacity, work_style, work_preferences, start_time, end_time, break_minutes, overtime_details, allowance_details, pay_type, pay_amount, pay_amount_max, pay_condition_details, required_licenses, preferred_licenses, experience_requirement, experience_requirement_details, tags, image_url, owner_id, is_closed, created_at, updated_at')
     .order('id', { ascending: false });
 
   if (error) {
@@ -23,10 +23,8 @@ async function publishJob() {
   }
 
   const title = document.getElementById("jobTitle").value.trim();
-  const location = document.getElementById("jobLocation").value.trim();
+  const location = getLocationPreferencesFromForm("jobLocationPrefecture", "jobLocation").trim();
   const salary = document.getElementById("jobSalary").value.trim();
-  const phone = document.getElementById("jobPhone").value.trim();
-  const line = document.getElementById("jobLine").value.trim();
   const duties = document.getElementById("jobDuties").value.trim();
   const capacity = parseInt(document.getElementById("jobCapacity").value) || 1;
   const payType = document.getElementById("jobPayType").value;
@@ -45,17 +43,15 @@ async function publishJob() {
   const breakMinutes = breakMinutesValue ? Number(breakMinutesValue) : null;
   const overtimeDetails = document.getElementById("jobOvertimeDetails").value.trim();
   const allowanceDetails = document.getElementById("jobAllowanceDetails").value.trim();
-  const normalizedPhone = normalizeJapanesePhone(phone);
-
   const checkedTags = Array.from(document.querySelectorAll('input[name="jobTag"]:checked')).map(cb => cb.value);
   const workPreferences = getCheckedValues("jobWorkPreference");
 
-  if (!title || !phone) {
-    alert("「職種名」と「連絡用電話番号」は必須項目です。");
+  if (!title) {
+    alert("「職種・現場名」は必須項目です。");
     return;
   }
 
-  if (title.length > 80 || location.length > 100 || salary.length > 100 || duties.length > 2000 ||
+  if (title.length > 80 || location.length > 500 || salary.length > 100 || duties.length > 2000 ||
       overtimeDetails.length > 300 || allowanceDetails.length > 1000 ||
       payConditionDetails.length > 500 || experienceRequirementDetails.length > 500) {
     alert("入力欄の文字数上限を超えています。求人情報を短くして再度お試しください。");
@@ -68,35 +64,9 @@ async function publishJob() {
     return;
   }
 
-  if (!isValidJapanesePhone(normalizedPhone)) {
-    alert("連絡用電話番号は日本の電話番号を入力してください（例: 09012345678）。");
-    return;
-  }
-
   if (/-\s*\d/.test(salary)) {
     alert("給与表記にマイナスの金額は入力できません。");
     return;
-  }
-
-  if (line.length > 200) {
-    alert("LINE ID / URLは200文字以内で入力してください。");
-    return;
-  }
-
-  if (line) {
-    const isHttpsUrl = /^https:\/\//i.test(line);
-    if (isHttpsUrl) {
-      try {
-        const lineUrl = new URL(line);
-        if (!["line.me", "www.line.me"].includes(lineUrl.hostname)) throw new Error("unsupported host");
-      } catch {
-        alert("LINE URLにはhttps://line.meから始まるURLを入力してください。");
-        return;
-      }
-    } else if (!/^[A-Za-z0-9._-]{1,64}$/.test(line)) {
-      alert("LINE IDは英数字と「.」「_」「-」で入力するか、https://line.meのURLを入力してください。");
-      return;
-    }
   }
 
   if ((payType && (!Number.isFinite(payAmount) || !Number.isInteger(payAmount) || payAmount <= 0 || payAmount > 100000000)) ||
@@ -113,7 +83,7 @@ async function publishJob() {
   }
 
   const jobData = {
-    title, location, salary, phone: normalizedPhone, line, duties, capacity,
+    title, location, salary, duties, capacity,
     work_style: workPreferences.some(value => ["employment:spot", "employment:short_term"].includes(value)) ? "short" : "regular",
     work_preferences: workPreferences,
     start_time: document.getElementById("jobStartTime").value || null,
@@ -172,7 +142,13 @@ function editJob(id) {
   setCheckedValues("jobWorkPreference", job.work_preferences);
   document.getElementById("jobImageUrl").value = job.image_url || "";
 
-  document.getElementById("jobLocation").value = job.location || "";
+  setLocationPreferences(
+    job.location || "",
+    "jobLocationPrefecture",
+    "jobLocation",
+    "jobLocationPrefectureOptions",
+    "jobLocationPrefecture"
+  );
   document.getElementById("jobSalary").value = job.salary || "";
   document.getElementById("jobStartTime").value = job.start_time || "";
   document.getElementById("jobEndTime").value = job.end_time || "";
@@ -192,8 +168,6 @@ function editJob(id) {
   setCheckedValues("jobPreferredLicense", preferredLicenses);
   document.getElementById("jobExperienceRequirement").value = job.experience_requirement || "none";
   document.getElementById("jobExperienceRequirementDetails").value = job.experience_requirement_details || "";
-  document.getElementById("jobPhone").value = job.phone || "";
-  document.getElementById("jobLine").value = job.line || "";
   document.getElementById("jobDuties").value = job.duties || "";
   document.getElementById("jobCapacity").value = getCapacityOptionValue(job.capacity);
   const jobTags = getNormalizedJobTags(job.tags);
@@ -227,7 +201,13 @@ function cancelJobEdit() {
   setCheckedValues("jobWorkPreference", []);
   document.getElementById("jobImageUrl").value = "";
 
-  document.getElementById("jobLocation").value = "";
+  setLocationPreferences(
+    "",
+    "jobLocationPrefecture",
+    "jobLocation",
+    "jobLocationPrefectureOptions",
+    "jobLocationPrefecture"
+  );
   document.getElementById("jobSalary").value = "";
   document.getElementById("jobStartTime").value = "";
   document.getElementById("jobEndTime").value = "";
@@ -242,8 +222,6 @@ function cancelJobEdit() {
   setCheckedValues("jobPreferredLicense", []);
   document.getElementById("jobExperienceRequirement").value = "none";
   document.getElementById("jobExperienceRequirementDetails").value = "";
-  document.getElementById("jobPhone").value = "";
-  document.getElementById("jobLine").value = "";
   document.getElementById("jobDuties").value = "";
   document.getElementById("jobCapacity").value = "1";
   document.querySelectorAll('input[name="jobTag"]').forEach(cb => cb.checked = false);

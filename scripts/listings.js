@@ -56,7 +56,7 @@ function renderJobList(resetLimit = false) {
       (!openJobsOnly || !isJobClosed(job)) &&
         (!favoritesOnly || isFavorite(job.id)) &&
         (!capacityFilter || getCapacityOptionValue(job.capacity) === capacityFilter) &&
-        (!locationFilter || (job.location || "").trim() === locationFilter) &&
+        (!locationFilter || jobMatchesLocationFilter(job.location, locationFilter)) &&
         (!salaryTypeFilter || getJobPayType(job) === salaryTypeFilter) &&
         (!minimumSalary || (salaryTypeFilter && getJobPayAmount(job) >= minimumSalary)) &&
         (!selectedTags.length || selectedTags.some(tag => getNormalizedJobTags(job.tags).includes(tag))) &&
@@ -240,10 +240,34 @@ function getTagMatchCount(job, selectedTags) {
   return selectedTags.filter(tag => jobTags.includes(tag)).length;
 }
 
+function jobMatchesLocationFilter(jobLocation, selectedLocation) {
+  const selectedArea = selectedLocation.replace(/\s+/g, "").toLocaleLowerCase();
+  const selectedPrefecture = getPrefecture(selectedLocation);
+  return getLocationPreferenceEntries(jobLocation).some(jobArea => {
+    const normalizedJobArea = jobArea.replace(/\s+/g, "").toLocaleLowerCase();
+    if (normalizedJobArea === selectedArea ||
+        normalizedJobArea.includes(selectedArea) ||
+        selectedArea.includes(normalizedJobArea)) {
+      return true;
+    }
+
+    const jobPrefecture = getPrefecture(jobArea);
+    const isJobPrefectureOnly = jobPrefecture &&
+      normalizedJobArea === jobPrefecture.toLocaleLowerCase();
+    const isSelectedPrefectureOnly = selectedPrefecture &&
+      selectedArea === selectedPrefecture.toLocaleLowerCase();
+    return Boolean(
+      selectedPrefecture &&
+      selectedPrefecture === jobPrefecture &&
+      (isJobPrefectureOnly || isSelectedPrefectureOnly)
+    );
+  });
+}
+
 function updateJobFilterOptions() {
   const locationSelect = document.getElementById("locationFilter");
   const previousLocation = locationSelect.value;
-  const locations = [...new Set(cachedJobs.map(job => (job.location || "").trim()).filter(Boolean))]
+  const locations = [...new Set(cachedJobs.flatMap(job => getLocationPreferenceEntries(job.location)))]
     .sort((a, b) => a.localeCompare(b, "ja"));
   locationSelect.replaceChildren(new Option("すべての勤務地", ""));
   locations.forEach(location => locationSelect.add(new Option(location, location)));
@@ -527,23 +551,26 @@ function getJobPayAmount(job) {
 }
 
 function getLocationMatchScore(jobLocation, preferredLocation) {
-  const jobArea = String(jobLocation || "").trim();
-  const normalizedJobArea = jobArea.replace(/\s+/g, "").toLocaleLowerCase();
-  if (!normalizedJobArea) return 0;
-  return getLocationPreferenceEntries(preferredLocation).reduce((bestScore, preferredArea) => {
-    const normalizedPreferredArea = preferredArea.replace(/\s+/g, "").toLocaleLowerCase();
-    const preferredPrefecture = getPrefecture(preferredArea);
-    const isPrefectureOnly = preferredPrefecture &&
-      normalizedPreferredArea === preferredPrefecture.toLocaleLowerCase();
-    if (normalizedJobArea.includes(normalizedPreferredArea)) {
-      return Math.max(bestScore, isPrefectureOnly ? 1 : 2);
-    }
-    if (normalizedPreferredArea.includes(normalizedJobArea)) {
-      return Math.max(bestScore, 1);
-    }
-    return preferredPrefecture && preferredPrefecture === getPrefecture(jobArea)
-      ? Math.max(bestScore, 1)
-      : bestScore;
+  const jobAreas = getLocationPreferenceEntries(jobLocation);
+  const preferredAreas = getLocationPreferenceEntries(preferredLocation);
+  return preferredAreas.reduce((bestScore, preferredArea) => {
+    const matchedScore = jobAreas.reduce((areaScore, jobArea) => {
+      const normalizedJobArea = jobArea.replace(/\s+/g, "").toLocaleLowerCase();
+      const normalizedPreferredArea = preferredArea.replace(/\s+/g, "").toLocaleLowerCase();
+      const preferredPrefecture = getPrefecture(preferredArea);
+      const isPrefectureOnly = preferredPrefecture &&
+        normalizedPreferredArea === preferredPrefecture.toLocaleLowerCase();
+      if (normalizedJobArea.includes(normalizedPreferredArea)) {
+        return Math.max(areaScore, isPrefectureOnly ? 1 : 2);
+      }
+      if (normalizedPreferredArea.includes(normalizedJobArea)) {
+        return Math.max(areaScore, 1);
+      }
+      return preferredPrefecture && preferredPrefecture === getPrefecture(jobArea)
+        ? Math.max(areaScore, 1)
+        : areaScore;
+    }, 0);
+    return Math.max(bestScore, matchedScore);
   }, 0);
 }
 
