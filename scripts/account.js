@@ -156,14 +156,20 @@ function updateAccountTypeUI() {
   updateAccountSearchSurface();
 }
 
-function updateHeaderAccountButton() {
+function updateHeaderAccountButton(unreadCount = headerUnreadNotificationCount) {
   const button = document.getElementById("headerAccountButton");
   if (!button) return;
-  button.innerText = !currentUser
+  headerUnreadNotificationCount = currentUser ? unreadCount : 0;
+  unreadCount = headerUnreadNotificationCount;
+  const baseTitle = document.title.replace(/^\(\d+\)\s*/, "");
+  document.title = unreadCount ? `(${unreadCount}) ${baseTitle}` : baseTitle;
+  const label = !currentUser
     ? "ログイン"
     : accountType === "employer" || accountType === "seeker"
       ? "マイページ"
       : "アカウント設定";
+  button.innerText = unreadCount > 0 ? `${label}（未読${unreadCount}）` : label;
+  button.setAttribute("aria-label", unreadCount > 0 ? `${label}、未読の通知が${unreadCount}件あります` : label);
   button.setAttribute("aria-expanded", String(Boolean(dashboardOpen || loginPanelOpen)));
 }
 

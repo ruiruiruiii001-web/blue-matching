@@ -21,6 +21,7 @@ let currentUser = null;
 let accountType = null;
 let dashboardOpen = false;
 let loginNotificationBannerDismissed = false;
+let headerUnreadNotificationCount = 0;
 let loginPanelOpen = false;
 let dashboardReturnPlaceholder = null;
 let dashboardNavigationReturnPlaceholder = null;

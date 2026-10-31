@@ -2,7 +2,7 @@
 async function fetchJobs() {
   const { data, error } = await supabaseClient
     .from('published_jobs')
-    .select('id, title, location, salary, duties, capacity, work_style, work_preferences, start_time, end_time, break_minutes, overtime_details, allowance_details, pay_type, pay_amount, pay_amount_max, pay_condition_details, required_licenses, preferred_licenses, experience_requirement, experience_requirement_details, tags, image_url, owner_id, is_closed, created_at, updated_at')
+    .select('id, title, location, salary, duties, capacity, work_style, work_preferences, start_time, end_time, break_minutes, overtime_details, allowance_details, pay_type, pay_amount, pay_amount_max, pay_condition_details, required_licenses, preferred_licenses, experience_requirement, experience_requirement_details, tags, image_url, owner_id, is_closed, is_hidden, hidden_reason, expires_at, created_at, updated_at')
     .order('id', { ascending: false });
 
   if (error) {
@@ -45,6 +45,12 @@ async function publishJob() {
   const allowanceDetails = document.getElementById("jobAllowanceDetails").value.trim();
   const checkedTags = Array.from(document.querySelectorAll('input[name="jobTag"]:checked')).map(cb => cb.value);
   const workPreferences = getCheckedValues("jobWorkPreference");
+  const durationValue = document.getElementById("jobDurationDays").value;
+  const durationDays = durationValue === "keep" ? null : Number(durationValue);
+  if (durationDays !== null && !JOB_DURATION_OPTIONS.includes(durationDays)) {
+    alert("掲載期間を選択してください。");
+    return;
+  }
 
   if (!title) {
     alert("「職種・現場名」は必須項目です。");
@@ -102,6 +108,7 @@ async function publishJob() {
     experience_requirement_details: experienceRequirementDetails,
     tags: getNormalizedJobTags(checkedTags),
     image_url: document.getElementById("jobImageUrl").value.trim() || null,
+    ...(durationDays !== null && { expires_at: getJobExpiryDateFromDays(durationDays) }),
     ...(!editingJobId && { owner_id: currentUser.id })
   };
 
@@ -170,6 +177,9 @@ function editJob(id) {
   document.getElementById("jobExperienceRequirementDetails").value = job.experience_requirement_details || "";
   document.getElementById("jobDuties").value = job.duties || "";
   document.getElementById("jobCapacity").value = getCapacityOptionValue(job.capacity);
+  setJobDurationControl(true, job);
+  const legacyLocation = parseLocationPreferences(job.location || "").otherLocations.length > 0;
+  document.getElementById("jobLocationLegacyNotice").classList.toggle("hidden", !legacyLocation);
   const jobTags = getNormalizedJobTags(job.tags);
   setCheckedValues("jobTag", jobTags);
   document.getElementById("jobFormHeading").innerText = "求人情報を編集";
@@ -224,10 +234,44 @@ function cancelJobEdit() {
   document.getElementById("jobExperienceRequirementDetails").value = "";
   document.getElementById("jobDuties").value = "";
   document.getElementById("jobCapacity").value = "1";
+  setJobDurationControl(false);
+  document.getElementById("jobLocationLegacyNotice").classList.add("hidden");
   document.querySelectorAll('input[name="jobTag"]').forEach(cb => cb.checked = false);
   document.getElementById("jobFormHeading").innerText = "現場求人のクラウド投稿";
   document.getElementById("jobSubmitButton").innerText = "🔥 クラウドに求人を今すぐ掲載する";
   if (dashboardOpen) showEmployerDashboardView("jobs");
+}
+
+function setJobDurationControl(editing, job = null) {
+  const select = document.getElementById("jobDurationDays");
+  const keepOption = select.querySelector('option[value="keep"]');
+  keepOption.hidden = !editing;
+  keepOption.disabled = !editing;
+  select.value = editing ? "keep" : String(DEFAULT_JOB_DURATION_DAYS);
+  const status = getJobExpiryStatus(job || {});
+  const note = document.getElementById("jobDurationNote");
+  note.textContent = editing && status ? `現在: ${status.text}` : "";
+  note.classList.toggle("text-red-700", Boolean(status?.warning));
+  note.classList.toggle("text-gray-500", !status?.warning);
+}
+
+async function extendJob(id, days = DEFAULT_JOB_DURATION_DAYS) {
+  const job = cachedJobs.find(item => item.id === id);
+  if (!currentUser || accountType !== "employer" || !job || job.owner_id !== currentUser.id) return;
+  if (!confirm(`「${job.title}」の掲載を今日から${days}日間に延長しますか？`)) return;
+
+  const { error } = await supabaseClient
+    .from('published_jobs')
+    .update({ expires_at: getJobExpiryDateFromDays(days) })
+    .eq('id', id)
+    .eq('owner_id', currentUser.id);
+
+  if (error) {
+    alert(`掲載の延長に失敗しました: ${error.message}`);
+    return;
+  }
+
+  await fetchJobs();
 }
 
 async function toggleJobClosed(id) {

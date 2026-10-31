@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>求人に応募 | 現場直結！職人＆親方の求人マッチング</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="styles/tailwind.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="min-h-screen bg-gray-100 text-gray-800">
@@ -25,17 +25,24 @@
         <a href="/" class="mt-3 inline-flex min-h-11 items-center rounded-lg bg-blue-600 px-4 py-2 font-bold text-white">ログイン画面へ</a>
       </div>
       <form id="applicationForm" class="mt-6 hidden space-y-5" novalidate>
+        <p class="rounded-lg border border-blue-100 bg-blue-50 p-3 text-xs leading-relaxed text-blue-900">このフォームから送る応募は、このサイト内で求人掲載企業に届きます。外部サイトには移動しません。</p>
         <label class="block text-sm font-bold text-gray-700">お名前
           <input id="applicantName" maxlength="100" required autocomplete="name" class="mt-1 w-full rounded-xl border border-gray-300 px-3 py-3 text-base outline-none focus:ring-2 focus:ring-blue-500">
         </label>
         <label class="block text-sm font-bold text-gray-700">応募メッセージ（任意）
           <textarea id="applicationMessage" maxlength="1000" rows="5" class="mt-1 w-full rounded-xl border border-gray-300 px-3 py-3 text-base outline-none focus:ring-2 focus:ring-blue-500" placeholder="経験や資格、仕事への意欲など"></textarea>
         </label>
-        <p class="rounded-lg bg-gray-50 p-3 text-xs leading-relaxed text-gray-600">応募時に共有される情報は、お名前・プロフィールに登録済みの経験・資格・このメッセージです。電話番号は応募先へ共有されません。</p>
+        <p class="rounded-lg bg-gray-50 p-3 text-xs leading-relaxed text-gray-600">応募時に共有される情報は、お名前・プロフィールに登録済みの経験・資格・このメッセージです。        電話番号は応募先へ共有されません。応募すると<a href="terms.html" target="_blank" rel="noopener" class="font-bold text-blue-700 underline">利用規約</a>と<a href="privacy.html" target="_blank" rel="noopener" class="font-bold text-blue-700 underline">プライバシーポリシー</a>に同意したものとみなします。</p>
         <button id="submitButton" type="submit" class="min-h-12 w-full rounded-xl bg-blue-600 px-4 py-3 font-bold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50">この内容で応募する</button>
       </form>
       <div id="successPanel" class="mt-6 hidden rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
         <p class="font-bold">応募を送信しました。</p>
+        <ol class="mt-3 list-inside list-decimal space-y-1 leading-relaxed">
+          <li>企業が応募内容を確認するまでお待ちください。</li>
+          <li>進捗はログイン後、マイページの「応募履歴」で確認できます。</li>
+          <li>企業から連絡が届いた場合は、マイページの「連絡・通知」をご確認ください。</li>
+        </ol>
+        <p class="mt-3 text-xs leading-relaxed">応募時に電話番号は共有されません。企業から連絡リクエストが届いた場合は、マイページの「連絡・通知」で内容を確認してから返信してください。</p>
         <p id="emailWarning" class="mt-2"></p>
         <a href="/" class="mt-4 inline-flex min-h-11 items-center rounded-lg bg-emerald-700 px-4 py-2 font-bold text-white">求人一覧へ戻る</a>
       </div>
@@ -95,7 +102,7 @@
 
       const { data: job, error: jobError } = await supabaseClient
         .from("published_jobs")
-        .select("id, owner_id, title, location, salary, duties, is_closed")
+        .select("id, owner_id, title, location, salary, duties, is_closed, expires_at")
         .eq("id", jobId)
         .maybeSingle();
       if (jobError) {
@@ -114,8 +121,9 @@
         job.duties ? `仕事内容:\n${job.duties}` : ""
       ].filter(Boolean).join("\n");
 
-      if (job.is_closed || job.owner_id === user.id) {
-        showStatus(job.is_closed ? "この求人は募集を終了しています。" : "自分が投稿した求人には応募できません。", true);
+      const jobIsClosed = job.is_closed || Date.parse(job.expires_at || "") <= Date.now();
+      if (jobIsClosed || job.owner_id === user.id) {
+        showStatus(jobIsClosed ? "この求人は募集を終了しています。" : "自分が投稿した求人には応募できません。", true);
         return;
       }
 
@@ -180,15 +188,16 @@
 
         const { data: currentJob, error: currentJobError } = await supabaseClient
           .from("published_jobs")
-          .select("id, owner_id, is_closed")
+          .select("id, owner_id, is_closed, expires_at")
           .eq("id", String(applicationJob.id))
           .maybeSingle();
         if (currentJobError) {
           showStatus(`求人の状態を再確認できませんでした: ${currentJobError.message}`, true);
           return;
         }
-        if (!currentJob || currentJob.is_closed || currentJob.owner_id === applicantId) {
-          showStatus(!currentJob || currentJob.is_closed ? "この求人は募集を終了しています。" : "自分が投稿した求人には応募できません。", true);
+        const currentJobIsClosed = !currentJob || currentJob.is_closed || Date.parse(currentJob.expires_at || "") <= Date.now();
+        if (currentJobIsClosed || currentJob.owner_id === applicantId) {
+          showStatus(currentJobIsClosed ?  "この求人は募集を終了しています。" : "自分が投稿した求人には応募できません。", true);
           form.classList.add("hidden");
           return;
         }

@@ -60,7 +60,8 @@ function renderJobList(resetLimit = false) {
         (!salaryTypeFilter || getJobPayType(job) === salaryTypeFilter) &&
         (!minimumSalary || (salaryTypeFilter && getJobPayAmount(job) >= minimumSalary)) &&
         (!selectedTags.length || selectedTags.some(tag => getNormalizedJobTags(job.tags).includes(tag))) &&
-        (!currentUser || !blockedUserIds.includes(job.owner_id))
+        (!currentUser || !blockedUserIds.includes(job.owner_id)) &&
+        ((!isJobExpired(job) && !job.is_hidden) || (currentUser && job.owner_id === currentUser.id))
     )
 
     .sort((a, b) => {
@@ -147,6 +148,7 @@ function renderJobList(resetLimit = false) {
         <div class="min-w-0 flex-1">
                         <div class="mb-3 flex flex-wrap gap-2">
             <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-wider uppercase ${isJobClosed(job) ? 'bg-gray-100 text-gray-500' : 'bg-emerald-50 text-emerald-700'}">${isJobClosed(job) ? '募集終了' : '募集中'}</span>
+            ${job.is_hidden ? '<span class="inline-flex items-center rounded-full bg-red-50 px-2.5 py-0.5 text-[10px] font-bold text-red-700">運営により非表示中</span>' : ''}
 
             ${job.capacity <= 0 ? '' : `<span class="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-[10px] font-bold text-blue-700 uppercase">募集人数 ${formatJobCapacity(job.capacity)}</span>`}
             ${matchDetails?.score > 0 ? '<span class="inline-flex items-center rounded-full bg-purple-50 px-2.5 py-0.5 text-[10px] font-bold text-purple-700 uppercase">希望条件に一致</span>' : ''}
@@ -232,7 +234,7 @@ function toggleQuickJobTag(tag) {
 }
 
 function isJobClosed(job) {
-  return Boolean(job.is_closed || job.capacity <= 0);
+  return Boolean(job.is_closed || job.capacity <= 0 || isJobExpired(job));
 }
 
 function getTagMatchCount(job, selectedTags) {

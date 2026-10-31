@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>運営管理 | 現場直結！職人＆親方の求人マッチング</title>
+  <link rel="stylesheet" href="styles/tailwind.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="scripts/supabase-client.js"></script>
+  <script src="scripts/admin.js" defer></script>
+</head>
+<body class="min-h-screen bg-gray-100 font-sans text-gray-800">
+  <header class="bg-gray-900 text-white shadow">
+    <div class="mx-auto flex max-w-4xl items-center justify-between gap-3 px-4 py-4">
+      <h1 class="text-lg font-bold">運営管理：通報の確認</h1>
+      <a href="index.html" class="rounded-lg bg-white px-3 py-2 text-sm font-bold text-gray-900">サイトへ戻る</a>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-4xl px-4 py-6">
+    <p id="adminStatus" role="status" aria-live="polite" class="mb-4 text-sm text-gray-700">確認しています…</p>
+    <section id="adminPanel" class="hidden">
+      <div class="mb-4 flex flex-wrap items-center gap-2">
+        <label for="adminReportFilter" class="text-sm font-bold">表示</label>
+        <select id="adminReportFilter" class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm">
+          <option value="pending">未対応のみ</option>
+          <option value="all">すべて</option>
+          <option value="reviewed">確認済み</option>
+          <option value="dismissed">対応不要</option>
+        </select>
+        <button id="adminReloadButton" type="button" class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-bold">再読み込み</button>
+      </div>
+      <div id="adminReports" class="space-y-4"></div>
+    </section>
+  </main>
+</body>
+</html>

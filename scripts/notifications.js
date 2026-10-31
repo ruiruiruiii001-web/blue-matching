@@ -1,4 +1,12 @@
+function updateNotificationIndicators() {
+  const unreadCount = currentUser && !appNotificationsError
+    ? getVisibleNotifications().filter(notification => !notification.read_at).length
+    : 0;
+  updateHeaderAccountButton(unreadCount);
+}
+
 function renderLoginNotificationBanner() {
+  updateNotificationIndicators();
 
   const banner = document.getElementById("loginNotificationBanner");
   if (!banner || loginNotificationBannerDismissed || !currentUser || !accountType || appNotificationsError) {
@@ -9,13 +17,19 @@ function renderLoginNotificationBanner() {
     ? seekerContactRequests.filter(request => request.status === "pending").length
     : 0;
   const unreadCount = getVisibleNotifications().filter(notification => !notification.read_at).length;
-  if (!pendingContactCount && !unreadCount) {
+  const expiringJobCount = accountType === "employer"
+    ? cachedJobs.filter(job => job.owner_id === currentUser.id && !job.is_closed && getJobExpiryStatus(job)?.warning).length
+    : 0;
+  if (!pendingContactCount && !unreadCount && !expiringJobCount) {
     banner.classList.add("hidden");
     return;
   }
-  document.getElementById("loginNotificationMessage").innerText = pendingContactCount
-    ? `企業からの連絡が${pendingContactCount}件届いています。マイページから確認できます。`
-    : `新しいお知らせが${unreadCount}件あります。マイページから確認できます。`;
+  const messages = [];
+  if (pendingContactCount) messages.push(`企業からの連絡が${pendingContactCount}件届いています。`);
+  if (unreadCount) messages.push(`新しいお知らせが${unreadCount}件あります。`);
+  if (expiringJobCount) messages.push(`掲載期限が近い求人が${expiringJobCount}件あります。`);
+  document.getElementById("loginNotificationMessage").innerText =
+    `${messages.join("")}メールが届かない場合があるため、マイページでもご確認ください。`;
   banner.classList.remove("hidden");
 }
 

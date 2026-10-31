@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="cloudflare-turnstile-sitekey" content="0x4AAAAAAFmKntPFXSdCMP-V">
   <title>現場直結！職人＆親方の求人マッチング</title>
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Tailwind CSS（tools/ で生成: npm run build:css） -->
+  <link rel="stylesheet" href="styles/tailwind.css">
     <!-- Supabase JS SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <!-- Confetti library -->
@@ -223,6 +223,7 @@
             <div class="space-y-3 px-4 pb-4">
               <p class="text-xs leading-5 text-gray-600">地方を開いて都道府県を選び、市区町村を入力してください。複数現場は複数の都道府県・市区町村を登録できます。番地・建物名など、個人宅を特定できる情報は入力しないでください。</p>
               <div id="jobLocationPrefectureOptions" class="space-y-2"></div>
+              <p id="jobLocationLegacyNotice" class="hidden rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs leading-relaxed text-amber-900">この求人の勤務地は、都道府県を選ぶ前の古い形式で保存されています。都道府県で探している求職者に見つけてもらいやすくするため、上で都道府県を選び直して保存してください（入力済みの内容は「その他の勤務地」に残っています）。</p>
               <label class="block text-sm">その他の勤務地・現場の補足（任意）
                 <input type="text" id="jobLocation" maxlength="500" placeholder="例: 東京都内、関東一円" class="mt-1 h-11 w-full rounded border px-3 py-2.5 text-sm font-normal focus:ring-2 focus:ring-blue-500 outline-none">
               </label>
@@ -244,6 +245,19 @@
               <label class="block text-sm font-medium mb-1">給与表記</label>
               <input type="text" id="jobSalary" maxlength="100" placeholder="例: 日給 15,000円〜" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
             </div>
+          </div>
+
+          <div>
+            <label for="jobDurationDays" class="block text-sm font-medium mb-1">掲載期間</label>
+            <select id="jobDurationDays" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+              <option value="keep" hidden disabled>現在の掲載期限のまま</option>
+              <option value="14">14日間</option>
+              <option value="30" selected>30日間（おすすめ）</option>
+              <option value="60">60日間</option>
+              <option value="90">90日間</option>
+            </select>
+            <p class="mt-1 text-xs text-gray-500">掲載期限を過ぎると、求人は自動的に一覧から非表示になり応募も受け付けなくなります。期限の3日前からマイページで警告が表示され、ワンタップで延長できます。編集時に期間を選ぶと、今日からの日数で期限が更新されます。</p>
+            <p id="jobDurationNote" class="mt-1 text-xs font-bold text-gray-500"></p>
           </div>
 
           <details data-selection-name="jobWorkPreference" class="rounded-xl border border-blue-100 bg-blue-50">
@@ -936,6 +950,14 @@
       </div>
     </div>
   </div>
+
+  <footer class="border-t border-gray-200 bg-white px-4 py-6 text-center text-xs text-gray-600">
+    <nav aria-label="フッター" class="flex flex-wrap justify-center gap-x-5 gap-y-2">
+      <a href="terms.html" class="underline">利用規約</a>
+      <a href="privacy.html" class="underline">プライバシーポリシー</a>
+      <a href="contact.html" class="underline">お問い合わせ</a>
+    </nav>
+  </footer>
 
   <script src="scripts/supabase-client.js"></script>
   <script src="scripts/shared.js"></script>

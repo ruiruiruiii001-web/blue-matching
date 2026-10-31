@@ -436,6 +436,37 @@ function formatJobFreshness(job) {
   return job.created_at ? `掲載日: ${formatDashboardDate(job.created_at)}` : "";
 }
 
+const JOB_EXPIRY_WARNING_DAYS = 3;
+const JOB_DURATION_OPTIONS = [14, 30, 60, 90];
+const DEFAULT_JOB_DURATION_DAYS = 30;
+
+function isJobExpired(job) {
+  const expiresAt = Date.parse(job.expires_at || "");
+  return Number.isFinite(expiresAt) && expiresAt <= Date.now();
+}
+
+function getJobExpiryStatus(job) {
+  const expiresAt = Date.parse(job.expires_at || "");
+  if (!Number.isFinite(expiresAt)) return null;
+  const dateText = new Date(expiresAt).toLocaleDateString("ja-JP");
+  if (expiresAt <= Date.now()) {
+    return { expired: true, warning: true, text: `掲載期限が切れました（${dateText}）。掲載を延長すると再び公開されます。` };
+  }
+  const daysLeft = Math.ceil((expiresAt - Date.now()) / 86400000);
+  const warning = daysLeft <= JOB_EXPIRY_WARNING_DAYS;
+  return {
+    expired: false,
+    warning,
+    text: warning
+      ? `あと${daysLeft}日で掲載が終了します（${dateText}まで）`
+      : `掲載期限: ${dateText}（あと${daysLeft}日）`
+  };
+}
+
+function getJobExpiryDateFromDays(days) {
+  return new Date(Date.now() + days * 86400000).toISOString();
+}
+
 function formatApplicationStatus(status) {
   return { pending: "未確認", reviewed: "確認済み", dismissed: "対応不要" }[status] || "未確認";
 }

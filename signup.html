@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="cloudflare-turnstile-sitekey" content="0x4AAAAAAFmKntPFXSdCMP-V">
   <title>新規登録 | 現場直結！職人＆親方の求人マッチング</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="styles/tailwind.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="scripts/supabase-client.js"></script>
   <script src="scripts/signup.js" defer></script>
@@ -49,6 +49,7 @@
           <input id="signupPasswordConfirmation" name="passwordConfirmation" type="password" autocomplete="new-password" minlength="8" required class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200">
         </label>
 
+        <p class="text-xs leading-relaxed text-gray-600">アカウントを作成すると、<a href="terms.html" target="_blank" rel="noopener" class="font-bold text-blue-700 underline">利用規約</a>と<a href="privacy.html" target="_blank" rel="noopener" class="font-bold text-blue-700 underline">プライバシーポリシー</a>に同意したものとみなします。</p>
         <div id="signupTurnstile" class="min-h-4"></div>
         <p id="signupStatus" role="status" aria-live="polite" class="text-sm text-gray-600">登録にはCAPTCHA確認が必要です。</p>
         <button id="signupSubmit" type="submit" class="min-h-12 w-full rounded-lg bg-blue-600 px-4 py-3 font-bold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60">アカウントを作成</button>
@@ -57,5 +58,12 @@
       <p class="mt-5 text-center text-sm text-gray-600">すでにアカウントをお持ちですか？ <a href="index.html" class="font-bold text-blue-700 underline">ログイン</a></p>
     </section>
   </main>
+  <footer class="mx-auto max-w-xl px-4 pb-10 text-center text-xs text-gray-600">
+    <nav aria-label="フッター" class="flex flex-wrap justify-center gap-x-5 gap-y-2">
+      <a href="terms.html" class="underline">利用規約</a>
+      <a href="privacy.html" class="underline">プライバシーポリシー</a>
+      <a href="contact.html" class="underline">お問い合わせ</a>
+    </nav>
+  </footer>
 </body>
 </html>

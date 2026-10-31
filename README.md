@@ -84,7 +84,33 @@ Vercelのプロジェクト設定 **Settings → Environment Variables** に、P
 - `SUPABASE_URL`: `https://qefqlbkqewvahtqzqmfp.supabase.co`
 - `SUPABASE_SERVICE_ROLE_KEY`: Supabaseのサーバー専用service_role key（ブラウザー用publishable/anon keyではありません）
 
-通報内容はSupabase Dashboardの **Table Editor → job_reports** で確認できます。公開ユーザーには通報一覧の読み取り・直接書き込み権限を付与せず、検証済みのサーバーAPIだけが保存します。
+通報内容は運営管理画面（`/admin.html`）で確認できます。Supabase Dashboardの **Table Editor → job_reports** でも確認できます。公開ユーザーには通報一覧の読み取り・直接書き込み権限を付与せず、検証済みのサーバーAPIだけが保存します。
+
+### 運営管理・求人の掲載期限・非表示
+
+次の移行SQLを実行すると、求人の掲載期限（`expires_at`。既存求人は実行時から30日）、運営による非表示（`is_hidden`）、運営者の判定（`admin_users` と `is_admin()`）、通報の運営向け閲覧・更新が有効になります。**新しい画面を公開する前に実行してください**（未実行だと求人一覧の取得に失敗します）。
+
+- [`supabase/migrations/20261101_add_job_expiry_and_moderation.sql`](./supabase/migrations/20261101_add_job_expiry_and_moderation.sql)
+
+運営者は、実行後にSQL Editorで次のSQLを実行して登録します（`運営者のメール` を書き換え、アカウントは先に新規登録しておきます。メールアドレスをGitHubに置かないでください）。
+
+```sql
+INSERT INTO public.admin_users (user_id)
+SELECT id FROM auth.users WHERE email = '運営者のメール'
+ON CONFLICT DO NOTHING;
+```
+
+- 運営者でログインしたまま `/admin.html` を開くと、通報の確認、求人の非表示・解除、通報の「確認済み」「対応不要」の切替ができます。非表示にした求人は一覧・応募から外れ、投稿者のマイページに理由つきで表示されます。
+- 求人の掲載期間は14・30・60・90日から選びます。期限を過ぎた求人は一覧に出ず応募もできません。期限の3日前から投稿者のマイページに警告が出て、「掲載を30日延長」で再公開できます。
+- 求人テーブルに列を足す場合は、取得列と `GRANT SELECT` の両方に追加してください。
+
+### スタイル（Tailwind CSS）
+
+CDNは使わず、ビルド済みの `styles/tailwind.css` を読み込みます。HTMLやスクリプトでTailwindのクラスを追加・変更したら、`tools` フォルダーで `npm install`（初回のみ）と `npm run build:css` を実行し、更新された `styles/tailwind.css` もコミットしてください。
+
+### 通知について
+
+メール通知はResendの独自ドメイン設定が済むまで届かない場合があります。サイト内では、ヘッダーの「マイページ（未読N）」、ブラウザータブの件数、ログイン後の案内バナーで未読の通知・連絡・掲載期限の近い求人を知らせます。
 
 ### 確認メールをResendから送る（標準メール上限の回避）
 
