@@ -508,7 +508,9 @@ async function deleteMyAccount() {
   button.disabled = false;
   button.innerText = "退会する（アカウント削除）";
   if (error) {
-    logoutStatus.innerText = `退会できませんでした: ${error.message}`;
+    logoutStatus.innerText = /Admin accounts/.test(error.message)
+      ? "運営者アカウントは退会できません。"
+      : `退会できませんでした: ${error.message}`;
     logoutStatus.classList.remove("hidden");
     return;
   }
