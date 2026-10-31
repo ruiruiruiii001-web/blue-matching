@@ -490,6 +490,32 @@ async function signOutEmployer() {
   }
 }
 
+async function deleteMyAccount() {
+  if (!currentUser) return;
+  const isEmployer = accountType === "employer";
+  const detail = isEmployer
+    ? "掲載中の求人はすべて削除されます。応募者とのメッセージは「退会したユーザー」として相手側に残ります。"
+    : "プロフィール・お気に入り・通知は削除されます。応募履歴は氏名などを消して企業側に残り、応募は終了扱いになります。";
+  if (!confirm(`退会するとアカウントを元に戻せません。\n\n${detail}\n\n本当に退会しますか？`)) return;
+  if (!confirm("最終確認：退会してよろしいですか？")) return;
+
+  const button = document.getElementById("deleteAccountButton");
+  const logoutStatus = document.getElementById("myPageLogoutStatus");
+  button.disabled = true;
+  button.innerText = "退会処理中…";
+  const { error } = await supabaseClient.rpc("delete_my_account");
+  button.disabled = false;
+  button.innerText = "退会する（アカウント削除）";
+  if (error) {
+    logoutStatus.innerText = `退会できませんでした: ${error.message}`;
+    logoutStatus.classList.remove("hidden");
+    return;
+  }
+  await supabaseClient.auth.signOut();
+  closeAccountPanel();
+  setAuthMessage("退会しました。ご利用ありがとうございました。");
+}
+
 function switchTab(tab) {
   if (currentUser && (accountType === "seeker" || accountType === "employer")) {
     tab = accountType;
