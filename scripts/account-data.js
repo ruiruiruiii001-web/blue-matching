@@ -78,6 +78,7 @@ async function loadAccountData(user) {
       renderEmployerDashboard();
       renderJobList();
       if (savedSearchesUserId !== userId) loadSavedSearches();
+      if (accountType === "employer") loadJobViewCounts();
     }
 
 function renderApplicationConversation(application) {

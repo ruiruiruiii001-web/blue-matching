@@ -103,6 +103,7 @@ function updateEmployerAuth(session) {
     accountDataUserId = null;
     loadingAccountUserId = null;
     resetSavedSearches();
+    jobViewCounts = new Map();
     seekerProfileData = null;
     accountApplications = [];
     accountApplicationsError = "";

@@ -40,6 +40,8 @@ function renderEmployerDashboard() {
                   <span class="px-2 py-0.5 rounded-full bg-gray-50 border border-gray-100 text-[10px] font-bold text-gray-500">📍 ${escapeHtml(String(job.location || "未設定"))}</span>
                   <span class="px-2 py-0.5 rounded-full ${isJobClosed(job) ? "bg-gray-100 text-gray-400" : "bg-emerald-50 text-emerald-600"} text-[10px] font-bold border border-current/10 uppercase">${isJobClosed(job) ? "募集終了" : "募集中"}</span>
                   ${job.is_hidden ? '<span class="px-2 py-0.5 rounded-full bg-red-50 text-red-700 text-[10px] font-bold">運営により非表示中</span>' : ""}
+                  <span class="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-[10px] font-bold">👁 閲覧 ${(jobViewCounts.get(String(job.id)) || 0).toLocaleString()}回</span>
+                  <span class="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-[10px] font-bold">📨 応募 ${receivedApplications.filter(application => String(application.job_id) === String(job.id)).length}件</span>
                 </div>
                 ${job.is_hidden ? `<p class="mt-2 rounded-lg bg-red-50 p-2 text-xs font-bold text-red-800">この求人は運営の確認により非公開になっています${job.hidden_reason ? `（理由: ${escapeHtml(String(job.hidden_reason))}）` : ""}。内容を見直したい場合はお問い合わせください。</p>` : ""}
                 ${(() => {

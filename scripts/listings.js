@@ -318,6 +318,7 @@ function openModal(id) {
   if (!selectedJob) return;
 
   clearJobReportWidget();
+  recordJobView(selectedJob);
   const alreadyApplied = Boolean(currentUser && accountApplications.some(application =>
     application.applicant_id === currentUser.id && application.job_id === String(selectedJob.id)
   ));
@@ -415,6 +416,34 @@ function openModal(id) {
   modal.classList.remove("hidden");
   modal.classList.add("flex");
   document.getElementById("jobModalContent").scrollTop = 0;
+}
+
+const viewedJobIds = new Set();
+let jobViewCounts = new Map();
+
+function recordJobView(job) {
+  const key = String(job.id);
+  if (viewedJobIds.has(key) || job.owner_id === currentUser?.id) return;
+  viewedJobIds.add(key);
+  supabaseClient.rpc("record_job_view", { p_job_id: job.id }).then(({ error }) => {
+    if (error) console.error("閲覧数を記録できませんでした:", error);
+  });
+}
+
+async function loadJobViewCounts() {
+  if (!currentUser || accountType !== "employer") {
+    jobViewCounts = new Map();
+    return;
+  }
+  const userId = currentUser.id;
+  const { data, error } = await supabaseClient.from("job_view_counts").select("job_id, view_count");
+  if (currentUser?.id !== userId) return;
+  if (error) {
+    console.error("閲覧数を読み込めませんでした:", error);
+    return;
+  }
+  jobViewCounts = new Map((data || []).map(row => [String(row.job_id), row.view_count]));
+  renderEmployerDashboard();
 }
 
 function getJobShareUrl(job) {

@@ -1,9 +1,24 @@
 // Supabaseから求人一覧を取得
 async function fetchJobs() {
-  const { data, error } = await supabaseClient
-    .from('published_jobs')
-    .select('id, title, location, salary, duties, capacity, work_style, work_preferences, start_time, end_time, break_minutes, overtime_details, allowance_details, pay_type, pay_amount, pay_amount_max, pay_condition_details, required_licenses, preferred_licenses, experience_requirement, experience_requirement_details, tags, image_url, owner_id, is_closed, is_hidden, hidden_reason, expires_at, created_at, updated_at')
-    .order('id', { ascending: false });
+  const jobColumns = 'id, title, location, salary, duties, capacity, work_style, work_preferences, start_time, end_time, break_minutes, overtime_details, allowance_details, pay_type, pay_amount, pay_amount_max, pay_condition_details, required_licenses, preferred_licenses, experience_requirement, experience_requirement_details, tags, image_url, owner_id, is_closed, is_hidden, hidden_reason, expires_at, created_at, updated_at';
+  const pageSize = 1000;
+  const rows = [];
+  let error = null;
+  // Supabaseは1回で最大1000件までなので、件数が増えても欠けないよう分けて取得する
+  for (let from = 0; ; from += pageSize) {
+    const result = await supabaseClient
+      .from('published_jobs')
+      .select(jobColumns)
+      .order('id', { ascending: false })
+      .range(from, from + pageSize - 1);
+    if (result.error) {
+      error = result.error;
+      break;
+    }
+    rows.push(...(result.data || []));
+    if ((result.data || []).length < pageSize) break;
+  }
+  const data = rows;
 
   if (error) {
     console.error("データ取得エラー:", error);
