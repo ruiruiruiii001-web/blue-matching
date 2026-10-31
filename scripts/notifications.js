@@ -179,6 +179,7 @@ function renderApplicationNotificationView(application, messageStatus) {
   if (accountType === "employer") {
     content.innerHTML = `${renderEmployerApplicationDetails(application)}
       ${messageStatus ? `<p role="status" aria-live="polite" class="mt-2 text-sm text-emerald-700">${escapeHtml(messageStatus)}</p>` : ""}`;
+    hydrateApplicationTracking(content);
     return;
   }
   const employerId = cachedJobs.find(job => String(job.id) === String(application.job_id))?.owner_id;

@@ -141,6 +141,7 @@ function renderEmployerApplicationDetails(application) {
           ? `<p class="mt-4 whitespace-pre-wrap rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700"><span class="mb-1 block text-xs font-bold text-gray-500">対応不要の理由</span>${escapeHtml(String(application.dismissal_reason))}</p>`
           : ""}
         ${renderApplicationConversation(application)}
+        ${application.status === "withdrawn" ? "" : `<div data-tracking-box data-application-id="${applicationId}"></div>`}
         ${statusActions}
       </div>
     </article>
