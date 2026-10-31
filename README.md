@@ -37,6 +37,9 @@
 - 保存した検索条件の新着メール通知（メール設定の完了後）
 - 独自ドメインの取得とVercel（Settings → Domains）への追加
 - Resendの独自ドメイン設定（通知メール・確認メール）
+- 新規登録の確認メールの日本語化（`supabase/email-templates/confirm-signup.html` をSupabaseのAuthentication → Emails → Confirm sign upに貼る。パスワード再設定などの他のメールも必要に応じて）
+- 「Confirm email」をオンに戻す（テスト中はオフ）
+- テスト用アカウント・求人の削除と、運営者パスワードの運用用への変更
 - SMSによる電話番号確認と、同意に基づく電話番号共有
 - 規約・プライバシー・お問い合わせの仮表記（運営者名・連絡先・制定日）の差し替え
 
