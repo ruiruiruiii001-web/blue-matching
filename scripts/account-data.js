@@ -99,6 +99,22 @@ function renderApplicationConversation(application) {
                 <time class="text-[10px] text-gray-500">${formatDashboardDate(message.created_at)}</time>
               </div>
               <p class="whitespace-pre-wrap break-words text-sm text-gray-800">${escapeHtml(String(message.body || ""))}</p>
+              ${message.sender_id !== currentUser?.id ? `
+                <details class="mt-2 text-xs">
+                  <summary class="cursor-pointer font-bold text-gray-500 hover:text-red-700">このメッセージを通報</summary>
+                  <div class="mt-2 space-y-2 rounded-lg bg-gray-50 p-3">
+                    <select data-message-report-reason aria-label="通報の理由" class="w-full rounded border border-gray-200 bg-white px-2 py-2 text-xs">
+                      <option value="harassment">嫌がらせ・迷惑行為</option>
+                      <option value="scam">詐欺・不審な勧誘</option>
+                      <option value="contact">連絡先の不要な要求</option>
+                      <option value="inappropriate">不適切な内容</option>
+                      <option value="other">その他</option>
+                    </select>
+                    <textarea data-message-report-details maxlength="500" rows="2" aria-label="補足（任意）" placeholder="補足（任意・500文字以内）" class="w-full rounded border border-gray-200 bg-white px-2 py-2 text-xs"></textarea>
+                    <button type="button" onclick="submitMessageReport('${escapeHtml(String(message.id))}', this)" class="min-h-10 rounded-lg bg-red-600 px-3 py-2 text-xs font-bold text-white hover:bg-red-700">運営に通報する</button>
+                    <p data-message-report-status role="status" aria-live="polite" class="hidden text-xs"></p>
+                  </div>
+                </details>` : ""}
             </article>
           `).join("")
           : '<p class="rounded-lg bg-white p-3 text-xs text-gray-500">まだメッセージはありません。</p>'}
@@ -115,6 +131,28 @@ function renderApplicationConversation(application) {
           : "この応募は終了しているため、メッセージを送信できません。"}</p>`}
     </section>
   `;
+}
+
+async function submitMessageReport(messageId, button) {
+  if (!currentUser) return;
+  const box = button.closest("div");
+  const status = box.querySelector("[data-message-report-status]");
+  const showStatus = (text, isError) => {
+    status.textContent = text;
+    status.className = `text-xs ${isError ? "text-red-700" : "text-emerald-700"}`;
+  };
+  button.disabled = true;
+  const { error } = await supabaseClient.rpc("report_message", {
+    p_message_id: messageId,
+    p_reason: box.querySelector("[data-message-report-reason]").value,
+    p_details: box.querySelector("[data-message-report-details]").value.trim() || null
+  });
+  if (error) {
+    button.disabled = false;
+    showStatus(`通報できませんでした: ${error.message}`, true);
+    return;
+  }
+  showStatus("通報しました。運営が内容を確認します。", false);
 }
 
 async function sendApplicationMessage(applicationId, button) {

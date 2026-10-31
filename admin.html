@@ -9,11 +9,12 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="scripts/supabase-client.js"></script>
   <script src="scripts/admin.js" defer></script>
+  <script src="scripts/admin-extra.js" defer></script>
 </head>
 <body class="min-h-screen bg-gray-100 font-sans text-gray-800">
   <header class="bg-gray-900 text-white shadow">
     <div class="mx-auto flex max-w-4xl items-center justify-between gap-3 px-4 py-4">
-      <h1 class="text-lg font-bold">運営管理：通報の確認</h1>
+      <h1 class="text-lg font-bold">運営管理</h1>
       <a href="index.html" class="rounded-lg bg-white px-3 py-2 text-sm font-bold text-gray-900">サイトへ戻る</a>
     </div>
   </header>
@@ -27,17 +28,44 @@
       <button type="submit" class="min-h-11 w-full rounded-lg bg-gray-900 px-4 py-2 text-sm font-bold text-white">ログイン</button>
     </form>
     <section id="adminPanel" class="hidden">
-      <div class="mb-4 flex flex-wrap items-center gap-2">
-        <label for="adminReportFilter" class="text-sm font-bold">表示</label>
-        <select id="adminReportFilter" class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm">
-          <option value="pending">未対応のみ</option>
-          <option value="all">すべて</option>
-          <option value="reviewed">確認済み</option>
-          <option value="dismissed">対応不要</option>
-        </select>
-        <button id="adminReloadButton" type="button" class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-bold">再読み込み</button>
+      <div role="tablist" aria-label="管理メニュー" class="mb-4 flex flex-wrap gap-2">
+        <button type="button" role="tab" data-admin-tab="reports" aria-selected="true" class="admin-tab min-h-10 rounded-lg bg-gray-900 px-4 py-2 text-sm font-bold text-white">求人の通報</button>
+        <button type="button" role="tab" data-admin-tab="messages" aria-selected="false" class="admin-tab min-h-10 rounded-lg bg-white px-4 py-2 text-sm font-bold text-gray-800 border border-gray-300">メッセージの通報</button>
+        <button type="button" role="tab" data-admin-tab="users" aria-selected="false" class="admin-tab min-h-10 rounded-lg bg-white px-4 py-2 text-sm font-bold text-gray-800 border border-gray-300">ユーザー</button>
       </div>
-      <div id="adminReports" class="space-y-4"></div>
+      <div id="adminTabReports" data-admin-panel="reports">
+        <div class="mb-4 flex flex-wrap items-center gap-2">
+          <label for="adminReportFilter" class="text-sm font-bold">表示</label>
+          <select id="adminReportFilter" class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm">
+            <option value="pending">未対応のみ</option>
+            <option value="all">すべて</option>
+            <option value="reviewed">確認済み</option>
+            <option value="dismissed">対応不要</option>
+          </select>
+          <button id="adminReloadButton" type="button" class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-bold">再読み込み</button>
+        </div>
+        <div id="adminReports" class="space-y-4"></div>
+      </div>
+      <div id="adminTabMessages" data-admin-panel="messages" class="hidden">
+        <div class="mb-4 flex flex-wrap items-center gap-2">
+          <label for="adminMessageReportFilter" class="text-sm font-bold">表示</label>
+          <select id="adminMessageReportFilter" class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm">
+            <option value="pending">未対応のみ</option>
+            <option value="all">すべて</option>
+            <option value="reviewed">確認済み</option>
+            <option value="dismissed">対応不要</option>
+          </select>
+        </div>
+        <div id="adminMessageReports" class="space-y-4"></div>
+      </div>
+      <div id="adminTabUsers" data-admin-panel="users" class="hidden">
+        <form id="adminUserSearchForm" class="mb-4 flex flex-wrap gap-2">
+          <label for="adminUserQuery" class="sr-only">メールアドレスで検索</label>
+          <input id="adminUserQuery" type="search" placeholder="メールアドレスの一部で検索" class="min-w-0 flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm">
+          <button type="submit" class="min-h-10 rounded-lg bg-gray-900 px-4 py-2 text-sm font-bold text-white">検索</button>
+        </form>
+        <div id="adminUsers" class="space-y-3"></div>
+      </div>
     </section>
   </main>
 </body>

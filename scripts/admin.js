@@ -63,13 +63,14 @@ async function initializeAdmin() {
   adminPanel.classList.remove("hidden");
   setAdminStatus("");
   await loadReports();
+  if (typeof loadAdminExtras === "function") loadAdminExtras();
 }
 
 async function loadReports() {
   setAdminStatus("通報を読み込んでいます…");
   const { data: reports, error } = await supabaseClient
     .from("job_reports")
-    .select("id, job_id, job_title, reason, details, status, created_at")
+    .select("id, job_id, job_title, reason, details, status, admin_note, created_at")
     .order("created_at", { ascending: false })
     .limit(300);
   if (error) {
@@ -137,8 +138,12 @@ function renderReports() {
         : "公開中";
     card.append(createElement("p", "mt-1 text-xs text-gray-600", `求人ID: ${report.job_id} ／ 状態: ${jobState}${job?.owner_id && adminSuspendedIds.has(job.owner_id) ? " ／ 投稿者: 停止中" : ""}`));
     card.append(createElement("p", "mt-3 whitespace-pre-wrap break-words rounded-lg bg-gray-50 p-3 text-sm", report.details || "（詳細の記入なし）"));
+    if (report.admin_note) {
+      card.append(createElement("p", "mt-2 whitespace-pre-wrap break-words rounded-lg bg-amber-50 p-3 text-xs text-amber-900", `運営メモ: ${report.admin_note}`));
+    }
 
     const actions = createElement("div", "mt-4 flex flex-wrap gap-2");
+    actions.append(createActionButton("運営メモ", "bg-white border border-gray-300 text-gray-800 hover:bg-gray-50", () => editAdminNote("job_reports", report.id, report.admin_note, loadReports)));
     if (job && !job.is_hidden) {
       actions.append(createActionButton("求人を非表示にする", "bg-red-600 text-white hover:bg-red-700", () => hideJob(report, job)));
     }
