@@ -12,6 +12,7 @@ const adminPanel = document.getElementById("adminPanel");
 const adminReports = document.getElementById("adminReports");
 const adminReportFilter = document.getElementById("adminReportFilter");
 let adminJobsById = new Map();
+let adminSuspendedIds = new Set();
 let adminReportRows = [];
 
 function setAdminStatus(message, isError = false) {
@@ -90,6 +91,14 @@ async function loadReports() {
     }
     (jobs || []).forEach(job => adminJobsById.set(String(job.id), job));
   }
+  const { data: suspended, error: suspendedError } = await supabaseClient
+    .from("suspended_users")
+    .select("user_id");
+  if (suspendedError) {
+    setAdminStatus(`停止中のアカウントを読み込めませんでした。移行SQLを実行済みか確認してください: ${suspendedError.message}`, true);
+    return;
+  }
+  adminSuspendedIds = new Set((suspended || []).map(row => row.user_id));
   setAdminStatus("");
   renderReports();
 }
