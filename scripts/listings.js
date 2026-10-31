@@ -105,6 +105,7 @@ function renderJobList(resetLimit = false) {
   document.getElementById("activeJobFilterSummary").innerText = activeFilters.length
     ? `${activeFilters.length}件の条件で絞り込み中`
     : "";
+  renderSavedSearches();
 
   if (filteredJobs.length === 0) {
     jobList.innerHTML = favoritesOnly

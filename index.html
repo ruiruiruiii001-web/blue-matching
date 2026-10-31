@@ -825,6 +825,8 @@
           <p id="activeJobFilterSummary" class="text-gray-600" aria-live="polite"></p>
           <button type="button" onclick="resetJobFilters()" class="min-h-10 rounded-lg border border-blue-200 bg-white px-3 py-2 font-bold text-blue-700 hover:bg-blue-50">条件をリセット</button>
         </div>
+        <button id="saveSearchButton" type="button" onclick="saveCurrentSearch()" class="mt-3 hidden min-h-10 rounded-lg bg-blue-600 px-3 py-2 text-sm font-bold text-white hover:bg-blue-700">この条件を保存</button>
+        <div id="savedSearches" class="mt-3 hidden flex-wrap items-center gap-2"></div>
       </div>
 
             <div id="jobList" class="mt-6 space-y-4 pr-0" aria-live="polite">
@@ -971,6 +973,7 @@
   <script src="scripts/account.js"></script>
   <script src="scripts/jobs.js"></script>
   <script src="scripts/listings.js"></script>
+  <script src="scripts/saved-searches.js"></script>
   <script src="scripts/profile.js"></script>
   <script src="scripts/notifications.js"></script>
   <script src="scripts/dashboard.js"></script>

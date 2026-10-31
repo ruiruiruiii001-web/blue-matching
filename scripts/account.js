@@ -102,7 +102,7 @@ function updateEmployerAuth(session) {
     accountTypeLoading = Boolean(currentUser);
     accountDataUserId = null;
     loadingAccountUserId = null;
-    favoriteJobIds = [];
+    resetSavedSearches();
     seekerProfileData = null;
     accountApplications = [];
     accountApplicationsError = "";
