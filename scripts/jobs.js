@@ -164,7 +164,8 @@ async function publishJob() {
     });
   }
   await fetchJobs();
-
+  document.getElementById("myPageOverlayContent").scrollTop = 0;
+  window.scrollTo({ top: 0, behavior: "instant" });
 }
 
 function editJob(id) {
@@ -295,14 +296,30 @@ function setJobDurationControl(editing, job = null) {
   note.classList.toggle("text-gray-500", !status?.warning);
 }
 
-async function extendJob(id, days = DEFAULT_JOB_DURATION_DAYS) {
+const MAX_JOB_LISTING_DAYS_AHEAD = 90;
+
+async function extendJob(id, days = null) {
   const job = cachedJobs.find(item => item.id === id);
   if (!currentUser || accountType !== "employer" || !job || job.owner_id !== currentUser.id) return;
-  if (!confirm(`「${job.title}」の掲載を今日から${days}日間に延長しますか？`)) return;
+  const select = document.getElementById(`extendDays-${id}`);
+  days = days ?? (Number(select?.value) || DEFAULT_JOB_DURATION_DAYS);
+
+  // 期限が残っていれば残り日数に加算し、切れていれば今日から数える
+  const currentExpiry = Date.parse(job.expires_at || "");
+  const base = Number.isFinite(currentExpiry) && currentExpiry > Date.now() ? currentExpiry : Date.now();
+  const maxExpiry = Date.now() + MAX_JOB_LISTING_DAYS_AHEAD * 86400000;
+  const newExpiry = Math.min(base + days * 86400000, maxExpiry);
+  if (newExpiry <= base) {
+    alert(`掲載期限は今日から最大${MAX_JOB_LISTING_DAYS_AHEAD}日先までです。これ以上は延長できません。`);
+    return;
+  }
+  const newExpiryText = new Date(newExpiry).toLocaleDateString("ja-JP");
+  const capped = base + days * 86400000 > maxExpiry ? `（上限の${MAX_JOB_LISTING_DAYS_AHEAD}日先までに調整されます）` : "";
+  if (!confirm(`「${job.title}」の掲載を${days}日延長し、${newExpiryText}までにしますか？${capped}`)) return;
 
   const { error } = await supabaseClient
     .from('published_jobs')
-    .update({ expires_at: getJobExpiryDateFromDays(days) })
+    .update({ expires_at: new Date(newExpiry).toISOString() })
     .eq('id', id)
     .eq('owner_id', currentUser.id);
 

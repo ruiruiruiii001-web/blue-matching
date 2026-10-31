@@ -1,10 +1,12 @@
 const MAX_SAVED_SEARCHES = 5;
 let savedSearches = [];
 let savedSearchesUserId = null;
+let pendingSavedSearchId = null;
 
 function resetSavedSearches() {
   savedSearches = [];
   savedSearchesUserId = null;
+  pendingSavedSearchId = null;
   renderSavedSearches();
 }
 
@@ -110,7 +112,7 @@ function renderSavedSearches() {
     apply.className = "min-h-10 px-3 py-2 text-left font-bold text-blue-800 hover:bg-blue-50";
     apply.textContent = search.name;
     apply.title = describeJobFilters(search.filters || {});
-    apply.addEventListener("click", () => applySavedSearch(search.id));
+    apply.addEventListener("click", () => previewSavedSearch(search.id));
     wrapper.append(apply);
 
     if (newCount > 0) {
@@ -129,6 +131,58 @@ function renderSavedSearches() {
     wrapper.append(remove);
     container.append(wrapper);
   });
+
+  const pending = savedSearches.find(search => search.id === pendingSavedSearchId);
+  if (pending) {
+    const filters = pending.filters || {};
+    const preview = document.createElement("div");
+    preview.className = "w-full rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm";
+    const title = document.createElement("p");
+    title.className = "font-bold text-blue-900";
+    title.textContent = `「${pending.name}」の条件`;
+    const list = document.createElement("ul");
+    list.className = "mt-1 list-disc pl-5 text-gray-800";
+    const items = [
+      filters.keyword && `キーワード: ${filters.keyword}`,
+      filters.location && `勤務地: ${filters.location}`,
+      filters.salaryType && `給与区分: ${{ hourly: "時給", daily: "日給", monthly: "月給" }[filters.salaryType]}`,
+      filters.minimumSalary && `最低給与: ${Number(filters.minimumSalary).toLocaleString()}円以上`,
+      filters.capacity && `募集人数: ${filters.capacity}`,
+      filters.openJobsOnly && "募集中のみ",
+      (filters.tags || []).length && `タグ: ${filters.tags.join("、")}`
+    ].filter(Boolean);
+    (items.length ? items : ["条件なし"]).forEach(text => {
+      const li = document.createElement("li");
+      li.textContent = text;
+      list.append(li);
+    });
+    const actions = document.createElement("div");
+    actions.className = "mt-3 flex flex-wrap gap-2";
+    const confirmButton = document.createElement("button");
+    confirmButton.type = "button";
+    confirmButton.className = "min-h-10 rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white hover:bg-blue-700";
+    confirmButton.textContent = "この条件で絞り込む";
+    confirmButton.addEventListener("click", () => {
+      pendingSavedSearchId = null;
+      applySavedSearch(pending.id);
+    });
+    const cancelButton = document.createElement("button");
+    cancelButton.type = "button";
+    cancelButton.className = "min-h-10 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-bold text-gray-700 hover:bg-gray-50";
+    cancelButton.textContent = "キャンセル";
+    cancelButton.addEventListener("click", () => {
+      pendingSavedSearchId = null;
+      renderSavedSearches();
+    });
+    actions.append(confirmButton, cancelButton);
+    preview.append(title, list, actions);
+    container.append(preview);
+  }
+}
+
+function previewSavedSearch(id) {
+  pendingSavedSearchId = id;
+  renderSavedSearches();
 }
 
 async function saveCurrentSearch() {

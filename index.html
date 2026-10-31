@@ -309,11 +309,12 @@
                 <option value="daily">日給</option>
                 <option value="monthly">月給</option>
               </select>
-              <input type="number" id="jobPayAmount" min="1" max="100000000" step="1" placeholder="下限金額（円）" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
             </div>
-            <label class="mt-2 block text-sm">上限金額（任意・円）
-              <input type="number" id="jobPayAmountMax" min="1" max="100000000" step="1" placeholder="例: 20000" class="mt-1 w-full rounded border px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-            </label>
+            <div class="mt-2 flex items-center gap-2">
+              <input type="number" id="jobPayAmount" aria-label="下限金額（円）" min="1" max="100000000" step="1" placeholder="下限（円）" class="min-w-0 flex-1 border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+              <span class="text-sm text-gray-500" aria-hidden="true">〜</span>
+              <input type="number" id="jobPayAmountMax" aria-label="上限金額（任意・円）" min="1" max="100000000" step="1" placeholder="上限（任意）" class="min-w-0 flex-1 rounded border px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
             <label class="mt-2 block text-sm">給与の支給条件（任意）
               <textarea id="jobPayConditionDetails" rows="2" maxlength="500" placeholder="例: 毎月末締め・翌月25日払い／昇給あり／賞与年2回" class="mt-1 w-full rounded border px-3 py-2.5 text-sm"></textarea>
             </label>
