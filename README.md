@@ -34,6 +34,8 @@
 
 ## リリース前の仕上げ（保留中）
 
+実行済みのSQL（Supabaseで一度だけ実行）: `20261106_block_admin_self_deletion.sql`（運営者は退会不可）、`20261107_block_suspended_reregistration.sql`（停止中に退会したメールのハッシュを記録し、再登録時は停止状態で開始）。
+
 - 保存した検索条件の新着メール通知（メール設定の完了後）
 - 独自ドメインの取得とVercel（Settings → Domains）への追加
 - Resendの独自ドメイン設定（通知メール・確認メール）
