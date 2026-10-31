@@ -1,0 +1,14 @@
+<!-- Supabase: Authentication → Emails → Confirm sign up に貼り付ける -->
+<!-- 件名: 【現場直結】メールアドレスの確認をお願いします -->
+<div style="font-family:-apple-system,'Hiragino Sans','Yu Gothic',sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#1f2937;line-height:1.8;">
+  <h1 style="font-size:18px;margin:0 0 16px;">ご登録ありがとうございます</h1>
+  <p style="margin:0 0 12px;">「現場直結！職人＆親方の求人マッチング」にご登録いただき、ありがとうございます。</p>
+  <p style="margin:0 0 20px;">登録を完了するには、下のボタンを押してメールアドレスの確認をお願いします。</p>
+  <p style="text-align:center;margin:0 0 24px;">
+    <a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#2563eb;color:#ffffff;text-decoration:none;font-weight:bold;padding:14px 28px;border-radius:8px;">メールアドレスを確認する</a>
+  </p>
+  <p style="font-size:12px;color:#6b7280;margin:0 0 8px;">ボタンが押せない場合は、次のURLをブラウザーに貼り付けてください。</p>
+  <p style="font-size:12px;color:#6b7280;word-break:break-all;margin:0 0 20px;">{{ .ConfirmationURL }}</p>
+  <hr style="border:none;border-top:1px solid #e5e7eb;margin:20px 0;">
+  <p style="font-size:12px;color:#6b7280;margin:0;">このメールに心当たりがない場合は、お手数ですが破棄してください。アカウントは作成されません。<br>このメールは送信専用です。</p>
+</div>
