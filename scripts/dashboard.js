@@ -17,6 +17,18 @@ function renderAccountDashboard() {
     `).join("")
     : '<div class="text-center py-10 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200"><p class="text-xs text-gray-400 font-bold uppercase tracking-widest">No Favorites Yet</p></div>';
 
+  const followedContainer = document.getElementById("dashboardFollowedJobs");
+  if (followedContainer) {
+    const followedJobs = cachedJobs.filter(job => isFollowingEmployer(job.owner_id) && !isJobClosed(job) && !isJobExpired(job) && !job.is_hidden);
+    followedContainer.innerHTML = followedJobs.length
+      ? followedJobs.map(job => `
+        <button type="button" onclick="openModal(${job.id})" class="block w-full rounded-xl border border-gray-100 bg-white p-4 text-left shadow-sm hover:border-blue-200">
+          <span class="block truncate font-bold text-gray-800">${escapeHtml(job.title)}</span>
+          <span class="mt-1 block text-[10px] font-medium text-gray-400">📍 ${escapeHtml(job.location || "場所未設定")}</span>
+        </button>`).join("")
+      : '<p class="rounded-2xl border border-dashed border-gray-200 bg-gray-50/50 p-4 text-xs text-gray-500">フォロー中の企業の掲載中求人はありません。</p>';
+  }
+
   const submitted = accountApplications.filter(application => application.applicant_id === currentUser.id);
   const employerIdsByJobId = new Map(cachedJobs.map(job => [String(job.id), job.owner_id]));
   const applicationsContainer = document.getElementById("dashboardApplications");

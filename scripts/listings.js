@@ -5,6 +5,7 @@ function renderJobList(resetLimit = false) {
   const keyword = document.getElementById("searchKeyword").value.toLowerCase();
   const openJobsOnly = document.getElementById("openJobsOnly").checked;
   const favoritesOnly = document.getElementById("favoritesOnly").checked;
+  const followedOnly = document.getElementById("followedOnly").checked;
   const capacityFilter = document.getElementById("capacityFilter").value;
   updateJobFilterOptions();
   const locationFilter = document.getElementById("locationFilter").value;
@@ -55,6 +56,7 @@ function renderJobList(resetLimit = false) {
         getNormalizedJobTags(job.tags).some(tag => tag.toLocaleLowerCase().includes(keyword))) &&
       (!openJobsOnly || !isJobClosed(job)) &&
         (!favoritesOnly || isFavorite(job.id)) &&
+        (!followedOnly || isFollowingEmployer(job.owner_id)) &&
         (!capacityFilter || getCapacityOptionValue(job.capacity) === capacityFilter) &&
         (!locationFilter || jobMatchesLocationFilter(job.location, locationFilter)) &&
         (!salaryTypeFilter || getJobPayType(job) === salaryTypeFilter) &&
@@ -95,6 +97,7 @@ function renderJobList(resetLimit = false) {
     keyword && `キーワード: ${keyword}`,
     openJobsOnly && "募集中のみ",
     favoritesOnly && "お気に入り",
+    followedOnly && "フォロー中の企業",
     locationFilter && `勤務地: ${locationFilter}`,
     capacityFilter && `募集人数: ${document.getElementById("capacityFilter").selectedOptions[0].text}`,
     salaryTypeFilter && `給与: ${document.getElementById("salaryTypeFilter").selectedOptions[0].text}`,
@@ -214,6 +217,7 @@ function resetJobFilters() {
   document.getElementById("searchKeyword").value = "";
   document.getElementById("openJobsOnly").checked = false;
   document.getElementById("favoritesOnly").checked = false;
+  document.getElementById("followedOnly").checked = false;
   document.getElementById("locationFilter").value = "";
   document.getElementById("capacityFilter").value = "";
   document.getElementById("salaryTypeFilter").value = "";
@@ -408,6 +412,7 @@ function openModal(id) {
   document.getElementById("modalApplicationRequirements").classList.toggle("hidden", requirementDetails.length === 0);
   document.getElementById("modalClosed").classList.toggle("hidden", !selectedJobIsClosed);
   updateModalFavoriteButton();
+  updateModalFollowButton();
 
   const tagsContainer = document.getElementById("modalTags");
   tagsContainer.innerHTML = getNormalizedJobTags(selectedJob.tags).map(tag => `<span class="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded font-bold">${escapeHtml(tag)}</span>`).join("");
@@ -555,6 +560,42 @@ function isFavorite(jobId) {
 
   // 実際にはバックグラウンドで再読み込みして整合性を取る
   loadAccountData(currentUser);
+}
+
+function isFollowingEmployer(employerId) {
+  return followedEmployerIds.includes(String(employerId));
+}
+
+async function toggleFollowEmployer(employerId) {
+  if (!currentUser) {
+    promptLogin("企業をフォローするにはログインしてください。");
+    return;
+  }
+  if (accountType !== "seeker" || !employerId || employerId === currentUser.id) return;
+  const id = String(employerId);
+  const following = isFollowingEmployer(id);
+  const { error } = following
+    ? await supabaseClient.from("employer_follows").delete().eq("user_id", currentUser.id).eq("employer_id", id)
+    : await supabaseClient.from("employer_follows").insert({ user_id: currentUser.id, employer_id: id });
+  if (error) {
+    alert(`フォローの更新に失敗しました: ${error.message}`);
+    return;
+  }
+  followedEmployerIds = following ? followedEmployerIds.filter(value => value !== id) : [...followedEmployerIds, id];
+  renderJobList();
+  updateModalFollowButton();
+  if (typeof renderAccountDashboard === "function") renderAccountDashboard();
+}
+
+function updateModalFollowButton() {
+  const button = document.getElementById("modalFollowButton");
+  if (!button) return;
+  const visible = Boolean(selectedJob && currentUser && accountType === "seeker" && selectedJob.owner_id !== currentUser.id);
+  button.classList.toggle("hidden", !visible);
+  if (!visible) return;
+  const following = isFollowingEmployer(selectedJob.owner_id);
+  button.innerText = following ? "✓ この企業をフォロー中（解除）" : "＋ この企業をフォロー";
+  button.setAttribute("aria-pressed", String(following));
 }
 
 function updateModalFavoriteButton() {

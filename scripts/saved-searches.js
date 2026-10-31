@@ -221,6 +221,7 @@ async function applySavedSearch(id) {
   document.getElementById("searchKeyword").value = filters.keyword || "";
   document.getElementById("openJobsOnly").checked = Boolean(filters.openJobsOnly);
   document.getElementById("favoritesOnly").checked = false;
+  document.getElementById("followedOnly").checked = false;
   document.getElementById("capacityFilter").value = filters.capacity || "";
   document.getElementById("salaryTypeFilter").value = filters.salaryType || "";
   document.getElementById("minimumSalary").value = filters.minimumSalary || "";

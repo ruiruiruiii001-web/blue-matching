@@ -3,7 +3,7 @@ async function loadAccountData(user) {
       loadingAccountUserId = user.id;
       const userId = user.id;
 
-      const [profileResult, appsResult, favsResult, notifsResult, seekerReqsResult, employerReqsResult, reviewsResult, blocksResult] = await Promise.all([
+      const [profileResult, appsResult, favsResult, notifsResult, seekerReqsResult, employerReqsResult, reviewsResult, blocksResult, followsResult] = await Promise.all([
         supabaseClient.from("seeker_profiles").select("*").eq("user_id", userId).maybeSingle(),
         supabaseClient.from("job_applications").select("*").order("created_at", { ascending: false }),
         supabaseClient.from("job_favorites").select("job_id").eq("user_id", userId),
@@ -15,7 +15,8 @@ async function loadAccountData(user) {
           ? supabaseClient.from("seeker_contact_requests").select("*").eq("employer_id", userId).order("created_at", { ascending: false })
           : Promise.resolve({ data: [], error: null }),
         supabaseClient.from("job_reviews").select("*").eq("reviewer_id", userId),
-        supabaseClient.from("user_blocks").select("blocked_id").eq("blocker_id", userId)
+        supabaseClient.from("user_blocks").select("blocked_id").eq("blocker_id", userId),
+        supabaseClient.from("employer_follows").select("employer_id").eq("user_id", userId)
       ]);
 
       if (currentUser?.id !== userId) {
@@ -62,6 +63,7 @@ async function loadAccountData(user) {
           : "";
       accountReviews = reviewsResult.data || [];
       blockedUserIds = (blocksResult.data || []).map(b => b.blocked_id);
+      followedEmployerIds = (followsResult.data || []).map(f => String(f.employer_id));
       accountApplicationsError = appsResult.error ? `応募履歴を読み込めませんでした: ${appsResult.error.message}` : "";
 
       favoriteJobIds = (favsResult.data || []).map(f => String(f.job_id));

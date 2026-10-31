@@ -644,6 +644,9 @@
             <section id="dashboardView-favorites" class="hidden rounded border p-3">
               <h3 class="font-bold text-sm mb-2">お気に入り求人</h3>
               <div id="dashboardFavorites" class="space-y-2 text-sm"></div>
+              <h3 class="font-bold text-sm mt-6 mb-2">フォロー中の企業の求人</h3>
+              <p class="mb-2 text-xs text-gray-600">フォローした企業が掲載中の求人を表示します。求人の詳細画面からフォローを解除できます。</p>
+              <div id="dashboardFollowedJobs" class="space-y-2 text-sm"></div>
             </section>
                         <section id="dashboardView-applications" class="hidden rounded border p-3">
               <h3 class="font-bold text-sm mb-2">応募履歴・応募者</h3>
@@ -766,6 +769,10 @@
           <label class="flex min-h-11 items-center gap-2 rounded-lg border border-blue-100 bg-white px-3 text-sm text-gray-700">
             <input type="checkbox" id="favoritesOnly" onchange="renderJobList(true)" class="h-4 w-4 rounded text-blue-600 focus:ring-blue-500">
             お気に入りのみ表示
+          </label>
+          <label class="flex min-h-11 items-center gap-2 rounded-lg border border-blue-100 bg-white px-3 text-sm text-gray-700">
+            <input type="checkbox" id="followedOnly" onchange="renderJobList(true)" class="h-4 w-4 rounded text-blue-600 focus:ring-blue-500">
+            フォロー中の企業のみ表示
           </label>
         </div>
 
@@ -891,6 +898,7 @@
         <p id="modalJobFreshness" class="mt-2 text-xs text-gray-500"></p>
         <p class="mt-1 text-xs text-amber-800">掲載企業の本人確認は行っていません。応募前に求人内容・条件をご確認ください。連絡は応募後にサイト内で行えます。</p>
         <button id="modalFavoriteButton" type="button" onclick="toggleFavorite(selectedJob.id)" class="mt-3 min-h-11 rounded-lg border border-amber-300 px-4 py-2 text-sm font-bold text-amber-800 hover:bg-amber-50"></button>
+        <button id="modalFollowButton" type="button" onclick="toggleFollowEmployer(selectedJob.owner_id)" class="mt-3 hidden min-h-11 rounded-lg border border-blue-300 px-4 py-2 text-sm font-bold text-blue-800 hover:bg-blue-50"></button>
         <div class="mt-3 flex flex-wrap gap-2">
           <button type="button" onclick="shareJobToLine()" class="min-h-11 rounded-lg bg-[#06C755] px-4 py-2 text-sm font-bold text-white hover:opacity-90">LINEで送る</button>
           <button id="modalCopyLinkButton" type="button" onclick="copyJobLink()" class="min-h-11 rounded-lg border border-gray-300 px-4 py-2 text-sm font-bold text-gray-700 hover:bg-gray-50">リンクをコピー</button>

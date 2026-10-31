@@ -1,6 +1,7 @@
 let cachedJobs = [];
 let selectedJob = null;
 let favoriteJobIds = [];
+let followedEmployerIds = [];
 let seekerProfileData = null;
 let accountApplications = [];
 let accountApplicationsError = "";
