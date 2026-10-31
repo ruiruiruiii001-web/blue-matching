@@ -32,10 +32,10 @@ function renderEmployerDashboard() {
             </div>
           ` : ""}
           <div class="flex-1 p-5 min-w-0">
-            <div class="flex items-start justify-between gap-4">
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div class="min-w-0 flex-1">
                 <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">${escapeHtml(formatJobFreshness(job))}</p>
-                <h4 class="font-black text-gray-800 text-lg leading-tight truncate group-hover:text-blue-600 transition-colors">${escapeHtml(String(job.title || ""))}</h4>
+                <h4 class="break-words font-black text-gray-800 text-lg leading-tight group-hover:text-blue-600 transition-colors">${escapeHtml(String(job.title || ""))}</h4>
                 <div class="flex flex-wrap gap-2 mt-2">
                   <span class="px-2 py-0.5 rounded-full bg-gray-50 border border-gray-100 text-[10px] font-bold text-gray-500">📍 ${escapeHtml(String(job.location || "未設定"))}</span>
                   <span class="px-2 py-0.5 rounded-full ${isJobClosed(job) ? "bg-gray-100 text-gray-400" : "bg-emerald-50 text-emerald-600"} text-[10px] font-bold border border-current/10 uppercase">${isJobClosed(job) ? "募集終了" : "募集中"}</span>
@@ -44,10 +44,10 @@ function renderEmployerDashboard() {
                 ${job.is_hidden ? `<p class="mt-2 rounded-lg bg-red-50 p-2 text-xs font-bold text-red-800">この求人は運営の確認により非公開になっています${job.hidden_reason ? `（理由: ${escapeHtml(String(job.hidden_reason))}）` : ""}。内容を見直したい場合はお問い合わせください。</p>` : ""}
                 ${(() => {
                   const expiry = getJobExpiryStatus(job);
-                  return expiry ? `<p class="mt-2 rounded-lg ${expiry.warning ? "bg-red-50 text-red-800" : "bg-gray-50 text-gray-600"} p-2 text-xs font-bold">${expiry.warning ? "⚠️ " : ""}${escapeHtml(expiry.text)}</p>` : "";
+                  return expiry ? `<p class="mt-2 break-words rounded-lg ${expiry.warning ? "bg-red-50 text-red-800" : "bg-gray-50 text-gray-600"} p-2 text-xs font-bold">${expiry.warning ? "⚠️ " : ""}${escapeHtml(expiry.text)}</p>` : "";
                 })()}
               </div>
-              <div class="flex flex-wrap justify-end gap-2">
+              <div class="flex flex-wrap gap-2 sm:shrink-0 sm:justify-end">
                 <button type="button" onclick="editJob(${job.id})" class="min-h-10 rounded-lg bg-blue-50 px-3 py-2 text-xs font-bold text-blue-700 hover:bg-blue-100 transition-colors">編集</button>
                 <button type="button" onclick="extendJob(${job.id})" class="min-h-10 rounded-lg ${getJobExpiryStatus(job)?.warning ? "bg-red-600 text-white hover:bg-red-700" : "bg-blue-50 text-blue-700 hover:bg-blue-100"} px-3 py-2 text-xs font-bold transition-colors">掲載を30日延長</button>
                 <button type="button" onclick="toggleJobClosed(${job.id})" class="min-h-10 rounded-lg bg-gray-50 px-3 py-2 text-xs font-bold text-gray-700 hover:bg-gray-100 transition-colors">${job.is_closed ? "募集を再開" : "募集を終了"}</button>

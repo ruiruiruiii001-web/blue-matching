@@ -42,11 +42,14 @@ function createActionButton(label, className, onClick) {
 }
 
 async function initializeAdmin() {
+  const loginForm = document.getElementById("adminLoginForm");
   const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
   if (sessionError || !session) {
-    setAdminStatus("運営者アカウントでログインしてから、このページを開き直してください。", true);
+    loginForm.classList.remove("hidden");
+    setAdminStatus("運営者アカウントでログインしてください。", true);
     return;
   }
+  loginForm.classList.add("hidden");
   const { data: isAdmin, error } = await supabaseClient.rpc("is_admin");
   if (error) {
     setAdminStatus(`権限を確認できませんでした。移行SQLを実行済みか確認してください: ${error.message}`, true);
@@ -186,6 +189,19 @@ async function hideJob(report, job) {
   }
 }
 
+document.getElementById("adminLoginForm").addEventListener("submit", async event => {
+  event.preventDefault();
+  setAdminStatus("ログインしています…");
+  const { error } = await supabaseClient.auth.signInWithPassword({
+    email: document.getElementById("adminEmail").value.trim(),
+    password: document.getElementById("adminPassword").value
+  });
+  if (error) {
+    setAdminStatus("ログインできませんでした。メールアドレスとパスワードを確認してください。", true);
+    return;
+  }
+  await initializeAdmin();
+});
 adminReportFilter.addEventListener("change", renderReports);
 document.getElementById("adminReloadButton").addEventListener("click", loadReports);
 initializeAdmin();
