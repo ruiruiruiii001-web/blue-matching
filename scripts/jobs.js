@@ -36,6 +36,7 @@ async function fetchJobs() {
     ...job,
     image_urls: Array.isArray(job.image_urls) ? job.image_urls : job.image_url ? [job.image_url] : []
   }));
+  await loadEmployerPublicProfiles(cachedJobs.map(job => job.owner_id));
   renderJobList();
   renderEmployerDashboard();
   renderAccountDashboard();

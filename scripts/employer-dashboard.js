@@ -149,7 +149,7 @@ function renderEmployerApplicationDetails(application) {
 }
 
 function showEmployerDashboardView(view) {
-  const views = ["jobs", "messages", "job-editor"];
+  const views = ["jobs", "messages", "profile", "job-editor"];
   if (!views.includes(view)) return;
 
   views.forEach(item => {
@@ -164,4 +164,5 @@ function showEmployerDashboardView(view) {
     button.classList.toggle("text-gray-700", !isActive);
     button.setAttribute("aria-selected", String(isActive));
   });
+  if (view === "profile") loadEmployerProfileForm();
 }

@@ -75,6 +75,10 @@ async function loadAccountData(user) {
       employerContactRequestsError = employerReqsResult.error ? `連絡リクエストの返信を読み込めませんでした: ${employerReqsResult.error.message}` : "";
 
       accountDataUserId = userId;
+      if (accountType === "employer") {
+        await loadEmployerProfileForm();
+        await loadEmployerPublicProfiles(cachedJobs.map(job => job.owner_id));
+      }
       await fetchAvgRatings();
       renderAccountDashboard();
       renderEmployerDashboard();
