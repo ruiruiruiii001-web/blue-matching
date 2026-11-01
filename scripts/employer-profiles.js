@@ -3,6 +3,20 @@ let employerProfileLoadError = "";
 let employerProfileLoadedUserId = null;
 let employerProfilesSchemaReady = false;
 
+function setEmployerProfileStatus(message, tone = "info", shouldScroll = false) {
+  const status = document.getElementById("employerProfileStatus");
+  if (!status) return;
+  const styles = {
+    info: "mt-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-600",
+    warning: "mt-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800",
+    error: "mt-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700",
+    success: "mt-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-bold text-emerald-800"
+  };
+  status.textContent = message;
+  status.className = styles[tone] || styles.info;
+  if (shouldScroll) status.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
 function getEmployerPublicProfile(userId) {
   return employerPublicProfiles.get(String(userId)) || null;
 }
@@ -32,11 +46,7 @@ async function loadEmployerPublicProfiles(userIds) {
 async function loadEmployerProfileForm() {
   if (!currentUser || accountType !== "employer") return;
   employerProfileLoadedUserId = currentUser.id;
-  const status = document.getElementById("employerProfileStatus");
-  if (status) {
-    status.textContent = "プロフィールを読み込んでいます…";
-    status.className = "mb-3 text-sm text-gray-600";
-  }
+  setEmployerProfileStatus("プロフィールを読み込んでいます…");
   const { data, error } = await supabaseClient
     .from("employer_public_profiles")
     .select("display_name, service_area, introduction")
@@ -45,38 +55,32 @@ async function loadEmployerProfileForm() {
   if (currentUser?.id !== employerProfileLoadedUserId || !document.getElementById("employerProfileName")) return;
   if (error) {
     if (["42P01", "PGRST205"].includes(error.code)) {
-      status.textContent = "企業プロフィール機能を使うには、README記載の企業プロフィール用SQLを実行してください。";
-      status.className = "mb-3 text-sm text-amber-800";
+      setEmployerProfileStatus("企業プロフィール機能を使うには、README記載の企業プロフィール用SQLを実行してください。", "warning");
       return;
     }
-    status.textContent = `プロフィールを読み込めませんでした: ${error.message}`;
-    status.className = "mb-3 text-sm text-red-700";
+    setEmployerProfileStatus(`プロフィールを読み込めませんでした: ${error.message}`, "error");
     return;
   }
   employerProfilesSchemaReady = true;
   document.getElementById("employerProfileName").value = data?.display_name || "";
   document.getElementById("employerProfileArea").value = data?.service_area || "";
   document.getElementById("employerProfileIntroduction").value = data?.introduction || "";
-  status.textContent = data ? "公開中のプロフィールです。保存内容は求人ページに表示されます。" : "プロフィールはまだ登録されていません。";
-  status.className = "mb-3 text-sm text-gray-600";
+  setEmployerProfileStatus(data ? "公開中のプロフィールです。保存内容は求人ページに表示されます。" : "プロフィールはまだ登録されていません。");
 }
 
 async function saveEmployerProfile(event) {
   event.preventDefault();
   if (!currentUser || accountType !== "employer") return;
   const userId = currentUser.id;
-  const status = document.getElementById("employerProfileStatus");
   if (!employerProfilesSchemaReady) {
-    status.textContent = "企業プロフィール用SQLを実行してから保存してください。";
-    status.className = "mb-3 text-sm text-amber-800";
+    setEmployerProfileStatus("企業プロフィール用SQLを実行してから保存してください。", "warning", true);
     return;
   }
   const displayName = document.getElementById("employerProfileName").value.trim();
   const serviceArea = document.getElementById("employerProfileArea").value.trim();
   const introduction = document.getElementById("employerProfileIntroduction").value.trim();
   if (!displayName || displayName.length > 100 || serviceArea.length > 300 || introduction.length > 1000) {
-    status.textContent = "企業・屋号は1〜100文字、対応地域は300文字、紹介文は1,000文字以内で入力してください。";
-    status.className = "mb-3 text-sm text-red-700";
+    setEmployerProfileStatus("企業・屋号は1〜100文字、対応地域は300文字、紹介文は1,000文字以内で入力してください。", "error", true);
     return;
   }
   const { data, error } = await supabaseClient
@@ -91,15 +95,13 @@ async function saveEmployerProfile(event) {
     .single();
   if (error) {
     if (currentUser?.id !== userId) return;
-    status.textContent = `保存できませんでした: ${error.message}`;
-    status.className = "mb-3 text-sm text-red-700";
+    setEmployerProfileStatus(`保存できませんでした: ${error.message}`, "error", true);
     return;
   }
   employerPublicProfiles.set(String(data.user_id), data);
   if (currentUser?.id !== userId) return;
   employerProfileLoadError = "";
-  status.textContent = "企業プロフィールを保存しました。求人ページに表示されます。";
-  status.className = "mb-3 text-sm text-emerald-700";
+  setEmployerProfileStatus("企業プロフィールを保存しました。求人ページに表示されます。", "success", true);
   renderJobList();
 }
 
