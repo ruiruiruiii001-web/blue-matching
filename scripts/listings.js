@@ -132,6 +132,7 @@ function renderJobList(resetLimit = false) {
   jobList.innerHTML = displayJobs.map(job => {
     const matchDetails = matchProfile ? getJobMatchDetails(job, matchProfile) : null;
     const workPreferences = getWorkPreferenceLabels(job.work_preferences);
+    const primaryImage = getJobImages(job)[0];
     const matchSummary = matchDetails
       ? `<div class="mt-4 rounded-lg ${matchDetails.score >= 11 ? "bg-emerald-50 text-emerald-900" : matchDetails.score >= 6 ? "bg-amber-50 text-amber-900" : "bg-gray-50 text-gray-700"} p-3">
           <div class="flex items-center justify-between gap-3">
@@ -148,6 +149,7 @@ function renderJobList(resetLimit = false) {
       : "";
     return `
     <article onclick="openModal(${job.id})" class="cursor-pointer group relative bg-white rounded-2xl border border-gray-100 p-5 transition-all hover:shadow-md hover:border-blue-200 sm:p-6 mb-4">
+      ${primaryImage ? `<img src="${escapeHtml(primaryImage)}" alt="" loading="lazy" class="mb-4 aspect-[16/7] w-full rounded-xl bg-gray-100 object-cover">` : ""}
       <div class="flex items-start justify-between gap-3">
         <div class="min-w-0 flex-1">
                         <div class="mb-3 flex flex-wrap gap-2">
@@ -359,6 +361,9 @@ function openModal(id) {
   document.getElementById("jobReportSubmitButton").disabled = true;
   setJobReportStatus("通報するには確認を完了してください。");
   document.getElementById("modalTitle").innerText = selectedJob.title;
+  const imageGallery = document.getElementById("modalJobImages");
+  imageGallery.innerHTML = renderJobImageGallery(selectedJob);
+  imageGallery.classList.toggle("hidden", getJobImages(selectedJob).length === 0);
   document.getElementById("modalJobFreshness").innerText = formatJobFreshness(selectedJob);
   document.getElementById("modalLocation").innerText = selectedJob.location ? `📍 ${selectedJob.location}` : "";
   document.getElementById("modalSalary").innerText = formatJobSalary(selectedJob);

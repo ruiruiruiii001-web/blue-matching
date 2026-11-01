@@ -26,9 +26,9 @@ function renderEmployerDashboard() {
     ? ownedJobs.map(job => `
       <article class="bg-white rounded-2xl border border-gray-100 shadow-sm mb-4 transition-all hover:border-blue-200 group overflow-hidden">
         <div class="flex">
-          ${job.image_url ? `
+          ${getJobImages(job)[0] ? `
             <div class="w-24 shrink-0 bg-gray-100 overflow-hidden hidden sm:block">
-              <img src="${escapeHtml(job.image_url)}" alt="" class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300">
+              <img src="${escapeHtml(getJobImages(job)[0])}" alt="" class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300">
             </div>
           ` : ""}
           <div class="flex-1 p-5 min-w-0">

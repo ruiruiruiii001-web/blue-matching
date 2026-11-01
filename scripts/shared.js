@@ -496,43 +496,42 @@ function isValidJapanesePhone(phone) {
 }
 
 async function uploadImage(fileInput, targetId, statusId) {
-
   const file = fileInput.files[0];
   const status = document.getElementById(statusId);
-  if (!file) return;
+  if (!file || !status) return;
 
   if (!currentUser) {
     alert("写真をアップロードするにはログインが必要です。");
     return;
   }
+  if (!["image/jpeg", "image/png", "image/webp"].includes(file.type) || file.size > 15 * 1024 * 1024) {
+    status.innerText = "JPEG・PNG・WebP形式で、15MB以下の画像を選んでください。";
+    status.className = "text-[10px] text-red-600";
+    fileInput.value = "";
+    return;
+  }
 
   status.innerText = "⏳ アップロード中...";
   status.className = "text-[10px] text-blue-600 font-bold animate-pulse";
+  const extension = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" }[file.type];
+  const fileId = typeof crypto.randomUUID === "function"
+    ? crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  const filePath = `${currentUser.id}/${fileId}.${extension}`;
 
   try {
-    // ファイル名をユニークにする (userId_timestamp_name)
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${currentUser.id}_${Date.now()}.${fileExt}`;
-    const filePath = `uploads/${fileName}`;
-
-    // Supabase Storage にアップロード
-    const { data, error } = await supabaseClient.storage
-      .from('job-media')
-      .upload(filePath, file);
-
+    const { error } = await supabaseClient.storage
+      .from("job-media")
+      .upload(filePath, file, { contentType: file.type, upsert: false });
     if (error) throw error;
 
-    // 公開URLを取得
-    const { data: { publicUrl } } = supabaseClient.storage
-      .from('job-media')
-      .getPublicUrl(filePath);
-
+    const { data: { publicUrl } } = supabaseClient.storage.from("job-media").getPublicUrl(filePath);
     document.getElementById(targetId).value = publicUrl;
     status.innerText = "✅ アップロード完了";
     status.className = "text-[10px] text-green-600 font-bold";
   } catch (error) {
-    console.error("Upload error:", error);
-    status.innerText = "❌ アップロード失敗: " + error.message;
+    console.error("画像アップロードエラー:", error);
+    status.innerText = `❌ アップロード失敗: ${error.message}`;
     status.className = "text-[10px] text-red-600 font-bold";
   }
 }

@@ -1,30 +1,41 @@
 // Supabaseから求人一覧を取得
 async function fetchJobs() {
-  const jobColumns = 'id, title, location, salary, duties, capacity, work_style, work_preferences, start_time, end_time, break_minutes, overtime_details, allowance_details, pay_type, pay_amount, pay_amount_max, pay_condition_details, required_licenses, preferred_licenses, experience_requirement, experience_requirement_details, tags, image_url, owner_id, is_closed, is_hidden, hidden_reason, expires_at, created_at, updated_at';
+  const jobColumns = 'id, title, location, salary, duties, capacity, work_style, work_preferences, start_time, end_time, break_minutes, overtime_details, allowance_details, pay_type, pay_amount, pay_amount_max, pay_condition_details, required_licenses, preferred_licenses, experience_requirement, experience_requirement_details, tags, image_url, image_urls, owner_id, is_closed, is_hidden, hidden_reason, expires_at, created_at, updated_at';
+  const legacyJobColumns = jobColumns.replace(", image_urls", "");
   const pageSize = 1000;
-  const rows = [];
-  let error = null;
-  // Supabaseは1回で最大1000件までなので、件数が増えても欠けないよう分けて取得する
-  for (let from = 0; ; from += pageSize) {
-    const result = await supabaseClient
-      .from('published_jobs')
-      .select(jobColumns)
-      .order('id', { ascending: false })
-      .range(from, from + pageSize - 1);
-    if (result.error) {
-      error = result.error;
-      break;
+  const loadPages = async columns => {
+    const rows = [];
+    for (let from = 0; ; from += pageSize) {
+      const result = await supabaseClient
+        .from('published_jobs')
+        .select(columns)
+        .order('id', { ascending: false })
+        .range(from, from + pageSize - 1);
+      if (result.error) return { rows, error: result.error };
+      rows.push(...(result.data || []));
+      if ((result.data || []).length < pageSize) break;
     }
-    rows.push(...(result.data || []));
-    if ((result.data || []).length < pageSize) break;
+    return { rows, error: null };
+  };
+  let result = await loadPages(jobColumns);
+  const missingImageUrlsColumn = result.error &&
+    ["42703", "PGRST204"].includes(result.error.code) &&
+    result.error.message.includes("image_urls");
+  if (missingImageUrlsColumn) {
+    jobImagesSchemaReady = false;
+    result = await loadPages(legacyJobColumns);
+  } else if (!result.error) {
+    jobImagesSchemaReady = true;
   }
-  const data = rows;
 
-  if (error) {
-    console.error("データ取得エラー:", error);
+  if (result.error) {
+    console.error("データ取得エラー:", result.error);
     return;
   }
-  cachedJobs = data || [];
+  cachedJobs = result.rows.map(job => ({
+    ...job,
+    image_urls: Array.isArray(job.image_urls) ? job.image_urls : job.image_url ? [job.image_url] : []
+  }));
   renderJobList();
   renderEmployerDashboard();
   renderAccountDashboard();
@@ -117,6 +128,25 @@ async function publishJob() {
     return;
   }
 
+  if (!jobImagesSchemaReady && pendingJobImageFiles.length) {
+    alert("写真を登録するには、README記載の写真用SQLをSupabaseで実行してください。");
+    return;
+  }
+
+  let uploadedImages;
+  try {
+    uploadedImages = jobImagesSchemaReady
+      ? await uploadPendingJobImages()
+      : { urls: [], paths: [] };
+  } catch (error) {
+    alert(`写真をアップロードできませんでした: ${error.message}`);
+    return;
+  }
+  const oldImages = editingJobId === null
+    ? []
+    : getJobImages(cachedJobs.find(job => String(job.id) === String(editingJobId)) || {});
+  const imageUrls = [...retainedJobImageUrls, ...uploadedImages.urls];
+
   const jobData = {
     title, location, salary, duties, capacity,
     work_style: workPreferences.some(value => ["employment:spot", "employment:short_term"].includes(value)) ? "short" : "regular",
@@ -136,25 +166,32 @@ async function publishJob() {
     experience_requirement: experienceRequirement,
     experience_requirement_details: experienceRequirementDetails,
     tags: getNormalizedJobTags(checkedTags),
-    image_url: document.getElementById("jobImageUrl").value.trim() || null,
+    image_url: imageUrls[0] || null,
+    ...(jobImagesSchemaReady && { image_urls: imageUrls }),
     ...(durationDays !== null && { expires_at: getJobExpiryDateFromDays(durationDays) }),
     ...(!editingJobId && { owner_id: currentUser.id })
   };
 
   const query = supabaseClient.from('published_jobs');
-  const { error } = editingJobId
-    ? await query.update(jobData).eq('id', editingJobId)
-    : await query.insert([jobData]);
+  const result = editingJobId
+    ? await query.update(jobData).eq('id', editingJobId).eq('owner_id', currentUser.id).select("id").maybeSingle()
+    : await query.insert([jobData]).select("id").single();
 
-  if (error) {
-    alert(`${editingJobId ? "更新" : "投稿"}に失敗しました: ${error.message}`);
+  if (result.error || !result.data) {
+    const cleanupError = uploadedImages.paths.length
+      ? (await supabaseClient.storage.from("job-media").remove(uploadedImages.paths)).error
+      : null;
+    if (cleanupError) console.error("保存に失敗した求人写真の後片付けに失敗しました:", cleanupError);
+    alert(`${editingJobId ? "更新" : "投稿"}に失敗しました: ${result.error?.message || "対象の求人を更新できませんでした。"}`);
     return;
   }
 
   const wasEditing = editingJobId !== null;
+  const removedImages = oldImages.filter(url => !imageUrls.includes(url));
+  const cleanupFailures = await deleteUnreferencedJobImages(removedImages, wasEditing ? editingJobId : null);
   cancelJobEdit();
 
-  alert(wasEditing ? "求人情報を更新しました！" : "クラウド上に求人を掲載しました！");
+  alert(`${wasEditing ? "求人情報を更新しました！" : "クラウド上に求人を掲載しました！"}${cleanupFailures.length ? "\n一部の不要な写真を整理できませんでした。時間をおいて再度お試しください。" : ""}`);
   if (!wasEditing) {
     confetti({
       particleCount: 150,
@@ -177,7 +214,7 @@ function editJob(id) {
   editingJobId = id;
   document.getElementById("jobTitle").value = job.title || "";
   setCheckedValues("jobWorkPreference", job.work_preferences);
-  document.getElementById("jobImageUrl").value = job.image_url || "";
+  setJobImagesForEdit(job);
 
   setLocationPreferences(
     job.location || "",
@@ -250,7 +287,7 @@ function cancelJobEdit() {
   document.getElementById("cancelEditButton").classList.add("hidden");
   document.getElementById("jobTitle").value = "";
   setCheckedValues("jobWorkPreference", []);
-  document.getElementById("jobImageUrl").value = "";
+  resetJobImages();
 
   setLocationPreferences(
     "",
@@ -372,6 +409,10 @@ async function deleteJob(id) {
     return;
   }
 
+  const cleanupFailures = await deleteUnreferencedJobImages(getJobImages(job), id);
+  if (cleanupFailures.length) {
+    alert("求人は削除しましたが、一部の写真を整理できませんでした。");
+  }
   fetchJobs();
   closeModal();
 }
