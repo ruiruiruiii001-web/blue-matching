@@ -8,6 +8,7 @@ let displayLimitSeekers = 10;
 function updateAccountSearchSurface() {
   const isEmployerTab = activeTab === "employer";
   const canSearchSeekers = isEmployerTab && Boolean(currentUser) && accountType === "employer";
+  const mainLayout = document.querySelector("main");
   const jobSearchPanel = document.getElementById("jobSearchPanel");
   const seekerSearchPanel = document.getElementById("employerSeekerSearch");
   const jobList = document.getElementById("jobList");
@@ -16,6 +17,11 @@ function updateAccountSearchSurface() {
   const jobListDescription = document.getElementById("jobListDescription");
   const jobTrustNotice = document.getElementById("jobTrustNotice");
   if (!jobSearchPanel || !seekerSearchPanel || !jobList || !jobCount || !jobListTitle) return;
+
+  mainLayout?.classList.toggle("md:grid-cols-1", canSearchSeekers);
+  mainLayout?.classList.toggle("md:grid-cols-2", !canSearchSeekers);
+  document.getElementById("jobListSection")?.classList.toggle("md:col-span-1", canSearchSeekers);
+  document.getElementById("jobListSection")?.classList.toggle("md:col-span-2", !canSearchSeekers);
 
   jobSearchPanel.classList.toggle("hidden", isEmployerTab);
   seekerSearchPanel.classList.toggle("hidden", !canSearchSeekers);
