@@ -94,6 +94,7 @@ function renderApplicationConversation(application) {
   );
   const otherParticipant = accountType === "employer" ? "求職者" : "企業";
   return `
+    ${application.status === "reviewed" ? `<div data-interview-box data-application-id="${escapeHtml(String(application.id))}"></div>` : ""}
     <section data-application-thread="${escapeHtml(String(application.id))}" class="mt-5 rounded-xl border border-blue-100 bg-blue-50/50 p-4">
       <h5 class="mb-3 text-sm font-bold text-gray-800">メッセージ</h5>
       <div class="space-y-2">
