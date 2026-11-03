@@ -173,9 +173,9 @@
       <section id="employerDashboard" class="hidden scroll-mt-20 space-y-4">
         <p id="employerDashboardStatus" role="status" aria-live="polite" class="hidden text-sm text-red-600"></p>
         <nav id="employerDashboardNavigation" role="tablist" aria-label="企業マイページの表示切替" class="flex shrink-0 gap-2 overflow-x-auto py-2">
-          <button type="button" role="tab" aria-selected="true" aria-controls="employerDashboardView-jobs" data-employer-dashboard-view="jobs" onclick="showEmployerDashboardView('jobs')" class="employer-dashboard-menu-button h-11 shrink-0 rounded-lg bg-blue-600 px-3 text-sm font-bold text-white">求人管理</button>
-          <button type="button" role="tab" aria-selected="false" aria-controls="employerDashboardView-messages" data-employer-dashboard-view="messages" onclick="showEmployerDashboardView('messages')" class="employer-dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 text-sm font-bold text-gray-700">応募・メッセージ <span id="employerApplicationCount"></span></button>
-          <button type="button" role="tab" aria-selected="false" aria-controls="employerDashboardView-profile" data-employer-dashboard-view="profile" onclick="showEmployerDashboardView('profile')" class="employer-dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 text-sm font-bold text-gray-700">企業プロフィール</button>
+          <button type="button" role="tab" aria-selected="true" aria-controls="employerDashboardView-jobs" data-employer-dashboard-view="jobs" onclick="showEmployerDashboardView('jobs')" class="employer-dashboard-menu-button h-11 shrink-0 rounded-lg bg-blue-600 px-3 text-sm font-bold text-white">📋 求人管理</button>
+          <button type="button" role="tab" aria-selected="false" aria-controls="employerDashboardView-messages" data-employer-dashboard-view="messages" onclick="showEmployerDashboardView('messages')" class="employer-dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 text-sm font-bold text-gray-700">💬 応募・メッセージ <span id="employerApplicationCount"></span></button>
+          <button type="button" role="tab" aria-selected="false" aria-controls="employerDashboardView-profile" data-employer-dashboard-view="profile" onclick="showEmployerDashboardView('profile')" class="employer-dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 text-sm font-bold text-gray-700">🏢 企業プロフィール</button>
         </nav>
 
         <section id="employerDashboardView-job-editor" class="hidden space-y-3">
@@ -471,10 +471,10 @@
       <div id="seekerDashboard" class="hidden scroll-mt-20 space-y-4">
         <p id="accountDashboardStatus" role="status" aria-live="polite" class="hidden text-sm text-red-600"></p>
         <nav id="dashboardNavigation" role="tablist" aria-label="マイページの表示切替" class="flex shrink-0 gap-2 overflow-x-auto py-2">
-          <button type="button" role="tab" aria-selected="true" aria-controls="dashboardView-profile" data-dashboard-view="profile" onclick="showDashboardView('profile')" class="dashboard-menu-button h-11 shrink-0 rounded-lg bg-blue-600 px-3 font-bold text-sm text-white">プロフィール</button>
-          <button type="button" role="tab" aria-selected="false" aria-controls="dashboardView-favorites" data-dashboard-view="favorites" onclick="showDashboardView('favorites')" class="dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 font-bold text-sm text-gray-700">お気に入り</button>
-                              <button type="button" role="tab" aria-selected="false" aria-controls="dashboardView-applications" data-dashboard-view="applications" onclick="showDashboardView('applications')" class="dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 font-bold text-sm text-gray-700">応募履歴</button>
-          <button id="seekerNotificationsTab" type="button" role="tab" aria-selected="false" aria-controls="dashboardView-notifications" data-dashboard-view="notifications" onclick="showDashboardView('notifications')" class="dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 font-bold text-sm text-gray-700">連絡・通知</button>
+          <button type="button" role="tab" aria-selected="true" aria-controls="dashboardView-profile" data-dashboard-view="profile" onclick="showDashboardView('profile')" class="dashboard-menu-button h-11 shrink-0 rounded-lg bg-blue-600 px-3 font-bold text-sm text-white">👤 プロフィール</button>
+          <button type="button" role="tab" aria-selected="false" aria-controls="dashboardView-favorites" data-dashboard-view="favorites" onclick="showDashboardView('favorites')" class="dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 font-bold text-sm text-gray-700">⭐ お気に入り</button>
+                              <button type="button" role="tab" aria-selected="false" aria-controls="dashboardView-applications" data-dashboard-view="applications" onclick="showDashboardView('applications')" class="dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 font-bold text-sm text-gray-700">📨 応募履歴</button>
+          <button id="seekerNotificationsTab" type="button" role="tab" aria-selected="false" aria-controls="dashboardView-notifications" data-dashboard-view="notifications" onclick="showDashboardView('notifications')" class="dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 font-bold text-sm text-gray-700">🔔 連絡・通知</button>
 
 
         </nav>
@@ -713,7 +713,7 @@
           <p class="mb-4 text-xs leading-relaxed text-gray-600">職種・勤務地・給与条件の一致度を目安として並べます。経験・資格は候補者情報として表示し、順位の判定には使いません。</p>
           <label for="seekerSearchKeyword" class="mb-2 block text-sm font-bold text-gray-700">キーワード</label>
           <input type="search" id="seekerSearchKeyword" oninput="renderEmployerSeekerSearch(true)" placeholder="希望職種・地域・資格・経験で検索" class="mb-4 w-full rounded-xl border border-blue-300 bg-white px-4 py-3 text-base shadow-sm outline-none focus:ring-2 focus:ring-blue-500">
-          <label for="seekerSearchSort" class="mb-2 block text-sm font-bold text-gray-700">並び替え</label>
+          <label for="seekerSearchSort" class="mb-2 block text-sm font-bold text-gray-700">↕️ 並び替え</label>
           <select id="seekerSearchSort" onchange="renderEmployerSeekerSearch(true)" class="mb-4 w-full rounded-xl border border-blue-300 bg-white px-4 py-3 text-base shadow-sm outline-none focus:ring-2 focus:ring-blue-500">
             <option value="match">マッチ度が高い順</option>
             <option value="newest">更新が新しい順</option>
@@ -774,7 +774,7 @@
 
         <div class="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
           <label class="text-sm font-bold text-gray-700">
-            <span class="mb-1 block">並び替え</span>
+            <span class="mb-1 block">↕️ 並び替え</span>
             <select id="jobSort" onchange="renderJobList(true)" class="w-full rounded-lg border border-blue-300 bg-white px-3 py-2.5 text-base font-normal shadow-sm focus:ring-2 focus:ring-blue-500 outline-none">
               <option value="recommended">おすすめ順</option>
               <option value="newest" selected>新着順</option>
@@ -796,19 +796,19 @@
         <div class="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <label class="flex min-h-11 items-center gap-2 rounded-lg border border-blue-100 bg-white px-3 text-sm text-gray-700">
             <input type="checkbox" id="openJobsOnly" onchange="renderJobList(true)" class="h-4 w-4 rounded text-blue-600 focus:ring-blue-500">
-            募集中のみ表示
+            🟢 募集中のみ表示
           </label>
           <label class="flex min-h-11 items-center gap-2 rounded-lg border border-blue-100 bg-white px-3 text-sm text-gray-700">
             <input type="checkbox" id="favoritesOnly" onchange="renderJobList(true)" class="h-4 w-4 rounded text-blue-600 focus:ring-blue-500">
-            お気に入りのみ表示
+            ⭐ お気に入りのみ表示
           </label>
           <label class="flex min-h-11 items-center gap-2 rounded-lg border border-blue-100 bg-white px-3 text-sm text-gray-700">
             <input type="checkbox" id="followedOnly" onchange="renderJobList(true)" class="h-4 w-4 rounded text-blue-600 focus:ring-blue-500">
-            フォロー中の企業のみ表示
+            🏢 フォロー中の企業のみ表示
           </label>
           <label class="flex min-h-11 items-center gap-2 rounded-lg border border-blue-100 bg-white px-3 text-sm text-gray-700">
             <input type="checkbox" id="hideAppliedJobs" onchange="renderJobList(true)" class="h-4 w-4 rounded text-blue-600 focus:ring-blue-500">
-            応募済みを隠す
+            🙈 応募済みを隠す
           </label>
         </div>
 

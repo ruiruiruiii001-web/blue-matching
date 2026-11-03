@@ -468,7 +468,7 @@ function getJobExpiryDateFromDays(days) {
 }
 
 function formatApplicationStatus(status) {
-  return { pending: "未確認", reviewed: "確認済み", dismissed: "対応不要" }[status] || "未確認";
+  return { pending: "⏳ 未確認", reviewed: "✅ 確認済み", dismissed: "➖ 対応不要" }[status] || "⏳ 未確認";
 }
 
 function formatApplicationStatusClass(status) {

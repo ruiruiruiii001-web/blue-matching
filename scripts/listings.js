@@ -138,7 +138,7 @@ function renderJobList(resetLimit = false) {
     const primaryImage = getJobImages(job)[0];
     const matchSummary = matchDetails
       ? `<div class="mt-4 rounded-lg ${matchDetails.score >= 11 ? "bg-emerald-50 text-emerald-900" : matchDetails.score >= 6 ? "bg-amber-50 text-amber-900" : "bg-gray-50 text-gray-700"} px-3 py-2 text-xs">
-          <span class="font-bold">希望条件との一致 ${matchDetails.score}/14点</span>
+          <span class="font-bold">🎯 希望条件との一致 ${matchDetails.score}/14点</span>
           <span class="ml-1">${matchDetails.reasons.length
             ? `（${escapeHtml(matchDetails.reasons.join("・"))}）`
             : matchDetails.compared
@@ -152,11 +152,11 @@ function renderJobList(resetLimit = false) {
       <div class="flex items-start justify-between gap-3">
         <div class="min-w-0 flex-1">
                         <div class="mb-3 flex flex-wrap gap-2">
-            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-wider uppercase ${isJobClosed(job) ? 'bg-gray-100 text-gray-500' : 'bg-emerald-50 text-emerald-700'}">${isJobClosed(job) ? '募集終了' : '募集中'}</span>
+            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-wider uppercase ${isJobClosed(job) ? 'bg-gray-100 text-gray-500' : 'bg-emerald-50 text-emerald-700'}">${isJobClosed(job) ? '⛔ 募集終了' : '🟢 募集中'}</span>
             ${job.is_hidden ? '<span class="inline-flex items-center rounded-full bg-red-50 px-2.5 py-0.5 text-[10px] font-bold text-red-700">運営により非表示中</span>' : ''}
             ${renderAppliedBadge(job.id)}
 
-            ${job.capacity <= 0 ? '' : `<span class="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-[10px] font-bold text-blue-700 uppercase">募集人数 ${formatJobCapacity(job.capacity)}</span>`}
+            ${job.capacity <= 0 ? '' : `<span class="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-[10px] font-bold text-blue-700 uppercase">👥 募集人数 ${formatJobCapacity(job.capacity)}</span>`}
           </div>
                                       <h3 class="break-words text-lg font-extrabold leading-tight text-gray-900 sm:text-xl group-hover:text-blue-700 transition-colors">${escapeHtml(job.title)}</h3>
           ${renderEmployerProfileSummary(job.owner_id)}
@@ -224,9 +224,9 @@ function getSeekerApplication(jobId) {
 function renderAppliedBadge(jobId) {
   const application = getSeekerApplication(jobId);
   if (!application) return "";
-  const label = application.status === "reviewed" ? "応募済み・確認済み"
-    : application.status === "dismissed" ? "応募済み・見送り"
-    : "応募済み";
+  const label = application.status === "reviewed" ? "✅ 応募済み・確認済み"
+    : application.status === "dismissed" ? "➖ 応募済み・見送り"
+    : "📨 応募済み";
   return `<span class="inline-flex items-center rounded-full bg-sky-100 px-2.5 py-0.5 text-[10px] font-bold text-sky-800">${label}</span>`;
 }
 

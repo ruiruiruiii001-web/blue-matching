@@ -77,8 +77,8 @@ function renderAccountDashboard() {
 
   const unreadNotifications = getVisibleNotifications().filter(notification => !notification.read_at).length;
   document.getElementById("seekerNotificationsTab").innerText = unreadNotifications
-    ? `通知 (${unreadNotifications})`
-    : "連絡・通知";
+    ? `🔔 通知 (${unreadNotifications})`
+    : "🔔 連絡・通知";
         renderNotifications("seekerDashboardNotifications", "seekerNotificationsStatus");
   renderBlocks();
   renderLoginNotificationBanner();
