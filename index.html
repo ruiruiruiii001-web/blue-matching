@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="cloudflare-turnstile-sitekey" content="0x4AAAAAAFmKntPFXSdCMP-V">
   <title>現場の仕事探し・人探しマッチング</title>
-  <meta name="description" content="建設・解体・設備などの現場求人を、職人と親方がサイト内で直接やり取りできるマッチングサイト。勤務地・給与・資格で探して応募できます。">
+  <meta name="description" content="建設・解体・設備などの現場のお仕事を、職人と親方がサイト内で直接やり取りできるマッチングサイト。勤務地・給与・資格で探して応募できます。">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="現場の仕事探し・人探しマッチング">
   <meta property="og:title" content="現場の仕事探し・人探しマッチング">
-  <meta property="og:description" content="建設・解体・設備などの現場求人を、勤務地・給与・資格で探して応募できます。">
+  <meta property="og:description" content="建設・解体・設備などの現場のお仕事を、勤務地・給与・資格で探して応募できます。">
   <meta property="og:url" content="https://blue-matching-pi.vercel.app/">
   <meta property="og:image" content="https://blue-matching-pi.vercel.app/icons/icon-512.png">
   <meta name="twitter:card" content="summary">
@@ -100,10 +100,10 @@
   <div id="accountModeTabs" class="hidden max-w-5xl mx-auto px-4 mt-4">
     <div class="flex border-b border-gray-300 bg-white rounded-t-lg shadow-sm">
       <button id="tabSeekerBtn" onclick="switchTab('seeker')" class="flex-1 py-3.5 font-bold text-sm md:text-base border-b-2 border-blue-600 text-blue-600 focus:outline-none transition">
-        👷 職人・求職者向け（即戦力カード）
+        👷 職人・お仕事探しの方向け（即戦力カード）
       </button>
       <button id="tabEmployerBtn" onclick="switchTab('employer')" class="flex-1 py-3.5 font-bold text-sm md:text-base border-b-2 border-transparent text-gray-500 hover:text-blue-600 focus:outline-none transition">
-        🏢 親方・企業向け（求人投稿）
+        🏢 親方・企業向け（お仕事投稿）
       </button>
     </div>
   </div>
@@ -111,12 +111,12 @@
   <section id="accountTypeSetup" class="hidden max-w-5xl mx-auto px-4 mt-4">
     <div class="rounded-lg border border-blue-200 bg-blue-50 p-4">
       <h2 class="font-bold text-blue-800">アカウントの種類を選択</h2>
-      <p class="mt-1 text-sm text-blue-900">求職者は求人への応募、企業・親方は求人投稿や公開プロフィールの閲覧に使います。自分の求人を投稿済みの場合は企業・親方を選択してください。選択後は変更できません。</p>
+      <p class="mt-1 text-sm text-blue-900">お仕事探しの方はお仕事への応募、企業・親方はお仕事の投稿や公開プロフィールの閲覧に使います。自分のお仕事を投稿済みの場合は企業・親方を選択してください。選択後は変更できません。</p>
       <div class="mt-3 flex flex-col gap-2 sm:flex-row sm:items-end">
         <label class="block flex-1 text-sm font-medium">アカウントの種類
           <select id="existingAccountType" class="mt-1 w-full border rounded px-3 py-2.5 text-sm">
             <option value="">選択してください</option>
-            <option value="seeker">求職者</option>
+            <option value="seeker">お仕事探しの方</option>
             <option value="employer">企業・親方</option>
           </select>
         </label>
@@ -127,10 +127,10 @@
 
   <main class="max-w-5xl mx-auto px-4 py-6 grid grid-cols-1 md:grid-cols-2 gap-8">
     
-    <!-- 左側①：親方・企業向け 求人作成 -->
+    <!-- 左側①：親方・企業向け お仕事作成 -->
     <section id="employerSection" class="space-y-6 hidden">
       <div id="employerAuthPanel" class="bg-white p-6 rounded-lg shadow-md">
-        <p class="text-sm text-gray-600 mb-4">求職者プロフィールの保存・応募履歴・求人の投稿にはログインが必要です。</p>
+        <p class="text-sm text-gray-600 mb-4">プロフィールの保存・応募履歴・お仕事の投稿にはログインが必要です。</p>
         <div id="employerLoggedOut" class="space-y-3">
           <div>
             <label for="employerEmail" class="block text-sm font-medium mb-1">メールアドレス</label>
@@ -155,7 +155,7 @@
           <p class="text-sm text-gray-700">ログイン中: <span id="employerAccountEmail" class="font-medium"></span></p>
           <button onclick="signOutEmployer()" class="text-sm text-blue-600 hover:underline">ログアウト</button>
         </div>
-        <p id="accountTypeMismatch" class="hidden mt-3 rounded border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">この画面の求人管理機能は企業・親方アカウント専用です。</p>
+        <p id="accountTypeMismatch" class="hidden mt-3 rounded border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">この画面のお仕事管理機能は企業・親方アカウント専用です。</p>
         <div id="passwordRecoveryPanel" class="hidden mt-4 border-t pt-4 space-y-3">
           <h3 class="font-bold text-blue-700">新しいパスワードを設定</h3>
           <p class="text-xs text-gray-600">再設定メールのリンクから開いた画面です。8文字以上で入力してください。</p>
@@ -173,23 +173,23 @@
       <section id="employerDashboard" class="hidden scroll-mt-20 space-y-4">
         <p id="employerDashboardStatus" role="status" aria-live="polite" class="hidden text-sm text-red-600"></p>
         <nav id="employerDashboardNavigation" role="tablist" aria-label="企業マイページの表示切替" class="flex shrink-0 gap-2 overflow-x-auto py-2">
-          <button type="button" role="tab" aria-selected="true" aria-controls="employerDashboardView-jobs" data-employer-dashboard-view="jobs" onclick="showEmployerDashboardView('jobs')" class="employer-dashboard-menu-button h-11 shrink-0 rounded-lg bg-blue-600 px-3 text-sm font-bold text-white"><span data-line-icon="clipboard"></span>求人管理</button>
+          <button type="button" role="tab" aria-selected="true" aria-controls="employerDashboardView-jobs" data-employer-dashboard-view="jobs" onclick="showEmployerDashboardView('jobs')" class="employer-dashboard-menu-button h-11 shrink-0 rounded-lg bg-blue-600 px-3 text-sm font-bold text-white"><span data-line-icon="clipboard"></span>お仕事管理</button>
           <button type="button" role="tab" aria-selected="false" aria-controls="employerDashboardView-messages" data-employer-dashboard-view="messages" onclick="showEmployerDashboardView('messages')" class="employer-dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 text-sm font-bold text-gray-700"><span data-line-icon="chat"></span>応募・メッセージ <span id="employerApplicationCount"></span></button>
           <button type="button" role="tab" aria-selected="false" aria-controls="employerDashboardView-profile" data-employer-dashboard-view="profile" onclick="showEmployerDashboardView('profile')" class="employer-dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 text-sm font-bold text-gray-700"><span data-line-icon="building"></span>企業プロフィール</button>
         </nav>
 
         <section id="employerDashboardView-job-editor" class="hidden space-y-3">
           <div class="flex items-center gap-3">
-            <button type="button" onclick="cancelJobEdit()" class="min-h-11 shrink-0 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-bold text-gray-700 hover:bg-gray-50">← 求人管理</button>
-            <p class="text-sm font-bold text-gray-600">求人の新規投稿・編集</p>
+            <button type="button" onclick="cancelJobEdit()" class="min-h-11 shrink-0 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-bold text-gray-700 hover:bg-gray-50">← お仕事管理</button>
+            <p class="text-sm font-bold text-gray-600">お仕事の新規投稿・編集</p>
           </div>
           <div id="employerDashboardJobFormSlot"></div>
         </section>
 
         <section id="employerDashboardView-jobs" class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
           <div class="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 pb-3">
-            <h3 class="text-lg font-bold text-blue-600">自分の掲載求人</h3>
-            <button type="button" onclick="openEmployerJobForm()" class="min-h-11 rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white hover:bg-blue-700">＋ 求人を新規投稿</button>
+            <h3 class="text-lg font-bold text-blue-600">自分の掲載お仕事</h3>
+            <button type="button" onclick="openEmployerJobForm()" class="min-h-11 rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white hover:bg-blue-700">＋ お仕事を新規投稿</button>
           </div>
           <div id="employerDashboardJobs" class="space-y-3 text-sm"></div>
         </section>
@@ -209,7 +209,7 @@
 
         <section id="employerDashboardView-profile" class="hidden rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
           <h3 class="mb-2 text-lg font-bold text-blue-600">企業プロフィール</h3>
-          <p class="mb-4 text-sm leading-6 text-gray-600">企業名・屋号、対応地域、紹介文を求人一覧と求人詳細に公開します。電話番号・メールアドレスなどの連絡先や、個人情報を書かないでください。掲載内容はご自身で正確さを確認してください。</p>
+          <p class="mb-4 text-sm leading-6 text-gray-600">企業名・屋号、対応地域、紹介文をお仕事一覧とお仕事詳細に公開します。電話番号・メールアドレスなどの連絡先や、個人情報を書かないでください。掲載内容はご自身で正確さを確認してください。</p>
           <form onsubmit="saveEmployerProfile(event)" class="space-y-4">
             <label class="block text-sm font-bold text-gray-700">企業名・屋号 <span class="text-red-600">*</span>
               <input id="employerProfileName" maxlength="100" required class="mt-1 min-h-11 w-full rounded-lg border border-gray-200 px-3 py-2 text-base" placeholder="例: 株式会社〇〇 / 〇〇工務店">
@@ -227,7 +227,7 @@
       </section>
 
       <div id="employerJobForm" class="hidden rounded-xl border border-blue-100 bg-white p-4 shadow-sm sm:p-5">
-        <h2 id="jobFormHeading" class="mb-4 border-b border-gray-100 pb-3 text-lg font-bold text-blue-600">現場求人のクラウド投稿</h2>
+        <h2 id="jobFormHeading" class="mb-4 border-b border-gray-100 pb-3 text-lg font-bold text-blue-600">現場のお仕事のクラウド投稿</h2>
         <p class="mb-4 rounded-lg border border-blue-100 bg-blue-50 p-3 text-xs leading-relaxed text-blue-900">赤い「*」は必須項目です。詳細情報は入力できる範囲で構いません。応募者との連絡は「応募・メッセージ」から行えます。</p>
         <div class="space-y-4">
           <div class="flex items-center gap-2 border-b border-blue-100 pb-2"><span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-black text-white">1</span><h3 class="text-base font-black text-gray-900">基本情報</h3><span class="rounded-full bg-red-50 px-2 py-0.5 text-xs font-bold text-red-700">必須あり</span></div>
@@ -248,7 +248,7 @@
             <div class="space-y-3 px-4 pb-4">
               <p class="text-xs leading-5 text-gray-600">地方を開いて都道府県を選び、市区町村を入力してください。複数現場は複数の都道府県・市区町村を登録できます。番地・建物名など、個人宅を特定できる情報は入力しないでください。</p>
               <div id="jobLocationPrefectureOptions" class="space-y-2"></div>
-              <p id="jobLocationLegacyNotice" class="hidden rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs leading-relaxed text-amber-900">この求人の勤務地は、都道府県を選ぶ前の古い形式で保存されています。都道府県で探している求職者に見つけてもらいやすくするため、上で都道府県を選び直して保存してください（入力済みの内容は「その他の勤務地」に残っています）。</p>
+              <p id="jobLocationLegacyNotice" class="hidden rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs leading-relaxed text-amber-900">このお仕事の勤務地は、都道府県を選ぶ前の古い形式で保存されています。都道府県で探しているお仕事探しの方に見つけてもらいやすくするため、上で都道府県を選び直して保存してください（入力済みの内容は「その他の勤務地」に残っています）。</p>
               <label class="block text-sm">その他の勤務地・現場の補足（任意）
                 <input type="text" id="jobLocation" maxlength="500" placeholder="例: 東京都内、関東一円" class="mt-1 h-11 w-full rounded border px-3 py-2.5 text-sm font-normal focus:ring-2 focus:ring-blue-500 outline-none">
               </label>
@@ -281,7 +281,7 @@
               <option value="60">60日間</option>
               <option value="90">90日間</option>
             </select>
-            <p class="mt-1 text-xs text-gray-500">掲載期限を過ぎると、求人は自動的に一覧から非表示になり応募も受け付けなくなります。期限の3日前からマイページで警告が表示され、ワンタップで延長できます。編集時に期間を選ぶと、今日からの日数で期限が更新されます。</p>
+            <p class="mt-1 text-xs text-gray-500">掲載期限を過ぎると、お仕事は自動的に一覧から非表示になり応募も受け付けなくなります。期限の3日前からマイページで警告が表示され、ワンタップで延長できます。編集時に期間を選ぶと、今日からの日数で期限が更新されます。</p>
             <p id="jobDurationNote" class="mt-1 text-xs font-bold text-gray-500"></p>
           </div>
 
@@ -296,7 +296,7 @@
               </span>
             </summary>
             <div class="px-4 pb-4">
-              <p class="mb-3 text-xs text-gray-600">勤務形態・週の勤務日数・勤務時間帯を設定できます。選択した条件は求職者の希望条件とのおすすめ表示に使われます。</p>
+              <p class="mb-3 text-xs text-gray-600">勤務形態・週の勤務日数・勤務時間帯を設定できます。選択した条件は希望条件に合うおすすめ表示に使われます。</p>
               <div id="jobWorkPreferences" class="space-y-4"></div>
             </div>
           </details>
@@ -389,7 +389,7 @@
           </fieldset>
 
           <div class="mt-2 flex items-center gap-2 border-b border-blue-100 pb-2 pt-4"><span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-black text-white">4</span><h3 class="text-base font-black text-gray-900">写真・アピール</h3><span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-bold text-gray-700">任意</span></div>
-          <p class="rounded-lg border border-blue-100 bg-blue-50 p-3 text-xs leading-relaxed text-blue-900">求人に電話番号・LINE IDは登録しません。応募者との連絡は「応募・メッセージ」から行えます。</p>
+          <p class="rounded-lg border border-blue-100 bg-blue-50 p-3 text-xs leading-relaxed text-blue-900">お仕事に電話番号・LINE IDは登録しません。応募者との連絡は「応募・メッセージ」から行えます。</p>
 
                   <div>
                     <label class="block text-sm font-medium mb-1">現場写真 <span class="text-xs text-gray-400">(任意)</span></label>
@@ -452,7 +452,7 @@
           </div>
 
           <button id="jobSubmitButton" onclick="publishJob()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-lg transition shadow text-base">
-            🔥 クラウドに求人を今すぐ掲載する
+            🔥 クラウドにお仕事を今すぐ掲載する
           </button>
           <button id="cancelEditButton" onclick="cancelJobEdit()" class="w-full border border-gray-300 text-gray-700 font-bold py-2.5 rounded-lg hover:bg-gray-50 hidden">
             編集をキャンセル
@@ -527,7 +527,7 @@
           <label class="mt-2 block text-sm">その他・具体的な職種
             <input type="text" id="seekerJobType" maxlength="100" placeholder="例: 足場、解体、塗装" class="mt-1 w-full rounded border px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
           </label>
-          <p class="text-xs text-gray-500 mt-1">選んだ職種と求人の職種名・仕事内容の一致をおすすめ順に反映します。</p>
+          <p class="text-xs text-gray-500 mt-1">選んだ職種とお仕事の職種名・仕事内容の一致をおすすめ順に反映します。</p>
         </div>
 
         <details id="seekerLocationPreferences" data-selection-name="seekerLocationPrefecture" data-location-input-name="seekerLocationPrefecture" data-location-other-input="seekerLocation" data-location-count-label="希望エリア" class="rounded-xl border border-blue-100 bg-blue-50">
@@ -540,7 +540,7 @@
             </span>
           </summary>
           <div class="space-y-3 px-4 pb-4">
-            <p class="text-xs leading-5 text-gray-600">地方を開いて都道府県を選び、必要なら市区町村を入力してください。希望地のいずれかに合う求人をおすすめ順で優先します。番地・建物名は入力しないでください。</p>
+            <p class="text-xs leading-5 text-gray-600">地方を開いて都道府県を選び、必要なら市区町村を入力してください。希望地のいずれかに合うお仕事をおすすめ順で優先します。番地・建物名は入力しないでください。</p>
             <div id="seekerLocationPrefectureOptions" class="space-y-2"></div>
             <label class="block text-sm">その他の希望地域（任意）
               <input type="text" id="seekerLocation" maxlength="500" placeholder="例: 横浜市周辺、東京都内" class="mt-1 h-11 w-full rounded border px-3 py-2.5 text-sm font-normal focus:ring-2 focus:ring-blue-500 outline-none">
@@ -565,7 +565,7 @@
               <input type="number" id="seekerMinimumSalary" min="1" step="1" placeholder="例: 15000" class="w-full border rounded px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
             </label>
           </div>
-          <p class="text-xs text-gray-600">保存すると希望条件が求人検索に反映されます。最低額を指定する場合は給与区分も選択してください。</p>
+          <p class="text-xs text-gray-600">保存すると希望条件がお仕事検索に反映されます。最低額を指定する場合は給与区分も選択してください。</p>
         </div>
 
         <!-- 資格チェックボックス -->
@@ -628,7 +628,7 @@
             </span>
           </summary>
           <div class="px-4 pb-4">
-            <p class="mb-3 text-xs text-gray-600">勤務形態・週の勤務日数・勤務時間帯を選ぶと、求人のおすすめ順に反映されます。</p>
+            <p class="mb-3 text-xs text-gray-600">勤務形態・週の勤務日数・勤務時間帯を選ぶと、お仕事のおすすめ順に反映されます。</p>
             <div id="seekerWorkPreferences" class="space-y-4"></div>
           </div>
         </details>
@@ -652,16 +652,16 @@
       </div>
       <details class="mt-6 rounded-xl border border-gray-200 bg-gray-50 p-4">
         <summary class="cursor-pointer text-sm font-bold text-gray-800">ブロックしたユーザー</summary>
-        <p class="mt-2 mb-3 text-xs text-gray-600">ブロックしたユーザーの求人やプロフィールは表示されません。必要な場合はここから解除できます。</p>
+        <p class="mt-2 mb-3 text-xs text-gray-600">ブロックしたユーザーのお仕事やプロフィールは表示されません。必要な場合はここから解除できます。</p>
         <div id="dashboardBlocks" class="space-y-2 text-sm"></div>
       </details>
             </section>
 
             <section id="dashboardView-favorites" class="hidden rounded border p-3">
-              <h3 class="font-bold text-sm mb-2">お気に入り求人</h3>
+              <h3 class="font-bold text-sm mb-2">お気に入りお仕事</h3>
               <div id="dashboardFavorites" class="space-y-2 text-sm"></div>
-              <h3 class="font-bold text-sm mt-6 mb-2">フォロー中の企業の求人</h3>
-              <p class="mb-2 text-xs text-gray-600">フォローした企業が掲載中の求人を表示します。求人の詳細画面からフォローを解除できます。</p>
+              <h3 class="font-bold text-sm mt-6 mb-2">フォロー中の企業のお仕事</h3>
+              <p class="mb-2 text-xs text-gray-600">フォローした企業が掲載中のお仕事を表示します。お仕事の詳細画面からフォローを解除できます。</p>
               <div id="dashboardFollowedJobs" class="space-y-2 text-sm"></div>
             </section>
                         <section id="dashboardView-applications" class="hidden rounded border p-3">
@@ -682,7 +682,7 @@
       </div>
     </section>
 
-        <!-- 右側：掲載中の現場求人一覧 -->
+        <!-- 右側：掲載中の現場のお仕事一覧 -->
     <section id="jobListSection" class="h-fit order-first md:col-span-2">
       <section id="onboardingGuide" aria-label="はじめての方へ" class="mb-6 hidden rounded-2xl border border-blue-200 bg-blue-50 p-4 shadow-sm sm:p-5">
         <div class="flex items-start justify-between gap-3">
@@ -693,22 +693,22 @@
       </section>
       <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-6">
         <div class="flex justify-between items-center gap-3 border-b border-gray-50 pb-3">
-          <h2 id="jobListTitle" class="text-xl font-black text-gray-800">求人一覧</h2>
+          <h2 id="jobListTitle" class="text-xl font-black text-gray-800">お仕事一覧</h2>
           <span id="jobCount" class="text-xs bg-blue-600 text-white px-3 py-1 rounded-full font-bold shadow-sm shadow-blue-100">0件</span>
         </div>
         <p id="jobTrustNotice" class="mt-3 text-[11px] font-medium text-amber-700 flex items-center gap-1.5">
-          <span class="text-base">⚠️</span> 掲載企業の本人確認は行っていません。応募前に求人内容・条件をご確認ください。連絡は応募後にサイト内で行えます。
+          <span class="text-base">⚠️</span> 掲載企業の本人確認は行っていません。応募前にお仕事内容・条件をご確認ください。連絡は応募後にサイト内で行えます。
         </p>
-        <p id="jobListDescription" class="mt-3 text-xs text-gray-500 hidden leading-relaxed">希望職種・勤務地・給与条件の一致度を目安に求人をおすすめ順で表示します。検索条件は以下のパネルから自由に変更できます。</p>
+        <p id="jobListDescription" class="mt-3 text-xs text-gray-500 hidden leading-relaxed">希望職種・勤務地・給与条件の一致度を目安にお仕事をおすすめ順で表示します。検索条件は以下のパネルから自由に変更できます。</p>
       </div>
         <section id="employerSeekerSearch" class="hidden mt-5 mb-8 rounded-2xl border border-blue-200 bg-blue-50 p-4 shadow-sm sm:p-5">
           <div class="mb-4">
-            <h3 class="text-base font-bold text-blue-900">求職者を検索・絞り込み</h3>
-            <p class="mt-1 text-sm leading-relaxed text-blue-800">企業へのプロフィール公開を許可した求職者だけが表示されます。氏名・電話番号・メールアドレスは表示されません。</p>
+            <h3 class="text-base font-bold text-blue-900">お仕事探しの方を検索・絞り込み</h3>
+            <p class="mt-1 text-sm leading-relaxed text-blue-800">企業へのプロフィール公開を許可したお仕事探しの方だけが表示されます。氏名・電話番号・メールアドレスは表示されません。</p>
           </div>
-          <label for="seekerSearchJob" class="mb-2 block text-sm font-bold text-gray-700">マッチさせる自社求人</label>
+          <label for="seekerSearchJob" class="mb-2 block text-sm font-bold text-gray-700">マッチさせる自社お仕事</label>
           <select id="seekerSearchJob" onchange="renderEmployerSeekerSearch(true)" class="mb-2 w-full rounded-xl border border-blue-300 bg-white px-4 py-3 text-base shadow-sm outline-none focus:ring-2 focus:ring-blue-500">
-            <option value="">求人を選ぶとマッチ度順に表示</option>
+            <option value="">お仕事を選ぶとマッチ度順に表示</option>
           </select>
           <p class="mb-4 text-xs leading-relaxed text-gray-600">職種・勤務地・給与条件の一致度を目安として並べます。経験・資格は候補者情報として表示し、順位の判定には使いません。</p>
           <label for="seekerSearchKeyword" class="mb-2 block text-sm font-bold text-gray-700">キーワード</label>
@@ -730,7 +730,7 @@
               </label>
               <fieldset class="text-sm text-gray-700">
                 <legend class="mb-1">保有資格（複数選択可）</legend>
-                <p class="mb-2 text-xs text-gray-500">選んだ資格のいずれかを持つ求職者を表示します。</p>
+                <p class="mb-2 text-xs text-gray-500">選んだ資格のいずれかを持つお仕事探しの方を表示します。</p>
                 <div id="seekerSearchLicenses" class="max-h-36 space-y-1 overflow-y-auto rounded border p-2">
                   <p class="text-xs text-gray-400">公開プロフィールを読み込むと表示されます。</p>
                 </div>
@@ -765,8 +765,8 @@
         </section>
         <div id="jobSearchPanel" role="search" class="mt-5 mb-8 rounded-2xl border border-blue-200 bg-blue-50 p-4 shadow-sm sm:p-5">
         <div class="mb-4">
-          <h3 id="jobSearchTitle" class="text-base font-bold text-blue-900">求人を検索・絞り込み</h3>
-          <p id="jobSearchDescription" class="mt-1 text-sm text-blue-800">キーワードや条件を指定して、希望に合う求人を探せます。</p>
+          <h3 id="jobSearchTitle" class="text-base font-bold text-blue-900">お仕事を検索・絞り込み</h3>
+          <p id="jobSearchDescription" class="mt-1 text-sm text-blue-800">キーワードや条件を指定して、希望に合うお仕事を探せます。</p>
         </div>
 
         <label for="searchKeyword" class="mb-2 block text-sm font-bold text-gray-700">キーワード</label>
@@ -823,9 +823,9 @@
         </label>
         <fieldset class="text-sm text-gray-700">
           <legend class="mb-1">タグ（複数選択可）</legend>
-          <p class="text-xs text-gray-500 mb-2">選んだタグのいずれかを含む求人を表示します。</p>
+          <p class="text-xs text-gray-500 mb-2">選んだタグのいずれかを含むお仕事を表示します。</p>
           <div id="tagFilterOptions" class="max-h-36 overflow-y-auto rounded border p-2 space-y-1">
-            <p class="text-xs text-gray-400">タグは求人の読み込み後に表示されます。</p>
+            <p class="text-xs text-gray-400">タグはお仕事の読み込み後に表示されます。</p>
           </div>
         </fieldset>
                 <label class="text-sm text-gray-700">
@@ -864,7 +864,7 @@
       </div>
 
             <div id="jobList" class="mt-6 space-y-4 pr-0" aria-live="polite">
-        <!-- 求人カード -->
+        <!-- お仕事カード -->
       </div>
     </section>
 
@@ -913,7 +913,7 @@
 
   <div id="jobModal" class="fixed inset-0 z-[70] hidden items-center justify-center bg-black/50 p-4">
     <div class="relative max-h-[90vh] w-full max-w-xl">
-      <button type="button" aria-label="求人詳細を閉じる" onclick="closeModal()" class="absolute right-3 top-3 z-10 flex h-12 w-12 items-center justify-center rounded-full border-2 border-gray-300 bg-white text-2xl font-bold text-gray-700 shadow-md hover:border-red-400 hover:bg-red-50 hover:text-red-700 focus:outline-none focus:ring-4 focus:ring-blue-200">×</button>
+      <button type="button" aria-label="お仕事詳細を閉じる" onclick="closeModal()" class="absolute right-3 top-3 z-10 flex h-12 w-12 items-center justify-center rounded-full border-2 border-gray-300 bg-white text-2xl font-bold text-gray-700 shadow-md hover:border-red-400 hover:bg-red-50 hover:text-red-700 focus:outline-none focus:ring-4 focus:ring-blue-200">×</button>
       <div id="jobModalContent" class="max-h-[90vh] overflow-y-auto rounded-lg bg-white p-6 shadow-xl">
       <div class="border-b pb-4 mb-4 pr-14">
         <div class="mb-2 flex flex-wrap gap-2">
@@ -923,7 +923,7 @@
         <h2 id="modalTitle" class="text-2xl font-bold leading-snug text-gray-900"></h2>
         <div id="modalEmployerProfile"></div>
         <p id="modalJobFreshness" class="mt-2 text-xs text-gray-500"></p>
-        <p class="mt-1 text-xs text-amber-800">掲載企業の本人確認は行っていません。応募前に求人内容・条件をご確認ください。連絡は応募後にサイト内で行えます。</p>
+        <p class="mt-1 text-xs text-amber-800">掲載企業の本人確認は行っていません。応募前にお仕事内容・条件をご確認ください。連絡は応募後にサイト内で行えます。</p>
         <button id="modalFavoriteButton" type="button" onclick="toggleFavorite(selectedJob.id)" class="mt-3 min-h-11 rounded-lg border border-amber-300 px-4 py-2 text-sm font-bold text-amber-800 hover:bg-amber-50"></button>
         <button id="modalFollowButton" type="button" onclick="toggleFollowEmployer(selectedJob.owner_id)" class="mt-3 hidden min-h-11 rounded-lg border border-blue-300 px-4 py-2 text-sm font-bold text-blue-800 hover:bg-blue-50"></button>
         <div class="mt-3 flex flex-wrap gap-2">
@@ -970,7 +970,7 @@
       </div>
 
       <div class="border-t mt-4 pt-4">
-        <button id="jobReportButton" onclick="showJobReportForm()" class="text-sm text-gray-500 hover:text-red-600 underline">この求人を通報する</button>
+        <button id="jobReportButton" onclick="showJobReportForm()" class="text-sm text-gray-500 hover:text-red-600 underline">このお仕事を通報する</button>
         <form id="jobReportForm" class="hidden mt-3 space-y-3" onsubmit="submitJobReport(event)">
           <label class="block text-sm font-medium">
             通報理由
@@ -978,7 +978,7 @@
               <option value="">選択してください</option>
               <option value="misleading">虚偽・誤解を招く内容</option>
               <option value="inappropriate">不適切な内容</option>
-              <option value="scam">詐欺・不審な求人</option>
+              <option value="scam">詐欺・不審なお仕事</option>
               <option value="contact">連絡先が不正確</option>
               <option value="other">その他</option>
             </select>

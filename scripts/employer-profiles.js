@@ -65,7 +65,7 @@ async function loadEmployerProfileForm() {
   document.getElementById("employerProfileName").value = data?.display_name || "";
   document.getElementById("employerProfileArea").value = data?.service_area || "";
   document.getElementById("employerProfileIntroduction").value = data?.introduction || "";
-  setEmployerProfileStatus(data ? "公開中のプロフィールです。保存内容は求人ページに表示されます。" : "プロフィールはまだ登録されていません。");
+  setEmployerProfileStatus(data ? "公開中のプロフィールです。保存内容はお仕事の詳細ページに表示されます。" : "プロフィールはまだ登録されていません。");
 }
 
 async function saveEmployerProfile(event) {
@@ -101,7 +101,7 @@ async function saveEmployerProfile(event) {
   employerPublicProfiles.set(String(data.user_id), data);
   if (currentUser?.id !== userId) return;
   employerProfileLoadError = "";
-  setEmployerProfileStatus("企業プロフィールを保存しました。求人ページに表示されます。", "success", true);
+  setEmployerProfileStatus("企業プロフィールを保存しました。お仕事の詳細ページに表示されます。", "success", true);
   renderJobList();
 }
 

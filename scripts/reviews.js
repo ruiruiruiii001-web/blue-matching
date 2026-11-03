@@ -1,7 +1,7 @@
 async function blockUser(blockedId) {
       if (!currentUser) return;
       if (blockedId === currentUser.id) return;
-      if (!confirm("このユーザーをブロックしますか？\nブロックすると、このユーザーの求人やプロフィールが表示されなくなります。")) return;
+      if (!confirm("このユーザーをブロックしますか？\nブロックすると、このユーザーのお仕事やプロフィールが表示されなくなります。")) return;
 
       const { error } = await supabaseClient
         .from("user_blocks")

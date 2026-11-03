@@ -152,7 +152,7 @@ function updateAccountTypeUI() {
   document.getElementById("seekerDashboard").classList.toggle("hidden", !hasUser || !isSeeker || !dashboardOpen);
   document.getElementById("seekerAccountPrompt").classList.toggle("hidden", hasUser && isSeeker);
   document.getElementById("seekerAccountPromptText").innerText = hasUser
-    ? "求職者プロフィールは求職者アカウントで利用できます。"
+    ? "プロフィールはお仕事探しアカウントで利用できます。"
     : "プロフィール・お気に入り・応募履歴をアカウントに保存するにはログインしてください。";
   updateAccountSearchSurface();
 }
@@ -294,7 +294,7 @@ function handleMyPageOverlayClick(event) {
 }
 
 function updateMyPageAccountInfo() {
-  const accountTypeLabel = accountType === "seeker" ? "求職者" : accountType === "employer" ? "企業・親方" : "";
+  const accountTypeLabel = accountType === "seeker" ? "お仕事探しの方" : accountType === "employer" ? "企業・親方" : "";
   document.getElementById("myPageAccountInfo").innerText = currentUser?.email
     ? `${currentUser.email} ・ ${accountTypeLabel}アカウント`
     : `${accountTypeLabel}アカウント`;
@@ -495,7 +495,7 @@ async function deleteMyAccount() {
   if (!currentUser) return;
   const isEmployer = accountType === "employer";
   const detail = isEmployer
-    ? "掲載中の求人はすべて削除されます。応募者とのメッセージは「退会したユーザー」として相手側に残ります。"
+    ? "掲載中のお仕事はすべて削除されます。応募者とのメッセージは「退会したユーザー」として相手側に残ります。"
     : "プロフィール・お気に入り・通知は削除されます。応募履歴は氏名などを消して企業側に残り、応募は終了扱いになります。";
   if (!confirm(`退会するとアカウントを元に戻せません。\n\n${detail}\n\n本当に退会しますか？`)) return;
   if (!confirm("最終確認：退会してよろしいですか？")) return;
@@ -535,10 +535,10 @@ function switchTab(tab) {
   const tabEmployerBtn = document.getElementById("tabEmployerBtn");
   const tabSeekerBtn = document.getElementById("tabSeekerBtn");
   const isSeekerTab = tab === "seeker";
-  jobSearchTitle.innerText = isSeekerTab ? "おすすめ求人を条件で絞り込む" : "求人を検索・絞り込み";
+  jobSearchTitle.innerText = isSeekerTab ? "おすすめお仕事を条件で絞り込む" : "お仕事を検索・絞り込み";
   jobSearchDescription.innerText = isSeekerTab
-    ? "並び替えで「おすすめ順」を選ぶと、プロフィールに登録した希望条件を参考に表示します。条件を選ぶと求人をさらに絞り込めます。"
-    : "キーワードや条件を指定して、希望に合う求人を探せます。";
+    ? "並び替えで「おすすめ順」を選ぶと、プロフィールに登録した希望条件を参考に表示します。条件を選ぶとお仕事をさらに絞り込めます。"
+    : "キーワードや条件を指定して、希望に合うお仕事を探せます。";
 
   if (tab === "guest") {
     employerSection.classList.add("hidden");
@@ -547,7 +547,7 @@ function switchTab(tab) {
     jobSearchPanel.classList.remove("hidden");
     jobList.classList.remove("hidden");
     jobCount.classList.remove("hidden");
-    document.getElementById("jobListTitle").innerText = "求人一覧";
+    document.getElementById("jobListTitle").innerText = "お仕事一覧";
     document.getElementById("jobListDescription").classList.add("hidden");
     updateAccountSearchSurface();
     renderJobList();
@@ -564,7 +564,7 @@ function switchTab(tab) {
     jobSearchPanel.classList.remove("hidden");
     jobList.classList.remove("hidden");
     jobCount.classList.remove("hidden");
-    document.getElementById("jobListTitle").innerText = "求人一覧";
+    document.getElementById("jobListTitle").innerText = "お仕事一覧";
     document.getElementById("jobListDescription").classList.add("hidden");
   } else {
     document.getElementById("jobSort").value = "recommended";

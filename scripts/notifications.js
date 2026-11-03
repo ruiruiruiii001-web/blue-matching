@@ -27,7 +27,7 @@ function renderLoginNotificationBanner() {
   const messages = [];
   if (pendingContactCount) messages.push(`企業からの連絡が${pendingContactCount}件届いています。`);
   if (unreadCount) messages.push(`新しいお知らせが${unreadCount}件あります。`);
-  if (expiringJobCount) messages.push(`掲載期限が近い求人が${expiringJobCount}件あります。`);
+  if (expiringJobCount) messages.push(`掲載期限が近いお仕事が${expiringJobCount}件あります。`);
   document.getElementById("loginNotificationMessage").innerText =
     `${messages.join("")}メールが届かない場合があるため、マイページでもご確認ください。`;
   banner.classList.remove("hidden");
@@ -88,7 +88,7 @@ function getVisibleNotifications() {
             </div>
             ${["job_application", "application_message"].includes(notification.event_type)
               ? renderApplicationNotificationDetails(notification)
-              : `<p class="mt-1 text-sm text-gray-600 leading-relaxed">${escapeHtml(notification.event_type === "contact_reply" ? "求職者から届いた連絡への返信です。" : String(notification.body || ""))}</p>`}
+              : `<p class="mt-1 text-sm text-gray-600 leading-relaxed">${escapeHtml(notification.event_type === "contact_reply" ? "お仕事探しの方から届いた連絡への返信です。" : String(notification.body || ""))}</p>`}
             <p class="mt-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest">${formatDashboardDate(notification.created_at)}</p>
             ${notification.event_type === "contact_request" ? renderContactRequestNotification(notification.related_id) : ""}
             ${notification.event_type === "contact_reply" ? renderContactReplyNotification(notification.related_id) : ""}
@@ -131,7 +131,7 @@ function renderApplicationNotificationDetails(notification) {
   return `
     <dl class="mt-2 grid grid-cols-1 gap-1 rounded-lg bg-white/80 p-3 text-sm sm:grid-cols-2">
       ${applicantDetail}
-      <div><dt class="inline font-medium text-gray-500">求人：</dt><dd class="inline font-bold text-gray-800">${escapeHtml(String(application.job_title || "求人"))}</dd></div>
+      <div><dt class="inline font-medium text-gray-500">お仕事：</dt><dd class="inline font-bold text-gray-800">${escapeHtml(String(application.job_title || "お仕事"))}</dd></div>
     </dl>
   `;
 }
@@ -141,7 +141,7 @@ function renderContactReplyNotification(requestId) {
   if (!request) return '<p class="mt-2 text-xs text-amber-800">返信内容を読み込めませんでした。画面を再読み込みしてください。</p>';
   return request.status === "responded"
     ? `<p class="mt-3 whitespace-pre-wrap break-words rounded-lg bg-white p-3 text-sm text-gray-800">${escapeHtml(String(request.seeker_reply || ""))}</p>`
-    : '<p class="mt-3 rounded-lg bg-white p-3 text-sm text-gray-600">求職者は連絡を見送りました。</p>';
+    : '<p class="mt-3 rounded-lg bg-white p-3 text-sm text-gray-600">応募者は連絡を見送りました。</p>';
 }
 
 function openApplicationNotification(applicationId, notificationId, trigger) {
@@ -187,7 +187,7 @@ function renderApplicationNotificationView(application, messageStatus) {
     <article class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
       <div class="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 pb-4">
         <div>
-          <h3 class="text-lg font-black text-gray-900">${escapeHtml(String(application.job_title || "求人"))}</h3>
+          <h3 class="text-lg font-black text-gray-900">${escapeHtml(String(application.job_title || "お仕事"))}</h3>
           <p class="mt-1 text-xs text-gray-500">応募日時: ${formatDashboardDate(application.created_at)}</p>
         </div>
         <span class="inline-flex rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest ${application.status === "withdrawn" ? "bg-rose-100 text-rose-800" : formatApplicationStatusClass(application.status)}">${application.status === "withdrawn" ? "取り下げ" : escapeHtml(formatApplicationStatus(application.status))}</span>

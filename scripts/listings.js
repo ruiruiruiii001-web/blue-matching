@@ -42,7 +42,7 @@ function renderJobList(resetLimit = false) {
     ? "おすすめ順"
     : activeTab === "seeker"
       ? "おすすめ順（希望条件登録後）"
-      : "おすすめ順（求職者ログイン時）";
+      : "おすすめ順（お仕事探しの方ログイン時）";
   if (!canRecommend && sortSelect.value === "recommended") sortSelect.value = "newest";
   const sortBy = sortSelect.value;
   const preferredLocation = activeTab === "seeker" && seekerProfile ? seekerProfile.location || "" : "";
@@ -118,13 +118,13 @@ function renderJobList(resetLimit = false) {
       ? `<div class="text-center py-12 bg-white rounded-2xl border border-dashed border-gray-200">
           <div class="text-3xl mb-3">⭐</div>
           <p class="text-sm text-gray-500">${currentUser
-            ? `お気に入りの求人はありません。<br><button type="button" onclick="resetJobFilters()" class="mt-4 font-bold text-blue-600 underline">条件をリセット</button>`
+            ? `お気に入りのお仕事はありません。<br><button type="button" onclick="resetJobFilters()" class="mt-4 font-bold text-blue-600 underline">条件をリセット</button>`
             : `お気に入りを見るにはログインしてください。<br><button type="button" onclick="openAccountPanel()" class="mt-4 font-bold text-blue-600 underline">ログイン</button>`}</p>
         </div>`
       : `<div class="rounded-2xl border border-dashed border-gray-300 bg-white px-4 py-12 text-center shadow-sm">
           <div class="text-3xl mb-3">🔍</div>
-          <p class="text-base font-bold text-gray-800">${activeFilters.length ? "条件に合う求人が見つかりませんでした" : "現在、掲載中の求人はありません"}</p>
-          <p class="mt-2 text-sm text-gray-500">${activeFilters.length ? "条件をリセットして、ほかの求人も見てみましょう。" : "新しい求人が掲載されるまでお待ちください。"}</p>
+          <p class="text-base font-bold text-gray-800">${activeFilters.length ? "条件に合うお仕事が見つかりませんでした" : "現在、掲載中のお仕事はありません"}</p>
+          <p class="mt-2 text-sm text-gray-500">${activeFilters.length ? "条件をリセットして、ほかのお仕事も見てみましょう。" : "新しいお仕事が掲載されるまでお待ちください。"}</p>
           ${activeFilters.length ? '<button type="button" onclick="resetJobFilters()" class="mt-6 min-h-11 rounded-xl bg-blue-600 px-6 py-2.5 font-bold text-white hover:bg-blue-700 shadow-lg shadow-blue-100 transition-all">検索条件をリセット</button>' : ""}
         </div>`;
     return;
@@ -209,7 +209,7 @@ function renderJobList(resetLimit = false) {
     loadMoreBtn.type = "button";
     loadMoreBtn.onclick = loadMoreJobs;
     loadMoreBtn.className = "w-full py-4 mt-4 bg-white border border-blue-100 text-blue-600 font-bold rounded-2xl hover:bg-blue-50 transition-colors shadow-sm";
-    loadMoreBtn.innerText = `もっと求人を見る (${filteredJobs.length - displayLimitJobs}件の残り)`;
+    loadMoreBtn.innerText = `もっとお仕事を見る (${filteredJobs.length - displayLimitJobs}件の残り)`;
     jobList.appendChild(loadMoreBtn);
   }
 }
@@ -360,15 +360,15 @@ function openModal(id) {
     ? "アカウント画面を開く"
     : "ログイン";
   if (!currentUser) {
-    document.getElementById("applicationLoginPrompt").innerText = "応募画面に進むには、求職者アカウントでログインしてください。";
+    document.getElementById("applicationLoginPrompt").innerText = "応募画面に進むには、お仕事探しアカウントでログインしてください。";
   } else if (accountType !== "seeker") {
-    document.getElementById("applicationLoginPrompt").innerText = "サイトから応募するには求職者アカウントが必要です。別の求職者アカウントでログインしてください。";
+    document.getElementById("applicationLoginPrompt").innerText = "サイトから応募するにはお仕事探しアカウントが必要です。別のお仕事探しアカウントでログインしてください。";
   } else if (selectedJob.owner_id === currentUser.id) {
-    document.getElementById("applicationLoginPrompt").innerText = "自分が投稿した求人には応募できません。";
+    document.getElementById("applicationLoginPrompt").innerText = "自分が投稿したお仕事には応募できません。";
   } else if (selectedJobIsClosed) {
     document.getElementById("applicationLoginPrompt").innerText = "募集が終了しているため、サイトから応募できません。";
   } else if (alreadyApplied) {
-    document.getElementById("applicationLoginPrompt").innerText = "この求人にはすでにサイトから応募済みです。応募履歴はマイページで確認できます。";
+    document.getElementById("applicationLoginPrompt").innerText = "このお仕事にはすでにサイトから応募済みです。応募履歴はマイページで確認できます。";
   }
   document.getElementById("jobReportForm").classList.add("hidden");
   document.getElementById("jobReportButton").classList.remove("hidden");
@@ -524,7 +524,7 @@ async function generateAIDuties() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        prompt: `${title}の現場求人情報を募集しています。親しみやすく、かつ誠実な印象で、仕事内容や現場の魅力を200文字程度で作成してください。「未経験歓迎」「チームワーク重視」などの要素を含めてください。箇条書きではなく、呼びかけるような自然な文章にしてください。`
+        prompt: `${title}の現場のお仕事情報を募集しています。親しみやすく、かつ誠実な印象で、仕事内容や現場の魅力を200文字程度で作成してください。「未経験歓迎」「チームワーク重視」などの要素を含めてください。箇条書きではなく、呼びかけるような自然な文章にしてください。`
       })
     });
     const data = await response.json();
@@ -732,7 +732,7 @@ function getJobMatchDetails(job, profile) {
     compared += 1;
     if (getJobPayAmount(job) >= Number(profile.minimumSalary)) {
       score += 1;
-      reasons.push("求人給与が希望最低額以上");
+      reasons.push("お仕事給与が希望最低額以上");
     }
   }
   const workMatch = getWorkPreferenceMatch(job.work_preferences, profile.workPreferences);

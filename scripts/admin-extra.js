@@ -5,7 +5,7 @@ const MESSAGE_REPORT_REASON_LABELS = {
   inappropriate: "不適切な内容",
   other: "その他"
 };
-const ACCOUNT_TYPE_LABELS = { seeker: "求職者", employer: "企業・親方" };
+const ACCOUNT_TYPE_LABELS = { seeker: "お仕事探しの方", employer: "企業・親方" };
 
 const adminMessageReports = document.getElementById("adminMessageReports");
 const adminMessageReportFilter = document.getElementById("adminMessageReportFilter");
@@ -153,7 +153,7 @@ function renderAdminUsers(users) {
     if (user.is_suspended) heading.append(createElement("span", "rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-bold text-red-700", "停止中"));
     card.append(heading);
     card.append(createElement("p", "mt-2 text-xs text-gray-600",
-      `登録: ${new Date(user.created_at).toLocaleDateString("ja-JP")} ／ 最終ログイン: ${user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleDateString("ja-JP") : "なし"} ／ 求人: ${user.job_count}件 ／ メッセージ通報された回数: ${user.report_count}件`));
+      `登録: ${new Date(user.created_at).toLocaleDateString("ja-JP")} ／ 最終ログイン: ${user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleDateString("ja-JP") : "なし"} ／ お仕事: ${user.job_count}件 ／ メッセージ通報された回数: ${user.report_count}件`));
     if (user.is_suspended && user.suspended_reason) {
       card.append(createElement("p", "mt-2 rounded-lg bg-red-50 p-2 text-xs text-red-800", `停止の理由: ${user.suspended_reason}`));
     }

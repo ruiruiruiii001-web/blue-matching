@@ -1,4 +1,4 @@
-// Supabaseから求人一覧を取得
+// Supabaseからお仕事一覧を取得
 async function fetchJobs() {
   const jobColumns = 'id, title, location, salary, duties, capacity, work_style, work_preferences, start_time, end_time, break_minutes, overtime_details, allowance_details, pay_type, pay_amount, pay_amount_max, pay_condition_details, required_licenses, preferred_licenses, experience_requirement, experience_requirement_details, tags, image_url, image_urls, owner_id, is_closed, is_hidden, hidden_reason, expires_at, created_at, updated_at';
   const legacyJobColumns = jobColumns.replace(", image_urls", "");
@@ -52,14 +52,14 @@ function openSharedJobFromUrl() {
   if (cachedJobs.some(job => String(job.id) === sharedId)) {
     openModal(sharedId);
   } else {
-    alert("この求人は見つかりませんでした。掲載が終了したか、非公開になっている可能性があります。");
+    alert("このお仕事は見つかりませんでした。掲載が終了したか、非公開になっている可能性があります。");
   }
 }
 
-// 求人投稿・編集（Supabaseへ保存）
+// お仕事投稿・編集（Supabaseへ保存）
 async function publishJob() {
   if (!currentUser || accountType !== "employer") {
-    setAuthMessage("求人を管理するには企業・親方アカウントでログインしてください。", true);
+    setAuthMessage("お仕事を管理するには企業・親方アカウントでログインしてください。", true);
     return;
   }
 
@@ -101,7 +101,7 @@ async function publishJob() {
   if (title.length > 80 || location.length > 500 || salary.length > 100 || duties.length > 2000 ||
       overtimeDetails.length > 300 || allowanceDetails.length > 1000 ||
       payConditionDetails.length > 500 || experienceRequirementDetails.length > 500) {
-    alert("入力欄の文字数上限を超えています。求人情報を短くして再度お試しください。");
+    alert("入力欄の文字数上限を超えています。お仕事情報を短くして再度お試しください。");
     return;
   }
 
@@ -182,8 +182,8 @@ async function publishJob() {
     const cleanupError = uploadedImages.paths.length
       ? (await supabaseClient.storage.from("job-media").remove(uploadedImages.paths)).error
       : null;
-    if (cleanupError) console.error("保存に失敗した求人写真の後片付けに失敗しました:", cleanupError);
-    alert(`${editingJobId ? "更新" : "投稿"}に失敗しました: ${result.error?.message || "対象の求人を更新できませんでした。"}`);
+    if (cleanupError) console.error("保存に失敗したお仕事写真の後片付けに失敗しました:", cleanupError);
+    alert(`${editingJobId ? "更新" : "投稿"}に失敗しました: ${result.error?.message || "対象のお仕事を更新できませんでした。"}`);
     return;
   }
 
@@ -192,7 +192,7 @@ async function publishJob() {
   const cleanupFailures = await deleteUnreferencedJobImages(removedImages, wasEditing ? editingJobId : null);
   cancelJobEdit();
 
-  alert(`${wasEditing ? "求人情報を更新しました！" : "クラウド上に求人を掲載しました！"}${cleanupFailures.length ? "\n一部の不要な写真を整理できませんでした。時間をおいて再度お試しください。" : ""}`);
+  alert(`${wasEditing ? "お仕事情報を更新しました！" : "クラウド上にお仕事を掲載しました！"}${cleanupFailures.length ? "\n一部の不要な写真を整理できませんでした。時間をおいて再度お試しください。" : ""}`);
   if (!wasEditing) {
     confetti({
       particleCount: 150,
@@ -250,7 +250,7 @@ function editJob(id) {
   document.getElementById("jobLocationLegacyNotice").classList.toggle("hidden", !legacyLocation);
   const jobTags = getNormalizedJobTags(job.tags);
   setCheckedValues("jobTag", jobTags);
-  document.getElementById("jobFormHeading").innerText = "求人情報を編集";
+  document.getElementById("jobFormHeading").innerText = "お仕事情報を編集";
   document.getElementById("jobSubmitButton").innerText = "変更を保存";
   document.getElementById("cancelEditButton").classList.remove("hidden");
   document.getElementById("cancelEditButton").innerText = "編集をキャンセル";
@@ -265,7 +265,7 @@ function duplicateJob(id) {
   editJob(id);
   editingJobId = null;
   setJobDurationControl(false);
-  document.getElementById("jobFormHeading").innerText = "求人を複製して新規投稿";
+  document.getElementById("jobFormHeading").innerText = "お仕事を複製して新規投稿";
   document.getElementById("jobSubmitButton").innerText = "🔥 この内容で新しく掲載する";
   document.getElementById("cancelEditButton").innerText = "キャンセル";
 }
@@ -316,8 +316,8 @@ function cancelJobEdit() {
   setJobDurationControl(false);
   document.getElementById("jobLocationLegacyNotice").classList.add("hidden");
   document.querySelectorAll('input[name="jobTag"]').forEach(cb => cb.checked = false);
-  document.getElementById("jobFormHeading").innerText = "現場求人のクラウド投稿";
-  document.getElementById("jobSubmitButton").innerText = "🔥 クラウドに求人を今すぐ掲載する";
+  document.getElementById("jobFormHeading").innerText = "現場のお仕事のクラウド投稿";
+  document.getElementById("jobSubmitButton").innerText = "🔥 クラウドにお仕事を今すぐ掲載する";
   if (dashboardOpen) showEmployerDashboardView("jobs");
 }
 
@@ -392,12 +392,12 @@ async function toggleJobClosed(id) {
   if (selectedJob && selectedJob.id === id) openModal(id);
 }
 
-// 求職者プロフィール保存
+// プロフィール保存
 
 async function deleteJob(id) {
   const job = cachedJobs.find(item => item.id === id);
   if (!currentUser || accountType !== "employer" || !job || job.owner_id !== currentUser.id) return;
-  if (!confirm("この求人をクラウドから削除しますか？")) return;
+  if (!confirm("このお仕事をクラウドから削除しますか？")) return;
 
   const { error } = await supabaseClient
     .from('published_jobs')
@@ -412,7 +412,7 @@ async function deleteJob(id) {
 
   const cleanupFailures = await deleteUnreferencedJobImages(getJobImages(job), id);
   if (cleanupFailures.length) {
-    alert("求人は削除しましたが、一部の写真を整理できませんでした。");
+    alert("お仕事は削除しましたが、一部の写真を整理できませんでした。");
   }
   fetchJobs();
   closeModal();

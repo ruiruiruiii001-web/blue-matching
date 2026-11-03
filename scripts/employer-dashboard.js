@@ -19,7 +19,7 @@ function renderEmployerDashboard() {
 
   const expiringJobs = ownedJobs.filter(job => !job.is_closed && getJobExpiryStatus(job)?.warning);
   const expiryBanner = expiringJobs.length
-    ? `<p role="alert" class="mb-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-bold text-red-800">⚠️ 掲載期限が近い、または切れた求人が${expiringJobs.length}件あります。「掲載を30日延長」で公開を続けられます。</p>`
+    ? `<p role="alert" class="mb-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-bold text-red-800">⚠️ 掲載期限が近い、または切れたお仕事が${expiringJobs.length}件あります。「掲載を30日延長」で公開を続けられます。</p>`
     : "";
 
   container.innerHTML = expiryBanner + (ownedJobs.length
@@ -43,7 +43,7 @@ function renderEmployerDashboard() {
                   <span class="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-[10px] font-bold">👁 閲覧 ${(jobViewCounts.get(String(job.id)) || 0).toLocaleString()}回</span>
                   <span class="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-[10px] font-bold">📨 応募 ${receivedApplications.filter(application => String(application.job_id) === String(job.id)).length}件</span>
                 </div>
-                ${job.is_hidden ? `<p class="mt-2 rounded-lg bg-red-50 p-2 text-xs font-bold text-red-800">この求人は運営の確認により非公開になっています${job.hidden_reason ? `（理由: ${escapeHtml(String(job.hidden_reason))}）` : ""}。内容を見直したい場合はお問い合わせください。</p>` : ""}
+                ${job.is_hidden ? `<p class="mt-2 rounded-lg bg-red-50 p-2 text-xs font-bold text-red-800">このお仕事は運営の確認により非公開になっています${job.hidden_reason ? `（理由: ${escapeHtml(String(job.hidden_reason))}）` : ""}。内容を見直したい場合はお問い合わせください。</p>` : ""}
                 ${(() => {
                   const expiry = getJobExpiryStatus(job);
                   return expiry ? `<p class="mt-2 break-words rounded-lg ${expiry.warning ? "bg-red-50 text-red-800" : "bg-gray-50 text-gray-600"} p-2 text-xs font-bold">${expiry.warning ? "⚠️ " : ""}${escapeHtml(expiry.text)}</p>` : "";
@@ -65,7 +65,7 @@ function renderEmployerDashboard() {
         </div>
       </article>
     `).join("")
-    : '<div class="text-center py-10 bg-gray-50 rounded-2xl border border-dashed border-gray-200"><p class="text-xs text-gray-400">掲載中の求人はまだありません。</p></div>');
+    : '<div class="text-center py-10 bg-gray-50 rounded-2xl border border-dashed border-gray-200"><p class="text-xs text-gray-400">掲載中のお仕事はまだありません。</p></div>');
 
   const applicationCount = document.getElementById("employerApplicationCount");
   const applicationsStatus = document.getElementById("employerApplicationsStatus");
@@ -108,7 +108,7 @@ function renderEmployerApplicationDetails(application) {
       <div class="p-5">
         <div class="flex flex-wrap items-start justify-between gap-3 mb-4 pb-4 border-b border-gray-50">
           <div class="min-w-0 flex-1">
-            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">求人: ${escapeHtml(String(application.job_title || "求人"))}</p>
+            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">お仕事: ${escapeHtml(String(application.job_title || "お仕事"))}</p>
             <h4 class="font-black text-gray-900 text-lg leading-tight">👷 ${escapeHtml(String(application.applicant_name || ""))}</h4>
             <button type="button" onclick="openApplicantPublicProfile('${applicationId}')" class="mt-2 min-h-10 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-bold text-blue-700 hover:bg-blue-100">応募者プロフィールを見る</button>
             <p class="mt-1 text-[10px] text-gray-400 uppercase tracking-widest font-bold">応募日時: ${formatDashboardDate(application.created_at)}</p>

@@ -6,7 +6,7 @@ function renderAccountDashboard() {
   favoriteContainer.innerHTML = favoriteJobs.length
     ? favoriteJobs.map(job => `
       <div class="flex items-center justify-between gap-4 bg-white p-4 rounded-xl border border-gray-100 shadow-sm mb-2 hover:border-blue-200 transition-all group">
-        <button type="button" onclick="openModal(${job.id})" aria-label="求人詳細を開く: ${escapeHtml(job.title)}" class="min-w-0 flex-1 text-left">
+        <button type="button" onclick="openModal(${job.id})" aria-label="お仕事詳細を開く: ${escapeHtml(job.title)}" class="min-w-0 flex-1 text-left">
           <span class="font-bold text-gray-800 group-hover:text-blue-600 truncate block w-full transition-colors">${escapeHtml(job.title)}</span>
           <span class="text-[10px] text-gray-400 mt-1 uppercase tracking-wider font-medium flex items-center gap-1">
             <span class="text-xs">📍</span> ${escapeHtml(job.location || '場所未設定')}
@@ -26,7 +26,7 @@ function renderAccountDashboard() {
           <span class="block truncate font-bold text-gray-800">${escapeHtml(job.title)}</span>
           <span class="mt-1 block text-[10px] font-medium text-gray-400">📍 ${escapeHtml(job.location || "場所未設定")}</span>
         </button>`).join("")
-      : '<p class="rounded-2xl border border-dashed border-gray-200 bg-gray-50/50 p-4 text-xs text-gray-500">フォロー中の企業の掲載中求人はありません。</p>';
+      : '<p class="rounded-2xl border border-dashed border-gray-200 bg-gray-50/50 p-4 text-xs text-gray-500">フォロー中の企業の掲載中お仕事はありません。</p>';
   }
 
   const submitted = accountApplications.filter(application => application.applicant_id === currentUser.id);

@@ -29,19 +29,19 @@ function updateAccountSearchSurface() {
   jobCount.classList.toggle("hidden", isEmployerTab && !canSearchSeekers);
   jobTrustNotice?.classList.toggle("hidden", isEmployerTab);
   if (isEmployerTab) {
-    jobListTitle.innerText = canSearchSeekers ? "求職者検索" : "アカウント情報を確認しています";
+    jobListTitle.innerText = canSearchSeekers ? "お仕事探しの方を探す" : "アカウント情報を確認しています";
     jobListDescription?.classList.toggle("hidden", !canSearchSeekers);
     if (jobListDescription && canSearchSeekers) {
-      jobListDescription.innerText = "企業へのプロフィール公開を許可した求職者だけを検索できます。";
+      jobListDescription.innerText = "企業へのプロフィール公開を許可したお仕事探しの方だけを検索できます。";
     }
     if (canSearchSeekers) renderEmployerSeekerSearch();
     return;
   }
 
-  jobListTitle.innerText = activeTab === "seeker" ? "あなたに合う仕事を探す" : "求人一覧";
+  jobListTitle.innerText = activeTab === "seeker" ? "あなたに合う仕事を探す" : "お仕事一覧";
   jobListDescription?.classList.toggle("hidden", activeTab !== "seeker");
   if (jobListDescription && activeTab === "seeker") {
-    jobListDescription.innerText = "希望職種・勤務地・給与条件の一致度を目安に求人をおすすめ順で表示します。検索条件は以下のパネルから自由に変更できます。";
+    jobListDescription.innerText = "希望職種・勤務地・給与条件の一致度を目安にお仕事をおすすめ順で表示します。検索条件は以下のパネルから自由に変更できます。";
   }
 }
 
@@ -144,9 +144,9 @@ function renderEmployerSeekerSearch(resetLimit = false) {
   const selectedJobId = jobSelect.value;
   const selectedJob = ownedJobs.find(job => String(job.id) === selectedJobId);
   const previousJobId = selectedJob ? String(selectedJob.id) : "";
-  jobSelect.innerHTML = `<option value="">${ownedJobs.length ? "求人を選ぶとマッチ度順に表示" : "募集中の自社求人がありません"}</option>`;
+  jobSelect.innerHTML = `<option value="">${ownedJobs.length ? "お仕事を選ぶとマッチ度順に表示" : "募集中の自社お仕事がありません"}</option>`;
   ownedJobs.forEach(job => {
-    jobSelect.add(new Option(`${job.title || "求人"} ・ ${job.location || "勤務地未設定"}`, String(job.id)));
+    jobSelect.add(new Option(`${job.title || "お仕事"} ・ ${job.location || "勤務地未設定"}`, String(job.id)));
   });
   jobSelect.value = previousJobId;
   const matchedJob = ownedJobs.find(job => String(job.id) === jobSelect.value);
@@ -231,8 +231,8 @@ function renderEmployerSeekerSearch(resetLimit = false) {
   if (filteredProfiles.length === 0) {
     results.innerHTML = `<div class="rounded-2xl border border-dashed border-gray-300 bg-white px-4 py-12 text-center shadow-sm">
       <div class="mb-3 text-3xl">🔍</div>
-      <p class="text-base font-bold text-gray-800">${activeFilters.length ? "条件に合う求職者が見つかりませんでした" : "公開中の求職者プロフィールはありません"}</p>
-      <p class="mt-2 text-sm text-gray-500">${activeFilters.length ? "条件をリセットして、ほかのプロフィールも見てみましょう。" : "求職者がプロフィールの公開を許可すると、ここに表示されます。"}</p>
+      <p class="text-base font-bold text-gray-800">${activeFilters.length ? "条件に合うお仕事探しの方が見つかりませんでした" : "公開中のプロフィールはありません"}</p>
+      <p class="mt-2 text-sm text-gray-500">${activeFilters.length ? "条件をリセットして、ほかのプロフィールも見てみましょう。" : "お仕事探しの方がプロフィールの公開を許可すると、ここに表示されます。"}</p>
       ${activeFilters.length ? '<button type="button" onclick="resetEmployerSeekerFilters()" class="mt-6 min-h-11 rounded-xl bg-blue-600 px-6 py-2.5 font-bold text-white hover:bg-blue-700">検索条件をリセット</button>' : ""}
     </div>`;
     return;
@@ -333,7 +333,7 @@ function getSeekerJobMatch(job, profile) {
     maximumScore += 1;
     if (jobSalary >= minimumSalary) {
       score += 1;
-      reasons.push("求人給与が希望最低額以上");
+      reasons.push("お仕事給与が希望最低額以上");
     }
   }
 

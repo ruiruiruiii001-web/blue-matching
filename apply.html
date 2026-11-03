@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
-  <title>求人に応募 | 現場の仕事探し・人探しマッチング</title>
+  <title>お仕事に応募 | 現場の仕事探し・人探しマッチング</title>
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#2563eb">
   <link rel="apple-touch-icon" href="/icons/icon-192.png">
@@ -15,21 +15,21 @@
   <header class="bg-blue-600 text-white shadow">
     <div class="mx-auto flex max-w-2xl items-center justify-between px-4 py-4">
       <a href="/" class="font-bold">👷 現場の仕事探し・人探し</a>
-      <a href="/" class="text-sm underline">求人一覧へ戻る</a>
+      <a href="/" class="text-sm underline">お仕事一覧へ戻る</a>
     </div>
   </header>
   <main class="mx-auto max-w-2xl px-4 py-8">
     <section class="rounded-2xl bg-white p-5 shadow-sm sm:p-8">
-      <p class="text-sm font-bold text-blue-700">求人への応募</p>
-      <h1 id="jobTitle" class="mt-2 text-2xl font-black text-gray-900">求人を確認しています</h1>
+      <p class="text-sm font-bold text-blue-700">お仕事への応募</p>
+      <h1 id="jobTitle" class="mt-2 text-2xl font-black text-gray-900">お仕事を確認しています</h1>
       <p id="jobDetails" class="mt-2 whitespace-pre-wrap text-sm text-gray-600"></p>
       <p id="status" role="status" aria-live="polite" class="mt-5 text-sm text-gray-700">応募情報を確認しています。</p>
       <div id="loginNotice" class="mt-5 hidden rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-        <p>応募するには求職者アカウントでログインしてください。</p>
+        <p>応募するにはお仕事探しアカウントでログインしてください。</p>
         <a href="/" class="mt-3 inline-flex min-h-11 items-center rounded-lg bg-blue-600 px-4 py-2 font-bold text-white">ログイン画面へ</a>
       </div>
       <form id="applicationForm" class="mt-6 hidden space-y-5" novalidate>
-        <p class="rounded-lg border border-blue-100 bg-blue-50 p-3 text-xs leading-relaxed text-blue-900">このフォームから送る応募は、このサイト内で求人掲載企業に届きます。外部サイトには移動しません。</p>
+        <p class="rounded-lg border border-blue-100 bg-blue-50 p-3 text-xs leading-relaxed text-blue-900">このフォームから送る応募は、このサイト内でお仕事掲載企業に届きます。外部サイトには移動しません。</p>
         <label class="block text-sm font-bold text-gray-700">お名前
           <input id="applicantName" maxlength="100" required autocomplete="name" class="mt-1 w-full rounded-xl border border-gray-300 px-3 py-3 text-base outline-none focus:ring-2 focus:ring-blue-500">
         </label>
@@ -48,7 +48,7 @@
         </ol>
         <p class="mt-3 text-xs leading-relaxed">応募時に電話番号は共有されません。企業から連絡リクエストが届いた場合は、マイページの「連絡・通知」で内容を確認してから返信してください。</p>
         <p id="emailWarning" class="mt-2"></p>
-        <a href="/" class="mt-4 inline-flex min-h-11 items-center rounded-lg bg-emerald-700 px-4 py-2 font-bold text-white">求人一覧へ戻る</a>
+        <a href="/" class="mt-4 inline-flex min-h-11 items-center rounded-lg bg-emerald-700 px-4 py-2 font-bold text-white">お仕事一覧へ戻る</a>
       </div>
     </section>
   </main>
@@ -87,7 +87,7 @@
 
     async function initializeApplication() {
       if (!jobId) {
-        showStatus("求人を特定できません。求人一覧から応募する求人を選び直してください。", true);
+        showStatus("お仕事を特定できません。お仕事一覧から応募するお仕事を選び直してください。", true);
         return;
       }
 
@@ -110,11 +110,11 @@
         .eq("id", jobId)
         .maybeSingle();
       if (jobError) {
-        showStatus(`求人を読み込めませんでした: ${jobError.message}`, true);
+        showStatus(`お仕事を読み込めませんでした: ${jobError.message}`, true);
         return;
       }
       if (!job) {
-        showStatus("この求人は見つかりません。掲載が終了した可能性があります。", true);
+        showStatus("このお仕事は見つかりません。掲載が終了した可能性があります。", true);
         return;
       }
       applicationJob = job;
@@ -127,7 +127,7 @@
 
       const jobIsClosed = job.is_closed || Date.parse(job.expires_at || "") <= Date.now();
       if (jobIsClosed || job.owner_id === user.id) {
-        showStatus(jobIsClosed ? "この求人は募集を終了しています。" : "自分が投稿した求人には応募できません。", true);
+        showStatus(jobIsClosed ? "このお仕事は募集を終了しています。" : "自分が投稿したお仕事には応募できません。", true);
         return;
       }
 
@@ -141,7 +141,7 @@
         return;
       }
       if (account?.account_type !== "seeker") {
-        showStatus(account ? "応募には求職者アカウントが必要です。" : "求人一覧からログインし、求職者アカウントの設定を完了してください。", true);
+        showStatus(account ? "応募にはお仕事探しアカウントが必要です。" : "お仕事一覧からログインし、お仕事探しアカウントの設定を完了してください。", true);
         return;
       }
 
@@ -167,7 +167,7 @@
         return;
       }
       if (existingResult.data) {
-        showStatus("この求人にはすでに応募済みです。応募履歴はマイページで確認できます。");
+        showStatus("このお仕事にはすでに応募済みです。応募履歴はマイページで確認できます。");
         return;
       }
 
@@ -196,12 +196,12 @@
           .eq("id", String(applicationJob.id))
           .maybeSingle();
         if (currentJobError) {
-          showStatus(`求人の状態を再確認できませんでした: ${currentJobError.message}`, true);
+          showStatus(`お仕事の状態を再確認できませんでした: ${currentJobError.message}`, true);
           return;
         }
         const currentJobIsClosed = !currentJob || currentJob.is_closed || Date.parse(currentJob.expires_at || "") <= Date.now();
         if (currentJobIsClosed || currentJob.owner_id === applicantId) {
-          showStatus(currentJobIsClosed ?  "この求人は募集を終了しています。" : "自分が投稿した求人には応募できません。", true);
+          showStatus(currentJobIsClosed ?  "このお仕事は募集を終了しています。" : "自分が投稿したお仕事には応募できません。", true);
           form.classList.add("hidden");
           return;
         }
@@ -226,7 +226,7 @@
         if (error) {
           submitButton.disabled = false;
           if (error.code === "23505") {
-            showStatus("この求人にはすでに応募済みです。応募履歴はマイページで確認できます。", true);
+            showStatus("このお仕事にはすでに応募済みです。応募履歴はマイページで確認できます。", true);
             form.classList.add("hidden");
           } else if (error.code === "23502" && error.message.includes("applicant_phone")) {
             showStatus("電話番号を使わない応募へのデータベース更新が未適用です。管理者にお問い合わせください。", true);

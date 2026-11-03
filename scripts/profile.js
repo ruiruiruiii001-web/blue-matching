@@ -1,6 +1,6 @@
 async function saveSeekerProfile() {
   if (!currentUser || accountType !== "seeker") {
-    promptLogin("プロフィールを保存するには求職者アカウントでログインしてください。");
+    promptLogin("プロフィールを保存するにはお仕事探しアカウントでログインしてください。");
     return;
   }
 

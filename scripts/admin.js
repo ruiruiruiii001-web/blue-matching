@@ -1,7 +1,7 @@
 const REPORT_REASON_LABELS = {
   misleading: "虚偽・誤解を招く内容",
   inappropriate: "不適切な内容",
-  scam: "詐欺・不審な求人",
+  scam: "詐欺・不審なお仕事",
   contact: "連絡先が不正確",
   other: "その他"
 };
@@ -87,7 +87,7 @@ async function loadReports() {
       .select("id, title, is_hidden, hidden_reason, is_closed, expires_at, owner_id")
       .in("id", jobIds);
     if (jobsError) {
-      setAdminStatus(`求人の状態を読み込めませんでした: ${jobsError.message}`, true);
+      setAdminStatus(`お仕事の状態を読み込めませんでした: ${jobsError.message}`, true);
       return;
     }
     (jobs || []).forEach(job => adminJobsById.set(String(job.id), job));
@@ -126,17 +126,17 @@ function renderReports() {
       createElement("span", "text-xs text-gray-500", new Date(report.created_at).toLocaleString("ja-JP"))
     );
     if (reportCounts.get(report.job_id) > 1) {
-      heading.append(createElement("span", "rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-bold text-amber-800", `この求人への通報: ${reportCounts.get(report.job_id)}件`));
+      heading.append(createElement("span", "rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-bold text-amber-800", `このお仕事への通報: ${reportCounts.get(report.job_id)}件`));
     }
     card.append(heading);
 
     card.append(createElement("h2", "mt-3 break-words text-base font-bold text-gray-900", report.job_title));
     const jobState = !job
-      ? "求人は削除されたか、見つかりません。"
+      ? "お仕事は削除されたか、見つかりません。"
       : job.is_hidden
         ? `非表示中${job.hidden_reason ? `（理由: ${job.hidden_reason}）` : ""}`
         : "公開中";
-    card.append(createElement("p", "mt-1 text-xs text-gray-600", `求人ID: ${report.job_id} ／ 状態: ${jobState}${job?.owner_id && adminSuspendedIds.has(job.owner_id) ? " ／ 投稿者: 停止中" : ""}`));
+    card.append(createElement("p", "mt-1 text-xs text-gray-600", `お仕事ID: ${report.job_id} ／ 状態: ${jobState}${job?.owner_id && adminSuspendedIds.has(job.owner_id) ? " ／ 投稿者: 停止中" : ""}`));
     card.append(createElement("p", "mt-3 whitespace-pre-wrap break-words rounded-lg bg-gray-50 p-3 text-sm", report.details || "（詳細の記入なし）"));
     if (report.admin_note) {
       card.append(createElement("p", "mt-2 whitespace-pre-wrap break-words rounded-lg bg-amber-50 p-3 text-xs text-amber-900", `運営メモ: ${report.admin_note}`));
@@ -145,7 +145,7 @@ function renderReports() {
     const actions = createElement("div", "mt-4 flex flex-wrap gap-2");
     actions.append(createActionButton("運営メモ", "bg-white border border-gray-300 text-gray-800 hover:bg-gray-50", () => editAdminNote("job_reports", report.id, report.admin_note, loadReports)));
     if (job && !job.is_hidden) {
-      actions.append(createActionButton("求人を非表示にする", "bg-red-600 text-white hover:bg-red-700", () => hideJob(report, job)));
+      actions.append(createActionButton("お仕事を非表示にする", "bg-red-600 text-white hover:bg-red-700", () => hideJob(report, job)));
     }
     if (job?.is_hidden) {
       actions.append(createActionButton("非表示を解除", "bg-blue-600 text-white hover:bg-blue-700", () => setJobHidden(job.id, false, "")));
@@ -189,7 +189,7 @@ async function setJobHidden(jobId, hidden, reason) {
     p_reason: reason
   });
   if (error) {
-    setAdminStatus(`求人の表示状態を変更できませんでした: ${error.message}`, true);
+    setAdminStatus(`お仕事の表示状態を変更できませんでした: ${error.message}`, true);
     return false;
   }
   await loadReports();
@@ -199,7 +199,7 @@ async function setJobHidden(jobId, hidden, reason) {
 async function suspendOwner(ownerId, suspended) {
   let reason = "";
   if (suspended) {
-    reason = window.prompt("この投稿者のアカウントを停止します。投稿者の求人はすべて非表示になり、投稿・応募・メッセージ送信ができなくなります。理由（200文字以内・運営用メモ）を入力してください。", "");
+    reason = window.prompt("この投稿者のアカウントを停止します。投稿者のお仕事はすべて非表示になり、投稿・応募・メッセージ送信ができなくなります。理由（200文字以内・運営用メモ）を入力してください。", "");
     if (reason === null) return;
     if (reason.length > 200) {
       setAdminStatus("理由は200文字以内で入力してください。", true);
