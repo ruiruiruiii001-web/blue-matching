@@ -547,7 +547,7 @@ function switchTab(tab) {
     jobSearchPanel.classList.remove("hidden");
     jobList.classList.remove("hidden");
     jobCount.classList.remove("hidden");
-    document.getElementById("jobListTitle").innerText = "現場求人一覧";
+    document.getElementById("jobListTitle").innerText = "求人一覧";
     document.getElementById("jobListDescription").classList.add("hidden");
     updateAccountSearchSurface();
     renderJobList();
@@ -564,7 +564,7 @@ function switchTab(tab) {
     jobSearchPanel.classList.remove("hidden");
     jobList.classList.remove("hidden");
     jobCount.classList.remove("hidden");
-    document.getElementById("jobListTitle").innerText = "現場求人一覧";
+    document.getElementById("jobListTitle").innerText = "求人一覧";
     document.getElementById("jobListDescription").classList.add("hidden");
   } else {
     document.getElementById("jobSort").value = "recommended";
@@ -576,7 +576,7 @@ function switchTab(tab) {
     jobCount.classList.remove("hidden");
     tabSeekerBtn.className = "flex-1 py-3.5 font-bold text-sm md:text-base border-b-2 border-blue-600 text-blue-600 focus:outline-none transition";
     tabEmployerBtn.className = "flex-1 py-3.5 font-bold text-sm md:text-base border-b-2 border-transparent text-gray-500 hover:text-blue-600 focus:outline-none transition";
-    document.getElementById("jobListTitle").innerText = "希望に合う求人を探す";
+    document.getElementById("jobListTitle").innerText = "あなたに合う仕事を探す";
     document.getElementById("jobListDescription").classList.remove("hidden");
   }
   renderJobList();

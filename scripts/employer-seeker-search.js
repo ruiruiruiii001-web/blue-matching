@@ -38,7 +38,7 @@ function updateAccountSearchSurface() {
     return;
   }
 
-  jobListTitle.innerText = activeTab === "seeker" ? "希望に合う求人を探す" : "現場求人一覧";
+  jobListTitle.innerText = activeTab === "seeker" ? "あなたに合う仕事を探す" : "求人一覧";
   jobListDescription?.classList.toggle("hidden", activeTab !== "seeker");
   if (jobListDescription && activeTab === "seeker") {
     jobListDescription.innerText = "希望職種・勤務地・給与条件の一致度を目安に求人をおすすめ順で表示します。検索条件は以下のパネルから自由に変更できます。";
