@@ -137,17 +137,13 @@ function renderJobList(resetLimit = false) {
     const workPreferences = getWorkPreferenceLabels(job.work_preferences);
     const primaryImage = getJobImages(job)[0];
     const matchSummary = matchDetails
-      ? `<div class="mt-4 rounded-lg ${matchDetails.score >= 11 ? "bg-emerald-50 text-emerald-900" : matchDetails.score >= 6 ? "bg-amber-50 text-amber-900" : "bg-gray-50 text-gray-700"} p-3">
-          <div class="flex items-center justify-between gap-3">
-            <span class="text-sm font-bold">プロフィール条件との一致</span>
-            <span class="text-sm font-black">${matchDetails.score}点</span>
-          </div>
-          <p class="mt-1 text-xs">${matchDetails.reasons.length
-            ? `一致: ${escapeHtml(matchDetails.reasons.join("・"))}`
+      ? `<div class="mt-4 rounded-lg ${matchDetails.score >= 11 ? "bg-emerald-50 text-emerald-900" : matchDetails.score >= 6 ? "bg-amber-50 text-amber-900" : "bg-gray-50 text-gray-700"} px-3 py-2 text-xs">
+          <span class="font-bold">希望条件との一致 ${matchDetails.score}/14点</span>
+          <span class="ml-1">${matchDetails.reasons.length
+            ? `（${escapeHtml(matchDetails.reasons.join("・"))}）`
             : matchDetails.compared
-              ? "登録済みの希望条件と一致する項目はありません"
-              : "比較できる希望条件が未登録です"}</p>
-          <p class="mt-1 text-[10px] opacity-75">最大14点。希望職種・勤務地・給与・働き方の参考目安です。</p>
+              ? "（一致する項目なし）"
+              : "（希望条件が未登録です）"}</span>
         </div>`
       : "";
     return `
@@ -161,7 +157,6 @@ function renderJobList(resetLimit = false) {
             ${renderAppliedBadge(job.id)}
 
             ${job.capacity <= 0 ? '' : `<span class="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-[10px] font-bold text-blue-700 uppercase">募集人数 ${formatJobCapacity(job.capacity)}</span>`}
-            ${matchDetails?.score > 0 ? '<span class="inline-flex items-center rounded-full bg-purple-50 px-2.5 py-0.5 text-[10px] font-bold text-purple-700 uppercase">希望条件に一致</span>' : ''}
           </div>
                                       <h3 class="break-words text-lg font-extrabold leading-tight text-gray-900 sm:text-xl group-hover:text-blue-700 transition-colors">${escapeHtml(job.title)}</h3>
           ${renderEmployerProfileSummary(job.owner_id)}
@@ -191,8 +186,8 @@ function renderJobList(resetLimit = false) {
         </div>
       </div>
       ${matchSummary}
-      ${workPreferences.length ? `<div class="mt-4 flex flex-wrap gap-1.5">${workPreferences.slice(0, 6).map(value => `<span class="rounded-full bg-indigo-50 px-2.5 py-1 text-[10px] font-bold text-indigo-800">${escapeHtml(value)}</span>`).join("")}${workPreferences.length > 6 ? `<span class="self-center text-[10px] text-gray-400">ほか${workPreferences.length - 6}件</span>` : ""}</div>` : ""}
-      ${getNormalizedJobTags(job.tags).length ? `<div class="mt-5 flex flex-wrap gap-1.5">${getNormalizedJobTags(job.tags).slice(0, 5).map(tag => `<span class="rounded-lg bg-blue-50/50 px-2.5 py-1 text-[10px] font-bold text-blue-600 ring-1 ring-inset ring-blue-100/50">${escapeHtml(tag)}</span>`).join("")}${getNormalizedJobTags(job.tags).length > 5 ? '<span class="text-[10px] text-gray-400 self-center">...</span>' : ''}</div>` : ''}
+      ${workPreferences.length ? `<div class="mt-4 flex flex-wrap gap-1.5">${workPreferences.slice(0, 3).map(value => `<span class="rounded-full bg-indigo-50 px-2.5 py-1 text-[10px] font-bold text-indigo-800">${escapeHtml(value)}</span>`).join("")}${workPreferences.length > 3 ? `<span class="self-center text-[10px] text-gray-500">ほか${workPreferences.length - 3}件</span>` : ""}</div>` : ""}
+      ${getNormalizedJobTags(job.tags).length ? `<div class="mt-2 flex flex-wrap gap-1.5">${getNormalizedJobTags(job.tags).slice(0, 3).map(tag => `<span class="rounded-lg bg-blue-50/50 px-2.5 py-1 text-[10px] font-bold text-blue-600 ring-1 ring-inset ring-blue-100/50">${escapeHtml(tag)}</span>`).join("")}${getNormalizedJobTags(job.tags).length > 3 ? `<span class="text-[10px] text-gray-500 self-center">ほか${getNormalizedJobTags(job.tags).length - 3}件</span>` : ''}</div>` : ''}
       <div class="mt-5 flex items-center justify-between pt-4">
          <div class="flex items-center text-xs font-bold text-blue-600">
            詳細を見る

@@ -191,15 +191,6 @@
             <h3 class="text-lg font-bold text-blue-600">自分の掲載求人</h3>
             <button type="button" onclick="openEmployerJobForm()" class="min-h-11 rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white hover:bg-blue-700">＋ 求人を新規投稿</button>
           </div>
-          <details class="mb-5 rounded-lg border border-blue-200 bg-blue-50 p-3">
-            <summary class="cursor-pointer text-sm font-bold text-blue-900">企業アカウントの使い方</summary>
-            <ol class="mt-2 list-inside list-decimal space-y-1 text-sm text-blue-950">
-              <li>求人を投稿し、勤務地・給与・仕事内容・待遇タグを具体的に記入します。</li>
-              <li>応募者の経験・資格・メッセージを確認し、「確認済み」または「対応不要」に更新してください。</li>
-              <li>対応状況は応募者の応募履歴に表示されます。新しい応募はマイページの通知で確認できます。</li>
-            </ol>
-            <p class="mt-2 border-t border-blue-200 pt-2 text-xs leading-relaxed text-blue-950">応募に電話番号は含まれません。応募者とは「応募・メッセージ」からサイト内で連絡できます。</p>
-          </details>
           <div id="employerDashboardJobs" class="space-y-3 text-sm"></div>
         </section>
 
@@ -239,6 +230,7 @@
         <h2 id="jobFormHeading" class="mb-4 border-b border-gray-100 pb-3 text-lg font-bold text-blue-600">現場求人のクラウド投稿</h2>
         <p class="mb-4 rounded-lg border border-blue-100 bg-blue-50 p-3 text-xs leading-relaxed text-blue-900">赤い「*」は必須項目です。詳細情報は入力できる範囲で構いません。応募者との連絡は「応募・メッセージ」から行えます。</p>
         <div class="space-y-4">
+          <div class="flex items-center gap-2 border-b border-blue-100 pb-2"><span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-black text-white">1</span><h3 class="text-base font-black text-gray-900">基本情報</h3><span class="rounded-full bg-red-50 px-2 py-0.5 text-xs font-bold text-red-700">必須あり</span></div>
           <div>
             <label class="block text-sm font-medium mb-1">職種・現場名 <span class="text-red-500">*</span></label>
             <input type="text" id="jobTitle" maxlength="80" required placeholder="例: 解体現場の作業員・ダンプ運転手" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
@@ -293,6 +285,7 @@
             <p id="jobDurationNote" class="mt-1 text-xs font-bold text-gray-500"></p>
           </div>
 
+          <div class="mt-2 flex items-center gap-2 border-b border-blue-100 pb-2 pt-4"><span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-black text-white">2</span><h3 class="text-base font-black text-gray-900">働き方・勤務条件</h3><span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-bold text-gray-700">任意</span></div>
           <details data-selection-name="jobWorkPreference" class="rounded-xl border border-blue-100 bg-blue-50">
             <summary class="flex flex-wrap cursor-pointer list-none items-center justify-between gap-2 p-4 text-sm font-bold text-gray-800">
               <span class="min-w-0">働き方（複数選択可）</span>
@@ -351,6 +344,7 @@
             <p class="text-xs text-gray-500 mt-1">給与区分・金額の単位を明記できます。上限を入力する場合は下限も入力してください。支給日や昇給・賞与なども記載できます。</p>
           </div>
 
+          <div class="mt-2 flex items-center gap-2 border-b border-blue-100 pb-2 pt-4"><span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-black text-white">3</span><h3 class="text-base font-black text-gray-900">応募してほしい人</h3><span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-bold text-gray-700">任意</span></div>
           <fieldset class="rounded-xl border border-gray-200 p-4">
             <legend class="px-1 text-sm font-bold text-gray-800">資格・経験の応募条件（任意）</legend>
             <p class="mb-3 text-xs text-gray-600">資格は「必須」と「歓迎」を分けて設定できます。該当する場合だけ選択してください。</p>
@@ -394,6 +388,7 @@
             </label>
           </fieldset>
 
+          <div class="mt-2 flex items-center gap-2 border-b border-blue-100 pb-2 pt-4"><span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-black text-white">4</span><h3 class="text-base font-black text-gray-900">写真・アピール</h3><span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-bold text-gray-700">任意</span></div>
           <p class="rounded-lg border border-blue-100 bg-blue-50 p-3 text-xs leading-relaxed text-blue-900">求人に電話番号・LINE IDは登録しません。応募者との連絡は「応募・メッセージ」から行えます。</p>
 
                   <div>
@@ -487,15 +482,6 @@
         <div class="min-w-0">
             <section id="dashboardView-profile">
               <h3 class="text-lg font-bold mb-4 border-b pb-2 text-blue-600">マイプロフィール</h3>
-      <details class="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-3" open>
-        <summary class="cursor-pointer text-sm font-bold text-blue-900">はじめての方へ（求職者向け）</summary>
-        <ol class="mt-2 list-inside list-decimal space-y-1 text-sm text-blue-950">
-          <li>希望職種・地域・給与や経験を登録すると、求人のおすすめに反映されます。</li>
-          <li>求人一覧の「未経験歓迎」「寮あり」などから条件を選び、お気に入りも活用できます。</li>
-          <li>応募後は「応募履歴」で企業の確認状況を見られます。企業からの連絡は「連絡・通知」で確認できます。</li>
-        </ol>
-      </details>
-      
       <div id="seekerProfileForm" class="space-y-4">
         <div class="rounded-lg border border-blue-100 bg-blue-50 p-3 text-xs leading-relaxed text-blue-900">
           <p>赤い「*」は必須項目です。経験・資格・希望条件は分かる範囲で登録できます。</p>
@@ -727,6 +713,12 @@
           <p class="mb-4 text-xs leading-relaxed text-gray-600">職種・勤務地・給与条件の一致度を目安として並べます。経験・資格は候補者情報として表示し、順位の判定には使いません。</p>
           <label for="seekerSearchKeyword" class="mb-2 block text-sm font-bold text-gray-700">キーワード</label>
           <input type="search" id="seekerSearchKeyword" oninput="renderEmployerSeekerSearch(true)" placeholder="希望職種・地域・資格・経験で検索" class="mb-4 w-full rounded-xl border border-blue-300 bg-white px-4 py-3 text-base shadow-sm outline-none focus:ring-2 focus:ring-blue-500">
+          <label for="seekerSearchSort" class="mb-2 block text-sm font-bold text-gray-700">並び替え</label>
+          <select id="seekerSearchSort" onchange="renderEmployerSeekerSearch(true)" class="mb-4 w-full rounded-xl border border-blue-300 bg-white px-4 py-3 text-base shadow-sm outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="match">マッチ度が高い順</option>
+            <option value="newest">更新が新しい順</option>
+            <option value="salary">希望最低額が高い順</option>
+          </select>
           <details class="rounded-xl border border-blue-200 bg-white">
             <summary class="cursor-pointer select-none rounded-xl px-4 py-3 text-sm font-bold text-blue-900 hover:bg-blue-100">絞り込み条件・並び替え</summary>
             <div class="grid grid-cols-1 gap-3 border-t border-blue-100 p-4 sm:grid-cols-2">
@@ -762,15 +754,6 @@
                   <option value="monthly">月給</option>
                 </select>
               </label>
-              <label class="text-sm text-gray-700 sm:col-span-2">
-                <span class="mb-1 block border-t border-blue-100 pt-3 font-bold">絞り込んだ求職者の中で、優先したい順</span>
-                <span class="mb-1 block text-xs text-gray-500">設定した条件に合う候補者の中で、選んだ項目を重視して表示します。</span>
-                <select id="seekerSearchSort" onchange="renderEmployerSeekerSearch(true)" class="w-full rounded-lg border px-3 py-2.5 text-base focus:ring-2 focus:ring-blue-500 outline-none">
-                  <option value="match">マッチ度が高い順</option>
-                  <option value="newest">更新が新しい順</option>
-                  <option value="salary">希望最低額が高い順</option>
-                </select>
-              </label>
             </div>
           </details>
           <div id="activeSeekerFilters" class="mt-4 hidden items-center justify-between gap-2 text-sm">
@@ -788,6 +771,18 @@
 
         <label for="searchKeyword" class="mb-2 block text-sm font-bold text-gray-700">キーワード</label>
         <input type="text" id="searchKeyword" oninput="renderJobList(true)" placeholder="職種・勤務地・タグで検索（例: 横浜、日払い）" class="mb-4 w-full rounded-xl border border-blue-300 bg-white px-4 py-3 text-base shadow-sm outline-none focus:ring-2 focus:ring-blue-500">
+
+        <div class="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
+          <label class="text-sm font-bold text-gray-700">
+            <span class="mb-1 block">並び替え</span>
+            <select id="jobSort" onchange="renderJobList(true)" class="w-full rounded-lg border border-blue-300 bg-white px-3 py-2.5 text-base font-normal shadow-sm focus:ring-2 focus:ring-blue-500 outline-none">
+              <option value="recommended">おすすめ順</option>
+              <option value="newest" selected>新着順</option>
+              <option value="salary">給与額が高い順</option>
+              <option value="capacity">募集人数が少ない順</option>
+            </select>
+          </label>
+        </div>
 
         <fieldset class="mb-4">
           <legend class="mb-2 text-sm font-bold text-gray-700">人気の条件から探す</legend>
@@ -856,16 +851,6 @@
           <span class="block mb-1">最低給与額（円）</span>
           <input type="number" id="minimumSalary" min="0" step="1" oninput="renderJobList(true)" placeholder="例: 15000" class="w-full rounded-lg border px-3 py-2.5 text-base focus:ring-2 focus:ring-blue-500 outline-none">
           <span class="block text-xs text-gray-500 mt-1">最低額で絞る場合は給与区分も選択してください。</span>
-        </label>
-        <label class="text-sm text-gray-700 sm:col-span-2">
-          <span class="mb-1 block border-t border-blue-100 pt-3 font-bold">絞り込んだ求人の中で、優先したい順</span>
-          <span class="mb-1 block text-xs text-gray-500">設定した条件に合う求人の中で、選んだ項目を重視して表示します。</span>
-          <select id="jobSort" onchange="renderJobList(true)" class="w-full rounded-lg border px-3 py-2.5 text-base focus:ring-2 focus:ring-blue-500 outline-none">
-            <option value="recommended">おすすめ順</option>
-            <option value="newest" selected>新着順</option>
-            <option value="salary">給与額が高い順</option>
-            <option value="capacity">募集人数が少ない順</option>
-          </select>
         </label>
           </div>
         </details>
