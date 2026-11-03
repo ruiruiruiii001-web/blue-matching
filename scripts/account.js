@@ -535,7 +535,7 @@ function switchTab(tab) {
   const tabEmployerBtn = document.getElementById("tabEmployerBtn");
   const tabSeekerBtn = document.getElementById("tabSeekerBtn");
   const isSeekerTab = tab === "seeker";
-  jobSearchTitle.innerText = isSeekerTab ? "おすすめお仕事を条件で絞り込む" : "お仕事を検索・絞り込み";
+  jobSearchTitle.innerText = isSeekerTab ? "おすすめのお仕事を条件で絞り込む" : "お仕事を検索・絞り込み";
   jobSearchDescription.innerText = isSeekerTab
     ? "並び替えで「おすすめ順」を選ぶと、プロフィールに登録した希望条件を参考に表示します。条件を選ぶとお仕事をさらに絞り込めます。"
     : "キーワードや条件を指定して、希望に合うお仕事を探せます。";

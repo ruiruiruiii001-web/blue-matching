@@ -182,7 +182,7 @@ async function publishJob() {
     const cleanupError = uploadedImages.paths.length
       ? (await supabaseClient.storage.from("job-media").remove(uploadedImages.paths)).error
       : null;
-    if (cleanupError) console.error("保存に失敗したお仕事写真の後片付けに失敗しました:", cleanupError);
+    if (cleanupError) console.error("保存に失敗したお仕事の写真の後片付けに失敗しました:", cleanupError);
     alert(`${editingJobId ? "更新" : "投稿"}に失敗しました: ${result.error?.message || "対象のお仕事を更新できませんでした。"}`);
     return;
   }

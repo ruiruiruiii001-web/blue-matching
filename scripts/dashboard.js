@@ -26,7 +26,7 @@ function renderAccountDashboard() {
           <span class="block truncate font-bold text-gray-800">${escapeHtml(job.title)}</span>
           <span class="mt-1 block text-[10px] font-medium text-gray-400">📍 ${escapeHtml(job.location || "場所未設定")}</span>
         </button>`).join("")
-      : '<p class="rounded-2xl border border-dashed border-gray-200 bg-gray-50/50 p-4 text-xs text-gray-500">フォロー中の企業の掲載中お仕事はありません。</p>';
+      : '<p class="rounded-2xl border border-dashed border-gray-200 bg-gray-50/50 p-4 text-xs text-gray-500">フォロー中の企業の掲載中のお仕事はありません。</p>';
   }
 
   const submitted = accountApplications.filter(application => application.applicant_id === currentUser.id);

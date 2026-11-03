@@ -144,7 +144,7 @@ function renderEmployerSeekerSearch(resetLimit = false) {
   const selectedJobId = jobSelect.value;
   const selectedJob = ownedJobs.find(job => String(job.id) === selectedJobId);
   const previousJobId = selectedJob ? String(selectedJob.id) : "";
-  jobSelect.innerHTML = `<option value="">${ownedJobs.length ? "お仕事を選ぶとマッチ度順に表示" : "募集中の自社お仕事がありません"}</option>`;
+  jobSelect.innerHTML = `<option value="">${ownedJobs.length ? "お仕事を選ぶとマッチ度順に表示" : "募集中の自社のお仕事がありません"}</option>`;
   ownedJobs.forEach(job => {
     jobSelect.add(new Option(`${job.title || "お仕事"} ・ ${job.location || "勤務地未設定"}`, String(job.id)));
   });
@@ -333,7 +333,7 @@ function getSeekerJobMatch(job, profile) {
     maximumScore += 1;
     if (jobSalary >= minimumSalary) {
       score += 1;
-      reasons.push("お仕事給与が希望最低額以上");
+      reasons.push("お仕事の給与が希望最低額以上");
     }
   }
 

@@ -92,11 +92,11 @@ export default async function handler(req) {
     const jobResponse = await fetch(`${baseUrl}/rest/v1/published_jobs?${jobQuery}`, { headers });
     if (!jobResponse.ok) {
       console.error('Could not load job for report:', jobResponse.status);
-      return jsonResponse({ error: '求人情報を確認できませんでした。時間をおいて再度お試しください。' }, 502);
+      return jsonResponse({ error: 'お仕事の情報を確認できませんでした。時間をおいて再度お試しください。' }, 502);
     }
     const jobs = await jobResponse.json();
     if (!Array.isArray(jobs) || jobs.length !== 1) {
-      return jsonResponse({ error: '対象の求人が見つかりません。ページを更新してください。' }, 404);
+      return jsonResponse({ error: '対象のお仕事が見つかりません。ページを更新してください。' }, 404);
     }
 
     const insertResponse = await fetch(`${baseUrl}/rest/v1/job_reports`, {

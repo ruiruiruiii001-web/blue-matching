@@ -42,7 +42,7 @@ function renderJobList(resetLimit = false) {
     ? "おすすめ順"
     : activeTab === "seeker"
       ? "おすすめ順（希望条件登録後）"
-      : "おすすめ順（お仕事探しの方ログイン時）";
+      : "おすすめ順（ログイン時）";
   if (!canRecommend && sortSelect.value === "recommended") sortSelect.value = "newest";
   const sortBy = sortSelect.value;
   const preferredLocation = activeTab === "seeker" && seekerProfile ? seekerProfile.location || "" : "";
@@ -209,7 +209,7 @@ function renderJobList(resetLimit = false) {
     loadMoreBtn.type = "button";
     loadMoreBtn.onclick = loadMoreJobs;
     loadMoreBtn.className = "w-full py-4 mt-4 bg-white border border-blue-100 text-blue-600 font-bold rounded-2xl hover:bg-blue-50 transition-colors shadow-sm";
-    loadMoreBtn.innerText = `もっとお仕事を見る (${filteredJobs.length - displayLimitJobs}件の残り)`;
+    loadMoreBtn.innerText = `もっと見る (${filteredJobs.length - displayLimitJobs}件の残り)`;
     jobList.appendChild(loadMoreBtn);
   }
 }
@@ -732,7 +732,7 @@ function getJobMatchDetails(job, profile) {
     compared += 1;
     if (getJobPayAmount(job) >= Number(profile.minimumSalary)) {
       score += 1;
-      reasons.push("お仕事給与が希望最低額以上");
+      reasons.push("お仕事の給与が希望最低額以上");
     }
   }
   const workMatch = getWorkPreferenceMatch(job.work_preferences, profile.workPreferences);

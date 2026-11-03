@@ -88,7 +88,7 @@ function getVisibleNotifications() {
             </div>
             ${["job_application", "application_message"].includes(notification.event_type)
               ? renderApplicationNotificationDetails(notification)
-              : `<p class="mt-1 text-sm text-gray-600 leading-relaxed">${escapeHtml(notification.event_type === "contact_reply" ? "お仕事探しの方から届いた連絡への返信です。" : String(notification.body || ""))}</p>`}
+              : `<p class="mt-1 text-sm text-gray-600 leading-relaxed">${escapeHtml(notification.event_type === "contact_reply" ? "応募者から届いた連絡への返信です。" : String(notification.body || ""))}</p>`}
             <p class="mt-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest">${formatDashboardDate(notification.created_at)}</p>
             ${notification.event_type === "contact_request" ? renderContactRequestNotification(notification.related_id) : ""}
             ${notification.event_type === "contact_reply" ? renderContactReplyNotification(notification.related_id) : ""}

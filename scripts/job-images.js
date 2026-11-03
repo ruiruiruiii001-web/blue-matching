@@ -249,7 +249,7 @@ function renderJobImageGallery(job, className = "") {
   const images = getJobImages(job);
   if (!images.length) return "";
   return `<div class="${className} grid grid-cols-2 gap-2 sm:grid-cols-3">${images.map((url, index) => `
-    <a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" aria-label="お仕事写真 ${index + 1} を拡大表示" class="block overflow-hidden rounded-xl bg-gray-100">
-      <img src="${escapeHtml(url)}" alt="お仕事写真 ${index + 1}" loading="lazy" class="aspect-[4/3] w-full object-cover">
+    <a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" aria-label="お仕事の写真 ${index + 1} を拡大表示" class="block overflow-hidden rounded-xl bg-gray-100">
+      <img src="${escapeHtml(url)}" alt="お仕事の写真 ${index + 1}" loading="lazy" class="aspect-[4/3] w-full object-cover">
     </a>`).join("")}</div>`;
 }
