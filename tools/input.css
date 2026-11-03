@@ -1,3 +1,14 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* アクセシビリティ: 読みやすい文字色・最小文字サイズ・キーボード操作時の枠 */
+.text-gray-300,
+.text-gray-400 { color: #6b7280; }
+.text-\[8px\],
+.text-\[9px\],
+.text-\[10px\] { font-size: 11px; }
+:focus-visible {
+  outline: 3px solid #2563eb !important;
+  outline-offset: 2px;
+}

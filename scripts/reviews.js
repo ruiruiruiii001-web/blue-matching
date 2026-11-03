@@ -62,7 +62,9 @@ function updateStars(rating) {
   for (let i = 1; i <= 5; i++) {
     const btn = document.createElement("button");
     btn.type = "button";
-    btn.className = `text-4xl transition-transform hover:scale-110 focus:outline-none ${i <= rating ? "" : "grayscale opacity-30"}`;
+    btn.className = `min-h-11 min-w-11 text-4xl transition-transform hover:scale-110 ${i <= rating ? "" : "grayscale opacity-30"}`;
+    btn.setAttribute("aria-label", `満足度 ${i} / 5`);
+    btn.setAttribute("aria-pressed", String(i === rating));
     btn.innerText = "⭐";
     btn.onclick = () => updateStars(i);
     container.appendChild(btn);
