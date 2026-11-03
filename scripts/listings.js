@@ -6,6 +6,7 @@ function renderJobList(resetLimit = false) {
   const openJobsOnly = document.getElementById("openJobsOnly").checked;
   const favoritesOnly = document.getElementById("favoritesOnly").checked;
   const followedOnly = document.getElementById("followedOnly").checked;
+  const hideApplied = document.getElementById("hideAppliedJobs").checked;
   const capacityFilter = document.getElementById("capacityFilter").value;
   updateJobFilterOptions();
   const locationFilter = document.getElementById("locationFilter").value;
@@ -57,6 +58,7 @@ function renderJobList(resetLimit = false) {
       (!openJobsOnly || !isJobClosed(job)) &&
         (!favoritesOnly || isFavorite(job.id)) &&
         (!followedOnly || isFollowingEmployer(job.owner_id)) &&
+        (!hideApplied || !getSeekerApplication(job.id)) &&
         (!capacityFilter || getCapacityOptionValue(job.capacity) === capacityFilter) &&
         (!locationFilter || jobMatchesLocationFilter(job.location, locationFilter)) &&
         (!salaryTypeFilter || getJobPayType(job) === salaryTypeFilter) &&
@@ -98,6 +100,7 @@ function renderJobList(resetLimit = false) {
     openJobsOnly && "募集中のみ",
     favoritesOnly && "お気に入り",
     followedOnly && "フォロー中の企業",
+    hideApplied && "応募済みを隠す",
     locationFilter && `勤務地: ${locationFilter}`,
     capacityFilter && `募集人数: ${document.getElementById("capacityFilter").selectedOptions[0].text}`,
     salaryTypeFilter && `給与: ${document.getElementById("salaryTypeFilter").selectedOptions[0].text}`,
@@ -155,6 +158,7 @@ function renderJobList(resetLimit = false) {
                         <div class="mb-3 flex flex-wrap gap-2">
             <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-wider uppercase ${isJobClosed(job) ? 'bg-gray-100 text-gray-500' : 'bg-emerald-50 text-emerald-700'}">${isJobClosed(job) ? '募集終了' : '募集中'}</span>
             ${job.is_hidden ? '<span class="inline-flex items-center rounded-full bg-red-50 px-2.5 py-0.5 text-[10px] font-bold text-red-700">運営により非表示中</span>' : ''}
+            ${renderAppliedBadge(job.id)}
 
             ${job.capacity <= 0 ? '' : `<span class="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-[10px] font-bold text-blue-700 uppercase">募集人数 ${formatJobCapacity(job.capacity)}</span>`}
             ${matchDetails?.score > 0 ? '<span class="inline-flex items-center rounded-full bg-purple-50 px-2.5 py-0.5 text-[10px] font-bold text-purple-700 uppercase">希望条件に一致</span>' : ''}
@@ -215,12 +219,29 @@ function renderJobList(resetLimit = false) {
   }
 }
 
+function getSeekerApplication(jobId) {
+  if (!currentUser || accountType !== "seeker") return null;
+  return accountApplications.find(application =>
+    application.applicant_id === currentUser.id && String(application.job_id) === String(jobId)
+  ) || null;
+}
+
+function renderAppliedBadge(jobId) {
+  const application = getSeekerApplication(jobId);
+  if (!application) return "";
+  const label = application.status === "reviewed" ? "応募済み・確認済み"
+    : application.status === "dismissed" ? "応募済み・見送り"
+    : "応募済み";
+  return `<span class="inline-flex items-center rounded-full bg-sky-100 px-2.5 py-0.5 text-[10px] font-bold text-sky-800">${label}</span>`;
+}
+
 function resetJobFilters() {
   displayLimitJobs = 10;
   document.getElementById("searchKeyword").value = "";
   document.getElementById("openJobsOnly").checked = false;
   document.getElementById("favoritesOnly").checked = false;
   document.getElementById("followedOnly").checked = false;
+  document.getElementById("hideAppliedJobs").checked = false;
   document.getElementById("locationFilter").value = "";
   document.getElementById("capacityFilter").value = "";
   document.getElementById("salaryTypeFilter").value = "";
