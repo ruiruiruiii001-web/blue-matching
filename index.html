@@ -489,9 +489,19 @@
 
       <div id="seekerDashboard" class="hidden scroll-mt-20 space-y-4">
         <p id="accountDashboardStatus" role="status" aria-live="polite" class="hidden text-sm text-red-600"></p>
+        <section class="rounded-2xl border-2 border-emerald-300 bg-emerald-50 p-5 shadow-sm sm:p-6">
+          <p class="text-sm font-bold text-emerald-800">今日の予定</p>
+          <h3 class="mt-1 text-xl font-black text-emerald-950">今日は働けますか？</h3>
+          <p class="mt-2 text-sm leading-6 text-emerald-900">チェックして保存すると、プロフィール公開に同意している場合、掲載者が「今日働ける人」を探すときに表示されます。氏名や連絡先は表示されません。設定は今日のみ有効で、翌日になると自動でリセットされます。</p>
+          <label class="mt-5 flex min-h-14 items-center gap-3 rounded-xl border border-emerald-200 bg-white px-4 py-3 text-base font-bold text-emerald-950">
+            <input id="seekerAvailableToday" type="checkbox" class="h-5 w-5 shrink-0 rounded text-emerald-700 focus:ring-emerald-600">
+            <span>今日は働けます</span>
+          </label>
+          <button type="button" onclick="saveSeekerAvailability()" class="mt-4 min-h-12 w-full rounded-xl bg-emerald-700 px-5 py-3 font-bold text-white hover:bg-emerald-800 sm:w-auto">今日の状況を保存</button>
+          <p id="seekerAvailabilityStatus" role="status" aria-live="polite" class="mt-3 hidden text-sm"></p>
+        </section>
         <nav id="dashboardNavigation" role="tablist" aria-label="マイページの表示切替" class="flex shrink-0 gap-2 overflow-x-auto py-2">
           <button type="button" role="tab" aria-selected="true" aria-controls="dashboardView-profile" data-dashboard-view="profile" onclick="showDashboardView('profile')" class="dashboard-menu-button h-11 shrink-0 rounded-lg bg-blue-600 px-3 font-bold text-sm text-white"><span data-line-icon="user"></span>プロフィール</button>
-          <button type="button" role="tab" aria-selected="false" aria-controls="dashboardView-availability" data-dashboard-view="availability" onclick="showDashboardView('availability')" class="dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 font-bold text-sm text-gray-700">☀️ 今日働ける</button>
           <button type="button" role="tab" aria-selected="false" aria-controls="dashboardView-favorites" data-dashboard-view="favorites" onclick="showDashboardView('favorites')" class="dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 font-bold text-sm text-gray-700"><span data-line-icon="star"></span>お気に入り</button>
                               <button type="button" role="tab" aria-selected="false" aria-controls="dashboardView-applications" data-dashboard-view="applications" onclick="showDashboardView('applications')" class="dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 font-bold text-sm text-gray-700"><span data-line-icon="send"></span>応募履歴</button>
           <button id="seekerNotificationsTab" type="button" role="tab" aria-selected="false" aria-controls="dashboardView-notifications" data-dashboard-view="notifications" onclick="showDashboardView('notifications')" class="dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 font-bold text-sm text-gray-700"><span data-line-icon="bell"></span>連絡・通知</button>
@@ -500,19 +510,6 @@
         </nav>
 
         <div class="min-w-0">
-            <section id="dashboardView-availability" class="hidden">
-              <div class="rounded-2xl border-2 border-emerald-300 bg-emerald-50 p-5 shadow-sm sm:p-6">
-                <p class="text-sm font-bold text-emerald-800">今日の予定</p>
-                <h3 class="mt-1 text-xl font-black text-emerald-950">今日は働けますか？</h3>
-                <p class="mt-2 text-sm leading-6 text-emerald-900">チェックして保存すると、プロフィール公開に同意している場合、掲載者が「今日働ける人」を探すときに表示されます。氏名や連絡先は表示されません。</p>
-                <label class="mt-5 flex min-h-14 items-center gap-3 rounded-xl border border-emerald-200 bg-white px-4 py-3 text-base font-bold text-emerald-950">
-                  <input id="seekerAvailableToday" type="checkbox" class="h-5 w-5 shrink-0 rounded text-emerald-700 focus:ring-emerald-600">
-                  <span>今日は働けます</span>
-                </label>
-                <button type="button" onclick="saveSeekerAvailability()" class="mt-4 min-h-12 w-full rounded-xl bg-emerald-700 px-5 py-3 font-bold text-white hover:bg-emerald-800 sm:w-auto">今日の状況を保存</button>
-                <p id="seekerAvailabilityStatus" role="status" aria-live="polite" class="mt-3 hidden text-sm"></p>
-              </div>
-            </section>
             <section id="dashboardView-profile">
               <h3 class="text-lg font-bold mb-4 border-b pb-2 text-blue-600">マイプロフィール</h3>
       <div id="seekerProfileForm" class="space-y-4">

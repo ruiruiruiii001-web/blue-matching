@@ -1,3 +1,5 @@
+let seekerAvailabilityResetTimer = null;
+
 async function saveSeekerProfile() {
   if (!currentUser || accountType !== "seeker") {
     promptLogin("プロフィールを保存するにはお仕事探しアカウントでログインしてください。");
@@ -17,7 +19,8 @@ async function saveSeekerProfile() {
     .filter(Boolean);
   const checkedLic = [...new Set([...selectedLicenses, ...otherLicenses])];
   const workPreferences = getCheckedValues("seekerWorkPreference");
-  const availableDates = seekerProfileData?.availableDates || [];
+  const today = getLocalDateISO();
+  const availableDates = seekerProfileData?.availableDates?.includes(today) ? [today] : [];
   const preferredPayType = document.getElementById("seekerPayType").value;
   const minimumSalaryValue = document.getElementById("seekerMinimumSalary").value;
   const preferredMinimumSalary = minimumSalaryValue ? Number(minimumSalaryValue) : null;
@@ -216,6 +219,19 @@ function syncSeekerAvailabilityControl() {
   if (status) {
     status.innerText = "";
     status.className = "mt-3 hidden text-sm";
+  }
+
+  if (seekerAvailabilityResetTimer !== null) {
+    clearTimeout(seekerAvailabilityResetTimer);
+    seekerAvailabilityResetTimer = null;
+  }
+  if (currentUser && accountType === "seeker") {
+    const now = new Date();
+    const nextDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+    seekerAvailabilityResetTimer = setTimeout(() => {
+      seekerAvailabilityResetTimer = null;
+      syncSeekerAvailabilityControl();
+    }, nextDay.getTime() - now.getTime() + 10);
   }
 }
 
