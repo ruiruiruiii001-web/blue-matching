@@ -279,9 +279,9 @@ async function openApplicantPublicProfile(applicationId) {
         <div><dt class="text-xs font-bold text-gray-500">希望する仕事</dt><dd class="mt-1 font-medium text-gray-800">${escapeHtml(String(data.job_type || "未設定"))}</dd></div>
         <div><dt class="text-xs font-bold text-gray-500">希望勤務地</dt><dd class="mt-1 font-medium text-gray-800">${escapeHtml(String(data.location || "未設定"))}</dd></div>
         <div><dt class="text-xs font-bold text-gray-500">希望給与</dt><dd class="mt-1 font-medium text-gray-800">${escapeHtml(pay)}</dd></div>
-        <div><dt class="text-xs font-bold text-gray-500">作業経験</dt><dd class="mt-1 font-medium text-gray-800">${escapeHtml(String(data.exp_years || "未設定"))}</dd></div>
+        <div><dt class="text-xs font-bold text-gray-500">仕事の経験</dt><dd class="mt-1 font-medium text-gray-800">${escapeHtml(getSeekerExperienceLabel(data.exp_years))}</dd></div>
         <div class="sm:col-span-2"><dt class="text-xs font-bold text-gray-500">経験した作業・できること</dt><dd class="mt-1 whitespace-pre-wrap font-medium text-gray-800">${escapeHtml(String(data.experience_details || "未登録"))}</dd></div>
-        <div><dt class="text-xs font-bold text-gray-500">体力自信度</dt><dd class="mt-1 font-medium text-gray-800">${escapeHtml(String(data.stamina || "未設定"))}</dd></div>
+        <div><dt class="text-xs font-bold text-gray-500">体を使う作業への自信</dt><dd class="mt-1 font-medium text-gray-800">${escapeHtml(getSeekerStaminaLabel(data.stamina))}</dd></div>
         <div><dt class="text-xs font-bold text-gray-500">資格</dt><dd class="mt-1 flex flex-wrap gap-1.5">${licenses}</dd></div>
         <div class="sm:col-span-2"><dt class="text-xs font-bold text-gray-500">希望する働き方</dt><dd class="mt-1 flex flex-wrap gap-1.5">${workPreferences.length
           ? workPreferences.map(value => `<span class="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-800">${escapeHtml(value)}</span>`).join("")

@@ -116,13 +116,13 @@ async function publishJob() {
     return;
   }
 
-  if (workCategory !== "other" && !workDate) {
-    alert("単発のお手伝いは作業日を入力してください。");
+  if (!workDate) {
+    alert("作業日を入力してください。");
     return;
   }
 
-  if (workCategory !== "other" && !location) {
-    alert("単発のお手伝いは勤務地を入力してください。番地など個人宅を特定できる情報は入力しないでください。");
+  if (!location) {
+    alert("勤務地を入力してください。番地など個人宅を特定できる情報は入力しないでください。");
     return;
   }
 

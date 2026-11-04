@@ -28,8 +28,6 @@ async function loadAccountData(user) {
       if (profileResult.data) {
         seekerProfileData = {
           name: profileResult.data.name,
-          phone: profileResult.data.phone,
-          avatarUrl: profileResult.data.avatar_url,
           jobType: profileResult.data.job_type,
           location: profileResult.data.location,
           payType: profileResult.data.pay_type,

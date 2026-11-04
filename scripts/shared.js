@@ -72,7 +72,7 @@ const WORK_CATEGORY_LABELS = Object.freeze({
   farm_work: "農作業",
   neighborhood_help: "ご近所のお手伝い",
   restaurant_help: "飲食店のお手伝い",
-  other: "その他のお仕事"
+  other: "その他のお手伝い"
 });
 
 const PAYMENT_METHOD_LABELS = Object.freeze({
@@ -155,6 +155,45 @@ const WORK_PREFERENCE_GROUPS = [
   }
 ];
 
+const ACTIVE_WORK_PREFERENCE_GROUPS = WORK_PREFERENCE_GROUPS.map(group => {
+  if (group.key === "employment") {
+    return {
+      ...group,
+      options: group.options.filter(([value]) => ["spot", "short_term"].includes(value))
+    };
+  }
+  if (group.key === "days") {
+    return {
+      ...group,
+      options: group.options.filter(([value]) => ["days_1", "days_2_3", "days_flexible"].includes(value))
+    };
+  }
+  return group;
+});
+
+const SEEKER_EXPERIENCE_LABELS = Object.freeze({
+  "未経験（やる気あり）": "未経験",
+  "3〜5年（即戦力）": "3〜5年",
+  "5年以上（ベテラン）": "5年以上"
+});
+
+const SEEKER_STAMINA_LABELS = Object.freeze({
+  "★★★★★ (とても自信あり)": "かなり自信がある",
+  "★★★★☆ (自信あり)": "自信がある",
+  "★★★☆☆ (普通)": "ふつう",
+  "★★☆☆☆ (やや不安)": "少し不安がある",
+  "★☆☆☆☆ (自信なし)": "不安がある",
+  "★★★★★ (自信あり)": "自信がある"
+});
+
+function getSeekerExperienceLabel(value) {
+  return SEEKER_EXPERIENCE_LABELS[value] || value || "未設定";
+}
+
+function getSeekerStaminaLabel(value) {
+  return SEEKER_STAMINA_LABELS[value] || value || "未設定";
+}
+
 function renderCheckboxOptions(containerId, inputName, options) {
   const container = document.getElementById(containerId);
   if (!container) return;
@@ -175,10 +214,10 @@ function renderCheckboxOptions(containerId, inputName, options) {
   }));
 }
 
-function renderWorkPreferenceOptions(containerId, inputName) {
+function renderWorkPreferenceOptions(containerId, inputName, groups = WORK_PREFERENCE_GROUPS) {
   const container = document.getElementById(containerId);
   if (!container) return;
-  container.replaceChildren(...WORK_PREFERENCE_GROUPS.map(group => {
+  container.replaceChildren(...groups.map(group => {
     const fieldset = document.createElement("fieldset");
     fieldset.className = "space-y-2";
     const legend = document.createElement("legend");
@@ -457,7 +496,7 @@ function setCheckedValues(inputName, values) {
 
 function getWorkPreferenceLabels(values) {
   const labels = new Map(
-    WORK_PREFERENCE_GROUPS.flatMap(group =>
+    ACTIVE_WORK_PREFERENCE_GROUPS.flatMap(group =>
       group.options.map(([value, label]) => [`${group.key}:${value}`, label])
     )
   );
@@ -473,7 +512,7 @@ function getWorkPreferenceMatch(jobPreferences, seekerPreferences) {
   let maximumScore = 0;
   const reasons = [];
 
-  WORK_PREFERENCE_GROUPS.forEach(group => {
+  ACTIVE_WORK_PREFERENCE_GROUPS.forEach(group => {
     const groupValues = group.options.map(([value]) => `${group.key}:${value}`);
     const jobGroup = groupValues.filter(value => jobValues.has(value));
     const seekerGroup = groupValues.filter(value => seekerValues.has(value));
@@ -491,8 +530,8 @@ function initializeProfileOptionControls() {
   renderCheckboxOptions("seekerJobTypeOptions", "seekerJobTypeOption", JOB_TYPE_OPTIONS);
   renderCheckboxOptions("seekerLicenseOptions", "seekerLic", LICENSE_OPTIONS);
   initializeJobRequirementControls();
-  renderWorkPreferenceOptions("seekerWorkPreferences", "seekerWorkPreference");
-  renderWorkPreferenceOptions("jobWorkPreferences", "jobWorkPreference");
+  renderWorkPreferenceOptions("seekerWorkPreferences", "seekerWorkPreference", ACTIVE_WORK_PREFERENCE_GROUPS);
+  renderWorkPreferenceOptions("jobWorkPreferences", "jobWorkPreference", ACTIVE_WORK_PREFERENCE_GROUPS);
   renderLocationPreferenceOptions();
   renderLocationPreferenceOptions(
     "jobLocationPrefectureOptions",
@@ -565,14 +604,6 @@ function formatApplicationStatusDescription(status) {
     reviewed: "掲載者がお仕事を確定しました。チャットで最終確認できます。",
     dismissed: "募集した方が今回は対応を見送りました。理由は応募したお仕事から確認できます。"
   }[status] || "応募状況を確認できません。";
-}
-
-function normalizeJapanesePhone(phone) {
-  return phone.replace(/[()\s-]/g, "");
-}
-
-function isValidJapanesePhone(phone) {
-  return /^(0\d{9,10}|\+81\d{9,10})$/.test(phone);
 }
 
 async function uploadImage(fileInput, targetId, statusId) {

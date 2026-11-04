@@ -126,8 +126,8 @@ function renderEmployerApplicationDetails(application) {
           <div class="flex items-center gap-2">
             <span class="text-base">💪</span>
             <div>
-              <p class="text-[9px] font-bold text-gray-400 uppercase leading-none mb-1">仕事の経験年数</p>
-              <p class="font-bold text-gray-700">${escapeHtml(String(application.experience || "未登録"))}</p>
+              <p class="text-[9px] font-bold text-gray-400 uppercase leading-none mb-1">仕事の経験</p>
+              <p class="font-bold text-gray-700">${escapeHtml(getSeekerExperienceLabel(application.experience))}</p>
             </div>
           </div>
           <div class="flex items-center gap-2">

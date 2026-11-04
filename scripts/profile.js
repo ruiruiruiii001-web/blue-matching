@@ -37,8 +37,6 @@ async function saveSeekerProfile() {
 
   const profile = {
     name: document.getElementById("seekerName").value.trim(),
-    phone: normalizeJapanesePhone(document.getElementById("seekerPhone").value.trim()),
-    avatarUrl: document.getElementById("seekerAvatarUrl").value.trim(),
     jobType,
     location: getLocationPreferencesFromForm(),
     payType: preferredPayType,
@@ -54,10 +52,6 @@ async function saveSeekerProfile() {
 
   if (!profile.name) {
     alert("お名前を入力してください。");
-    return;
-  }
-  if (profile.phone && !isValidJapanesePhone(profile.phone)) {
-    alert("電話番号は日本の電話番号を入力してください（例: 09012345678）。");
     return;
   }
   if (profile.location.length > 500) {
@@ -80,8 +74,6 @@ async function saveSeekerProfile() {
   const profileRow = {
     user_id: currentUser.id,
     name: profile.name,
-    phone: profile.phone || null,
-    avatar_url: profile.avatarUrl || null,
     job_type: profile.jobType,
     location: profile.location,
     pay_type: profile.payType || null,
@@ -330,8 +322,6 @@ function closeSeekerAvailabilityDialog() {
 function loadSeekerProfile(profile) {
   if (!profile) return;
   document.getElementById("seekerName").value = profile.name || "";
-  document.getElementById("seekerPhone").value = profile.phone || "";
-  document.getElementById("seekerAvatarUrl").value = profile.avatarUrl || "";
   const jobTypes = String(profile.jobType || "").split(/[,、，]/).map(value => value.trim()).filter(Boolean);
   setCheckedValues("seekerJobTypeOption", jobTypes.filter(value => JOB_TYPE_OPTIONS.includes(value)));
   document.getElementById("seekerJobType").value = jobTypes
@@ -367,11 +357,9 @@ function loadSeekerProfile(profile) {
 }
 
     function clearSeekerProfileForm() {
-  seekerProfileData = null;
-  document.getElementById("seekerName").value = "";
-  document.getElementById("seekerPhone").value = "";
-  document.getElementById("seekerAvatarUrl").value = "";
-  document.getElementById("seekerJobType").value = "";
+      seekerProfileData = null;
+      document.getElementById("seekerName").value = "";
+      document.getElementById("seekerJobType").value = "";
   setCheckedValues("seekerJobTypeOption", []);
   document.getElementById("seekerOtherLicenses").value = "";
 

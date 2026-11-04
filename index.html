@@ -283,12 +283,12 @@
                 <option value="restaurant_help">飲食店のお手伝い</option>
                 <option value="neighborhood_help">ご近所のお手伝い</option>
                 <option value="construction_help">建設・屋外作業</option>
-                <option value="other">その他（内容を相談・継続募集）</option>
+                <option value="other">その他のお手伝い</option>
               </select>
             </label>
-            <label class="block text-sm font-medium">作業日
-              <input id="jobWorkDate" type="date" class="mt-1 min-h-11 w-full rounded border px-3 py-2.5 text-base focus:ring-2 focus:ring-blue-500">
-              <span class="mt-1 block text-xs font-normal text-gray-500">単発のお手伝いは作業日を入力してください。</span>
+            <label class="block text-sm font-medium">作業日 <span class="text-red-500">*</span>
+              <input id="jobWorkDate" type="date" required class="mt-1 min-h-11 w-full rounded border px-3 py-2.5 text-base focus:ring-2 focus:ring-blue-500">
+              <span class="mt-1 block text-xs font-normal text-gray-500">募集する作業日を入力してください。</span>
             </label>
           </div>
 
@@ -303,7 +303,7 @@
 
           <details id="jobLocationPreferences" data-selection-name="jobLocationPrefecture" data-location-input-name="jobLocationPrefecture" data-location-other-input="jobLocation" data-location-count-label="勤務地" class="rounded-xl border border-blue-100 bg-blue-50">
             <summary class="flex flex-wrap cursor-pointer list-none items-center justify-between gap-2 p-4 text-sm font-bold text-gray-800">
-              <span class="min-w-0">勤務地（単発の募集では必須） <span class="text-red-600">*</span></span>
+              <span class="min-w-0">勤務地 <span class="text-red-600">*</span></span>
               <span class="flex min-w-0 max-w-full flex-wrap items-center justify-end gap-x-2 gap-y-1 text-xs font-normal">
                 <span data-selected-count class="text-gray-600">勤務地 0件</span>
                 <span class="rounded-full bg-white px-2 py-1 font-bold text-blue-700 shadow-sm" data-toggle-label>選択肢を開く</span>
@@ -542,32 +542,14 @@
       <div id="seekerProfileForm" class="space-y-4">
         <div class="rounded-lg border border-blue-100 bg-blue-50 p-3 text-xs leading-relaxed text-blue-900">
           <p>赤い「*」は必須項目です。経験・資格・希望条件は分かる範囲で登録できます。</p>
-          <p class="mt-1">掲載者へのプロフィール公開は初期状態でオフです。公開を選んだ場合も、氏名・電話番号・メールアドレスは表示されません。</p>
+          <p class="mt-1">掲載者へのプロフィール公開は初期状態でオフです。公開を選んだ場合も、氏名・連絡先は表示されません。</p>
         </div>
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 gap-4">
           <div>
             <label class="block text-sm font-medium mb-1">お名前 / 通称 <span class="text-red-500">*</span></label>
             <input type="text" id="seekerName" placeholder="例: 山田 太郎" class="w-full border rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
           </div>
-          <div>
-            <label class="block text-sm font-medium mb-1">携帯電話番号（任意）</label>
-            <input type="text" id="seekerPhone" placeholder="例: 090-XXXX-XXXX" class="w-full border rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-            <p class="mt-1 text-xs text-gray-500">掲載者には公開されません。現在、SMS認証や応募先への電話番号共有には使用していません。</p>
-          </div>
         </div>
-
-                <div>
-          <label class="block text-sm font-medium mb-1">プロフィール写真 <span class="text-xs text-gray-400">(任意)</span></label>
-          <div class="flex items-center gap-3">
-            <input type="file" id="seekerAvatarFile" accept="image/jpeg,image/png,image/webp" class="hidden" onchange="uploadImage(this, 'seekerAvatarUrl', 'seekerAvatarStatus')">
-            <button type="button" onclick="document.getElementById('seekerAvatarFile').click()" class="flex-1 h-12 border-2 border-dashed border-gray-200 rounded-xl flex items-center justify-center gap-2 text-gray-500 hover:bg-gray-50 transition-all text-sm font-bold">
-              👤 写真を選択・撮影
-            </button>
-            <input type="hidden" id="seekerAvatarUrl">
-          </div>
-          <p id="seekerAvatarStatus" class="text-[10px] text-gray-500 mt-1">顔写真や仕事中の写真を設定してください。</p>
-        </div>
-
 
         <div>
           <details data-selection-name="seekerJobTypeOption" data-selection-extra-input="seekerJobType">
@@ -584,7 +566,7 @@
           <label class="mt-2 block text-sm">その他・具体的な仕事
             <input type="text" id="seekerJobType" maxlength="100" placeholder="例: イベント受付、野菜の袋詰め、店舗の清掃" class="mt-1 w-full rounded border px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
           </label>
-          <p class="text-xs text-gray-500 mt-1">選んだ仕事の種類と募集内容の一致を、おすすめ順の参考にします。</p>
+          <p class="text-xs text-gray-500 mt-1">選んだ仕事の種類と募集内容の一致を、おすすめ順の参考にします。単発・短期のお仕事から選べます。</p>
         </div>
 
         <details id="seekerLocationPreferences" data-selection-name="seekerLocationPrefecture" data-location-input-name="seekerLocationPrefecture" data-location-other-input="seekerLocation" data-location-count-label="希望エリア" class="rounded-xl border border-blue-100 bg-blue-50">
@@ -648,12 +630,11 @@
           <p class="mt-1 text-xs text-gray-500">経験した作業や扱える道具・機材を記入できます。掲載者向け公開プロフィールにも同意した場合のみ表示されます。</p>
         </div>
 
-        <!-- 経験・作業への自信 -->
         <div class="bg-gray-50 p-3 rounded border space-y-3">
-          <p class="text-xs font-bold text-gray-700">経験・作業への自信</p>
+          <p class="text-xs font-bold text-gray-700">経験・作業について</p>
           <div class="grid grid-cols-1 gap-3 text-xs sm:grid-cols-2">
             <div>
-              <label class="block font-medium mb-1">仕事の経験年数</label>
+              <label class="block font-medium mb-1">仕事の経験</label>
               <select id="seekerExpYears" class="w-full border rounded p-2">
                 <option value="未経験（やる気あり）">未経験</option>
                 <option value="1〜2年">1〜2年</option>
@@ -665,18 +646,18 @@
               <label class="block font-medium mb-1">体を使う作業への自信（任意）</label>
               <select id="seekerStamina" class="w-full border rounded p-2">
                 <option value="">未回答</option>
-                <option value="★★★★★ (とても自信あり)">★★★★★ とても自信あり</option>
-                <option value="★★★★☆ (自信あり)">★★★★☆ 自信あり</option>
-                <option value="★★★☆☆ (普通)">★★★☆☆ 普通</option>
-                <option value="★★☆☆☆ (やや不安)">★★☆☆☆ やや不安</option>
-                <option value="★☆☆☆☆ (自信なし)">★☆☆☆☆ 自信なし</option>
+                <option value="★★★★★ (とても自信あり)">かなり自信がある</option>
+                <option value="★★★★☆ (自信あり)">自信がある</option>
+                <option value="★★★☆☆ (普通)">ふつう</option>
+                <option value="★★☆☆☆ (やや不安)">少し不安がある</option>
+                <option value="★☆☆☆☆ (自信なし)">不安がある</option>
               </select>
             </div>
           </div>
         </div>
         <details data-selection-name="seekerWorkPreference" class="rounded-xl border border-blue-100 bg-blue-50">
           <summary class="flex flex-wrap cursor-pointer list-none items-center justify-between gap-2 p-4 text-sm font-bold text-gray-800">
-            <span class="min-w-0">希望する働き方（複数選択可）</span>
+            <span class="min-w-0">希望する働き方（任意・複数選択可）</span>
             <span class="flex min-w-0 max-w-full flex-wrap items-center justify-end gap-x-2 gap-y-1 text-xs font-normal">
               <span data-selected-count class="text-gray-600">選択済み 0件</span>
               <span class="rounded-full bg-white px-2 py-1 font-bold text-blue-700 shadow-sm" data-toggle-label>選択肢を開く</span>
@@ -684,7 +665,7 @@
             </span>
           </summary>
           <div class="px-4 pb-4">
-            <p class="mb-3 text-xs text-gray-600">勤務形態・週の勤務日数・勤務時間帯を選ぶと、お仕事のおすすめ順に反映されます。</p>
+            <p class="mb-3 text-xs text-gray-600">単発・短期のお仕事で希望する日数や時間帯を選ぶと、おすすめ順の参考になります。</p>
             <div id="seekerWorkPreferences" class="space-y-4"></div>
           </div>
         </details>
@@ -693,7 +674,7 @@
           <legend class="px-1 text-sm font-bold text-amber-950">掲載者へのプロフィール公開（任意）</legend>
           <label class="flex items-start gap-2 text-sm text-amber-950">
             <input id="seekerProfilePublic" type="checkbox" class="mt-0.5 h-4 w-4 shrink-0">
-            <span><span class="font-bold">お仕事をお願いする方に匿名プロフィールを公開する</span><br>チェックを入れてプロフィールを保存すると、希望する仕事・地域・報酬・資格・経験・体力自信度・希望する働き方が掲載者に表示されます。「今日働けます」の状況はマイページから別に設定します。名前と電話番号は表示されず、一般公開もされません。</span>
+            <span><span class="font-bold">お仕事をお願いする方に匿名プロフィールを公開する</span><br>チェックを入れてプロフィールを保存すると、希望する仕事・地域・報酬・資格・経験・体を使う作業への自信・希望する働き方が掲載者に表示されます。「今日働けます」の状況はマイページから別に設定します。氏名・連絡先は表示されず、一般公開もされません。</span>
           </label>
           <p class="mt-3 border-t border-amber-200 pt-3 text-xs leading-5 text-amber-900">公開は任意です。チェックを外して保存すると非公開になります。お仕事をお願いする方は本人確認されているとは限らないため、公開する情報に個人を特定できる内容を含めないでください。勤務地は市区町村までにしてください。</p>
         </fieldset>
@@ -797,7 +778,7 @@
                 </div>
               </fieldset>
               <label class="text-sm text-gray-700">
-                <span class="mb-1 block">仕事の経験年数</span>
+                <span class="mb-1 block">仕事の経験</span>
                 <select id="seekerSearchExperience" onchange="renderEmployerSeekerSearch(true)" class="w-full rounded-lg border px-3 py-2.5 text-base focus:ring-2 focus:ring-blue-500 outline-none">
                   <option value="">すべて</option>
                   <option value="未経験（やる気あり）">未経験</option>
@@ -891,7 +872,7 @@
             <option value="restaurant_help">飲食店のお手伝い</option>
             <option value="neighborhood_help">ご近所のお手伝い</option>
             <option value="construction_help">建設・屋外作業</option>
-            <option value="other">その他（内容を相談・継続募集）</option>
+            <option value="other">その他のお手伝い</option>
           </select>
         </label>
         <label class="text-sm text-gray-700">

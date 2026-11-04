@@ -90,7 +90,7 @@ async function loadPendingJobs() {
     const card = createElement("article", "rounded-2xl border border-gray-200 bg-white p-4 shadow-sm");
     card.append(createElement("h2", "break-words text-base font-bold text-gray-900", job.title));
     const dateTime = [
-      job.work_date ? formatWorkDate(job.work_date) : "作業日未設定（その他・継続募集）",
+      job.work_date ? formatWorkDate(job.work_date) : "作業日未設定（既存募集）",
       job.start_time || job.end_time
         ? `${String(job.start_time || "未設定").slice(0, 5)}〜${String(job.end_time || "未設定").slice(0, 5)}`
         : ""

@@ -315,10 +315,10 @@ function renderEmployerSeekerSearch(resetLimit = false) {
         <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-800">公開中</span>
       </div>
       <dl class="mt-4 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
-        <div><dt class="text-xs font-bold text-gray-500">仕事の経験年数</dt><dd class="mt-1 font-medium text-gray-800">${escapeHtml(String(profile.exp_years || "未設定"))}</dd></div>
+        <div><dt class="text-xs font-bold text-gray-500">仕事の経験</dt><dd class="mt-1 font-medium text-gray-800">${escapeHtml(getSeekerExperienceLabel(profile.exp_years))}</dd></div>
         <div class="sm:col-span-2"><dt class="text-xs font-bold text-gray-500">経験した作業・できること</dt><dd class="mt-1 whitespace-pre-wrap font-medium text-gray-800">${escapeHtml(String(profile.experience_details || "未登録"))}</dd></div>
         <div><dt class="text-xs font-bold text-gray-500">希望給与</dt><dd class="mt-1 font-medium text-gray-800">${escapeHtml(pay)}</dd></div>
-        <div><dt class="text-xs font-bold text-gray-500">体力自信度</dt><dd class="mt-1 font-medium text-gray-800">${escapeHtml(String(profile.stamina || "未設定"))}</dd></div>
+        <div><dt class="text-xs font-bold text-gray-500">体を使う作業への自信</dt><dd class="mt-1 font-medium text-gray-800">${escapeHtml(getSeekerStaminaLabel(profile.stamina))}</dd></div>
         <div class="sm:col-span-2"><dt class="text-xs font-bold text-gray-500">今日の状況</dt><dd class="mt-1 flex flex-wrap gap-1.5">${availableTodayBadge}</dd></div>
         <div><dt class="text-xs font-bold text-gray-500">資格</dt><dd class="mt-1 flex flex-wrap gap-1.5">${licenses}</dd></div>
       </dl>
