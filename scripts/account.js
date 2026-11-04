@@ -205,6 +205,7 @@ function openAccountPanel() {
     overlay.classList.remove("hidden");
     overlay.classList.add("flex");
     document.getElementById("myPageOverlayClose").focus();
+    if (accountType === "seeker" && activeDashboardView === "profile") openSeekerAvailabilityDialog();
     return;
   }
   if (!currentUser) {
@@ -547,7 +548,8 @@ function switchTab(tab) {
     tab = accountType;
   }
   activeTab = tab;
-  if (tab !== "employer") activeSearchMode = "jobs";
+  if (tab === "employer" && currentUser && accountType === "employer") activeSearchMode = "people";
+  else activeSearchMode = "jobs";
   const employerSection = document.getElementById("employerSection");
   const seekerSection = document.getElementById("seekerSection");
   const jobListSection = document.getElementById("jobListSection");

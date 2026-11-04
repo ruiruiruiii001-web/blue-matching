@@ -1,4 +1,5 @@
 const warnedJobSafetyIds = new Set();
+let legacySavedWorkDateFilter = "";
 
 function jobMatchesKeyword(job, keyword) {
   if (!keyword) return true;
@@ -30,7 +31,7 @@ function jobMatchesKeyword(job, keyword) {
 }
 
 function renderJobList(resetLimit = false) {
-  if (activeTab === "employer" && activeSearchMode === "people") return;
+  if (activeTab === "employer") return;
   if (resetLimit === true) displayLimitJobs = 10;
   const jobList = document.getElementById("jobList");
   const jobCount = document.getElementById("jobCount");
@@ -41,7 +42,7 @@ function renderJobList(resetLimit = false) {
   const hideApplied = document.getElementById("hideAppliedJobs").checked;
   const capacityFilter = document.getElementById("capacityFilter").value;
   const categoryFilter = document.getElementById("jobCategoryFilter").value;
-  const workDateFilter = document.querySelector('[data-work-date-filter][aria-pressed="true"]')?.dataset.workDateFilter || "all";
+  const workDateFilter = document.getElementById("workDateFilter").value || legacySavedWorkDateFilter;
   updateJobFilterOptions();
   const locationFilter = document.getElementById("locationFilter").value;
   const selectedTags = Array.from(document.querySelectorAll('input[name="tagFilter"]:checked')).map(input => input.value);
@@ -91,7 +92,7 @@ function renderJobList(resetLimit = false) {
         (!hideApplied || !getSeekerApplication(job.id)) &&
         (!capacityFilter || getCapacityOptionValue(job.capacity) === capacityFilter) &&
         (!categoryFilter || (job.category || "other") === categoryFilter) &&
-        matchesWorkDateFilter(job.work_date, workDateFilter) &&
+        matchesJobWorkDate(job.work_date, workDateFilter) &&
         (!locationFilter || jobMatchesLocationFilter(job.location, locationFilter)) &&
         (!salaryTypeFilter || getJobPayType(job) === salaryTypeFilter) &&
         (!minimumSalary || (salaryTypeFilter && getJobPayAmount(job) >= minimumSalary)) &&
@@ -139,7 +140,9 @@ function renderJobList(resetLimit = false) {
     hideApplied && "応募済みを隠す",
     locationFilter && `勤務地: ${locationFilter}`,
     categoryFilter && `カテゴリ: ${getWorkCategoryLabel(categoryFilter)}`,
-    workDateFilter !== "all" && (workDateFilter === "today" ? "今日の仕事" : "今週末の仕事"),
+    workDateFilter && (workDateFilter === "today" ? "今日の仕事"
+      : workDateFilter === "weekend" ? "今週末の仕事"
+        : `作業日: ${formatWorkDate(workDateFilter)}`),
     capacityFilter && `募集人数: ${document.getElementById("capacityFilter").selectedOptions[0].text}`,
     salaryTypeFilter && `給与: ${document.getElementById("salaryTypeFilter").selectedOptions[0].text}`,
     minimumSalary && `最低給与: ${minimumSalary.toLocaleString()}円`,
@@ -289,45 +292,29 @@ function resetJobFilters() {
     input.checked = false;
   });
   document.getElementById("advancedJobFilters").open = false;
-  setWorkDateFilter("all", false);
+  document.getElementById("workDateFilter").value = "";
+  legacySavedWorkDateFilter = "";
   renderJobList();
 }
 
-function setWorkDateFilter(filter, render = true) {
-  const selectedFilter = ["today", "weekend"].includes(filter) ? filter : "all";
-  document.querySelectorAll("[data-work-date-filter]").forEach(button => {
-    const active = button.dataset.workDateFilter === selectedFilter;
-    const isTodayButton = button.dataset.workDateFilter === "today";
-    const isToday = active && isTodayButton;
-    button.setAttribute("aria-pressed", String(active));
-    button.classList.toggle("bg-blue-600", active && !isToday);
-    button.classList.toggle("text-white", active);
-    button.classList.toggle("border-blue-600", active && !isToday);
-    button.classList.toggle("bg-white", !active);
-    button.classList.toggle("text-blue-900", !active && !isTodayButton);
-    button.classList.toggle("border-blue-200", !active && !isTodayButton);
-    button.classList.toggle("bg-amber-500", isToday);
-    button.classList.toggle("border-amber-500", isToday);
-    button.classList.toggle("shadow-sm", isToday);
-    button.classList.toggle("text-amber-950", !active && isTodayButton);
-    button.classList.toggle("border-amber-300", !active && isTodayButton);
-  });
-  if (render) renderJobList(true);
+function setJobWorkDateFromInput() {
+  legacySavedWorkDateFilter = "";
+  renderJobList(true);
 }
 
-function matchesWorkDateFilter(workDate, filter) {
-  if (filter === "all") return true;
+function matchesJobWorkDate(workDate, filter) {
+  if (!filter || filter === "all") return true;
   if (!workDate) return false;
-  const today = new Date();
-  const formatLocalDate = date => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-  const todayText = formatLocalDate(today);
-  if (filter === "today") return workDate === todayText;
-  if (filter !== "weekend") return true;
-  if (today.getDay() === 0) return workDate === todayText;
-  const saturday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  saturday.setDate(saturday.getDate() + ((6 - today.getDay() + 7) % 7));
-  const sunday = new Date(saturday.getFullYear(), saturday.getMonth(), saturday.getDate() + 1);
-  return workDate === formatLocalDate(saturday) || workDate === formatLocalDate(sunday);
+  if (filter === "today") return workDate === getLocalDateISO();
+  if (filter === "weekend") {
+    const today = new Date();
+    if (today.getDay() === 0) return workDate === getLocalDateISO();
+    const saturday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    saturday.setDate(saturday.getDate() + ((6 - today.getDay() + 7) % 7));
+    const sunday = new Date(saturday.getFullYear(), saturday.getMonth(), saturday.getDate() + 1);
+    return workDate === getLocalDateISO(saturday) || workDate === getLocalDateISO(sunday);
+  }
+  return workDate === filter;
 }
 
 function toggleQuickJobTag(tag) {

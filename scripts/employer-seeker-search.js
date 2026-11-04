@@ -9,10 +9,9 @@ let displayLimitSeekers = 10;
 function updateAccountSearchSurface() {
   const isEmployerTab = activeTab === "employer";
   const canSearchSeekers = isEmployerTab && Boolean(currentUser) && accountType === "employer";
-  const isPeopleSearch = canSearchSeekers && activeSearchMode === "people";
+  const isPeopleSearch = canSearchSeekers;
   const mainLayout = document.querySelector("main");
   const jobSearchPanel = document.getElementById("jobSearchPanel");
-  const searchModeNavigation = document.getElementById("searchModeNavigation");
   const jobSearchControls = document.getElementById("jobSearchControls");
   const seekerSearchPanel = document.getElementById("employerSeekerSearch");
   const jobList = document.getElementById("jobList");
@@ -27,24 +26,13 @@ function updateAccountSearchSurface() {
   document.getElementById("jobListSection")?.classList.toggle("md:col-span-1", canSearchSeekers);
   document.getElementById("jobListSection")?.classList.toggle("md:col-span-2", !canSearchSeekers);
 
-  searchModeNavigation?.classList.toggle("hidden", !canSearchSeekers);
-  jobSearchControls?.classList.toggle("hidden", isPeopleSearch);
+  jobSearchControls?.classList.toggle("hidden", isEmployerTab);
   seekerSearchPanel.classList.toggle("hidden", !isPeopleSearch);
-  jobList.classList.toggle("hidden", isPeopleSearch || (isEmployerTab && !canSearchSeekers));
+  jobList.classList.toggle("hidden", isEmployerTab);
   jobCount.classList.toggle("hidden", isEmployerTab && !canSearchSeekers);
   jobTrustNotice?.classList.toggle("hidden", isPeopleSearch || isEmployerTab);
-  document.querySelectorAll("[data-search-mode]").forEach(button => {
-    const isActive = button.dataset.searchMode === activeSearchMode;
-    button.setAttribute("aria-selected", String(isActive));
-    button.classList.toggle("bg-blue-600", isActive);
-    button.classList.toggle("text-white", isActive);
-    button.classList.toggle("bg-white", !isActive);
-    button.classList.toggle("text-blue-900", !isActive);
-  });
   if (isEmployerTab) {
-    jobListTitle.innerText = canSearchSeekers
-      ? isPeopleSearch ? "働ける人" : "お仕事一覧"
-      : "アカウント情報を確認しています";
+    jobListTitle.innerText = canSearchSeekers ? "働ける人" : "アカウント情報を確認しています";
     jobListDescription?.classList.toggle("hidden", !isPeopleSearch);
     if (jobListDescription && isPeopleSearch) {
       jobListDescription.innerText = "プロフィール公開に同意した方だけが表示されます。今日働ける人は検索欄の絞り込みから探せます。";

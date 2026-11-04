@@ -2,6 +2,34 @@ let employerPublicProfiles = new Map();
 let employerProfileLoadError = "";
 let employerProfileLoadedUserId = null;
 let employerProfilesSchemaReady = false;
+let employerProfilePhotoSchemaReady = null;
+const employerProfileColumns = "user_id, display_name, service_area, introduction, photo_url";
+const employerProfileBaseColumns = "user_id, display_name, service_area, introduction";
+
+function isMissingEmployerProfilePhotoColumnError(error) {
+  return ["42703", "PGRST204"].includes(error?.code) &&
+    String(error.message || "").includes("photo_url");
+}
+
+async function uploadEmployerProfilePhoto(fileInput) {
+  if (employerProfilePhotoSchemaReady === false) {
+    const status = document.getElementById("employerProfilePhotoStatus");
+    status.innerText = "写真を保存するには、README記載の20261117_add_employer_profile_photo.sqlをSupabaseで実行してください。";
+    status.className = "mt-1 text-xs text-amber-800";
+    fileInput.value = "";
+    return;
+  }
+  await uploadImage(fileInput, "employerProfilePhotoUrl", "employerProfilePhotoStatus");
+  updateEmployerProfilePhotoPreview();
+}
+
+function updateEmployerProfilePhotoPreview() {
+  const preview = document.getElementById("employerProfilePhotoPreview");
+  const photoUrl = document.getElementById("employerProfilePhotoUrl")?.value || "";
+  if (!preview) return;
+  preview.src = photoUrl;
+  preview.classList.toggle("hidden", !photoUrl);
+}
 
 function setEmployerProfileStatus(message, tone = "info", shouldScroll = false) {
   const status = document.getElementById("employerProfileStatus");
@@ -27,10 +55,21 @@ async function loadEmployerPublicProfiles(userIds) {
     employerPublicProfiles = new Map();
     return;
   }
-  const { data, error } = await supabaseClient
+  let result = await supabaseClient
     .from("employer_public_profiles")
-    .select("user_id, display_name, service_area, introduction")
+    .select(employerProfileColumns)
     .in("user_id", ids);
+  if (isMissingEmployerProfilePhotoColumnError(result.error)) {
+    employerProfilePhotoSchemaReady = false;
+    console.error("掲載者プロフィール写真用のデータベース移行が未適用です:", result.error);
+    result = await supabaseClient
+      .from("employer_public_profiles")
+      .select(employerProfileBaseColumns)
+      .in("user_id", ids);
+  } else if (!result.error) {
+    employerProfilePhotoSchemaReady = true;
+  }
+  const { data, error } = result;
   if (error) {
     const schemaUnavailable = ["42P01", "PGRST205"].includes(error.code);
     employerProfileLoadError = schemaUnavailable ? "" : error.message;
@@ -47,11 +86,23 @@ async function loadEmployerProfileForm() {
   if (!currentUser || accountType !== "employer") return;
   employerProfileLoadedUserId = currentUser.id;
   setEmployerProfileStatus("プロフィールを読み込んでいます…");
-  const { data, error } = await supabaseClient
+  let result = await supabaseClient
     .from("employer_public_profiles")
-    .select("display_name, service_area, introduction")
+    .select("display_name, service_area, introduction, photo_url")
     .eq("user_id", currentUser.id)
     .maybeSingle();
+  if (isMissingEmployerProfilePhotoColumnError(result.error)) {
+    employerProfilePhotoSchemaReady = false;
+    console.error("掲載者プロフィール写真用のデータベース移行が未適用です:", result.error);
+    result = await supabaseClient
+      .from("employer_public_profiles")
+      .select("display_name, service_area, introduction")
+      .eq("user_id", currentUser.id)
+      .maybeSingle();
+  } else if (!result.error) {
+    employerProfilePhotoSchemaReady = true;
+  }
+  const { data, error } = result;
   if (currentUser?.id !== employerProfileLoadedUserId || !document.getElementById("employerProfileName")) return;
   if (error) {
     if (["42P01", "PGRST205"].includes(error.code)) {
@@ -65,7 +116,15 @@ async function loadEmployerProfileForm() {
   document.getElementById("employerProfileName").value = data?.display_name || "";
   document.getElementById("employerProfileArea").value = data?.service_area || "";
   document.getElementById("employerProfileIntroduction").value = data?.introduction || "";
-  setEmployerProfileStatus(data ? "公開中のプロフィールです。保存内容はお仕事の詳細ページに表示されます。" : "プロフィールはまだ登録されていません。");
+  document.getElementById("employerProfilePhotoUrl").value = data?.photo_url || "";
+  updateEmployerProfilePhotoPreview();
+  if (employerProfilePhotoSchemaReady === false) {
+    setEmployerProfileStatus("写真を利用するには、README記載の20261117_add_employer_profile_photo.sqlをSupabaseで実行してください。", "warning");
+  } else {
+    setEmployerProfileStatus(data
+      ? "公開中のプロフィールです。保存内容はお仕事の詳細ページに表示されます。"
+      : "プロフィールはまだ登録されていません.");
+  }
 }
 
 async function saveEmployerProfile(event) {
@@ -79,20 +138,33 @@ async function saveEmployerProfile(event) {
   const displayName = document.getElementById("employerProfileName").value.trim();
   const serviceArea = document.getElementById("employerProfileArea").value.trim();
   const introduction = document.getElementById("employerProfileIntroduction").value.trim();
-  if (!displayName || displayName.length > 100 || serviceArea.length > 300 || introduction.length > 1000) {
+  const photoUrl = document.getElementById("employerProfilePhotoUrl").value.trim();
+  if (!displayName || displayName.length > 100 || serviceArea.length > 300 || introduction.length > 1000 || photoUrl.length > 2048) {
     setEmployerProfileStatus("表示名・屋号は1〜100文字、対応地域は300文字、紹介文は1,000文字以内で入力してください。", "error", true);
     return;
   }
-  const { data, error } = await supabaseClient
+  if (photoUrl && employerProfilePhotoSchemaReady === false) {
+    setEmployerProfileStatus("写真を保存するには、README記載の20261117_add_employer_profile_photo.sqlをSupabaseで実行してください。", "warning", true);
+    return;
+  }
+  const profileRow = {
+    user_id: userId,
+    display_name: displayName,
+    service_area: serviceArea,
+    introduction
+  };
+  if (employerProfilePhotoSchemaReady !== false) profileRow.photo_url = photoUrl;
+  let result = await supabaseClient
     .from("employer_public_profiles")
-    .upsert({
-      user_id: userId,
-      display_name: displayName,
-      service_area: serviceArea,
-      introduction
-    }, { onConflict: "user_id" })
-    .select("user_id, display_name, service_area, introduction")
+    .upsert(profileRow, { onConflict: "user_id" })
+    .select(employerProfilePhotoSchemaReady === false ? employerProfileBaseColumns : employerProfileColumns)
     .single();
+  if (isMissingEmployerProfilePhotoColumnError(result.error)) {
+    employerProfilePhotoSchemaReady = false;
+    setEmployerProfileStatus("写真を保存するには、README記載の20261117_add_employer_profile_photo.sqlをSupabaseで実行してください。", "warning", true);
+    return;
+  }
+  const { data, error } = result;
   if (error) {
     if (currentUser?.id !== userId) return;
     setEmployerProfileStatus(`保存できませんでした: ${error.message}`, "error", true);
@@ -118,6 +190,7 @@ function renderEmployerProfileDetails(userId) {
   if (!profile) return "";
   return `
     <section class="mb-5 rounded-xl border border-blue-100 bg-blue-50/60 p-4">
+      ${profile.photo_url ? `<img src="${escapeHtml(String(profile.photo_url))}" alt="${escapeHtml(String(profile.display_name))}" class="mb-3 max-h-60 w-full rounded-lg object-cover">` : ""}
       <h3 class="font-bold text-gray-900">${escapeHtml(profile.display_name)}</h3>
       ${profile.service_area ? `<p class="mt-2 text-sm text-gray-700"><span class="font-bold">対応地域:</span> ${escapeHtml(profile.service_area)}</p>` : ""}
       ${profile.introduction ? `<p class="mt-2 whitespace-pre-wrap text-sm leading-6 text-gray-700">${escapeHtml(profile.introduction)}</p>` : ""}

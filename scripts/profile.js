@@ -155,7 +155,7 @@ async function saveSeekerAvailability() {
   const checkbox = document.getElementById("seekerAvailableToday");
   const status = document.getElementById("seekerAvailabilityStatus");
   const availableDates = checkbox.checked ? [getLocalDateISO()] : [];
-  status.className = "mt-3 text-sm text-gray-600";
+  status.className = "mt-3 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-600";
   status.innerText = "保存しています...";
 
   const { data, error } = await supabaseClient
@@ -166,18 +166,18 @@ async function saveSeekerAvailability() {
     .maybeSingle();
 
   if (isMissingAvailabilityColumnError(error)) {
-    status.className = "mt-3 text-sm text-amber-800";
+    status.className = "mt-3 rounded-lg border border-amber-200 bg-white px-3 py-2 text-sm text-amber-800";
     status.innerText = "この機能を使うには、README記載の20261116_add_seeker_availability_dates.sqlをSupabaseで実行してください。";
     return;
   }
   if (error) {
-    status.className = "mt-3 text-sm text-red-700";
+    status.className = "mt-3 rounded-lg border border-red-200 bg-white px-3 py-2 text-sm text-red-700";
     status.innerText = `今日の状況を保存できませんでした: ${error.message}`;
     console.error("今日の働ける状況を保存できませんでした:", error);
     return;
   }
   if (!data) {
-    status.className = "mt-3 text-sm text-amber-800";
+    status.className = "mt-3 rounded-lg border border-amber-200 bg-white px-3 py-2 text-sm text-amber-800";
     status.innerText = "先にプロフィールを保存してください。";
     return;
   }
@@ -191,7 +191,7 @@ async function saveSeekerAvailability() {
         updated_at: new Date().toISOString()
       }, { onConflict: "user_id" });
     if (publicError) {
-      status.className = "mt-3 text-sm text-amber-800";
+      status.className = "mt-3 rounded-lg border border-amber-200 bg-white px-3 py-2 text-sm text-amber-800";
       status.innerText = isMissingAvailabilityColumnError(publicError)
         ? "状況は保存しましたが、掲載者の検索に表示するにはデータベース移行が必要です。"
         : `状況は保存しましたが、公開プロフィールを更新できませんでした: ${publicError.message}`;
@@ -202,7 +202,7 @@ async function saveSeekerAvailability() {
   }
 
   seekerProfileData = { ...seekerProfileData, availableDates, isPublic: data.is_public };
-  status.className = "mt-3 text-sm text-emerald-800";
+  status.className = "mt-3 rounded-lg border border-emerald-200 bg-white px-3 py-2 text-sm font-bold text-emerald-800";
   status.innerText = data.is_public
     ? checkbox.checked ? "保存しました。掲載者の「今日働ける人」検索に表示されます。" : "保存しました。今日は検索結果に表示されません。"
     : "保存しました。プロフィール公開に同意した場合だけ、掲載者の検索に表示されます。";
@@ -233,6 +233,24 @@ function syncSeekerAvailabilityControl() {
       syncSeekerAvailabilityControl();
     }, nextDay.getTime() - now.getTime() + 10);
   }
+}
+
+function openSeekerAvailabilityDialog() {
+  if (!currentUser || accountType !== "seeker") return;
+  const dialog = document.getElementById("seekerAvailabilityDialog");
+  if (!dialog) return;
+  syncSeekerAvailabilityControl();
+  dialog.classList.remove("hidden");
+  dialog.classList.add("flex");
+  dialog.querySelector('[aria-label="今日の予定を閉じる"]')?.focus();
+}
+
+function closeSeekerAvailabilityDialog() {
+  const dialog = document.getElementById("seekerAvailabilityDialog");
+  if (!dialog) return;
+  dialog.classList.add("hidden");
+  dialog.classList.remove("flex");
+  document.querySelector('#seekerDashboard [aria-label="今日の予定を設定"]')?.focus();
 }
 
 function loadSeekerProfile(profile) {
