@@ -14,9 +14,9 @@
   <meta property="og:image" content="https://blue-matching-pi.vercel.app/icons/icon-512.png">
   <meta name="twitter:card" content="summary">
   <!-- Tailwind CSS（tools/ で生成: npm run build:css） -->
-  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="manifest" href="manifest.webmanifest">
   <meta name="theme-color" content="#2563eb">
-  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
   <link rel="stylesheet" href="styles/tailwind.css">
     <!-- Supabase JS SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -80,15 +80,26 @@
       <button type="button" aria-label="今日の予定を閉じる" onclick="closeSeekerAvailabilityDialog()" class="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full text-2xl font-bold text-gray-500 hover:bg-white hover:text-gray-800">×</button>
       <p class="text-sm font-bold text-emerald-800">今日の予定</p>
       <h3 id="seekerAvailabilityTitle" class="mt-1 pr-10 text-xl font-black text-emerald-950">今日は働けますか？</h3>
-      <p class="mt-2 text-sm leading-6 text-emerald-900">チェックして保存すると、プロフィール公開に同意している場合、掲載者が「今日働ける人」を探すときに表示されます。氏名や連絡先は表示されません。設定は今日のみ有効で、翌日になると自動でリセットされます。</p>
-      <label class="mt-5 flex min-h-14 items-center gap-3 rounded-xl border border-emerald-200 bg-white px-4 py-3 text-base font-bold text-emerald-950">
-        <input id="seekerAvailableToday" type="checkbox" class="h-5 w-5 shrink-0 rounded text-emerald-700 focus:ring-emerald-600">
-        <span>今日は働けます</span>
-      </label>
+      <p class="mt-2 text-sm leading-6 text-emerald-900">今日の状況を選んで保存してください。「働けます」を選ぶと、プロフィール公開に同意している場合に限り、掲載者の「今日働ける人」検索に表示されます。氏名や連絡先は表示されません。設定は今日のみ有効で、翌日になると自動でリセットされます。</p>
+      <div class="mt-5 grid grid-cols-2 gap-3" role="group" aria-label="今日働けるかどうか">
+        <button id="seekerAvailabilityYes" type="button" aria-pressed="false" onclick="setSeekerAvailabilityChoice(true)" class="min-h-14 rounded-xl border-2 border-emerald-700 bg-white px-3 py-3 text-base font-bold text-emerald-900 hover:bg-emerald-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700">働けます</button>
+        <button id="seekerAvailabilityNo" type="button" aria-pressed="false" onclick="setSeekerAvailabilityChoice(false)" class="min-h-14 rounded-xl border-2 border-gray-300 bg-white px-3 py-3 text-base font-bold text-gray-800 hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-700">働けません</button>
+      </div>
       <button type="button" onclick="saveSeekerAvailability()" class="mt-4 min-h-12 w-full rounded-xl bg-emerald-700 px-5 py-3 font-bold text-white hover:bg-emerald-800 sm:w-auto">今日の状況を保存</button>
+      <label class="mt-4 flex min-h-11 items-center gap-2 text-sm text-emerald-950">
+        <input id="seekerAvailabilityDailyPrompt" type="checkbox" checked onchange="setSeekerAvailabilityDailyPrompt(this.checked)" class="h-4 w-4 shrink-0 rounded border-emerald-400 text-emerald-700 focus:ring-emerald-600">
+        <span>日付が変わるたびに、今日の状況を確認する</span>
+      </label>
       <p id="seekerAvailabilityStatus" role="status" aria-live="polite" class="mt-3 hidden text-sm"></p>
     </section>
   </div>
+  <button id="seekerAvailabilityLauncher" type="button" aria-label="今日働けるかを設定" aria-describedby="seekerAvailabilityTooltip" title="今日働けるかを設定" onclick="openSeekerAvailabilityDialog()" class="group fixed bottom-6 right-4 z-[55] hidden h-14 w-14 items-center justify-center rounded-full border border-emerald-800 bg-emerald-700 text-white shadow-lg transition hover:bg-emerald-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-800">
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-7 w-7">
+      <rect x="3.5" y="5" width="17" height="16" rx="2"></rect>
+      <path d="M7.5 3v4M16.5 3v4M3.5 9.5h17M8 14l2.5 2.5L16 11"></path>
+    </svg>
+    <span id="seekerAvailabilityTooltip" role="tooltip" class="pointer-events-none absolute bottom-full right-0 mb-2 hidden whitespace-nowrap rounded-lg bg-gray-900 px-3 py-2 text-xs font-bold text-white shadow-lg group-hover:block group-focus-visible:block group-active:block">今日働けるかを設定</span>
+  </button>
 
   <div id="loginOverlay" class="fixed inset-0 z-[60] hidden items-center justify-center p-4" onclick="handleLoginOverlayClick(event)">
     <button type="button" aria-label="ログイン画面を閉じる" aria-hidden="true" tabindex="-1" onclick="closeLoginPanel()" class="absolute inset-0 h-full w-full bg-black/60"></button>
@@ -515,9 +526,6 @@
       </div>
 
       <div id="seekerDashboard" class="hidden scroll-mt-20 space-y-4">
-        <div class="flex justify-end">
-          <button type="button" aria-label="今日の予定を設定" title="今日の予定を設定" onclick="openSeekerAvailabilityDialog()" class="flex h-10 w-10 items-center justify-center rounded-full border border-emerald-200 bg-white text-lg text-emerald-800 shadow-sm hover:bg-emerald-50">☀️</button>
-        </div>
         <p id="accountDashboardStatus" role="status" aria-live="polite" class="hidden text-sm text-red-600"></p>
         <nav id="dashboardNavigation" role="tablist" aria-label="マイページの表示切替" class="flex shrink-0 gap-2 overflow-x-auto py-2">
           <button type="button" role="tab" aria-selected="true" aria-controls="dashboardView-profile" data-dashboard-view="profile" onclick="showDashboardView('profile')" class="dashboard-menu-button h-11 shrink-0 rounded-lg bg-blue-600 px-3 font-bold text-sm text-white"><span data-line-icon="user"></span>プロフィール</button>
@@ -764,7 +772,7 @@
           <input type="search" id="seekerSearchKeyword" oninput="renderEmployerSeekerSearch(true)" placeholder="希望する仕事・地域・資格・経験などで検索" class="mb-4 w-full rounded-xl border border-blue-300 bg-white px-4 py-3 text-base shadow-sm outline-none focus:ring-2 focus:ring-blue-500">
           <label class="mb-4 flex min-h-14 items-center gap-3 rounded-xl border-2 border-emerald-300 bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-950">
             <input type="checkbox" id="seekerSearchAvailableOnly" onchange="renderEmployerSeekerSearch(true)" class="h-5 w-5 shrink-0 rounded text-emerald-700 focus:ring-emerald-600">
-            <span><span class="block">☀️ 今日働ける人だけ表示</span><span class="mt-0.5 block text-xs font-normal text-emerald-800">マイページで「今日は働けます」を設定した方が対象です。</span></span>
+            <span><span class="block">今日働ける人だけ表示</span><span class="mt-0.5 block text-xs font-normal text-emerald-800">マイページで「今日は働けます」を設定した方が対象です。</span></span>
           </label>
           <label for="seekerSearchSort" class="mb-2 block text-sm font-bold text-gray-700"><span data-line-icon="sort"></span>並び替え</label>
           <select id="seekerSearchSort" onchange="renderEmployerSeekerSearch(true)" class="mb-4 w-full rounded-xl border border-blue-300 bg-white px-4 py-3 text-base shadow-sm outline-none focus:ring-2 focus:ring-blue-500">
@@ -1077,8 +1085,12 @@
     </nav>
   </footer>
 
+  <!-- Core setup: app.js declares shared state used by feature modules below. -->
   <script src="scripts/supabase-client.js"></script>
   <script src="scripts/shared.js"></script>
+  <script src="scripts/app.js"></script>
+
+  <!-- Feature modules rely on the shared state declared above. -->
   <script src="scripts/account.js"></script>
   <script src="scripts/job-images.js"></script>
   <script src="scripts/jobs.js"></script>
@@ -1097,6 +1109,5 @@
   <script src="scripts/onboarding-guide.js"></script>
   <script src="scripts/reports.js"></script>
   <script src="scripts/reviews.js"></script>
-  <script src="scripts/app.js"></script>
 </body>
 </html>

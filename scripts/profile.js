@@ -1,4 +1,7 @@
 let seekerAvailabilityResetTimer = null;
+let seekerAvailabilityChoice = false;
+const SEEKER_AVAILABILITY_DAILY_PROMPT_KEY = "blueMatchingAvailabilityDailyPrompt";
+const SEEKER_AVAILABILITY_LAST_PROMPTED_KEY = "blueMatchingAvailabilityLastPrompted";
 
 async function saveSeekerProfile() {
   if (!currentUser || accountType !== "seeker") {
@@ -131,6 +134,7 @@ async function saveSeekerProfile() {
   seekerProfileData = profile;
   seekerProfileData.isPublic = isPublic;
   applySeekerSalaryPreferences(profile);
+  syncSeekerAvailabilityControl();
   const profileSavedMessage = document.getElementById("profileSavedMessage");
   profileSavedMessage.innerText = availabilityMigrationMissing
     ? "👍 プロフィールを保存しました。今日の働ける状況を公開するには、データベース移行を実行してください。"
@@ -152,9 +156,8 @@ async function saveSeekerAvailability() {
     return;
   }
 
-  const checkbox = document.getElementById("seekerAvailableToday");
   const status = document.getElementById("seekerAvailabilityStatus");
-  const availableDates = checkbox.checked ? [getLocalDateISO()] : [];
+  const availableDates = seekerAvailabilityChoice ? [getLocalDateISO()] : [];
   status.className = "mt-3 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-600";
   status.innerText = "保存しています...";
 
@@ -204,17 +207,21 @@ async function saveSeekerAvailability() {
   seekerProfileData = { ...seekerProfileData, availableDates, isPublic: data.is_public };
   status.className = "mt-3 rounded-lg border border-emerald-200 bg-white px-3 py-2 text-sm font-bold text-emerald-800";
   status.innerText = data.is_public
-    ? checkbox.checked ? "保存しました。掲載者の「今日働ける人」検索に表示されます。" : "保存しました。今日は検索結果に表示されません。"
+    ? seekerAvailabilityChoice ? "保存しました。掲載者の「今日働ける人」検索に表示されます。" : "保存しました。今日は検索結果に表示されません。"
     : "保存しました。プロフィール公開に同意した場合だけ、掲載者の検索に表示されます。";
 }
 
 function syncSeekerAvailabilityControl() {
-  const checkbox = document.getElementById("seekerAvailableToday");
-  if (!checkbox) return;
-  checkbox.checked = Boolean(
+  const availableToday = Boolean(
     Array.isArray(seekerProfileData?.availableDates) &&
     seekerProfileData.availableDates.includes(getLocalDateISO())
   );
+  setSeekerAvailabilityChoice(availableToday);
+  const dailyPromptCheckbox = document.getElementById("seekerAvailabilityDailyPrompt");
+  if (dailyPromptCheckbox) dailyPromptCheckbox.checked = getSeekerAvailabilityDailyPrompt();
+  const launcher = document.getElementById("seekerAvailabilityLauncher");
+  if (launcher) launcher.classList.toggle("hidden", !currentUser || accountType !== "seeker");
+
   const status = document.getElementById("seekerAvailabilityStatus");
   if (status) {
     status.innerText = "";
@@ -232,17 +239,75 @@ function syncSeekerAvailabilityControl() {
       seekerAvailabilityResetTimer = null;
       syncSeekerAvailabilityControl();
     }, nextDay.getTime() - now.getTime() + 10);
+    if (seekerProfileData && getSeekerAvailabilityDailyPrompt()) {
+      const lastPromptedKey = `${SEEKER_AVAILABILITY_LAST_PROMPTED_KEY}:${currentUser.id}`;
+      try {
+        if (localStorage.getItem(lastPromptedKey) !== getLocalDateISO()) {
+          localStorage.setItem(lastPromptedKey, getLocalDateISO());
+          showSeekerAvailabilityDialog();
+        }
+      } catch (error) {
+        console.error("今日の状況の確認日を保存できませんでした:", error);
+      }
+    }
   }
+}
+
+function getSeekerAvailabilityDailyPrompt() {
+  try {
+    return localStorage.getItem(SEEKER_AVAILABILITY_DAILY_PROMPT_KEY) !== "0";
+  } catch (error) {
+    console.error("今日の状況の確認設定を読み込めませんでした:", error);
+    return true;
+  }
+}
+
+function setSeekerAvailabilityDailyPrompt(shouldPrompt) {
+  const status = document.getElementById("seekerAvailabilityStatus");
+  try {
+    localStorage.setItem(SEEKER_AVAILABILITY_DAILY_PROMPT_KEY, shouldPrompt ? "1" : "0");
+    if (status) {
+      status.className = "mt-3 rounded-lg border border-emerald-200 bg-white px-3 py-2 text-sm text-emerald-800";
+      status.innerText = shouldPrompt
+        ? "日付が変わるたびに、今日の状況を確認します。"
+        : "毎日の確認をオフにしました。今日の状況は必要なときに設定できます。";
+    }
+  } catch (error) {
+    console.error("今日の状況の確認設定を保存できませんでした:", error);
+    if (status) {
+      status.className = "mt-3 rounded-lg border border-red-200 bg-white px-3 py-2 text-sm text-red-700";
+      status.innerText = "確認設定を保存できませんでした。このブラウザーの保存領域を確認してください。";
+    }
+  }
+}
+
+function setSeekerAvailabilityChoice(available) {
+  seekerAvailabilityChoice = available;
+  const yesButton = document.getElementById("seekerAvailabilityYes");
+  const noButton = document.getElementById("seekerAvailabilityNo");
+  if (!yesButton || !noButton) return;
+  yesButton.setAttribute("aria-pressed", String(available));
+  noButton.setAttribute("aria-pressed", String(!available));
+  yesButton.className = available
+    ? "min-h-14 rounded-xl border-2 border-emerald-700 bg-emerald-700 px-3 py-3 text-base font-bold text-white hover:bg-emerald-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700"
+    : "min-h-14 rounded-xl border-2 border-emerald-700 bg-white px-3 py-3 text-base font-bold text-emerald-900 hover:bg-emerald-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700";
+  noButton.className = !available
+    ? "min-h-14 rounded-xl border-2 border-gray-700 bg-gray-700 px-3 py-3 text-base font-bold text-white hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-700"
+    : "min-h-14 rounded-xl border-2 border-gray-300 bg-white px-3 py-3 text-base font-bold text-gray-800 hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-700";
+}
+
+function showSeekerAvailabilityDialog() {
+  const dialog = document.getElementById("seekerAvailabilityDialog");
+  if (!dialog) return;
+  dialog.classList.remove("hidden");
+  dialog.classList.add("flex");
+  document.getElementById("seekerAvailabilityYes")?.focus();
 }
 
 function openSeekerAvailabilityDialog() {
   if (!currentUser || accountType !== "seeker") return;
-  const dialog = document.getElementById("seekerAvailabilityDialog");
-  if (!dialog) return;
   syncSeekerAvailabilityControl();
-  dialog.classList.remove("hidden");
-  dialog.classList.add("flex");
-  dialog.querySelector('[aria-label="今日の予定を閉じる"]')?.focus();
+  showSeekerAvailabilityDialog();
 }
 
 function closeSeekerAvailabilityDialog() {
@@ -250,7 +315,7 @@ function closeSeekerAvailabilityDialog() {
   if (!dialog) return;
   dialog.classList.add("hidden");
   dialog.classList.remove("flex");
-  document.querySelector('#seekerDashboard [aria-label="今日の予定を設定"]')?.focus();
+  document.getElementById("seekerAvailabilityLauncher")?.focus();
 }
 
 function loadSeekerProfile(profile) {
