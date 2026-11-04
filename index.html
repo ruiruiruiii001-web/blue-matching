@@ -87,8 +87,8 @@
       </div>
       <button type="button" onclick="saveSeekerAvailability()" class="mt-4 min-h-12 w-full rounded-xl bg-emerald-700 px-5 py-3 font-bold text-white hover:bg-emerald-800 sm:w-auto">今日の状況を保存</button>
       <label class="mt-4 flex min-h-11 items-center gap-2 text-sm text-emerald-950">
-        <input id="seekerAvailabilityDailyPrompt" type="checkbox" checked onchange="setSeekerAvailabilityDailyPrompt(this.checked)" class="h-4 w-4 shrink-0 rounded border-emerald-400 text-emerald-700 focus:ring-emerald-600">
-        <span>日付が変わるたびに、今日の状況を確認する</span>
+        <input id="seekerAvailabilityDailyPrompt" type="checkbox" onchange="setSeekerAvailabilityNeverPrompt(this.checked)" class="h-4 w-4 shrink-0 rounded border-emerald-400 text-emerald-700 focus:ring-emerald-600">
+        <span>今後、自動では表示しない</span>
       </label>
       <p id="seekerAvailabilityStatus" role="status" aria-live="polite" class="mt-3 hidden text-sm"></p>
     </section>

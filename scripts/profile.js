@@ -1,6 +1,7 @@
 let seekerAvailabilityResetTimer = null;
 let seekerAvailabilityChoice = false;
-const SEEKER_AVAILABILITY_DAILY_PROMPT_KEY = "blueMatchingAvailabilityDailyPrompt";
+const SEEKER_AVAILABILITY_NEVER_PROMPT_KEY = "blueMatchingAvailabilityNeverPrompt";
+const SEEKER_AVAILABILITY_LEGACY_DAILY_PROMPT_KEY = "blueMatchingAvailabilityDailyPrompt";
 const SEEKER_AVAILABILITY_LAST_PROMPTED_KEY = "blueMatchingAvailabilityLastPrompted";
 
 async function saveSeekerProfile() {
@@ -218,7 +219,7 @@ function syncSeekerAvailabilityControl() {
   );
   setSeekerAvailabilityChoice(availableToday);
   const dailyPromptCheckbox = document.getElementById("seekerAvailabilityDailyPrompt");
-  if (dailyPromptCheckbox) dailyPromptCheckbox.checked = getSeekerAvailabilityDailyPrompt();
+  if (dailyPromptCheckbox) dailyPromptCheckbox.checked = getSeekerAvailabilityNeverPrompt();
   const launcher = document.getElementById("seekerAvailabilityLauncher");
   if (launcher) launcher.classList.toggle("hidden", !currentUser || accountType !== "seeker");
 
@@ -239,7 +240,7 @@ function syncSeekerAvailabilityControl() {
       seekerAvailabilityResetTimer = null;
       syncSeekerAvailabilityControl();
     }, nextDay.getTime() - now.getTime() + 10);
-    if (seekerProfileData && getSeekerAvailabilityDailyPrompt()) {
+    if (seekerProfileData && !getSeekerAvailabilityNeverPrompt()) {
       const lastPromptedKey = `${SEEKER_AVAILABILITY_LAST_PROMPTED_KEY}:${currentUser.id}`;
       try {
         if (localStorage.getItem(lastPromptedKey) !== getLocalDateISO()) {
@@ -253,24 +254,32 @@ function syncSeekerAvailabilityControl() {
   }
 }
 
-function getSeekerAvailabilityDailyPrompt() {
+function getSeekerAvailabilityNeverPrompt() {
   try {
-    return localStorage.getItem(SEEKER_AVAILABILITY_DAILY_PROMPT_KEY) !== "0";
+    const savedPreference = localStorage.getItem(SEEKER_AVAILABILITY_NEVER_PROMPT_KEY);
+    if (savedPreference !== null) return savedPreference === "1";
+
+    const legacyPreference = localStorage.getItem(SEEKER_AVAILABILITY_LEGACY_DAILY_PROMPT_KEY);
+    const neverPrompt = legacyPreference === "0";
+    if (legacyPreference !== null) {
+      localStorage.setItem(SEEKER_AVAILABILITY_NEVER_PROMPT_KEY, neverPrompt ? "1" : "0");
+    }
+    return neverPrompt;
   } catch (error) {
     console.error("今日の状況の確認設定を読み込めませんでした:", error);
-    return true;
+    return false;
   }
 }
 
-function setSeekerAvailabilityDailyPrompt(shouldPrompt) {
+function setSeekerAvailabilityNeverPrompt(neverPrompt) {
   const status = document.getElementById("seekerAvailabilityStatus");
   try {
-    localStorage.setItem(SEEKER_AVAILABILITY_DAILY_PROMPT_KEY, shouldPrompt ? "1" : "0");
+    localStorage.setItem(SEEKER_AVAILABILITY_NEVER_PROMPT_KEY, neverPrompt ? "1" : "0");
     if (status) {
       status.className = "mt-3 rounded-lg border border-emerald-200 bg-white px-3 py-2 text-sm text-emerald-800";
-      status.innerText = shouldPrompt
-        ? "日付が変わるたびに、今日の状況を確認します。"
-        : "毎日の確認をオフにしました。今日の状況は必要なときに設定できます。";
+      status.innerText = neverPrompt
+        ? "今後、自動では表示しません。必要なときは画面右下のボタンから設定できます。"
+        : "今日の状況を1日1回、自動で確認します。";
     }
   } catch (error) {
     console.error("今日の状況の確認設定を保存できませんでした:", error);
