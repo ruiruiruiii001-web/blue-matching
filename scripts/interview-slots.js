@@ -32,13 +32,13 @@ function renderInterviewBox(box, slots, message = "", isError = false) {
       </div>`
     : "";
   const guide = isEmployer
-    ? `<p class="mt-1 text-[11px] text-gray-500">最大${MAX_INTERVIEW_SLOTS}件まで提示できます。応募者が1つ選ぶと確定します。</p>`
-    : `<p class="mt-1 text-[11px] text-gray-500">${selected ? "面接日時が確定しました。変更が必要な場合はメッセージで相談してください。" : "都合のよい日時を1つ選んでください。"}</p>`;
+    ? `<p class="mt-1 text-[11px] text-gray-500">最大${MAX_INTERVIEW_SLOTS}件まで提示できます。応募した方が1つ選ぶと確定します。</p>`
+    : `<p class="mt-1 text-[11px] text-gray-500">${selected ? "日時が確定しました。変更が必要な場合はメッセージで相談してください。" : "都合のよい日時を1つ選んでください。"}</p>`;
   box.innerHTML = `
     <section class="mt-5 rounded-xl border border-emerald-100 bg-emerald-50/40 p-4">
-      <h5 class="text-sm font-bold text-gray-800">面接日時の調整</h5>
+      <h5 class="text-sm font-bold text-gray-800">作業・相談日時の調整</h5>
       ${guide}
-      ${slots.length ? `<ul class="mt-3 space-y-2">${slotItems}</ul>` : `<p class="mt-3 text-xs text-gray-500">${isEmployer ? "候補日時はまだ提示していません。" : "企業からの候補日時はまだありません。"}</p>`}
+      ${slots.length ? `<ul class="mt-3 space-y-2">${slotItems}</ul>` : `<p class="mt-3 text-xs text-gray-500">${isEmployer ? "候補日時はまだ提示していません。" : "掲載者からの候補日時はまだありません。"}</p>`}
       ${form}
       ${messageHtml}
     </section>`;
@@ -59,10 +59,10 @@ async function reloadInterviewBox(box, applicationId, message = "", isError = fa
   if (error) {
     const schemaUnavailable = ["42P01", "PGRST205"].includes(error.code);
     if (schemaUnavailable) {
-      box.innerHTML = '<p class="mt-5 rounded-lg bg-amber-50 p-3 text-xs text-amber-900">面接日時の調整を使うには、README記載の面接日時用SQLを実行してください。</p>';
+      box.innerHTML = '<p class="mt-5 rounded-lg bg-amber-50 p-3 text-xs text-amber-900">日時調整を使うには、README記載の日時調整用SQLを実行してください。</p>';
       return;
     }
-    box.innerHTML = `<p class="mt-5 text-xs text-red-700">面接日時を読み込めませんでした: ${escapeHtml(error.message)}</p>`;
+    box.innerHTML = `<p class="mt-5 text-xs text-red-700">候補日時を読み込めませんでした: ${escapeHtml(error.message)}</p>`;
     return;
   }
   interviewSlotCache.set(applicationId, data || []);
@@ -106,13 +106,13 @@ async function deleteInterviewSlot(box, applicationId, slotId) {
 async function selectInterviewSlot(box, applicationId, slotId) {
   if (!currentUser || accountType !== "seeker") return;
   const slot = (interviewSlotCache.get(applicationId) || []).find(item => item.id === slotId);
-  if (!slot || !confirm(`${formatInterviewSlot(slot.starts_at)} を面接日時として確定しますか？`)) return;
+  if (!slot || !confirm(`${formatInterviewSlot(slot.starts_at)} を選択しますか？`)) return;
   const { error } = await supabaseClient.rpc("select_interview_slot", { p_slot_id: slotId });
   if (error) {
     await reloadInterviewBox(box, applicationId, `確定できませんでした: ${error.message}`, true);
     return;
   }
-  await reloadInterviewBox(box, applicationId, "面接日時を確定しました。");
+  await reloadInterviewBox(box, applicationId, "日時を確定しました。");
 }
 
 function hydrateInterviewBoxes(root = document) {
@@ -123,5 +123,5 @@ function hydrateInterviewBoxes(root = document) {
   });
 }
 
-// 応募一覧・通知詳細など複数の画面が会話欄を描画するため、描画後に面接欄を読み込む
+// 応募一覧・通知詳細など複数の画面が会話欄を描画するため、描画後に日時調整欄を読み込む
 new MutationObserver(() => hydrateInterviewBoxes()).observe(document.body, { childList: true, subtree: true });

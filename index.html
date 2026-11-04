@@ -4,12 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="cloudflare-turnstile-sitekey" content="0x4AAAAAAFmKntPFXSdCMP-V">
-  <title>地域密着の単発・お助けスキマ仕事掲示板 | 現場の仕事探し・人探しマッチング</title>
-  <meta name="description" content="現場・イベント・農作業・飲食店など、地域の単発のお手伝いを探す・募集する掲示板です。作業日や支払い条件を見て、応募後はサイト内でやり取りできます。">
+  <title>地域のお助け仕事掲示板 | 単発・スキマ仕事を探す・募集する</title>
+  <meta name="description" content="建設・イベント・農作業・飲食店・ご近所など、地域の単発のお仕事やお手伝いを作業日や条件から探す・募集する掲示板です。">
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="現場の仕事探し・人探しマッチング">
-  <meta property="og:title" content="現場の仕事探し・人探しマッチング">
-  <meta property="og:description" content="地域の単発・お助け仕事を、作業日や支払い条件を見て探せます。">
+  <meta property="og:site_name" content="地域のお助け仕事掲示板">
+  <meta property="og:title" content="地域のお助け仕事掲示板 | 単発・スキマ仕事を探す・募集する">
+  <meta property="og:description" content="建設・イベント・農作業・飲食店・ご近所など、地域の単発のお仕事やお手伝いを作業日や条件から探せます。">
   <meta property="og:url" content="https://blue-matching-pi.vercel.app/">
   <meta property="og:image" content="https://blue-matching-pi.vercel.app/icons/icon-512.png">
   <meta name="twitter:card" content="summary">
@@ -32,8 +32,8 @@
   <header class="relative z-10 bg-blue-600 text-white shadow">
     <div class="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
       <div>
-        <h1 class="text-xl font-bold tracking-wide">👷 現場の仕事探し・人探し</h1>
-        <p class="text-xs text-blue-100">地域密着の単発・お助けスキマ仕事掲示板</p>
+        <h1 class="text-xl font-bold tracking-wide">地域のお助け仕事掲示板</h1>
+        <p class="text-xs text-blue-100">単発・スキマのお仕事を探す・お願いする</p>
       </div>
       <div class="flex items-center gap-2">
         <button id="headerAccountButton" type="button" aria-haspopup="dialog" aria-controls="myPageOverlay loginOverlay" aria-expanded="false" onclick="openAccountPanel()" class="rounded-lg bg-white px-3 py-2 text-xs font-bold text-blue-700">ログイン</button>
@@ -100,10 +100,10 @@
   <div id="accountModeTabs" class="hidden max-w-5xl mx-auto px-4 mt-4">
     <div class="flex border-b border-gray-300 bg-white rounded-t-lg shadow-sm">
       <button id="tabSeekerBtn" onclick="switchTab('seeker')" class="flex-1 py-3.5 font-bold text-sm md:text-base border-b-2 border-blue-600 text-blue-600 focus:outline-none transition">
-        👷 職人・お仕事探しの方向け（即戦力カード）
+        👷 お仕事を探す方
       </button>
       <button id="tabEmployerBtn" onclick="switchTab('employer')" class="flex-1 py-3.5 font-bold text-sm md:text-base border-b-2 border-transparent text-gray-500 hover:text-blue-600 focus:outline-none transition">
-        🏢 親方・企業向け（お仕事投稿）
+        🏪 お仕事をお願いする方
       </button>
     </div>
   </div>
@@ -111,13 +111,13 @@
   <section id="accountTypeSetup" class="hidden max-w-5xl mx-auto px-4 mt-4">
     <div class="rounded-lg border border-blue-200 bg-blue-50 p-4">
       <h2 class="font-bold text-blue-800">アカウントの種類を選択</h2>
-      <p class="mt-1 text-sm text-blue-900">お仕事探しの方はお仕事への応募、企業・親方はお仕事の投稿や公開プロフィールの閲覧に使います。自分のお仕事を投稿済みの場合は企業・親方を選択してください。選択後は変更できません。</p>
+      <p class="mt-1 text-sm text-blue-900">お仕事を探す方は応募やプロフィール管理、お仕事をお願いする方は募集の投稿・応募者との連絡に使います。お店・会社・個人の方など、実際に作業をお願いする側のアカウントを選んでください。選択後は変更できません。</p>
       <div class="mt-3 flex flex-col gap-2 sm:flex-row sm:items-end">
         <label class="block flex-1 text-sm font-medium">アカウントの種類
           <select id="existingAccountType" class="mt-1 w-full border rounded px-3 py-2.5 text-sm">
             <option value="">選択してください</option>
-            <option value="seeker">お仕事探しの方</option>
-            <option value="employer">企業・親方</option>
+            <option value="seeker">お仕事を探す方</option>
+            <option value="employer">お仕事をお願いする方（お店・会社・個人事業主など）</option>
           </select>
         </label>
         <button type="button" onclick="saveAccountType()" class="rounded bg-blue-600 px-4 py-2.5 font-bold text-white">この種類で登録</button>
@@ -127,10 +127,10 @@
 
   <main class="max-w-5xl mx-auto px-4 py-6 grid grid-cols-1 md:grid-cols-2 gap-8">
     
-    <!-- 左側①：親方・企業向け お仕事作成 -->
+    <!-- お仕事をお願いする方向け：募集作成 -->
     <section id="employerSection" class="space-y-6 hidden">
       <div id="employerAuthPanel" class="bg-white p-6 rounded-lg shadow-md">
-        <p class="text-sm text-gray-600 mb-4">プロフィールの保存・応募履歴・お仕事の投稿にはログインが必要です。</p>
+        <p class="text-sm text-gray-600 mb-4">プロフィールの保存や、お仕事の投稿・応募への返信にはログインが必要です。</p>
         <div id="employerLoggedOut" class="space-y-3">
           <div>
             <label for="employerEmail" class="block text-sm font-medium mb-1">メールアドレス</label>
@@ -155,7 +155,7 @@
           <p class="text-sm text-gray-700">ログイン中: <span id="employerAccountEmail" class="font-medium"></span></p>
           <button onclick="signOutEmployer()" class="text-sm text-blue-600 hover:underline">ログアウト</button>
         </div>
-        <p id="accountTypeMismatch" class="hidden mt-3 rounded border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">この画面のお仕事の管理機能は企業・親方アカウント専用です。</p>
+        <p id="accountTypeMismatch" class="hidden mt-3 rounded border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">募集の管理機能は「お仕事をお願いする方」アカウントで利用できます。</p>
         <div id="passwordRecoveryPanel" class="hidden mt-4 border-t pt-4 space-y-3">
           <h3 class="font-bold text-blue-700">新しいパスワードを設定</h3>
           <p class="text-xs text-gray-600">再設定メールのリンクから開いた画面です。8文字以上で入力してください。</p>
@@ -172,10 +172,10 @@
 
       <section id="employerDashboard" class="hidden scroll-mt-20 space-y-4">
         <p id="employerDashboardStatus" role="status" aria-live="polite" class="hidden text-sm text-red-600"></p>
-        <nav id="employerDashboardNavigation" role="tablist" aria-label="企業マイページの表示切替" class="flex shrink-0 gap-2 overflow-x-auto py-2">
-          <button type="button" role="tab" aria-selected="true" aria-controls="employerDashboardView-jobs" data-employer-dashboard-view="jobs" onclick="showEmployerDashboardView('jobs')" class="employer-dashboard-menu-button h-11 shrink-0 rounded-lg bg-blue-600 px-3 text-sm font-bold text-white"><span data-line-icon="clipboard"></span>お仕事の管理</button>
-          <button type="button" role="tab" aria-selected="false" aria-controls="employerDashboardView-messages" data-employer-dashboard-view="messages" onclick="showEmployerDashboardView('messages')" class="employer-dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 text-sm font-bold text-gray-700"><span data-line-icon="chat"></span>応募・メッセージ <span id="employerApplicationCount"></span></button>
-          <button type="button" role="tab" aria-selected="false" aria-controls="employerDashboardView-profile" data-employer-dashboard-view="profile" onclick="showEmployerDashboardView('profile')" class="employer-dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 text-sm font-bold text-gray-700"><span data-line-icon="building"></span>企業プロフィール</button>
+        <nav id="employerDashboardNavigation" role="tablist" aria-label="募集管理メニュー" class="flex shrink-0 gap-2 overflow-x-auto py-2">
+          <button type="button" role="tab" aria-selected="true" aria-controls="employerDashboardView-jobs" data-employer-dashboard-view="jobs" onclick="showEmployerDashboardView('jobs')" class="employer-dashboard-menu-button h-11 shrink-0 rounded-lg bg-blue-600 px-3 text-sm font-bold text-white"><span data-line-icon="clipboard"></span>募集の管理</button>
+          <button type="button" role="tab" aria-selected="false" aria-controls="employerDashboardView-messages" data-employer-dashboard-view="messages" onclick="showEmployerDashboardView('messages')" class="employer-dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 text-sm font-bold text-gray-700"><span data-line-icon="chat"></span>応募・チャット <span id="employerApplicationCount"></span></button>
+          <button type="button" role="tab" aria-selected="false" aria-controls="employerDashboardView-profile" data-employer-dashboard-view="profile" onclick="showEmployerDashboardView('profile')" class="employer-dashboard-menu-button h-11 shrink-0 rounded-lg bg-gray-200 px-3 text-sm font-bold text-gray-700"><span data-line-icon="building"></span>掲載者プロフィール</button>
         </nav>
 
         <section id="employerDashboardView-job-editor" class="hidden space-y-3">
@@ -208,17 +208,17 @@
         </section>
 
         <section id="employerDashboardView-profile" class="hidden rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
-          <h3 class="mb-2 text-lg font-bold text-blue-600">企業プロフィール</h3>
-          <p class="mb-4 text-sm leading-6 text-gray-600">企業名・屋号、対応地域、紹介文をお仕事一覧とお仕事詳細に公開します。電話番号・メールアドレスなどの連絡先や、個人情報を書かないでください。掲載内容はご自身で正確さを確認してください。</p>
+          <h3 class="mb-2 text-lg font-bold text-blue-600">掲載者プロフィール</h3>
+          <p class="mb-4 text-sm leading-6 text-gray-600">お店・会社・屋号、対応地域、紹介文を募集一覧と詳細に公開します。電話番号・メールアドレスなどの連絡先や個人情報を書かず、内容が正確であることをご確認ください。</p>
           <form onsubmit="saveEmployerProfile(event)" class="space-y-4">
-            <label class="block text-sm font-bold text-gray-700">企業名・屋号 <span class="text-red-600">*</span>
-              <input id="employerProfileName" maxlength="100" required class="mt-1 min-h-11 w-full rounded-lg border border-gray-200 px-3 py-2 text-base" placeholder="例: 株式会社〇〇 / 〇〇工務店">
+            <label class="block text-sm font-bold text-gray-700">表示名・屋号 <span class="text-red-600">*</span>
+              <input id="employerProfileName" maxlength="100" required class="mt-1 min-h-11 w-full rounded-lg border border-gray-200 px-3 py-2 text-base" placeholder="例: 〇〇商店 / 〇〇農園 / 山田">
             </label>
             <label class="block text-sm font-bold text-gray-700">対応地域（任意）
               <input id="employerProfileArea" maxlength="300" class="mt-1 min-h-11 w-full rounded-lg border border-gray-200 px-3 py-2 text-base" placeholder="例: 東京都・神奈川県">
             </label>
             <label class="block text-sm font-bold text-gray-700">紹介文（任意・1,000文字まで）
-              <textarea id="employerProfileIntroduction" maxlength="1000" rows="5" class="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-base" placeholder="会社や現場の特徴、仕事の進め方など"></textarea>
+              <textarea id="employerProfileIntroduction" maxlength="1000" rows="5" class="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-base" placeholder="お店・作業場所の特徴や、仕事の進め方など"></textarea>
             </label>
             <button type="submit" class="min-h-11 rounded-lg bg-blue-600 px-5 py-2 text-sm font-bold text-white hover:bg-blue-700">公開プロフィールを保存</button>
             <p id="employerProfileStatus" role="status" aria-live="polite" class="hidden mt-2 rounded-lg border px-3 py-2 text-sm"></p>
@@ -232,20 +232,20 @@
         <div class="space-y-4">
           <div class="flex items-center gap-2 border-b border-blue-100 pb-2"><span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-black text-white">1</span><h3 class="text-base font-black text-gray-900">基本情報</h3><span class="rounded-full bg-red-50 px-2 py-0.5 text-xs font-bold text-red-700">必須あり</span></div>
           <div>
-            <label class="block text-sm font-medium mb-1">職種・現場名 <span class="text-red-500">*</span></label>
-            <input type="text" id="jobTitle" maxlength="80" required placeholder="例: 解体現場の作業員・ダンプ運転手" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+            <label class="block text-sm font-medium mb-1">募集タイトル <span class="text-red-500">*</span></label>
+            <input type="text" id="jobTitle" maxlength="80" required placeholder="例: イベント受付、野菜の収穫、店舗の清掃" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
           </div>
 
           <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <label class="block text-sm font-medium">作業カテゴリ <span class="text-red-500">*</span>
               <select id="jobWorkCategory" required class="mt-1 w-full rounded border px-3 py-2.5 text-base focus:ring-2 focus:ring-blue-500">
                 <option value="">選択してください</option>
-                <option value="construction_help">現場の手伝い</option>
-                <option value="event_setup">イベント搬入・設営</option>
+                <option value="event_setup">イベント・催事</option>
                 <option value="farm_work">農作業</option>
+                <option value="restaurant_help">飲食店のお手伝い</option>
                 <option value="neighborhood_help">ご近所のお手伝い</option>
-                <option value="restaurant_help">飲食店のヘルプ</option>
-                <option value="other">その他・継続案件</option>
+                <option value="construction_help">建設・屋外作業</option>
+                <option value="other">その他（内容を相談・継続募集）</option>
               </select>
             </label>
             <label class="block text-sm font-medium">作業日
@@ -275,8 +275,8 @@
             <div class="space-y-3 px-4 pb-4">
               <p class="text-xs leading-5 text-gray-600">地方を開いて都道府県を選び、市区町村も入力してください。複数の勤務地を登録できます。番地・建物名など、個人宅を特定できる情報は入力しないでください。</p>
               <div id="jobLocationPrefectureOptions" class="space-y-2"></div>
-              <p id="jobLocationLegacyNotice" class="hidden rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs leading-relaxed text-amber-900">このお仕事の勤務地は、都道府県を選ぶ前の古い形式で保存されています。都道府県で探しているお仕事探しの方に見つけてもらいやすくするため、上で都道府県を選び直して保存してください（入力済みの内容は「その他の勤務地」に残っています）。</p>
-              <label class="block text-sm">その他の勤務地・現場の補足（任意）
+              <p id="jobLocationLegacyNotice" class="hidden rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs leading-relaxed text-amber-900">この募集の地域情報は旧形式で保存されています。地域で検索する方に見つけてもらいやすくするため、都道府県を選び直して保存してください（入力済みの内容は「作業場所の補足」に残っています）。</p>
+              <label class="block text-sm">作業場所の補足（任意）
                 <input type="text" id="jobLocation" maxlength="500" placeholder="例: 東京都内、関東一円" class="mt-1 h-11 w-full rounded border px-3 py-2.5 text-sm font-normal focus:ring-2 focus:ring-blue-500 outline-none">
               </label>
             </div>
@@ -426,15 +426,15 @@
               </select>
             </label>
             <label class="mt-3 block text-sm">必要・歓迎する経験の詳細（任意）
-              <textarea id="jobExperienceRequirementDetails" rows="2" maxlength="500" placeholder="例: 足場の組立経験がある方歓迎。未経験の方には先輩が指導します。" class="mt-1 w-full rounded border px-3 py-2.5 text-sm"></textarea>
+              <textarea id="jobExperienceRequirementDetails" rows="2" maxlength="500" placeholder="例: 接客経験のある方歓迎。初めての方には手順を説明します。" class="mt-1 w-full rounded border px-3 py-2.5 text-sm"></textarea>
             </label>
           </fieldset>
 
           <div class="mt-2 flex items-center gap-2 border-b border-blue-100 pb-2 pt-4"><span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-black text-white">4</span><h3 class="text-base font-black text-gray-900">写真・アピール</h3><span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-bold text-gray-700">任意</span></div>
-          <p class="rounded-lg border border-blue-100 bg-blue-50 p-3 text-xs leading-relaxed text-blue-900">お仕事に電話番号・LINE IDは登録しません。応募者との連絡は「応募・メッセージ」から行えます。</p>
+          <p class="rounded-lg border border-blue-100 bg-blue-50 p-3 text-xs leading-relaxed text-blue-900">募集に電話番号・LINE IDは登録しません。応募した方との連絡は「応募・チャット」から行えます。</p>
 
                   <div>
-                    <label class="block text-sm font-medium mb-1">現場写真 <span class="text-xs text-gray-400">(任意)</span></label>
+                    <label class="block text-sm font-medium mb-1">作業場所の写真 <span class="text-xs text-gray-400">(任意)</span></label>
                     <div class="flex items-center gap-3">
                       <input type="file" id="jobImageFiles" accept="image/jpeg,image/png,image/webp" multiple class="hidden" onchange="selectJobImages(this)">
                       <button id="jobImageSelectButton" type="button" onclick="document.getElementById('jobImageFiles').click()" class="flex-1 h-12 border-2 border-dashed border-gray-200 rounded-xl flex items-center justify-center gap-2 text-gray-500 hover:bg-gray-50 transition-all text-sm font-bold">
@@ -446,10 +446,10 @@
                   </div>
 
 
-          <!-- 現場特化タグ選択 -->
+          <!-- 募集条件タグ -->
           <details data-selection-name="jobTag" class="rounded-xl border border-gray-200">
             <summary class="flex flex-wrap cursor-pointer list-none items-center justify-between gap-2 p-3 text-sm font-bold text-gray-800">
-              <span class="min-w-0">現場アピールタグ（複数選択可）</span>
+              <span class="min-w-0">募集の条件・アピール（複数選択可）</span>
               <span class="flex min-w-0 max-w-full flex-wrap items-center justify-end gap-x-2 gap-y-1 text-xs font-normal">
                 <span data-selected-count class="text-gray-600">選択済み 0件</span>
                 <span class="rounded-full bg-blue-50 px-2 py-1 font-bold text-blue-700" data-toggle-label>選択肢を開く</span>
@@ -461,7 +461,8 @@
               <div class="grid grid-cols-2 gap-2 text-xs sm:grid-cols-3">
               <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="日払いOK"> <span>💰 日払いOK</span></label>
               <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="手渡しOK"> <span>💴 給与手渡しOK</span></label>
-              <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="現場直行直帰OK"> <span>🚗 現場直行直帰</span></label>
+              <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="交通費支給"> <span>🚃 交通費支給</span></label>
+              <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="作業場所へ直行・直帰OK"> <span>🚗 作業場所へ直行・直帰OK</span></label>
               <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="マイカー・バイク通勤可"> <span>🅿️ マイカー通勤可</span></label>
               <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="雨天時休業補償あり"> <span>☔️ 雨天時の休業補償</span></label>
               <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="寮・社宅完備"> <span>🏠 寮・社宅あり</span></label>
@@ -473,7 +474,9 @@
               <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="資格取得支援"> <span>🎓 資格取得支援</span></label>
               <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="週1日〜OK"> <span>📅 週1日〜OK</span></label>
               <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="シフト相談可"> <span>🗓️ シフト相談可</span></label>
-              <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="交通費支給"> <span>🚃 交通費支給</span></label>
+              <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="まかないあり"> <span>🍱 まかないあり</span></label>
+              <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="服装自由"> <span>👕 服装自由</span></label>
+              <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="道具貸出あり"> <span>🧰 道具貸出あり</span></label>
               <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="社会保険完備"> <span>🛡️ 社会保険完備</span></label>
               <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="日曜休み"> <span>🌤️ 日曜休み</span></label>
               <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="送迎あり"> <span>🚐 送迎あり</span></label>
@@ -494,7 +497,7 @@
       </div>
     </section>
 
-    <!-- 左側②：職人向け 即戦力プロフィール -->
+    <!-- お仕事を探す方向けプロフィール -->
     <section id="seekerSection" class="bg-white p-6 rounded-lg shadow-md h-fit md:col-span-2">
       <div id="seekerAccountPrompt" class="mb-4 p-4 rounded border border-blue-200 bg-blue-50">
         <p id="seekerAccountPromptText" class="text-sm text-blue-900">プロフィール・お気に入り・応募履歴をアカウントに保存するにはログインしてください。</p>
@@ -518,17 +521,17 @@
       <div id="seekerProfileForm" class="space-y-4">
         <div class="rounded-lg border border-blue-100 bg-blue-50 p-3 text-xs leading-relaxed text-blue-900">
           <p>赤い「*」は必須項目です。経験・資格・希望条件は分かる範囲で登録できます。</p>
-          <p class="mt-1">企業へのプロフィール公開は初期状態でオフです。公開を選んだ場合も、氏名・電話番号・メールアドレスは企業向けプロフィールに表示されません。</p>
+          <p class="mt-1">掲載者へのプロフィール公開は初期状態でオフです。公開を選んだ場合も、氏名・電話番号・メールアドレスは表示されません。</p>
         </div>
                 <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="block text-sm font-medium mb-1">お名前 / 通称 <span class="text-red-500">*</span></label>
-            <input type="text" id="seekerName" placeholder="例: 職人 太郎" class="w-full border rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+            <input type="text" id="seekerName" placeholder="例: 山田 太郎" class="w-full border rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
           </div>
           <div>
             <label class="block text-sm font-medium mb-1">携帯電話番号（任意）</label>
             <input type="text" id="seekerPhone" placeholder="例: 090-XXXX-XXXX" class="w-full border rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-            <p class="mt-1 text-xs text-gray-500">企業には公開されません。現在、SMS認証や応募先への電話番号共有には使用していません。</p>
+            <p class="mt-1 text-xs text-gray-500">掲載者には公開されません。現在、SMS認証や応募先への電話番号共有には使用していません。</p>
           </div>
         </div>
 
@@ -548,7 +551,7 @@
         <div>
           <details data-selection-name="seekerJobTypeOption" data-selection-extra-input="seekerJobType">
             <summary class="flex flex-wrap cursor-pointer list-none items-center justify-between gap-2 rounded-lg bg-gray-50 px-3 py-2 text-sm font-bold text-gray-800">
-              <span class="min-w-0">希望職種（複数選択可）</span>
+              <span class="min-w-0">希望する仕事（複数選択可）</span>
               <span class="flex min-w-0 max-w-full flex-wrap items-center justify-end gap-x-2 gap-y-1 text-xs font-normal">
                 <span data-selected-count class="text-gray-600">選択済み 0件</span>
                 <span class="rounded-full bg-gray-100 px-2 py-1 font-bold text-blue-700" data-toggle-label>選択肢を開く</span>
@@ -557,10 +560,10 @@
             </summary>
             <div id="seekerJobTypeOptions" class="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2"></div>
           </details>
-          <label class="mt-2 block text-sm">その他・具体的な職種
-            <input type="text" id="seekerJobType" maxlength="100" placeholder="例: 足場、解体、塗装" class="mt-1 w-full rounded border px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+          <label class="mt-2 block text-sm">その他・具体的な仕事
+            <input type="text" id="seekerJobType" maxlength="100" placeholder="例: イベント受付、野菜の袋詰め、店舗の清掃" class="mt-1 w-full rounded border px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
           </label>
-          <p class="text-xs text-gray-500 mt-1">選んだ職種とお仕事の職種名・仕事内容の一致をおすすめ順に反映します。</p>
+          <p class="text-xs text-gray-500 mt-1">選んだ仕事の種類と募集内容の一致を、おすすめ順の参考にします。</p>
         </div>
 
         <details id="seekerLocationPreferences" data-selection-name="seekerLocationPrefecture" data-location-input-name="seekerLocationPrefecture" data-location-other-input="seekerLocation" data-location-count-label="希望エリア" class="rounded-xl border border-blue-100 bg-blue-50">
@@ -621,25 +624,25 @@
 
         <div>
           <label for="seekerExperienceDetails" class="block text-sm font-medium mb-1">経験した作業・できること（任意）</label>
-          <textarea id="seekerExperienceDetails" rows="3" maxlength="1000" class="w-full rounded border px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="例: 足場の組立・解体を2年経験。車両系建設機械で掘削作業ができます。"></textarea>
-          <p class="mt-1 text-xs text-gray-500">担当した作業や扱える機材を記入できます。企業向け公開プロフィールにも同意した場合のみ表示されます。</p>
+          <textarea id="seekerExperienceDetails" rows="3" maxlength="1000" class="w-full rounded border px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="例: イベント受付、野菜の袋詰め、飲食店での接客を経験。"></textarea>
+          <p class="mt-1 text-xs text-gray-500">経験した作業や扱える道具・機材を記入できます。掲載者向け公開プロフィールにも同意した場合のみ表示されます。</p>
         </div>
 
-        <!-- 即戦力メーター -->
+        <!-- 経験・作業への自信 -->
         <div class="bg-gray-50 p-3 rounded border space-y-3">
-          <p class="text-xs font-bold text-gray-700">💪 即戦力アピール</p>
+          <p class="text-xs font-bold text-gray-700">経験・作業への自信</p>
           <div class="grid grid-cols-1 gap-3 text-xs sm:grid-cols-2">
             <div>
-              <label class="block font-medium mb-1">現場経験年数</label>
+              <label class="block font-medium mb-1">仕事の経験年数</label>
               <select id="seekerExpYears" class="w-full border rounded p-2">
-                <option value="未経験（やる気あり）">未経験（やる気あり）</option>
+                <option value="未経験（やる気あり）">未経験</option>
                 <option value="1〜2年">1〜2年</option>
-                <option value="3〜5年（即戦力）">3〜5年（即戦力）</option>
-                <option value="5年以上（ベテラン）">5年以上（ベテラン）</option>
+                <option value="3〜5年（即戦力）">3〜5年</option>
+                <option value="5年以上（ベテラン）">5年以上</option>
               </select>
             </div>
             <div>
-              <label class="block font-medium mb-1">体力自信度</label>
+              <label class="block font-medium mb-1">体を使う作業への自信（任意）</label>
               <select id="seekerStamina" class="w-full border rounded p-2">
                 <option value="">未回答</option>
                 <option value="★★★★★ (とても自信あり)">★★★★★ とても自信あり</option>
@@ -667,16 +670,16 @@
         </details>
 
         <fieldset class="rounded-lg border border-amber-300 bg-amber-50 p-4">
-          <legend class="px-1 text-sm font-bold text-amber-950">企業へのプロフィール公開（任意）</legend>
+          <legend class="px-1 text-sm font-bold text-amber-950">掲載者へのプロフィール公開（任意）</legend>
           <label class="flex items-start gap-2 text-sm text-amber-950">
             <input id="seekerProfilePublic" type="checkbox" class="mt-0.5 h-4 w-4 shrink-0">
-            <span><span class="font-bold">企業アカウントに匿名プロフィールを公開する</span><br>チェックを入れてプロフィールを保存すると、希望職種・勤務地・希望給与・資格・経験年数・経験した作業・体力自信度・希望する働き方が企業アカウントに表示されます。名前と電話番号は表示されません。一般公開ではありません。</span>
+            <span><span class="font-bold">お仕事をお願いする方に匿名プロフィールを公開する</span><br>チェックを入れてプロフィールを保存すると、希望する仕事・地域・報酬・資格・経験・体力自信度・希望する働き方が掲載者に表示されます。名前と電話番号は表示されず、一般公開もされません。</span>
           </label>
-          <p class="mt-3 border-t border-amber-200 pt-3 text-xs leading-5 text-amber-900">公開は任意です。チェックを外して保存すると非公開になります。企業アカウントの利用者は本人確認されているとは限らないため、公開する情報に個人を特定できる内容を含めないでください。勤務地は市区町村までにしてください。</p>
+          <p class="mt-3 border-t border-amber-200 pt-3 text-xs leading-5 text-amber-900">公開は任意です。チェックを外して保存すると非公開になります。お仕事をお願いする方は本人確認されているとは限らないため、公開する情報に個人を特定できる内容を含めないでください。勤務地は市区町村までにしてください。</p>
         </fieldset>
 
         <button onclick="saveSeekerProfile()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition shadow text-base">
-          ✅ 職人プロフィールを保存する
+          ✅ プロフィールを保存する
         </button>
       </div>
 
@@ -693,12 +696,12 @@
             <section id="dashboardView-favorites" class="hidden rounded border p-3">
               <h3 class="font-bold text-sm mb-2">お気に入りのお仕事</h3>
               <div id="dashboardFavorites" class="space-y-2 text-sm"></div>
-              <h3 class="font-bold text-sm mt-6 mb-2">フォロー中の企業のお仕事</h3>
-              <p class="mb-2 text-xs text-gray-600">フォローした企業が掲載中のお仕事を表示します。お仕事の詳細画面からフォローを解除できます。</p>
+              <h3 class="font-bold text-sm mt-6 mb-2">フォロー中の掲載者のお仕事</h3>
+              <p class="mb-2 text-xs text-gray-600">フォローした掲載者のお仕事を表示します。詳細画面からフォローを解除できます。</p>
               <div id="dashboardFollowedJobs" class="space-y-2 text-sm"></div>
             </section>
                         <section id="dashboardView-applications" class="hidden rounded border p-3">
-              <h3 class="font-bold text-sm mb-2">応募履歴・応募者</h3>
+              <h3 class="font-bold text-sm mb-2">応募したお仕事・チャット</h3>
               <p class="mb-3 text-xs text-gray-600">応募後すぐに掲載者とチャットできます。条件を確認し、掲載者がお仕事を確定するまで作業を始めないでください。</p>
               <p id="dashboardApplicationsStatus" role="status" aria-live="polite" class="mb-3 hidden text-sm"></p>
               <p id="seekerApplicationMessagesStatus" role="status" aria-live="polite" class="mb-3 hidden text-sm text-red-700"></p>
@@ -706,8 +709,8 @@
             </section>
             <section id="dashboardView-notifications" class="hidden rounded border p-3">
 
-              <h3 class="font-bold text-sm mb-2">企業からの連絡・通知</h3>
-              <p class="mb-3 text-xs text-gray-600">企業からの連絡にはここから返信または見送りできます。返信しても、名前・電話番号・メールアドレスは企業に共有されません。</p>
+              <h3 class="font-bold text-sm mb-2">掲載者からの連絡・通知</h3>
+              <p class="mb-3 text-xs text-gray-600">掲載者からの連絡に返信できます。返信しても、電話番号・メールアドレスは共有されません。</p>
               <p id="seekerNotificationsStatus" role="status" aria-live="polite" class="hidden text-sm text-red-700"></p>
               <div id="seekerDashboardNotifications" class="divide-y divide-gray-100 text-sm"></div>
             </section>
@@ -715,7 +718,7 @@
       </div>
     </section>
 
-        <!-- 右側：掲載中の現場のお仕事一覧 -->
+        <!-- お仕事一覧 -->
     <section id="jobListSection" class="h-fit order-first md:col-span-2">
       <section id="onboardingGuide" aria-label="はじめての方へ" class="mb-6 hidden rounded-2xl border border-blue-200 bg-blue-50 p-4 shadow-sm sm:p-5">
         <div class="flex items-start justify-between gap-3">
@@ -730,22 +733,22 @@
           <span id="jobCount" class="text-xs bg-blue-600 text-white px-3 py-1 rounded-full font-bold shadow-sm shadow-blue-100">0件</span>
         </div>
         <p id="jobTrustNotice" class="mt-3 text-[11px] font-medium text-amber-700 flex items-center gap-1.5">
-          <span class="text-base">⚠️</span> 掲載企業の本人確認は行っていません。応募前にお仕事内容・条件をご確認ください。連絡は応募後にサイト内で行えます。
+          <span class="text-base">⚠️</span> 掲載者の本人確認は行っていません。応募前に作業内容・場所・報酬をご確認ください。連絡は応募後にサイト内で行えます。
         </p>
-        <p id="jobListDescription" class="mt-3 text-xs text-gray-500 hidden leading-relaxed">希望職種・勤務地・給与条件の一致度を目安にお仕事をおすすめ順で表示します。検索条件は以下のパネルから自由に変更できます。</p>
+        <p id="jobListDescription" class="mt-3 text-xs text-gray-500 hidden leading-relaxed">希望する仕事・地域・報酬条件の一致度を目安にお仕事をおすすめ順で表示します。検索条件は以下のパネルから変更できます。</p>
       </div>
         <section id="employerSeekerSearch" class="hidden mt-5 mb-8 rounded-2xl border border-blue-200 bg-blue-50 p-4 shadow-sm sm:p-5">
           <div class="mb-4">
-            <h3 class="text-base font-bold text-blue-900">お仕事探しの方を検索・絞り込み</h3>
-            <p class="mt-1 text-sm leading-relaxed text-blue-800">企業へのプロフィール公開を許可したお仕事探しの方だけが表示されます。氏名・電話番号・メールアドレスは表示されません。</p>
+            <h3 class="text-base font-bold text-blue-900">公開プロフィールを検索・絞り込み</h3>
+            <p class="mt-1 text-sm leading-relaxed text-blue-800">プロフィール公開に同意した方だけが表示されます。氏名・電話番号・メールアドレスは表示されません。</p>
           </div>
-          <label for="seekerSearchJob" class="mb-2 block text-sm font-bold text-gray-700">マッチさせる自社のお仕事</label>
+          <label for="seekerSearchJob" class="mb-2 block text-sm font-bold text-gray-700">比較の基準にする自分の募集</label>
           <select id="seekerSearchJob" onchange="renderEmployerSeekerSearch(true)" class="mb-2 w-full rounded-xl border border-blue-300 bg-white px-4 py-3 text-base shadow-sm outline-none focus:ring-2 focus:ring-blue-500">
             <option value="">お仕事を選ぶとマッチ度順に表示</option>
           </select>
-          <p class="mb-4 text-xs leading-relaxed text-gray-600">職種・勤務地・給与条件の一致度を目安として並べます。経験・資格は候補者情報として表示し、順位の判定には使いません。</p>
+          <p class="mb-4 text-xs leading-relaxed text-gray-600">希望する仕事・地域・報酬条件の一致度を目安として並べます。経験・資格は参考情報として表示し、順位の判定には使いません。</p>
           <label for="seekerSearchKeyword" class="mb-2 block text-sm font-bold text-gray-700">キーワード</label>
-          <input type="search" id="seekerSearchKeyword" oninput="renderEmployerSeekerSearch(true)" placeholder="希望職種・地域・資格・経験で検索" class="mb-4 w-full rounded-xl border border-blue-300 bg-white px-4 py-3 text-base shadow-sm outline-none focus:ring-2 focus:ring-blue-500">
+          <input type="search" id="seekerSearchKeyword" oninput="renderEmployerSeekerSearch(true)" placeholder="希望する仕事・地域・資格・経験などで検索" class="mb-4 w-full rounded-xl border border-blue-300 bg-white px-4 py-3 text-base shadow-sm outline-none focus:ring-2 focus:ring-blue-500">
           <label for="seekerSearchSort" class="mb-2 block text-sm font-bold text-gray-700"><span data-line-icon="sort"></span>並び替え</label>
           <select id="seekerSearchSort" onchange="renderEmployerSeekerSearch(true)" class="mb-4 w-full rounded-xl border border-blue-300 bg-white px-4 py-3 text-base shadow-sm outline-none focus:ring-2 focus:ring-blue-500">
             <option value="match">マッチ度が高い順</option>
@@ -769,7 +772,7 @@
                 </div>
               </fieldset>
               <label class="text-sm text-gray-700">
-                <span class="mb-1 block">現場経験</span>
+                <span class="mb-1 block">仕事の経験年数</span>
                 <select id="seekerSearchExperience" onchange="renderEmployerSeekerSearch(true)" class="w-full rounded-lg border px-3 py-2.5 text-base focus:ring-2 focus:ring-blue-500 outline-none">
                   <option value="">すべて</option>
                   <option value="未経験（やる気あり）">未経験</option>
@@ -803,7 +806,7 @@
         </div>
 
         <label for="searchKeyword" class="mb-2 block text-sm font-bold text-gray-700">キーワード</label>
-        <input type="text" id="searchKeyword" oninput="renderJobList(true)" placeholder="職種・勤務地・タグで検索（例: 横浜、日払い）" class="mb-4 w-full rounded-xl border border-blue-300 bg-white px-4 py-3 text-base shadow-sm outline-none focus:ring-2 focus:ring-blue-500">
+        <input type="search" id="searchKeyword" oninput="renderJobList(true)" placeholder="タイトル・作業内容・地域・報酬などで検索（例: 受付、収穫、横浜）" class="mb-4 w-full rounded-xl border border-blue-300 bg-white px-4 py-3 text-base shadow-sm outline-none focus:ring-2 focus:ring-blue-500">
 
         <fieldset class="mb-4">
           <legend class="mb-2 text-sm font-bold text-gray-700">作業日から探す</legend>
@@ -828,11 +831,11 @@
         </div>
 
         <fieldset class="mb-4">
-          <legend class="mb-2 text-sm font-bold text-gray-700">人気の条件から探す</legend>
+          <legend class="mb-2 text-sm font-bold text-gray-700">よく使われる条件</legend>
           <div class="flex flex-wrap gap-2">
             <button type="button" data-quick-job-tag="未経験歓迎" aria-pressed="false" onclick="toggleQuickJobTag('未経験歓迎')" class="min-h-10 rounded-full border border-blue-200 bg-white px-3 py-2 text-sm font-medium text-blue-900 hover:bg-blue-100">未経験歓迎</button>
-            <button type="button" data-quick-job-tag="寮・社宅完備" aria-pressed="false" onclick="toggleQuickJobTag('寮・社宅完備')" class="min-h-10 rounded-full border border-blue-200 bg-white px-3 py-2 text-sm font-medium text-blue-900 hover:bg-blue-100">寮・社宅あり</button>
-            <button type="button" data-quick-job-tag="資格取得支援" aria-pressed="false" onclick="toggleQuickJobTag('資格取得支援')" class="min-h-10 rounded-full border border-blue-200 bg-white px-3 py-2 text-sm font-medium text-blue-900 hover:bg-blue-100">資格取得支援</button>
+            <button type="button" data-quick-job-tag="交通費支給" aria-pressed="false" onclick="toggleQuickJobTag('交通費支給')" class="min-h-10 rounded-full border border-blue-200 bg-white px-3 py-2 text-sm font-medium text-blue-900 hover:bg-blue-100">交通費支給</button>
+            <button type="button" data-quick-job-tag="週1日〜OK" aria-pressed="false" onclick="toggleQuickJobTag('週1日〜OK')" class="min-h-10 rounded-full border border-blue-200 bg-white px-3 py-2 text-sm font-medium text-blue-900 hover:bg-blue-100">週1日〜OK</button>
           </div>
         </fieldset>
 
@@ -847,7 +850,7 @@
           </label>
           <label class="flex min-h-11 items-center gap-2 rounded-lg border border-blue-100 bg-white px-3 text-sm text-gray-700">
             <input type="checkbox" id="followedOnly" onchange="renderJobList(true)" class="h-4 w-4 rounded text-blue-600 focus:ring-blue-500">
-            🏢 フォロー中の企業のみ表示
+            🏢 フォロー中の掲載者のみ表示
           </label>
           <label class="flex min-h-11 items-center gap-2 rounded-lg border border-blue-100 bg-white px-3 text-sm text-gray-700">
             <input type="checkbox" id="hideAppliedJobs" onchange="renderJobList(true)" class="h-4 w-4 rounded text-blue-600 focus:ring-blue-500">
@@ -862,12 +865,12 @@
           <span class="block mb-1">作業カテゴリ</span>
           <select id="jobCategoryFilter" onchange="renderJobList(true)" class="w-full rounded-lg border px-3 py-2.5 text-base focus:ring-2 focus:ring-blue-500 outline-none">
             <option value="">すべて</option>
-            <option value="construction_help">現場の手伝い</option>
-            <option value="event_setup">イベント搬入・設営</option>
+            <option value="event_setup">イベント・催事</option>
             <option value="farm_work">農作業</option>
+            <option value="restaurant_help">飲食店のお手伝い</option>
             <option value="neighborhood_help">ご近所のお手伝い</option>
-            <option value="restaurant_help">飲食店のヘルプ</option>
-            <option value="other">その他・継続案件</option>
+            <option value="construction_help">建設・屋外作業</option>
+            <option value="other">その他（内容を相談・継続募集）</option>
           </select>
         </label>
         <label class="text-sm text-gray-700">
@@ -978,7 +981,7 @@
         <h2 id="modalTitle" class="text-2xl font-bold leading-snug text-gray-900"></h2>
         <div id="modalEmployerProfile"></div>
         <p id="modalJobFreshness" class="mt-2 text-xs text-gray-500"></p>
-        <p class="mt-1 text-xs text-amber-800">掲載企業の本人確認は行っていません。応募前にお仕事内容・条件をご確認ください。連絡は応募後にサイト内で行えます。</p>
+        <p class="mt-1 text-xs text-amber-800">掲載者の本人確認は行っていません。応募前に作業内容・場所・報酬をご確認ください。連絡は応募後にサイト内で行えます。</p>
         <button id="modalFavoriteButton" type="button" onclick="toggleFavorite(selectedJob.id)" class="mt-3 min-h-11 rounded-lg border border-amber-300 px-4 py-2 text-sm font-bold text-amber-800 hover:bg-amber-50"></button>
         <button id="modalFollowButton" type="button" onclick="toggleFollowEmployer(selectedJob.owner_id)" class="mt-3 hidden min-h-11 rounded-lg border border-blue-300 px-4 py-2 text-sm font-bold text-blue-800 hover:bg-blue-50"></button>
         <div class="mt-3 flex flex-wrap gap-2">

@@ -29,10 +29,10 @@ function updateAccountSearchSurface() {
   jobCount.classList.toggle("hidden", isEmployerTab && !canSearchSeekers);
   jobTrustNotice?.classList.toggle("hidden", isEmployerTab);
   if (isEmployerTab) {
-    jobListTitle.innerText = canSearchSeekers ? "お仕事探しの方を探す" : "アカウント情報を確認しています";
+    jobListTitle.innerText = canSearchSeekers ? "公開プロフィールを探す" : "アカウント情報を確認しています";
     jobListDescription?.classList.toggle("hidden", !canSearchSeekers);
     if (jobListDescription && canSearchSeekers) {
-      jobListDescription.innerText = "企業へのプロフィール公開を許可したお仕事探しの方だけを検索できます。";
+      jobListDescription.innerText = "公開に同意した匿名プロフィールだけを検索できます。";
     }
     if (canSearchSeekers) renderEmployerSeekerSearch();
     return;
@@ -41,7 +41,7 @@ function updateAccountSearchSurface() {
   jobListTitle.innerText = activeTab === "seeker" ? "あなたに合う仕事を探す" : "お仕事一覧";
   jobListDescription?.classList.toggle("hidden", activeTab !== "seeker");
   if (jobListDescription && activeTab === "seeker") {
-    jobListDescription.innerText = "希望職種・勤務地・給与条件の一致度を目安にお仕事をおすすめ順で表示します。検索条件は以下のパネルから自由に変更できます。";
+    jobListDescription.innerText = "希望する仕事・地域・報酬条件の一致度を目安にお仕事を表示します。検索条件は以下のパネルから変更できます。";
   }
 }
 
@@ -144,7 +144,7 @@ function renderEmployerSeekerSearch(resetLimit = false) {
   const selectedJobId = jobSelect.value;
   const selectedJob = ownedJobs.find(job => String(job.id) === selectedJobId);
   const previousJobId = selectedJob ? String(selectedJob.id) : "";
-  jobSelect.innerHTML = `<option value="">${ownedJobs.length ? "お仕事を選ぶとマッチ度順に表示" : "募集中の自社のお仕事がありません"}</option>`;
+  jobSelect.innerHTML = `<option value="">${ownedJobs.length ? "募集を選ぶと条件の一致度を表示" : "募集中の募集がありません"}</option>`;
   ownedJobs.forEach(job => {
     jobSelect.add(new Option(`${job.title || "お仕事"} ・ ${job.location || "勤務地未設定"}`, String(job.id)));
   });
@@ -264,13 +264,13 @@ function renderEmployerSeekerSearch(resetLimit = false) {
     return `<article class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition-all hover:border-blue-200 hover:shadow-md sm:p-6">
       <div class="flex flex-wrap items-start justify-between gap-3 border-b border-gray-100 pb-4">
         <div class="min-w-0">
-          <h3 class="break-words text-lg font-extrabold leading-tight text-gray-900">${escapeHtml(String(profile.job_type || "希望職種未設定"))}</h3>
+          <h3 class="break-words text-lg font-extrabold leading-tight text-gray-900">${escapeHtml(String(profile.job_type || "希望する仕事は未設定"))}</h3>
           <p class="mt-1 text-sm text-gray-600">📍 ${escapeHtml(String(profile.location || "希望勤務地未設定"))}</p>
         </div>
         <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-800">公開中</span>
       </div>
       <dl class="mt-4 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
-        <div><dt class="text-xs font-bold text-gray-500">現場経験</dt><dd class="mt-1 font-medium text-gray-800">${escapeHtml(String(profile.exp_years || "未設定"))}</dd></div>
+        <div><dt class="text-xs font-bold text-gray-500">仕事の経験年数</dt><dd class="mt-1 font-medium text-gray-800">${escapeHtml(String(profile.exp_years || "未設定"))}</dd></div>
         <div class="sm:col-span-2"><dt class="text-xs font-bold text-gray-500">経験した作業・できること</dt><dd class="mt-1 whitespace-pre-wrap font-medium text-gray-800">${escapeHtml(String(profile.experience_details || "未登録"))}</dd></div>
         <div><dt class="text-xs font-bold text-gray-500">希望給与</dt><dd class="mt-1 font-medium text-gray-800">${escapeHtml(pay)}</dd></div>
         <div><dt class="text-xs font-bold text-gray-500">体力自信度</dt><dd class="mt-1 font-medium text-gray-800">${escapeHtml(String(profile.stamina || "未設定"))}</dd></div>
@@ -305,7 +305,7 @@ function getSeekerJobMatch(job, profile) {
     const jobDescription = `${job.title || ""} ${job.duties || ""}`.toLocaleLowerCase();
     if (preferredJobTypes.some(jobType => jobDescription.includes(jobType))) {
       score += 4;
-      reasons.push("希望職種が一致");
+      reasons.push("希望する仕事が一致");
     }
   }
 

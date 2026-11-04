@@ -316,7 +316,7 @@ function handleMyPageOverlayClick(event) {
 }
 
 function updateMyPageAccountInfo() {
-  const accountTypeLabel = accountType === "seeker" ? "お仕事探しの方" : accountType === "employer" ? "企業・親方" : "";
+  const accountTypeLabel = accountType === "seeker" ? "お仕事を探す方" : accountType === "employer" ? "お仕事をお願いする方" : "";
   document.getElementById("myPageAccountInfo").innerText = currentUser?.email
     ? `${currentUser.email} ・ ${accountTypeLabel}アカウント`
     : `${accountTypeLabel}アカウント`;
@@ -518,7 +518,7 @@ async function deleteMyAccount() {
   const isEmployer = accountType === "employer";
   const detail = isEmployer
     ? "掲載中のお仕事はすべて削除されます。応募者とのメッセージは「退会したユーザー」として相手側に残ります。"
-    : "プロフィール・お気に入り・通知は削除されます。応募履歴は氏名などを消して企業側に残り、応募は終了扱いになります。";
+    : "プロフィール・お気に入り・通知は削除されます。応募履歴は氏名などを消して掲載者側に残り、応募は終了扱いになります。";
   if (!confirm(`退会するとアカウントを元に戻せません。\n\n${detail}\n\n本当に退会しますか？`)) return;
   if (!confirm("最終確認：退会してよろしいですか？")) return;
 

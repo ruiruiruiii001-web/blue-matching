@@ -25,7 +25,7 @@ function renderLoginNotificationBanner() {
     return;
   }
   const messages = [];
-  if (pendingContactCount) messages.push(`企業からの連絡が${pendingContactCount}件届いています。`);
+  if (pendingContactCount) messages.push(`お仕事を探す方からの連絡が${pendingContactCount}件届いています。`);
   if (unreadCount) messages.push(`新しいお知らせが${unreadCount}件あります。`);
   if (expiringJobCount) messages.push(`掲載期限が近いお仕事が${expiringJobCount}件あります。`);
   document.getElementById("loginNotificationMessage").innerText =
@@ -200,7 +200,7 @@ function renderApplicationNotificationView(application, messageStatus) {
         ? `<button type="button" onclick="withdrawApplication('${escapeHtml(String(application.id))}')" class="mb-4 min-h-11 w-full rounded-xl border border-rose-200 bg-white px-4 py-2 text-sm font-bold text-rose-700 hover:bg-rose-50">応募を取り消す</button>`
         : ""}
       ${application.status === "reviewed" && employerId
-        ? `<button type="button" onclick="openReviewModal('${escapeHtml(String(application.id))}', '${escapeHtml(String(employerId))}', 'employer')" class="mb-4 rounded-lg border border-amber-100 bg-amber-50 px-3 py-2 text-xs font-black text-amber-600 hover:bg-amber-100">⭐ 企業を評価する</button>`
+        ? `<button type="button" onclick="openReviewModal('${escapeHtml(String(application.id))}', '${escapeHtml(String(employerId))}', 'employer')" class="mb-4 rounded-lg border border-amber-100 bg-amber-50 px-3 py-2 text-xs font-black text-amber-600 hover:bg-amber-100">⭐ 掲載者を評価する</button>`
         : ""}
       ${renderApplicationConversation(application)}
       <p id="applicationDetailMessageStatus" role="status" aria-live="polite" class="mt-2 ${messageStatus ? "text-sm text-emerald-700" : "hidden text-sm"}">${escapeHtml(messageStatus || "")}</p>
@@ -224,7 +224,7 @@ async function openApplicantPublicProfile(applicationId) {
 
   const employerId = currentUser.id;
   const applicantId = application.applicant_id;
-  document.getElementById("applicationDetailTitle").innerText = "応募者プロフィール";
+  document.getElementById("applicationDetailTitle").innerText = "応募した方のプロフィール";
   content.innerHTML = `
     <button type="button" onclick="returnToApplicationDetails('${escapeHtml(String(application.id))}')" class="mb-4 min-h-10 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-bold text-gray-700 hover:bg-gray-50">← 応募内容に戻る</button>
     <p role="status" aria-live="polite" class="rounded-xl bg-blue-50 p-4 text-sm text-blue-800">公開プロフィールを確認しています...</p>
@@ -253,8 +253,8 @@ async function openApplicantPublicProfile(applicationId) {
     content.innerHTML = `
       <button type="button" onclick="returnToApplicationDetails('${escapeHtml(String(application.id))}')" class="mb-4 min-h-10 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-bold text-gray-700 hover:bg-gray-50">← 応募内容に戻る</button>
       <article class="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-amber-950">
-        <h3 class="text-lg font-black">企業向けプロフィールは公開されていません</h3>
-        <p class="mt-2 text-sm leading-relaxed">この方は匿名プロフィールを企業向けに公開していないか、公開プロフィールを登録していません。応募時に共有された経験・資格・メッセージは、応募内容に戻って確認できます。</p>
+        <h3 class="text-lg font-black">掲載者向けプロフィールは公開されていません</h3>
+        <p class="mt-2 text-sm leading-relaxed">この方は匿名プロフィールを掲載者向けに公開していないか、公開プロフィールを登録していません。応募時に共有された経験・資格・メッセージは、応募内容に戻って確認できます。</p>
       </article>
     `;
     return;
@@ -273,13 +273,13 @@ async function openApplicantPublicProfile(applicationId) {
     <article class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
       <div class="border-b border-gray-100 pb-4">
         <h3 class="text-lg font-black text-gray-900">${escapeHtml(String(application.applicant_name || "応募者"))} さんのプロフィール</h3>
-        <p class="mt-1 text-xs text-gray-500">本人が企業向け公開に同意したプロフィール情報です。氏名・連絡先は公開プロフィールから取得していません。</p>
+        <p class="mt-1 text-xs text-gray-500">本人が掲載者向け公開に同意したプロフィール情報です。氏名・連絡先は公開プロフィールから取得していません。</p>
       </div>
       <dl class="mt-4 grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
-        <div><dt class="text-xs font-bold text-gray-500">希望職種</dt><dd class="mt-1 font-medium text-gray-800">${escapeHtml(String(data.job_type || "未設定"))}</dd></div>
+        <div><dt class="text-xs font-bold text-gray-500">希望する仕事</dt><dd class="mt-1 font-medium text-gray-800">${escapeHtml(String(data.job_type || "未設定"))}</dd></div>
         <div><dt class="text-xs font-bold text-gray-500">希望勤務地</dt><dd class="mt-1 font-medium text-gray-800">${escapeHtml(String(data.location || "未設定"))}</dd></div>
         <div><dt class="text-xs font-bold text-gray-500">希望給与</dt><dd class="mt-1 font-medium text-gray-800">${escapeHtml(pay)}</dd></div>
-        <div><dt class="text-xs font-bold text-gray-500">現場経験</dt><dd class="mt-1 font-medium text-gray-800">${escapeHtml(String(data.exp_years || "未設定"))}</dd></div>
+        <div><dt class="text-xs font-bold text-gray-500">作業経験</dt><dd class="mt-1 font-medium text-gray-800">${escapeHtml(String(data.exp_years || "未設定"))}</dd></div>
         <div class="sm:col-span-2"><dt class="text-xs font-bold text-gray-500">経験した作業・できること</dt><dd class="mt-1 whitespace-pre-wrap font-medium text-gray-800">${escapeHtml(String(data.experience_details || "未登録"))}</dd></div>
         <div><dt class="text-xs font-bold text-gray-500">体力自信度</dt><dd class="mt-1 font-medium text-gray-800">${escapeHtml(String(data.stamina || "未設定"))}</dd></div>
         <div><dt class="text-xs font-bold text-gray-500">資格</dt><dd class="mt-1 flex flex-wrap gap-1.5">${licenses}</dd></div>
@@ -318,7 +318,7 @@ function openApplicationDismissalForm(applicationId) {
       <p class="mb-4 text-sm text-gray-600">対応不要にする理由を入力してください。理由は応募者の応募履歴に表示されます。</p>
       <form onsubmit="submitApplicationDismissal(event, '${escapeHtml(String(application.id))}')">
         <label for="applicationDismissalReason" class="block text-sm font-medium text-gray-800">対応不要の理由（必須）</label>
-        <textarea id="applicationDismissalReason" required maxlength="500" rows="5" class="mt-2 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm" placeholder="例：募集条件との兼ね合いにより、今回は選考を見送らせていただきます。"></textarea>
+        <textarea id="applicationDismissalReason" required maxlength="500" rows="5" class="mt-2 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm" placeholder="例：募集条件との兼ね合いにより、今回はご希望に沿えません。"></textarea>
         <p class="mt-1 text-xs text-gray-500">1〜500文字で入力してください。</p>
         <div class="mt-5 flex flex-wrap justify-end gap-2">
           <button type="button" onclick="refreshApplicationNotificationView('${escapeHtml(String(application.id))}')" class="min-h-11 rounded-lg border border-gray-200 px-4 py-2 text-sm font-bold text-gray-700 hover:bg-gray-50">戻る</button>
@@ -376,13 +376,13 @@ function renderContactRequestNotification(requestId) {
   return `
     <div class="mt-3 rounded-lg bg-white p-3">
       <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
-        <p class="font-bold">企業からの連絡</p>
+        <p class="font-bold">掲載者からの連絡</p>
         <span class="rounded-full px-2.5 py-1 text-xs font-bold ${request.status === "pending" ? "bg-amber-100 text-amber-900" : request.status === "responded" ? "bg-emerald-100 text-emerald-900" : "bg-gray-100 text-gray-700"}">${request.status === "pending" ? "未返信" : request.status === "responded" ? "返信済み" : "見送り済み"}</span>
       </div>
       <p class="whitespace-pre-wrap break-words text-sm">${escapeHtml(String(request.employer_message || ""))}</p>
       ${request.status === "pending" ? `
         <label class="mt-3 block text-sm font-medium">返信メッセージ
-          <textarea id="contactReply-${escapeHtml(String(request.id))}" maxlength="1000" rows="3" class="mt-1 w-full rounded border px-3 py-2 text-sm" placeholder="企業への返信を入力"></textarea>
+          <textarea id="contactReply-${escapeHtml(String(request.id))}" maxlength="1000" rows="3" class="mt-1 w-full rounded border px-3 py-2 text-sm" placeholder="掲載者への返信を入力"></textarea>
         </label>
         <div class="mt-2 flex flex-wrap gap-2">
           <button type="button" onclick="respondToContactRequest('${escapeHtml(String(request.id))}', 'responded')" class="min-h-10 rounded-lg bg-emerald-700 px-3 py-2 text-xs font-bold text-white hover:bg-emerald-800">返信する</button>
@@ -495,7 +495,7 @@ async function respondToContactRequest(requestId, status) {
   if (error) {
     document.getElementById("accountDashboardStatus").innerText = `連絡リクエストに返信できませんでした: ${error.message}`;
     document.getElementById("accountDashboardStatus").classList.remove("hidden");
-    console.error("企業への返信エラー:", error);
+    console.error("掲載者への返信エラー:", error);
     return;
   }
   if (!data) {

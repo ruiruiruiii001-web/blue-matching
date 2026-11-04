@@ -121,7 +121,7 @@ function renderApplicationConversation(application) {
   const messages = applicationMessages.filter(message =>
     String(message.application_id) === String(application.id)
   );
-  const otherParticipant = accountType === "employer" ? "お仕事探しの方" : "企業";
+  const otherParticipant = accountType === "employer" ? "お仕事を探す方" : "募集を掲載した方";
   return `
     ${application.status === "reviewed" ? `<div data-interview-box data-application-id="${escapeHtml(String(application.id))}"></div>` : ""}
     <section data-application-thread="${escapeHtml(String(application.id))}" class="mt-5 rounded-xl border border-blue-100 bg-blue-50/50 p-4">

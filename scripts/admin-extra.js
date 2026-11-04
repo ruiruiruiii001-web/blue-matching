@@ -5,7 +5,7 @@ const MESSAGE_REPORT_REASON_LABELS = {
   inappropriate: "不適切な内容",
   other: "その他"
 };
-const ACCOUNT_TYPE_LABELS = { seeker: "お仕事探しの方", employer: "企業・親方" };
+const ACCOUNT_TYPE_LABELS = { seeker: "お仕事を探す方", employer: "お仕事をお願いする方" };
 
 const adminMessageReports = document.getElementById("adminMessageReports");
 const adminMessageReportFilter = document.getElementById("adminMessageReportFilter");

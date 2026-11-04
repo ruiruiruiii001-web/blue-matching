@@ -35,7 +35,7 @@ async function loadEmployerPublicProfiles(userIds) {
     const schemaUnavailable = ["42P01", "PGRST205"].includes(error.code);
     employerProfileLoadError = schemaUnavailable ? "" : error.message;
     employerProfilesSchemaReady = false;
-    if (!schemaUnavailable) console.error("企業プロフィールを読み込めませんでした:", error);
+    if (!schemaUnavailable) console.error("掲載者プロフィールを読み込めませんでした:", error);
     return;
   }
   employerProfilesSchemaReady = true;
@@ -55,7 +55,7 @@ async function loadEmployerProfileForm() {
   if (currentUser?.id !== employerProfileLoadedUserId || !document.getElementById("employerProfileName")) return;
   if (error) {
     if (["42P01", "PGRST205"].includes(error.code)) {
-      setEmployerProfileStatus("企業プロフィール機能を使うには、README記載の企業プロフィール用SQLを実行してください。", "warning");
+      setEmployerProfileStatus("掲載者プロフィール機能を使うには、README記載の掲載者プロフィール用SQLを実行してください。", "warning");
       return;
     }
     setEmployerProfileStatus(`プロフィールを読み込めませんでした: ${error.message}`, "error");
@@ -73,14 +73,14 @@ async function saveEmployerProfile(event) {
   if (!currentUser || accountType !== "employer") return;
   const userId = currentUser.id;
   if (!employerProfilesSchemaReady) {
-    setEmployerProfileStatus("企業プロフィール用SQLを実行してから保存してください。", "warning", true);
+    setEmployerProfileStatus("掲載者プロフィール用SQLを実行してから保存してください。", "warning", true);
     return;
   }
   const displayName = document.getElementById("employerProfileName").value.trim();
   const serviceArea = document.getElementById("employerProfileArea").value.trim();
   const introduction = document.getElementById("employerProfileIntroduction").value.trim();
   if (!displayName || displayName.length > 100 || serviceArea.length > 300 || introduction.length > 1000) {
-    setEmployerProfileStatus("企業・屋号は1〜100文字、対応地域は300文字、紹介文は1,000文字以内で入力してください。", "error", true);
+    setEmployerProfileStatus("表示名・屋号は1〜100文字、対応地域は300文字、紹介文は1,000文字以内で入力してください。", "error", true);
     return;
   }
   const { data, error } = await supabaseClient
@@ -101,14 +101,14 @@ async function saveEmployerProfile(event) {
   employerPublicProfiles.set(String(data.user_id), data);
   if (currentUser?.id !== userId) return;
   employerProfileLoadError = "";
-  setEmployerProfileStatus("企業プロフィールを保存しました。お仕事の詳細ページに表示されます。", "success", true);
+  setEmployerProfileStatus("掲載者プロフィールを保存しました。お仕事の詳細ページに表示されます。", "success", true);
   renderJobList();
 }
 
 function renderEmployerProfileSummary(userId) {
   const profile = getEmployerPublicProfile(userId);
   if (!profile) {
-    return `<p class="mt-1 text-[10px] text-gray-500">${employerProfileLoadError ? "企業プロフィールを読み込めませんでした" : "企業プロフィール未登録"}</p>`;
+    return `<p class="mt-1 text-[10px] text-gray-500">${employerProfileLoadError ? "掲載者プロフィールを読み込めませんでした" : "掲載者プロフィール未登録"}</p>`;
   }
   return `<p class="mt-1 truncate text-xs font-bold text-blue-700">${escapeHtml(profile.display_name)}</p>`;
 }

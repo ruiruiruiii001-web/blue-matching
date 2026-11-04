@@ -26,7 +26,7 @@ function renderAccountDashboard() {
           <span class="block truncate font-bold text-gray-800">${escapeHtml(job.title)}</span>
           <span class="mt-1 block text-[10px] font-medium text-gray-400">📍 ${escapeHtml(job.location || "場所未設定")}</span>
         </button>`).join("")
-      : '<p class="rounded-2xl border border-dashed border-gray-200 bg-gray-50/50 p-4 text-xs text-gray-500">フォロー中の企業の掲載中のお仕事はありません。</p>';
+      : '<p class="rounded-2xl border border-dashed border-gray-200 bg-gray-50/50 p-4 text-xs text-gray-500">フォロー中の掲載者のお仕事はありません。</p>';
   }
 
   const submitted = accountApplications.filter(application => application.applicant_id === currentUser.id);
@@ -58,11 +58,11 @@ function renderAccountDashboard() {
               Applied on: <span class="text-gray-600">${formatDashboardDate(application.created_at)}</span>
             </div>
             <p class="text-xs font-bold ${application.status === 'reviewed' ? 'text-emerald-600' : application.status === 'withdrawn' ? 'text-rose-700' : 'text-blue-500'} flex items-center gap-1">
-              ${application.status === 'reviewed' ? '✅' : application.status === 'withdrawn' ? '↩️' : '⏳'} ${application.status === 'withdrawn' ? '応募を取り下げました。企業にも取り下げ済みとして表示されます。' : formatApplicationStatusDescription(application.status)}
+              ${application.status === 'reviewed' ? '✅' : application.status === 'withdrawn' ? '↩️' : '⏳'} ${application.status === 'withdrawn' ? '応募を取り下げました。掲載者にも取り下げ済みとして表示されます。' : formatApplicationStatusDescription(application.status)}
             </p>
           </div>
             ${application.status === "dismissed" && application.dismissal_reason
-              ? `<p class="mt-3 whitespace-pre-wrap rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700"><span class="mb-1 block text-xs font-bold text-gray-500">企業からの理由</span>${escapeHtml(String(application.dismissal_reason))}</p>`
+              ? `<p class="mt-3 whitespace-pre-wrap rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700"><span class="mb-1 block text-xs font-bold text-gray-500">掲載者からの理由</span>${escapeHtml(String(application.dismissal_reason))}</p>`
               : ""}
             ${application.status === "pending" ? `
             <button type="button" onclick="withdrawApplication('${escapeHtml(String(application.id))}')" class="mt-4 min-h-11 w-full rounded-xl border border-rose-200 bg-white px-4 py-2 text-sm font-bold text-rose-700 hover:bg-rose-50 transition-colors">

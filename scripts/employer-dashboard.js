@@ -103,11 +103,11 @@ function renderEmployerApplicationDetails(application) {
       </div>
     `
     : application.status === "withdrawn"
-      ? '<p class="mt-5 rounded-lg bg-rose-50 px-3 py-2 text-sm font-bold text-rose-800">応募者が応募を取り下げました。</p>'
+      ? '<p class="mt-5 rounded-lg bg-rose-50 px-3 py-2 text-sm font-bold text-rose-800">応募した方が応募を取り下げました。</p>'
       : `
         <div class="mt-5 border-t border-gray-50 pt-4 flex justify-between items-center">
           <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Status: ${escapeHtml(formatApplicationStatus(application.status))}</p>
-          <button type="button" onclick="openReviewModal('${applicationId}', '${escapeHtml(String(application.applicant_id))}', 'seeker')" class="px-4 py-2 bg-amber-50 text-amber-600 text-xs font-black rounded-xl border border-amber-100 hover:bg-amber-100 transition-all">⭐ 職人を評価する</button>
+          <button type="button" onclick="openReviewModal('${applicationId}', '${escapeHtml(String(application.applicant_id))}', 'seeker')" class="px-4 py-2 bg-amber-50 text-amber-600 text-xs font-black rounded-xl border border-amber-100 hover:bg-amber-100 transition-all">⭐ お仕事を探す方を評価する</button>
         </div>
       `;
   return `
@@ -117,7 +117,7 @@ function renderEmployerApplicationDetails(application) {
           <div class="min-w-0 flex-1">
             <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">お仕事: ${escapeHtml(String(application.job_title || "お仕事"))}</p>
             <h4 class="font-black text-gray-900 text-lg leading-tight">👷 ${escapeHtml(String(application.applicant_name || ""))}</h4>
-            <button type="button" onclick="openApplicantPublicProfile('${applicationId}')" class="mt-2 min-h-10 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-bold text-blue-700 hover:bg-blue-100">応募者プロフィールを見る</button>
+            <button type="button" onclick="openApplicantPublicProfile('${applicationId}')" class="mt-2 min-h-10 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-bold text-blue-700 hover:bg-blue-100">応募した方のプロフィールを見る</button>
             <p class="mt-1 text-[10px] text-gray-400 uppercase tracking-widest font-bold">応募日時: ${formatDashboardDate(application.created_at)}</p>
           </div>
           <span class="inline-flex rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-widest ${application.status === "withdrawn" ? "bg-rose-100 text-rose-800" : formatApplicationStatusClass(application.status)}">${application.status === "withdrawn" ? "取り下げ" : escapeHtml(formatApplicationStatus(application.status))}</span>
@@ -126,7 +126,7 @@ function renderEmployerApplicationDetails(application) {
           <div class="flex items-center gap-2">
             <span class="text-base">💪</span>
             <div>
-              <p class="text-[9px] font-bold text-gray-400 uppercase leading-none mb-1">現場経験</p>
+              <p class="text-[9px] font-bold text-gray-400 uppercase leading-none mb-1">仕事の経験年数</p>
               <p class="font-bold text-gray-700">${escapeHtml(String(application.experience || "未登録"))}</p>
             </div>
           </div>

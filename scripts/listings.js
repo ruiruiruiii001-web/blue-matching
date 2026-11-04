@@ -1,10 +1,39 @@
 const warnedJobSafetyIds = new Set();
 
+function jobMatchesKeyword(job, keyword) {
+  if (!keyword) return true;
+  const payTypeLabels = { hourly: "時給", daily: "日給", monthly: "月給" };
+  const fields = [
+    job.title,
+    job.location,
+    job.duties,
+    job.salary,
+    job.work_date,
+    formatWorkDate(job.work_date),
+    job.start_time,
+    job.end_time,
+    job.pay_amount,
+    job.pay_amount_max,
+    job.pay_condition_details,
+    job.experience_requirement_details,
+    job.overtime_details,
+    job.allowance_details,
+    getWorkCategoryLabel(job.category),
+    getPaymentMethodLabel(job.payment_method),
+    payTypeLabels[getJobPayType(job)],
+    ...getWorkPreferenceLabels(job.work_preferences),
+    ...getNormalizedJobTags(job.tags),
+    ...(Array.isArray(job.required_licenses) ? job.required_licenses : []),
+    ...(Array.isArray(job.preferred_licenses) ? job.preferred_licenses : [])
+  ];
+  return fields.some(value => String(value ?? "").toLocaleLowerCase().includes(keyword));
+}
+
 function renderJobList(resetLimit = false) {
   if (resetLimit === true) displayLimitJobs = 10;
   const jobList = document.getElementById("jobList");
   const jobCount = document.getElementById("jobCount");
-  const keyword = document.getElementById("searchKeyword").value.toLowerCase();
+  const keyword = document.getElementById("searchKeyword").value.trim().toLocaleLowerCase();
   const openJobsOnly = document.getElementById("openJobsOnly").checked;
   const favoritesOnly = document.getElementById("favoritesOnly").checked;
   const followedOnly = document.getElementById("followedOnly").checked;
@@ -54,13 +83,7 @@ function renderJobList(resetLimit = false) {
 
                     const filteredJobs = cachedJobs
     .filter(job =>
-      (!keyword ||
-        (job.title || "").toLowerCase().includes(keyword) ||
-        (job.location || "").toLowerCase().includes(keyword) ||
-        getWorkCategoryLabel(job.category).toLocaleLowerCase().includes(keyword) ||
-        String(job.work_date || "").includes(keyword) ||
-        getWorkPreferenceLabels(job.work_preferences).some(value => value.toLocaleLowerCase().includes(keyword)) ||
-        getNormalizedJobTags(job.tags).some(tag => tag.toLocaleLowerCase().includes(keyword))) &&
+      jobMatchesKeyword(job, keyword) &&
       (!openJobsOnly || !isJobClosed(job)) &&
         (!favoritesOnly || isFavorite(job.id)) &&
         (!followedOnly || isFollowingEmployer(job.owner_id)) &&
@@ -111,7 +134,7 @@ function renderJobList(resetLimit = false) {
     keyword && `キーワード: ${keyword}`,
     openJobsOnly && "募集中のみ",
     favoritesOnly && "お気に入り",
-    followedOnly && "フォロー中の企業",
+    followedOnly && "フォロー中の掲載者",
     hideApplied && "応募済みを隠す",
     locationFilter && `勤務地: ${locationFilter}`,
     categoryFilter && `カテゴリ: ${getWorkCategoryLabel(categoryFilter)}`,
@@ -590,7 +613,7 @@ async function generateAIDuties() {
   const title = document.getElementById("jobTitle").value.trim();
   const status = document.getElementById("aiStatus");
   if (!title) {
-    alert("先に職種名（例: 解体作業員）を入力してください。AIがそれを元に文章を作ります。");
+    alert("先に募集タイトルを入力してください。AIがタイトルを元に作業内容の案を作ります。");
     return;
   }
   status.innerText = "✨ AIが魅力的な文章を考えています...";
@@ -600,7 +623,7 @@ async function generateAIDuties() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        prompt: `${title}の現場のお仕事情報を募集しています。親しみやすく、かつ誠実な印象で、仕事内容や現場の魅力を200文字程度で作成してください。「未経験歓迎」「チームワーク重視」などの要素を含めてください。箇条書きではなく、呼びかけるような自然な文章にしてください。`
+        prompt: `${title}のお仕事を募集しています。親しみやすく誠実な印象で、作業内容や場所の特徴を200文字程度で作成してください。「未経験歓迎」「丁寧に説明します」などの要素を含めてください。募集タイトルから分からない条件は創作せず、箇条書きではなく自然な文章にしてください。`
       })
     });
     const data = await response.json();
@@ -667,7 +690,7 @@ function isFollowingEmployer(employerId) {
 
 async function toggleFollowEmployer(employerId) {
   if (!currentUser) {
-    promptLogin("企業をフォローするにはログインしてください。");
+    promptLogin("掲載者をフォローするにはログインしてください。");
     return;
   }
   if (accountType !== "seeker" || !employerId || employerId === currentUser.id) return;
@@ -693,7 +716,7 @@ function updateModalFollowButton() {
   button.classList.toggle("hidden", !visible);
   if (!visible) return;
   const following = isFollowingEmployer(selectedJob.owner_id);
-  button.innerText = following ? "✓ この企業をフォロー中（解除）" : "＋ この企業をフォロー";
+  button.innerText = following ? "✓ この掲載者をフォロー中（解除）" : "＋ この掲載者をフォロー";
   button.setAttribute("aria-pressed", String(following));
 }
 
@@ -785,7 +808,7 @@ function getJobMatchDetails(job, profile) {
     compared += 1;
     if (preferredJobTypes.some(jobType => jobDescription.includes(jobType))) {
       score += 4;
-      reasons.push("希望職種が一致");
+      reasons.push("希望する仕事が一致");
     }
   }
 

@@ -42,7 +42,7 @@ async function blockUser(blockedId) {
       reviewContext = { applicationId, revieweeId, targetType, existingId };
       document.getElementById("reviewModal").classList.remove("hidden");
       document.getElementById("reviewTargetIcon").innerText = targetType === 'seeker' ? '👷' : '🏢';
-      document.getElementById("reviewTitle").innerText = existingId ? '評価を修正' : (targetType === 'seeker' ? '職人を評価' : '企業を評価');
+      document.getElementById("reviewTitle").innerText = existingId ? '評価を修正' : (targetType === 'seeker' ? 'お仕事を探す方を評価' : '掲載者を評価');
       document.getElementById("reviewComment").value = existingComment;
       document.getElementById("reviewSubmitButton").innerText = existingId ? '🔄 評価を更新する' : '🚀 評価を送信する';
       updateStars(existingRating);

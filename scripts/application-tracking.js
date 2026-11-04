@@ -1,9 +1,9 @@
 const TRACKING_STAGES = [
   ["none", "未設定"],
-  ["interview", "面接予定"],
-  ["offer", "内定・条件提示"],
-  ["hired", "採用"],
-  ["not_hired", "不採用"]
+  ["interview", "日時調整中"],
+  ["offer", "条件確認中"],
+  ["hired", "作業確定"],
+  ["not_hired", "今回は見送り"]
 ];
 
 function trackingDateToInput(value) {
@@ -19,14 +19,14 @@ function renderTrackingBox(box, tracking, message = "", isError = false) {
   const stage = tracking?.stage || "none";
   box.innerHTML = `
     <section class="mt-4 rounded-xl border border-indigo-100 bg-indigo-50/50 p-4">
-      <h4 class="text-sm font-black text-gray-900">選考管理 <span class="text-[10px] font-bold text-gray-500">（企業側のみ表示・応募者には見えません）</span></h4>
+      <h4 class="text-sm font-black text-gray-900">連絡・作業状況 <span class="text-[10px] font-bold text-gray-500">（掲載者のみ表示）</span></h4>
       <div class="mt-3 grid gap-3 sm:grid-cols-2">
-        <label class="block text-xs font-bold text-gray-700">選考の段階
+        <label class="block text-xs font-bold text-gray-700">状況
           <select data-tracking-stage class="mt-1 min-h-10 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm">
             ${TRACKING_STAGES.map(([value, label]) => `<option value="${value}"${value === stage ? " selected" : ""}>${label}</option>`).join("")}
           </select>
         </label>
-        <label class="block text-xs font-bold text-gray-700">面接日時
+        <label class="block text-xs font-bold text-gray-700">作業日時・相談日時
           <input data-tracking-interview type="datetime-local" value="${trackingDateToInput(tracking?.interview_at)}" class="mt-1 min-h-10 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm">
         </label>
       </div>

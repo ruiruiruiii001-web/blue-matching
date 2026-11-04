@@ -69,7 +69,7 @@ function openSharedJobFromUrl() {
 // お仕事投稿・編集（Supabaseへ保存）
 async function publishJob() {
   if (!currentUser || accountType !== "employer") {
-    setAuthMessage("お仕事を管理するには企業・親方アカウントでログインしてください。", true);
+    setAuthMessage("お仕事を管理するには「お仕事をお願いする方」アカウントでログインしてください。", true);
     return;
   }
 
@@ -107,7 +107,7 @@ async function publishJob() {
   }
 
   if (!title) {
-    alert("「職種・現場名」は必須項目です。");
+    alert("募集タイトルは必須項目です。");
     return;
   }
 
