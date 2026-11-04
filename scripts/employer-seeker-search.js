@@ -9,8 +9,11 @@ let displayLimitSeekers = 10;
 function updateAccountSearchSurface() {
   const isEmployerTab = activeTab === "employer";
   const canSearchSeekers = isEmployerTab && Boolean(currentUser) && accountType === "employer";
+  const isPeopleSearch = canSearchSeekers && activeSearchMode === "people";
   const mainLayout = document.querySelector("main");
   const jobSearchPanel = document.getElementById("jobSearchPanel");
+  const searchModeNavigation = document.getElementById("searchModeNavigation");
+  const jobSearchControls = document.getElementById("jobSearchControls");
   const seekerSearchPanel = document.getElementById("employerSeekerSearch");
   const jobList = document.getElementById("jobList");
   const jobCount = document.getElementById("jobCount");
@@ -24,18 +27,29 @@ function updateAccountSearchSurface() {
   document.getElementById("jobListSection")?.classList.toggle("md:col-span-1", canSearchSeekers);
   document.getElementById("jobListSection")?.classList.toggle("md:col-span-2", !canSearchSeekers);
 
-  jobSearchPanel.classList.toggle("hidden", isEmployerTab);
-  seekerSearchPanel.classList.toggle("hidden", !canSearchSeekers);
-  jobList.classList.toggle("hidden", isEmployerTab);
+  searchModeNavigation?.classList.toggle("hidden", !canSearchSeekers);
+  jobSearchControls?.classList.toggle("hidden", isPeopleSearch);
+  seekerSearchPanel.classList.toggle("hidden", !isPeopleSearch);
+  jobList.classList.toggle("hidden", isPeopleSearch || (isEmployerTab && !canSearchSeekers));
   jobCount.classList.toggle("hidden", isEmployerTab && !canSearchSeekers);
-  jobTrustNotice?.classList.toggle("hidden", isEmployerTab);
+  jobTrustNotice?.classList.toggle("hidden", isPeopleSearch || isEmployerTab);
+  document.querySelectorAll("[data-search-mode]").forEach(button => {
+    const isActive = button.dataset.searchMode === activeSearchMode;
+    button.setAttribute("aria-selected", String(isActive));
+    button.classList.toggle("bg-blue-600", isActive);
+    button.classList.toggle("text-white", isActive);
+    button.classList.toggle("bg-white", !isActive);
+    button.classList.toggle("text-blue-900", !isActive);
+  });
   if (isEmployerTab) {
-    jobListTitle.innerText = canSearchSeekers ? "働ける人を探す" : "アカウント情報を確認しています";
-    jobListDescription?.classList.toggle("hidden", !canSearchSeekers);
-    if (jobListDescription && canSearchSeekers) {
-      jobListDescription.innerText = "プロフィール公開に同意した方を探せます。今日働ける方で絞り込むこともできます。";
+    jobListTitle.innerText = canSearchSeekers
+      ? isPeopleSearch ? "働ける人" : "お仕事一覧"
+      : "アカウント情報を確認しています";
+    jobListDescription?.classList.toggle("hidden", !isPeopleSearch);
+    if (jobListDescription && isPeopleSearch) {
+      jobListDescription.innerText = "プロフィール公開に同意した方だけが表示されます。今日働ける人は検索欄の絞り込みから探せます。";
     }
-    if (canSearchSeekers) renderEmployerSeekerSearch();
+    if (isPeopleSearch) renderEmployerSeekerSearch();
     return;
   }
 
@@ -44,6 +58,14 @@ function updateAccountSearchSurface() {
   if (jobListDescription && activeTab === "seeker") {
     jobListDescription.innerText = "希望する仕事・地域・報酬条件の一致度を目安にお仕事を表示します。検索条件は以下のパネルから変更できます。";
   }
+}
+
+function setSearchMode(mode) {
+  if (mode === "people" && (activeTab !== "employer" || !currentUser || accountType !== "employer")) return;
+  activeSearchMode = mode === "people" ? "people" : "jobs";
+  if (activeSearchMode === "people") displayLimitSeekers = 10;
+  updateAccountSearchSurface();
+  if (activeSearchMode === "jobs") renderJobList(true);
 }
 
 function resetEmployerSeekerSearch() {
@@ -134,6 +156,7 @@ function renderEmployerSeekerSearch(resetLimit = false) {
   const count = document.getElementById("jobCount");
   if (!results || !status || !count) return;
   if (resetLimit) displayLimitSeekers = 10;
+  if (activeTab !== "employer" || activeSearchMode !== "people") return;
 
   if (!currentUser || accountType !== "employer") {
     results.innerHTML = "";

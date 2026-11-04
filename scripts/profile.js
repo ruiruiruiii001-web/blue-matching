@@ -17,9 +17,7 @@ async function saveSeekerProfile() {
     .filter(Boolean);
   const checkedLic = [...new Set([...selectedLicenses, ...otherLicenses])];
   const workPreferences = getCheckedValues("seekerWorkPreference");
-  const availableDates = document.getElementById("seekerAvailableToday").checked
-    ? [getLocalDateISO()]
-    : [];
+  const availableDates = seekerProfileData?.availableDates || [];
   const preferredPayType = document.getElementById("seekerPayType").value;
   const minimumSalaryValue = document.getElementById("seekerMinimumSalary").value;
   const preferredMinimumSalary = minimumSalaryValue ? Number(minimumSalaryValue) : null;
@@ -86,25 +84,14 @@ async function saveSeekerProfile() {
     experience_details: profile.experienceDetails,
     stamina: profile.stamina,
     work_preferences: profile.workPreferences,
-    available_dates: profile.availableDates,
     is_public: isPublic,
     updated_at: new Date().toISOString()
   };
-  let profileResult = await supabaseClient
+  const { error: profileError } = await supabaseClient
     .from("seeker_profiles")
     .upsert(profileRow, { onConflict: "user_id" });
-
-  if (isMissingAvailabilityColumnError(profileResult.error)) {
-    delete profileRow.available_dates;
-    profileResult = await supabaseClient
-      .from("seeker_profiles")
-      .upsert(profileRow, { onConflict: "user_id" });
-    if (!profileResult.error) {
-      alert("プロフィールは保存しました。働ける日を保存するにはREADME記載の 20261116_add_seeker_availability_dates.sql をSupabaseで実行してください。");
-    }
-  }
-  if (profileResult.error) {
-    alert(`プロフィールを保存できませんでした: ${profileResult.error.message}`);
+  if (profileError) {
+    alert(`プロフィールを保存できませんでした: ${profileError.message}`);
     return;
   }
 
@@ -122,12 +109,17 @@ async function saveSeekerProfile() {
     available_dates: profile.availableDates,
     updated_at: new Date().toISOString()
   };
-  if (!Object.prototype.hasOwnProperty.call(profileRow, "available_dates")) {
-    delete publicProfileRow.available_dates;
-  }
-  const publicProfileResult = isPublic
+  let publicProfileResult = isPublic
     ? await supabaseClient.from("seeker_public_profiles").upsert(publicProfileRow, { onConflict: "user_id" })
     : { error: null };
+  let availabilityMigrationMissing = false;
+  if (isMissingAvailabilityColumnError(publicProfileResult.error)) {
+    availabilityMigrationMissing = true;
+    delete publicProfileRow.available_dates;
+    publicProfileResult = await supabaseClient
+      .from("seeker_public_profiles")
+      .upsert(publicProfileRow, { onConflict: "user_id" });
+  }
   if (publicProfileResult.error) {
     alert(`プロフィール本体は保存しましたが、公開設定を更新できませんでした: ${publicProfileResult.error.message}`);
     return;
@@ -137,9 +129,9 @@ async function saveSeekerProfile() {
   seekerProfileData.isPublic = isPublic;
   applySeekerSalaryPreferences(profile);
   const profileSavedMessage = document.getElementById("profileSavedMessage");
-  profileSavedMessage.innerText = Object.prototype.hasOwnProperty.call(profileRow, "available_dates")
-    ? "👍 プロフィールと働ける日を保存しました。"
-    : "👍 プロフィールを保存しました。空き日の保存・検索はデータベース移行後に使えます。";
+  profileSavedMessage.innerText = availabilityMigrationMissing
+    ? "👍 プロフィールを保存しました。今日の働ける状況を公開するには、データベース移行を実行してください。"
+    : "👍 プロフィールを保存しました。";
   profileSavedMessage.classList.remove("hidden");
   accountDataUserId = currentUser.id;
   renderAccountDashboard();
@@ -149,6 +141,82 @@ async function saveSeekerProfile() {
 function isMissingAvailabilityColumnError(error) {
   return ["42703", "PGRST204"].includes(error?.code) &&
     String(error.message || "").includes("available_dates");
+}
+
+async function saveSeekerAvailability() {
+  if (!currentUser || accountType !== "seeker") {
+    promptLogin("今日の働ける状況を保存するには、お仕事探しアカウントでログインしてください。");
+    return;
+  }
+
+  const checkbox = document.getElementById("seekerAvailableToday");
+  const status = document.getElementById("seekerAvailabilityStatus");
+  const availableDates = checkbox.checked ? [getLocalDateISO()] : [];
+  status.className = "mt-3 text-sm text-gray-600";
+  status.innerText = "保存しています...";
+
+  const { data, error } = await supabaseClient
+    .from("seeker_profiles")
+    .update({ available_dates: availableDates, updated_at: new Date().toISOString() })
+    .eq("user_id", currentUser.id)
+    .select("is_public")
+    .maybeSingle();
+
+  if (isMissingAvailabilityColumnError(error)) {
+    status.className = "mt-3 text-sm text-amber-800";
+    status.innerText = "この機能を使うには、README記載の20261116_add_seeker_availability_dates.sqlをSupabaseで実行してください。";
+    return;
+  }
+  if (error) {
+    status.className = "mt-3 text-sm text-red-700";
+    status.innerText = `今日の状況を保存できませんでした: ${error.message}`;
+    console.error("今日の働ける状況を保存できませんでした:", error);
+    return;
+  }
+  if (!data) {
+    status.className = "mt-3 text-sm text-amber-800";
+    status.innerText = "先にプロフィールを保存してください。";
+    return;
+  }
+
+  if (data.is_public) {
+    const { error: publicError } = await supabaseClient
+      .from("seeker_public_profiles")
+      .upsert({
+        user_id: currentUser.id,
+        available_dates: availableDates,
+        updated_at: new Date().toISOString()
+      }, { onConflict: "user_id" });
+    if (publicError) {
+      status.className = "mt-3 text-sm text-amber-800";
+      status.innerText = isMissingAvailabilityColumnError(publicError)
+        ? "状況は保存しましたが、掲載者の検索に表示するにはデータベース移行が必要です。"
+        : `状況は保存しましたが、公開プロフィールを更新できませんでした: ${publicError.message}`;
+      console.error("今日の働ける状況を公開プロフィールへ反映できませんでした:", publicError);
+      seekerProfileData = { ...seekerProfileData, availableDates, isPublic: true };
+      return;
+    }
+  }
+
+  seekerProfileData = { ...seekerProfileData, availableDates, isPublic: data.is_public };
+  status.className = "mt-3 text-sm text-emerald-800";
+  status.innerText = data.is_public
+    ? checkbox.checked ? "保存しました。掲載者の「今日働ける人」検索に表示されます。" : "保存しました。今日は検索結果に表示されません。"
+    : "保存しました。プロフィール公開に同意した場合だけ、掲載者の検索に表示されます。";
+}
+
+function syncSeekerAvailabilityControl() {
+  const checkbox = document.getElementById("seekerAvailableToday");
+  if (!checkbox) return;
+  checkbox.checked = Boolean(
+    Array.isArray(seekerProfileData?.availableDates) &&
+    seekerProfileData.availableDates.includes(getLocalDateISO())
+  );
+  const status = document.getElementById("seekerAvailabilityStatus");
+  if (status) {
+    status.innerText = "";
+    status.className = "mt-3 hidden text-sm";
+  }
 }
 
 function loadSeekerProfile(profile) {
@@ -180,8 +248,6 @@ function loadSeekerProfile(profile) {
     : profile.stamina || "";
   document.getElementById("seekerStamina").value = stamina;
   document.getElementById("seekerProfilePublic").checked = Boolean(profile.isPublic);
-  document.getElementById("seekerAvailableToday").checked =
-    Array.isArray(profile.availableDates) && profile.availableDates.includes(getLocalDateISO());
 
   const licenses = Array.isArray(profile.licenses) ? profile.licenses : [];
   setCheckedValues("seekerLic", licenses.filter(value => LICENSE_OPTIONS.includes(value)));
@@ -213,7 +279,7 @@ function loadSeekerProfile(profile) {
   document.getElementById("seekerExperienceDetails").value = "";
   document.getElementById("seekerStamina").value = "";
   document.getElementById("seekerProfilePublic").checked = false;
-  document.getElementById("seekerAvailableToday").checked = false;
+  syncSeekerAvailabilityControl();
   document.getElementById("profileSavedMessage").classList.add("hidden");
   applySeekerSalaryPreferences({});
   updateSelectionDetails("seekerJobTypeOption");

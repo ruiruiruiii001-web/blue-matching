@@ -18,6 +18,7 @@ let loadingAccountUserId = null;
 let activeDashboardView = "profile";
 let editingJobId = null;
 let activeTab = "seeker";
+let activeSearchMode = "jobs";
 let currentUser = null;
 let accountType = null;
 let dashboardOpen = false;

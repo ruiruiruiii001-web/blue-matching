@@ -44,6 +44,7 @@ async function loadAccountData(user) {
         };
         if (!dashboardOpen) loadSeekerProfile(seekerProfileData);
       }
+      syncSeekerAvailabilityControl();
       accountApplications = appsResult.data || [];
       const messagesResult = accountApplications.length
         ? await supabaseClient

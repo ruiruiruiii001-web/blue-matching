@@ -105,7 +105,7 @@ function renderAccountDashboard() {
 }
 
 function showDashboardView(view) {
-  const views = ["profile", "favorites", "applications", "notifications"];
+  const views = ["profile", "availability", "favorites", "applications", "notifications"];
   if (!views.includes(view)) return;
   activeDashboardView = view;
   views.forEach(item => {

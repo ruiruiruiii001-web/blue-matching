@@ -116,6 +116,7 @@ function updateEmployerAuth(session) {
     employerContactRequests = [];
     employerContactRequestsError = "";
     activeDashboardView = "profile";
+    activeSearchMode = "jobs";
     showDashboardView(activeDashboardView);
     clearSeekerProfileForm();
     if (currentUser) {
@@ -546,6 +547,7 @@ function switchTab(tab) {
     tab = accountType;
   }
   activeTab = tab;
+  if (tab !== "employer") activeSearchMode = "jobs";
   const employerSection = document.getElementById("employerSection");
   const seekerSection = document.getElementById("seekerSection");
   const jobListSection = document.getElementById("jobListSection");

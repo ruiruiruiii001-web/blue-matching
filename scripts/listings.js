@@ -30,6 +30,7 @@ function jobMatchesKeyword(job, keyword) {
 }
 
 function renderJobList(resetLimit = false) {
+  if (activeTab === "employer" && activeSearchMode === "people") return;
   if (resetLimit === true) displayLimitJobs = 10;
   const jobList = document.getElementById("jobList");
   const jobCount = document.getElementById("jobCount");
@@ -296,13 +297,20 @@ function setWorkDateFilter(filter, render = true) {
   const selectedFilter = ["today", "weekend"].includes(filter) ? filter : "all";
   document.querySelectorAll("[data-work-date-filter]").forEach(button => {
     const active = button.dataset.workDateFilter === selectedFilter;
+    const isTodayButton = button.dataset.workDateFilter === "today";
+    const isToday = active && isTodayButton;
     button.setAttribute("aria-pressed", String(active));
-    button.classList.toggle("bg-blue-600", active);
+    button.classList.toggle("bg-blue-600", active && !isToday);
     button.classList.toggle("text-white", active);
-    button.classList.toggle("border-blue-600", active);
+    button.classList.toggle("border-blue-600", active && !isToday);
     button.classList.toggle("bg-white", !active);
-    button.classList.toggle("text-blue-900", !active);
-    button.classList.toggle("border-blue-200", !active);
+    button.classList.toggle("text-blue-900", !active && !isTodayButton);
+    button.classList.toggle("border-blue-200", !active && !isTodayButton);
+    button.classList.toggle("bg-amber-500", isToday);
+    button.classList.toggle("border-amber-500", isToday);
+    button.classList.toggle("shadow-sm", isToday);
+    button.classList.toggle("text-amber-950", !active && isTodayButton);
+    button.classList.toggle("border-amber-300", !active && isTodayButton);
   });
   if (render) renderJobList(true);
 }
