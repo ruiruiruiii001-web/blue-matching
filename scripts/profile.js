@@ -17,16 +17,9 @@ async function saveSeekerProfile() {
     .filter(Boolean);
   const checkedLic = [...new Set([...selectedLicenses, ...otherLicenses])];
   const workPreferences = getCheckedValues("seekerWorkPreference");
-  const availableDates = [...new Set(
-    Array.from(document.querySelectorAll("#seekerAvailableDates [data-available-date]"))
-      .map(item => item.dataset.availableDate)
-  )].sort();
-  if (availableDates.length > 60 || availableDates.some(date =>
-    !formatWorkDate(date) || date < getLocalDateISO()
-  )) {
-    alert("働ける日は今日以降の日付を60日分まで登録できます。");
-    return;
-  }
+  const availableDates = document.getElementById("seekerAvailableToday").checked
+    ? [getLocalDateISO()]
+    : [];
   const preferredPayType = document.getElementById("seekerPayType").value;
   const minimumSalaryValue = document.getElementById("seekerMinimumSalary").value;
   const preferredMinimumSalary = minimumSalaryValue ? Number(minimumSalaryValue) : null;
@@ -187,7 +180,8 @@ function loadSeekerProfile(profile) {
     : profile.stamina || "";
   document.getElementById("seekerStamina").value = stamina;
   document.getElementById("seekerProfilePublic").checked = Boolean(profile.isPublic);
-  setSeekerAvailableDates(profile.availableDates || []);
+  document.getElementById("seekerAvailableToday").checked =
+    Array.isArray(profile.availableDates) && profile.availableDates.includes(getLocalDateISO());
 
   const licenses = Array.isArray(profile.licenses) ? profile.licenses : [];
   setCheckedValues("seekerLic", licenses.filter(value => LICENSE_OPTIONS.includes(value)));
@@ -219,75 +213,11 @@ function loadSeekerProfile(profile) {
   document.getElementById("seekerExperienceDetails").value = "";
   document.getElementById("seekerStamina").value = "";
   document.getElementById("seekerProfilePublic").checked = false;
-  setSeekerAvailableDates([]);
+  document.getElementById("seekerAvailableToday").checked = false;
   document.getElementById("profileSavedMessage").classList.add("hidden");
   applySeekerSalaryPreferences({});
   updateSelectionDetails("seekerJobTypeOption");
   updateSelectionDetails("seekerLic");
-}
-
-function initializeSeekerAvailabilityControls() {
-  const dateInput = document.getElementById("seekerAvailableDate");
-  if (dateInput) {
-    dateInput.min = getLocalDateISO();
-    dateInput.value = getLocalDateISO();
-  }
-  const searchDate = document.getElementById("seekerSearchAvailabilityDate");
-  if (searchDate) {
-    searchDate.min = getLocalDateISO();
-    searchDate.value = getLocalDateISO();
-  }
-}
-
-function addSeekerAvailableDate() {
-  const dateInput = document.getElementById("seekerAvailableDate");
-  const date = dateInput.value;
-  if (!formatWorkDate(date) || date < getLocalDateISO()) {
-    alert("今日以降の日付を選択してください。");
-    return;
-  }
-  const selectedDates = Array.from(
-    document.querySelectorAll("#seekerAvailableDates [data-available-date]")
-  ).map(item => item.dataset.availableDate);
-  if (selectedDates.includes(date)) return;
-  if (selectedDates.length >= 60) {
-    alert("働ける日は60日分まで登録できます。");
-    return;
-  }
-  setSeekerAvailableDates([...selectedDates, date]);
-}
-
-function setSeekerAvailableDates(values) {
-  const container = document.getElementById("seekerAvailableDates");
-  if (!container) return;
-  const today = getLocalDateISO();
-  const dates = [...new Set(Array.isArray(values) ? values : [])]
-    .filter(date => formatWorkDate(date) && date >= today)
-    .sort();
-  container.replaceChildren();
-  dates.forEach(date => {
-    const item = document.createElement("span");
-    item.dataset.availableDate = date;
-    item.className = "inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white px-3 py-1.5 text-xs font-bold text-emerald-900";
-    const label = document.createElement("span");
-    label.textContent = formatWorkDate(date);
-    const removeButton = document.createElement("button");
-    removeButton.type = "button";
-    removeButton.className = "rounded-full px-1 text-emerald-700 hover:bg-emerald-100";
-    removeButton.setAttribute("aria-label", `${formatWorkDate(date)}を削除`);
-    removeButton.textContent = "×";
-    removeButton.addEventListener("click", () => {
-      setSeekerAvailableDates(dates.filter(value => value !== date));
-    });
-    item.append(label, removeButton);
-    container.append(item);
-  });
-  if (!dates.length) {
-    const empty = document.createElement("span");
-    empty.className = "text-xs text-gray-500";
-    empty.textContent = "登録された日付はありません。";
-    container.append(empty);
-  }
 }
 
 function applySeekerSalaryPreferences(profile) {
