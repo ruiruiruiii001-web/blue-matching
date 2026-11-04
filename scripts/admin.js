@@ -114,7 +114,7 @@ async function loadPendingJobs() {
       job.required_licenses?.length && `必須資格: ${job.required_licenses.join("、")}`,
       job.preferred_licenses?.length && `歓迎資格: ${job.preferred_licenses.join("、")}`,
       job.experience_requirement_details && `経験: ${job.experience_requirement_details}`,
-      job.tags?.length && `タグ: ${job.tags.join("、")}`
+      getNormalizedJobTags(job.tags).length && `タグ: ${getNormalizedJobTags(job.tags).join("、")}`
     ].filter(Boolean);
     if (additionalDetails.length) {
       card.append(createElement("p", "mt-3 whitespace-pre-wrap break-words text-sm text-gray-700", additionalDetails.join("\n")));

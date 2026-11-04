@@ -17,6 +17,16 @@ async function saveSeekerProfile() {
     .filter(Boolean);
   const checkedLic = [...new Set([...selectedLicenses, ...otherLicenses])];
   const workPreferences = getCheckedValues("seekerWorkPreference");
+  const availableDates = [...new Set(
+    Array.from(document.querySelectorAll("#seekerAvailableDates [data-available-date]"))
+      .map(item => item.dataset.availableDate)
+  )].sort();
+  if (availableDates.length > 60 || availableDates.some(date =>
+    !formatWorkDate(date) || date < getLocalDateISO()
+  )) {
+    alert("働ける日は今日以降の日付を60日分まで登録できます。");
+    return;
+  }
   const preferredPayType = document.getElementById("seekerPayType").value;
   const minimumSalaryValue = document.getElementById("seekerMinimumSalary").value;
   const preferredMinimumSalary = minimumSalaryValue ? Number(minimumSalaryValue) : null;
@@ -39,7 +49,8 @@ async function saveSeekerProfile() {
     expYears: document.getElementById("seekerExpYears").value,
     experienceDetails: document.getElementById("seekerExperienceDetails").value.trim(),
     stamina: document.getElementById("seekerStamina").value,
-    workPreferences
+    workPreferences,
+    availableDates
   };
 
 
@@ -68,46 +79,61 @@ async function saveSeekerProfile() {
     }
   }
 
-  const { error } = await supabaseClient
+  const profileRow = {
+    user_id: currentUser.id,
+    name: profile.name,
+    phone: profile.phone || null,
+    avatar_url: profile.avatarUrl || null,
+    job_type: profile.jobType,
+    location: profile.location,
+    pay_type: profile.payType || null,
+    minimum_salary: profile.minimumSalary,
+    licenses: profile.licenses,
+    exp_years: profile.expYears,
+    experience_details: profile.experienceDetails,
+    stamina: profile.stamina,
+    work_preferences: profile.workPreferences,
+    available_dates: profile.availableDates,
+    is_public: isPublic,
+    updated_at: new Date().toISOString()
+  };
+  let profileResult = await supabaseClient
     .from("seeker_profiles")
-    .upsert({
-      user_id: currentUser.id,
-      name: profile.name,
-      phone: profile.phone || null,
-      avatar_url: profile.avatarUrl || null,
-      job_type: profile.jobType,
-      location: profile.location,
-      pay_type: profile.payType || null,
-      minimum_salary: profile.minimumSalary,
-      licenses: profile.licenses,
-      exp_years: profile.expYears,
-      experience_details: profile.experienceDetails,
-      stamina: profile.stamina,
-      work_preferences: profile.workPreferences,
-      is_public: isPublic,
-      updated_at: new Date().toISOString()
-    }, { onConflict: "user_id" });
+    .upsert(profileRow, { onConflict: "user_id" });
 
-  if (error) {
-    alert(`プロフィールを保存できませんでした: ${error.message}`);
+  if (isMissingAvailabilityColumnError(profileResult.error)) {
+    delete profileRow.available_dates;
+    profileResult = await supabaseClient
+      .from("seeker_profiles")
+      .upsert(profileRow, { onConflict: "user_id" });
+    if (!profileResult.error) {
+      alert("プロフィールは保存しました。働ける日を保存するにはREADME記載の 20261116_add_seeker_availability_dates.sql をSupabaseで実行してください。");
+    }
+  }
+  if (profileResult.error) {
+    alert(`プロフィールを保存できませんでした: ${profileResult.error.message}`);
     return;
   }
 
+  const publicProfileRow = {
+    user_id: currentUser.id,
+    job_type: profile.jobType,
+    location: profile.location,
+    pay_type: profile.payType || null,
+    minimum_salary: profile.minimumSalary,
+    licenses: profile.licenses,
+    exp_years: profile.expYears,
+    experience_details: profile.experienceDetails,
+    stamina: profile.stamina,
+    work_preferences: profile.workPreferences,
+    available_dates: profile.availableDates,
+    updated_at: new Date().toISOString()
+  };
+  if (!Object.prototype.hasOwnProperty.call(profileRow, "available_dates")) {
+    delete publicProfileRow.available_dates;
+  }
   const publicProfileResult = isPublic
-    ? await supabaseClient.from("seeker_public_profiles").upsert({
-      user_id: currentUser.id,
-      job_type: profile.jobType,
-      location: profile.location,
-      pay_type: profile.payType || null,
-      minimum_salary: profile.minimumSalary,
-      licenses: profile.licenses,
-      exp_years: profile.expYears,
-      experience_details: profile.experienceDetails,
-      stamina: profile.stamina,
-      work_preferences: profile.workPreferences,
-      updated_at: new Date().toISOString()
-    }, { onConflict: "user_id" })
-
+    ? await supabaseClient.from("seeker_public_profiles").upsert(publicProfileRow, { onConflict: "user_id" })
     : { error: null };
   if (publicProfileResult.error) {
     alert(`プロフィール本体は保存しましたが、公開設定を更新できませんでした: ${publicProfileResult.error.message}`);
@@ -117,10 +143,19 @@ async function saveSeekerProfile() {
   seekerProfileData = profile;
   seekerProfileData.isPublic = isPublic;
   applySeekerSalaryPreferences(profile);
-  document.getElementById("profileSavedMessage").classList.remove("hidden");
+  const profileSavedMessage = document.getElementById("profileSavedMessage");
+  profileSavedMessage.innerText = Object.prototype.hasOwnProperty.call(profileRow, "available_dates")
+    ? "👍 プロフィールと働ける日を保存しました。"
+    : "👍 プロフィールを保存しました。空き日の保存・検索はデータベース移行後に使えます。";
+  profileSavedMessage.classList.remove("hidden");
   accountDataUserId = currentUser.id;
   renderAccountDashboard();
   renderJobList();
+}
+
+function isMissingAvailabilityColumnError(error) {
+  return ["42703", "PGRST204"].includes(error?.code) &&
+    String(error.message || "").includes("available_dates");
 }
 
 function loadSeekerProfile(profile) {
@@ -135,7 +170,13 @@ function loadSeekerProfile(profile) {
     .join("、");
 
   setLocationPreferences(profile.location || "");
-  document.getElementById("seekerPayType").value = profile.payType || "";
+  const payTypeSelect = document.getElementById("seekerPayType");
+  if (profile.payType === "monthly" && !Array.from(payTypeSelect.options).some(option => option.value === "monthly")) {
+    const legacyMonthlyOption = new Option("月給（既存プロフィール）", "monthly");
+    legacyMonthlyOption.dataset.legacy = "true";
+    payTypeSelect.add(legacyMonthlyOption);
+  }
+  payTypeSelect.value = profile.payType || "";
   document.getElementById("seekerMinimumSalary").value = profile.minimumSalary ?? "";
   setCheckedValues("seekerWorkPreference", profile.workPreferences);
   applySeekerSalaryPreferences(profile);
@@ -146,6 +187,7 @@ function loadSeekerProfile(profile) {
     : profile.stamina || "";
   document.getElementById("seekerStamina").value = stamina;
   document.getElementById("seekerProfilePublic").checked = Boolean(profile.isPublic);
+  setSeekerAvailableDates(profile.availableDates || []);
 
   const licenses = Array.isArray(profile.licenses) ? profile.licenses : [];
   setCheckedValues("seekerLic", licenses.filter(value => LICENSE_OPTIONS.includes(value)));
@@ -166,7 +208,10 @@ function loadSeekerProfile(profile) {
   document.getElementById("seekerOtherLicenses").value = "";
 
   setLocationPreferences("");
-  document.getElementById("seekerPayType").value = "";
+  const payTypeSelect = document.getElementById("seekerPayType");
+  const legacyMonthlyOption = payTypeSelect.querySelector('option[data-legacy="true"]');
+  if (legacyMonthlyOption) legacyMonthlyOption.remove();
+  payTypeSelect.value = "";
   document.getElementById("seekerMinimumSalary").value = "";
   setCheckedValues("seekerLic", []);
   setCheckedValues("seekerWorkPreference", []);
@@ -174,10 +219,75 @@ function loadSeekerProfile(profile) {
   document.getElementById("seekerExperienceDetails").value = "";
   document.getElementById("seekerStamina").value = "";
   document.getElementById("seekerProfilePublic").checked = false;
+  setSeekerAvailableDates([]);
   document.getElementById("profileSavedMessage").classList.add("hidden");
   applySeekerSalaryPreferences({});
   updateSelectionDetails("seekerJobTypeOption");
   updateSelectionDetails("seekerLic");
+}
+
+function initializeSeekerAvailabilityControls() {
+  const dateInput = document.getElementById("seekerAvailableDate");
+  if (dateInput) {
+    dateInput.min = getLocalDateISO();
+    dateInput.value = getLocalDateISO();
+  }
+  const searchDate = document.getElementById("seekerSearchAvailabilityDate");
+  if (searchDate) {
+    searchDate.min = getLocalDateISO();
+    searchDate.value = getLocalDateISO();
+  }
+}
+
+function addSeekerAvailableDate() {
+  const dateInput = document.getElementById("seekerAvailableDate");
+  const date = dateInput.value;
+  if (!formatWorkDate(date) || date < getLocalDateISO()) {
+    alert("今日以降の日付を選択してください。");
+    return;
+  }
+  const selectedDates = Array.from(
+    document.querySelectorAll("#seekerAvailableDates [data-available-date]")
+  ).map(item => item.dataset.availableDate);
+  if (selectedDates.includes(date)) return;
+  if (selectedDates.length >= 60) {
+    alert("働ける日は60日分まで登録できます。");
+    return;
+  }
+  setSeekerAvailableDates([...selectedDates, date]);
+}
+
+function setSeekerAvailableDates(values) {
+  const container = document.getElementById("seekerAvailableDates");
+  if (!container) return;
+  const today = getLocalDateISO();
+  const dates = [...new Set(Array.isArray(values) ? values : [])]
+    .filter(date => formatWorkDate(date) && date >= today)
+    .sort();
+  container.replaceChildren();
+  dates.forEach(date => {
+    const item = document.createElement("span");
+    item.dataset.availableDate = date;
+    item.className = "inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white px-3 py-1.5 text-xs font-bold text-emerald-900";
+    const label = document.createElement("span");
+    label.textContent = formatWorkDate(date);
+    const removeButton = document.createElement("button");
+    removeButton.type = "button";
+    removeButton.className = "rounded-full px-1 text-emerald-700 hover:bg-emerald-100";
+    removeButton.setAttribute("aria-label", `${formatWorkDate(date)}を削除`);
+    removeButton.textContent = "×";
+    removeButton.addEventListener("click", () => {
+      setSeekerAvailableDates(dates.filter(value => value !== date));
+    });
+    item.append(label, removeButton);
+    container.append(item);
+  });
+  if (!dates.length) {
+    const empty = document.createElement("span");
+    empty.className = "text-xs text-gray-500";
+    empty.textContent = "登録された日付はありません。";
+    container.append(empty);
+  }
 }
 
 function applySeekerSalaryPreferences(profile) {

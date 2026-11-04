@@ -39,6 +39,7 @@ async function loadAccountData(user) {
           experienceDetails: profileResult.data.experience_details || "",
           stamina: profileResult.data.stamina,
           workPreferences: profileResult.data.work_preferences || [],
+          availableDates: profileResult.data.available_dates || [],
           isPublic: profileResult.data.is_public
         };
         if (!dashboardOpen) loadSeekerProfile(seekerProfileData);

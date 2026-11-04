@@ -3,6 +3,7 @@ let employerPublicSeekersError = "";
 let employerPublicSeekersUserId = null;
 let employerPublicSeekersLoadingUserId = null;
 let seekerSearchFilterOptionsUserId = null;
+let employerPublicSeekersAvailabilitySchemaReady = null;
 let displayLimitSeekers = 10;
 
 function updateAccountSearchSurface() {
@@ -51,6 +52,7 @@ function resetEmployerSeekerSearch() {
   employerPublicSeekersUserId = null;
   employerPublicSeekersLoadingUserId = null;
   seekerSearchFilterOptionsUserId = null;
+  employerPublicSeekersAvailabilitySchemaReady = null;
   displayLimitSeekers = 10;
   const keyword = document.getElementById("seekerSearchKeyword");
   if (keyword) keyword.value = "";
@@ -66,6 +68,10 @@ function resetEmployerSeekerSearch() {
   if (payType) payType.value = "";
   const sort = document.getElementById("seekerSearchSort");
   if (sort) sort.value = "match";
+  const availableOnly = document.getElementById("seekerSearchAvailableOnly");
+  if (availableOnly) availableOnly.checked = false;
+  const availabilityDate = document.getElementById("seekerSearchAvailabilityDate");
+  if (availabilityDate) availabilityDate.value = getLocalDateISO();
   const status = document.getElementById("employerSeekerSearchStatus");
   if (status) {
     status.innerText = "";
@@ -86,11 +92,27 @@ async function loadPublicSeekerProfiles(user) {
   const profiles = [];
   const pageSize = 500;
   for (let offset = 0; ; offset += pageSize) {
-    const { data, error } = await supabaseClient
+    const profileColumns = "job_type, location, pay_type, minimum_salary, licenses, exp_years, experience_details, stamina, work_preferences, updated_at";
+    const availabilityColumns = `${profileColumns}, available_dates`;
+    let result = await supabaseClient
       .from("seeker_public_profiles")
-      .select("job_type, location, pay_type, minimum_salary, licenses, exp_years, experience_details, stamina, work_preferences, updated_at")
+      .select(employerPublicSeekersAvailabilitySchemaReady === false ? profileColumns : availabilityColumns)
       .order("updated_at", { ascending: false })
       .range(offset, offset + pageSize - 1);
+    if (result.error &&
+        ["42703", "PGRST204"].includes(result.error.code) &&
+        String(result.error.message || "").includes("available_dates")) {
+      employerPublicSeekersAvailabilitySchemaReady = false;
+      console.error("空き日検索のデータベース移行が未適用です:", result.error);
+      result = await supabaseClient
+        .from("seeker_public_profiles")
+        .select(profileColumns)
+        .order("updated_at", { ascending: false })
+        .range(offset, offset + pageSize - 1);
+    } else if (!result.error) {
+      employerPublicSeekersAvailabilitySchemaReady = true;
+    }
+    const { data, error } = result;
     if (currentUser?.id !== user.id || accountType !== "employer") return;
     if (error) {
       employerPublicSeekersError = `公開プロフィールを読み込めませんでした: ${error.message}`;
@@ -123,17 +145,23 @@ function renderEmployerSeekerSearch(resetLimit = false) {
 
   if (employerPublicSeekersError) {
     status.innerHTML = `${escapeHtml(employerPublicSeekersError)} <button type="button" onclick="retryPublicSeekerSearch()" class="ml-2 font-bold underline">再読み込み</button>`;
+  } else if (employerPublicSeekersAvailabilitySchemaReady === false) {
+    status.innerHTML = '空き日検索を有効にするには、README記載の <code>20261116_add_seeker_availability_dates.sql</code> をSupabaseで実行してください。適用後に「再読み込み」してください。 <button type="button" onclick="retryPublicSeekerSearch()" class="ml-2 font-bold underline">再読み込み</button>';
   } else {
     status.innerText = employerPublicSeekersLoadingUserId === currentUser.id
       ? "公開プロフィールを読み込んでいます..."
       : "";
   }
-  status.classList.toggle("hidden", !employerPublicSeekersError && employerPublicSeekersLoadingUserId !== currentUser.id);
+  status.classList.toggle("hidden", !employerPublicSeekersError &&
+    employerPublicSeekersAvailabilitySchemaReady !== false &&
+    employerPublicSeekersLoadingUserId !== currentUser.id);
 
   const keyword = (document.getElementById("seekerSearchKeyword")?.value || "").trim().toLocaleLowerCase();
   const location = document.getElementById("seekerSearchLocation")?.value || "";
   const experience = document.getElementById("seekerSearchExperience")?.value || "";
   const payType = document.getElementById("seekerSearchPayType")?.value || "";
+  const availabilityDate = document.getElementById("seekerSearchAvailabilityDate")?.value || "";
+  const availableOnly = document.getElementById("seekerSearchAvailableOnly")?.checked || false;
   const sortBy = document.getElementById("seekerSearchSort")?.value || "match";
   const selectedLicenses = Array.from(document.querySelectorAll('input[name="seekerSearchLicense"]:checked'))
     .map(input => input.value);
@@ -192,6 +220,8 @@ function renderEmployerSeekerSearch(resetLimit = false) {
         (!location || getLocationPreferenceEntries(profile.location).includes(location)) &&
         (!experience || profile.exp_years === experience) &&
         (!payType || profile.pay_type === payType) &&
+        (!availableOnly || (employerPublicSeekersAvailabilitySchemaReady !== false &&
+          Array.isArray(profile.available_dates) && profile.available_dates.includes(availabilityDate))) &&
         (!selectedLicenses.length ||
           selectedLicenses.some(license => Array.isArray(profile.licenses) && profile.licenses.includes(license)));
     })
@@ -215,6 +245,7 @@ function renderEmployerSeekerSearch(resetLimit = false) {
     location && `勤務地: ${location}`,
     experience && `経験: ${experience}`,
     payType && `希望給与区分: ${document.getElementById("seekerSearchPayType").selectedOptions[0].text}`,
+    availableOnly && `働ける日: ${formatWorkDate(availabilityDate) || availabilityDate}`,
     ...selectedLicenses.map(license => `資格: ${license}`)
   ].filter(Boolean);
   const activeFiltersContainer = document.getElementById("activeSeekerFilters");
@@ -248,6 +279,12 @@ function renderEmployerSeekerSearch(resetLimit = false) {
       ? profile.licenses.map(license => `<span class="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-800">${escapeHtml(String(license))}</span>`).join("")
       : '<span class="text-sm text-gray-500">登録なし</span>';
     const workPreferences = getWorkPreferenceLabels(profile.work_preferences);
+    const availableDates = (Array.isArray(profile.available_dates) ? profile.available_dates : [])
+      .filter(date => formatWorkDate(date) && date >= getLocalDateISO())
+      .sort();
+    const availableDateBadges = availableDates.length
+      ? availableDates.slice(0, 5).map(date => `<span class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-800">${escapeHtml(date === getLocalDateISO() ? "今日" : formatWorkDate(date))}</span>`).join("")
+      : '<span class="text-sm text-gray-500">未登録</span>';
     const match = matchedJob ? getSeekerJobMatch(matchedJob, profile) : null;
     const matchLabel = match && match.maximumScore > 0
       ? `<div class="mt-4 rounded-lg ${match.score >= 11 ? "bg-emerald-50 text-emerald-900" : match.score >= 6 ? "bg-amber-50 text-amber-900" : "bg-gray-50 text-gray-700"} p-3">
@@ -274,6 +311,7 @@ function renderEmployerSeekerSearch(resetLimit = false) {
         <div class="sm:col-span-2"><dt class="text-xs font-bold text-gray-500">経験した作業・できること</dt><dd class="mt-1 whitespace-pre-wrap font-medium text-gray-800">${escapeHtml(String(profile.experience_details || "未登録"))}</dd></div>
         <div><dt class="text-xs font-bold text-gray-500">希望給与</dt><dd class="mt-1 font-medium text-gray-800">${escapeHtml(pay)}</dd></div>
         <div><dt class="text-xs font-bold text-gray-500">体力自信度</dt><dd class="mt-1 font-medium text-gray-800">${escapeHtml(String(profile.stamina || "未設定"))}</dd></div>
+        <div class="sm:col-span-2"><dt class="text-xs font-bold text-gray-500">働ける日</dt><dd class="mt-1 flex flex-wrap gap-1.5">${availableDateBadges}</dd></div>
         <div><dt class="text-xs font-bold text-gray-500">資格</dt><dd class="mt-1 flex flex-wrap gap-1.5">${licenses}</dd></div>
       </dl>
       <div class="mt-4">
@@ -357,6 +395,7 @@ function showMoreSeekerProfiles() {
 function retryPublicSeekerSearch() {
   if (!currentUser || accountType !== "employer") return;
   employerPublicSeekersError = "";
+  employerPublicSeekersAvailabilitySchemaReady = null;
   employerPublicSeekersUserId = null;
   loadPublicSeekerProfiles(currentUser);
 }
@@ -367,6 +406,8 @@ function resetEmployerSeekerFilters() {
   document.getElementById("seekerSearchLocation").value = "";
   document.getElementById("seekerSearchExperience").value = "";
   document.getElementById("seekerSearchPayType").value = "";
+  document.getElementById("seekerSearchAvailableOnly").checked = false;
+  document.getElementById("seekerSearchAvailabilityDate").value = getLocalDateISO();
   document.getElementById("seekerSearchSort").value = "match";
   document.querySelectorAll('input[name="seekerSearchLicense"]').forEach(input => {
     input.checked = false;

@@ -25,13 +25,25 @@ const LICENSE_OPTIONS = [
   "フルハーネス特別教育"
 ];
 
+const JOB_TAG_OPTIONS = Object.freeze([
+  "未経験歓迎",
+  "交通費支給",
+  "作業場所へ直行・直帰OK",
+  "マイカー・バイク通勤可",
+  "即日勤務OK",
+  "夜勤あり",
+  "道具・作業着支給",
+  "まかないあり",
+  "服装自由",
+  "道具貸出あり",
+  "送迎あり"
+]);
+const JOB_TAG_OPTION_SET = new Set(JOB_TAG_OPTIONS);
+
 const LEGACY_JOB_TAG_ALIASES = {
-  "日払い・手渡しOK": ["日払いOK", "手渡しOK"],
-  "雨天時給料保証あり": ["雨天時休業補償あり"],
   "現場直行直帰OK": ["作業場所へ直行・直帰OK"],
   "未経験・即日OK": ["未経験歓迎", "即日勤務OK"],
-  "夜勤・高収入": ["夜勤あり"],
-  "週1〜OK・シフト自由": ["週1日〜OK", "シフト相談可"]
+  "夜勤・高収入": ["夜勤あり"]
 };
 
 const PREFECTURE_GROUPS = [
@@ -48,7 +60,10 @@ const PREFECTURES = PREFECTURE_GROUPS.flatMap(([, prefectures]) => prefectures);
 
 function getNormalizedJobTags(values) {
   const tags = Array.isArray(values) ? values : [];
-  return [...new Set(tags.flatMap(tag => LEGACY_JOB_TAG_ALIASES[tag] || [tag]))];
+  return [...new Set(
+    tags.flatMap(tag => LEGACY_JOB_TAG_ALIASES[tag] || [tag])
+      .filter(tag => JOB_TAG_OPTION_SET.has(tag))
+  )];
 }
 
 const WORK_CATEGORY_LABELS = Object.freeze({
@@ -57,7 +72,7 @@ const WORK_CATEGORY_LABELS = Object.freeze({
   farm_work: "農作業",
   neighborhood_help: "ご近所のお手伝い",
   restaurant_help: "飲食店のお手伝い",
-  other: "その他（内容を相談・継続募集）"
+  other: "その他のお仕事"
 });
 
 const PAYMENT_METHOD_LABELS = Object.freeze({
@@ -97,6 +112,10 @@ function formatWorkDate(value) {
     day: "numeric",
     weekday: "short"
   }).format(date);
+}
+
+function getLocalDateISO(date = new Date()) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
 
 const WORK_PREFERENCE_GROUPS = [

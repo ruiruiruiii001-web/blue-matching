@@ -76,7 +76,7 @@ async function publishJob() {
   const title = document.getElementById("jobTitle").value.trim();
   const workCategory = document.getElementById("jobWorkCategory").value;
   const workDate = document.getElementById("jobWorkDate").value || null;
-  const paymentMethod = document.getElementById("jobPaymentMethod").value;
+  const paymentMethod = "cash_on_site";
   const location = getLocationPreferencesFromForm("jobLocationPrefecture", "jobLocation").trim();
   const salary = document.getElementById("jobSalary").value.trim();
   const duties = document.getElementById("jobDuties").value.trim();
@@ -136,11 +136,6 @@ async function publishJob() {
       alert("作業日は今日以降の日付を選択してください。");
       return;
     }
-  }
-
-  if (!Object.prototype.hasOwnProperty.call(PAYMENT_METHOD_LABELS, paymentMethod)) {
-    alert("支払い方法を選択してください。");
-    return;
   }
 
   if (title.length > 80 || location.length > 500 || salary.length > 100 || duties.length > 2000 ||
@@ -274,7 +269,6 @@ function editJob(id) {
   document.getElementById("jobTitle").value = job.title || "";
   document.getElementById("jobWorkCategory").value = job.category || "other";
   document.getElementById("jobWorkDate").value = job.work_date || "";
-  document.getElementById("jobPaymentMethod").value = job.payment_method || "undecided";
   setCheckedValues("jobWorkPreference", job.work_preferences);
   setJobImagesForEdit(job);
 
@@ -291,7 +285,14 @@ function editJob(id) {
   document.getElementById("jobBreakMinutes").value = job.break_minutes ?? "";
   document.getElementById("jobOvertimeDetails").value = job.overtime_details || "";
   document.getElementById("jobAllowanceDetails").value = job.allowance_details || "";
-  document.getElementById("jobPayType").value = getJobPayType(job);
+  const payTypeSelect = document.getElementById("jobPayType");
+  const payType = getJobPayType(job);
+  if (payType === "monthly" && !Array.from(payTypeSelect.options).some(option => option.value === "monthly")) {
+    const legacyMonthlyOption = new Option("月給（既存募集）", "monthly");
+    legacyMonthlyOption.dataset.legacy = "true";
+    payTypeSelect.add(legacyMonthlyOption);
+  }
+  payTypeSelect.value = payType;
   const payAmount = getJobPayAmount(job);
   document.getElementById("jobPayAmount").value = payAmount > 0 ? String(payAmount) : "";
   document.getElementById("jobPayAmountMax").value = job.pay_amount_max ?? "";
@@ -351,7 +352,6 @@ function cancelJobEdit() {
   document.getElementById("jobTitle").value = "";
   document.getElementById("jobWorkCategory").value = "";
   document.getElementById("jobWorkDate").value = "";
-  document.getElementById("jobPaymentMethod").value = "";
   setCheckedValues("jobWorkPreference", []);
   resetJobImages();
 
@@ -368,7 +368,10 @@ function cancelJobEdit() {
   document.getElementById("jobBreakMinutes").value = "";
   document.getElementById("jobOvertimeDetails").value = "";
   document.getElementById("jobAllowanceDetails").value = "";
-  document.getElementById("jobPayType").value = "";
+  const payTypeSelect = document.getElementById("jobPayType");
+  const legacyMonthlyOption = payTypeSelect.querySelector('option[data-legacy="true"]');
+  if (legacyMonthlyOption) legacyMonthlyOption.remove();
+  payTypeSelect.value = "";
   document.getElementById("jobPayAmount").value = "";
   document.getElementById("jobPayAmountMax").value = "";
   document.getElementById("jobPayConditionDetails").value = "";

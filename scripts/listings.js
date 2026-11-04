@@ -138,7 +138,7 @@ function renderJobList(resetLimit = false) {
     hideApplied && "応募済みを隠す",
     locationFilter && `勤務地: ${locationFilter}`,
     categoryFilter && `カテゴリ: ${getWorkCategoryLabel(categoryFilter)}`,
-    workDateFilter !== "all" && (workDateFilter === "today" ? "今日できる仕事" : "今週末の仕事"),
+    workDateFilter !== "all" && (workDateFilter === "today" ? "今日の仕事" : "今週末の仕事"),
     capacityFilter && `募集人数: ${document.getElementById("capacityFilter").selectedOptions[0].text}`,
     salaryTypeFilter && `給与: ${document.getElementById("salaryTypeFilter").selectedOptions[0].text}`,
     minimumSalary && `最低給与: ${minimumSalary.toLocaleString()}円`,

@@ -228,7 +228,7 @@
 
       <div id="employerJobForm" class="hidden rounded-xl border border-blue-100 bg-white p-4 shadow-sm sm:p-5">
         <h2 id="jobFormHeading" class="mb-4 border-b border-gray-100 pb-3 text-lg font-bold text-blue-600">地域のお手伝いを募集</h2>
-        <p class="mb-4 rounded-lg border border-blue-100 bg-blue-50 p-3 text-xs leading-relaxed text-blue-900">作業カテゴリ・支払い方法を選び、単発のお手伝いは作業日を入力してください。投稿内容は運営の確認後に公開されます。支払いはアプリ外で行います。</p>
+        <p class="mb-4 rounded-lg border border-blue-100 bg-blue-50 p-3 text-xs leading-relaxed text-blue-900">単発のお仕事として作業日を入力してください。給与は作業日当日に現金で手渡す条件で掲載します。投稿内容は運営の確認後に公開されます。アプリ内決済はありません。</p>
         <div class="space-y-4">
           <div class="flex items-center gap-2 border-b border-blue-100 pb-2"><span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-black text-white">1</span><h3 class="text-base font-black text-gray-900">基本情報</h3><span class="rounded-full bg-red-50 px-2 py-0.5 text-xs font-bold text-red-700">必須あり</span></div>
           <div>
@@ -299,15 +299,10 @@
             </div>
           </div>
 
-          <label class="block text-sm font-medium">支払い方法 <span class="text-red-500">*</span>
-            <select id="jobPaymentMethod" required class="mt-1 w-full rounded border px-3 py-2.5 text-base focus:ring-2 focus:ring-blue-500">
-              <option value="">選択してください</option>
-              <option value="cash_on_site">当日現金手渡し</option>
-              <option value="bank_transfer">後日振込</option>
-              <option value="undecided">条件を相談</option>
-            </select>
-            <span class="mt-1 block text-xs font-normal text-gray-500">この掲示板では決済を行いません。応募前に金額・支払日を確認してください。</span>
-          </label>
+          <div class="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900">
+            <p class="font-bold">給与の支払い: 作業日当日に現金手渡し</p>
+            <p class="mt-1 text-xs">金額や支払いのタイミングは作業内容・補足にも記載してください。アプリ内決済はありません。</p>
+          </div>
 
           <div>
             <div class="mb-1 flex items-center justify-between gap-2">
@@ -367,12 +362,11 @@
 
           <div>
             <label class="block text-sm font-medium mb-1">給与条件（絞り込み用・任意）</label>
-            <div class="grid grid-cols-2 gap-3">
+            <div class="grid grid-cols-1 gap-3">
               <select id="jobPayType" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
                 <option value="">給与区分を選択</option>
                 <option value="hourly">時給</option>
                 <option value="daily">日給</option>
-                <option value="monthly">月給</option>
               </select>
             </div>
             <div class="mt-2 flex items-center gap-2">
@@ -381,9 +375,9 @@
               <input type="number" id="jobPayAmountMax" aria-label="上限金額（任意・円）" min="1" max="100000000" step="1" placeholder="上限（任意）" class="min-w-0 flex-1 rounded border px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
             </div>
             <label class="mt-2 block text-sm">給与の支給条件（任意）
-              <textarea id="jobPayConditionDetails" rows="2" maxlength="500" placeholder="例: 毎月末締め・翌月25日払い／昇給あり／賞与年2回" class="mt-1 w-full rounded border px-3 py-2.5 text-sm"></textarea>
+              <textarea id="jobPayConditionDetails" rows="2" maxlength="500" placeholder="例: 交通費込み／作業完了後に支払い" class="mt-1 w-full rounded border px-3 py-2.5 text-sm"></textarea>
             </label>
-            <p class="text-xs text-gray-500 mt-1">給与区分・金額の単位を明記できます。上限を入力する場合は下限も入力してください。支給日や昇給・賞与なども記載できます。</p>
+            <p class="text-xs text-gray-500 mt-1">時給または日給を選択できます。上限を入力する場合は下限も入力してください。交通費などの条件も記載できます。</p>
           </div>
 
           <div class="mt-2 flex items-center gap-2 border-b border-blue-100 pb-2 pt-4"><span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-black text-white">3</span><h3 class="text-base font-black text-gray-900">応募してほしい人</h3><span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-bold text-gray-700">任意</span></div>
@@ -457,30 +451,19 @@
               </span>
             </summary>
             <div class="px-3 pb-3">
-              <p class="mb-2 text-xs text-gray-500">該当する条件を実際に提供できる場合だけ選択してください。金額や対象条件は手当・給与欄に詳しく記載できます。</p>
+              <p class="mb-2 text-xs text-gray-500">その募集で実際に用意できる条件だけ選択してください。</p>
               <div class="grid grid-cols-2 gap-2 text-xs sm:grid-cols-3">
-              <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="日払いOK"> <span>💰 日払いOK</span></label>
-              <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="手渡しOK"> <span>💴 給与手渡しOK</span></label>
+              <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="未経験歓迎"> <span>🌱 未経験歓迎</span></label>
               <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="交通費支給"> <span>🚃 交通費支給</span></label>
               <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="作業場所へ直行・直帰OK"> <span>🚗 作業場所へ直行・直帰OK</span></label>
               <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="マイカー・バイク通勤可"> <span>🅿️ マイカー通勤可</span></label>
-              <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="雨天時休業補償あり"> <span>☔️ 雨天時の休業補償</span></label>
-              <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="寮・社宅完備"> <span>🏠 寮・社宅あり</span></label>
-              <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="未経験歓迎"> <span>🌱 未経験歓迎</span></label>
               <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="即日勤務OK"> <span>⚡️ 即日勤務OK</span></label>
               <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="夜勤あり"> <span>🌙 夜勤あり</span></label>
-              <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="残業ほぼナシ"> <span>⏰ 残業ほぼなし</span></label>
               <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="道具・作業着支給"> <span>🧰 道具・作業着支給</span></label>
-              <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="資格取得支援"> <span>🎓 資格取得支援</span></label>
-              <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="週1日〜OK"> <span>📅 週1日〜OK</span></label>
-              <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="シフト相談可"> <span>🗓️ シフト相談可</span></label>
               <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="まかないあり"> <span>🍱 まかないあり</span></label>
               <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="服装自由"> <span>👕 服装自由</span></label>
               <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="道具貸出あり"> <span>🧰 道具貸出あり</span></label>
-              <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="社会保険完備"> <span>🛡️ 社会保険完備</span></label>
-              <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="日曜休み"> <span>🌤️ 日曜休み</span></label>
               <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="送迎あり"> <span>🚐 送迎あり</span></label>
-              <label class="flex items-center space-x-1.5 p-2 border rounded bg-gray-50"><input type="checkbox" name="jobTag" value="ミドル・シニア活躍中"> <span>👴 ミドル・シニア活躍</span></label>
               </div>
             </div>
           </details>
@@ -584,6 +567,18 @@
           </div>
         </details>
 
+        <fieldset class="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+          <legend class="px-1 text-sm font-bold text-emerald-950">働ける日（任意）</legend>
+          <p class="mb-3 text-xs leading-5 text-emerald-900">仕事を受けられる日を登録できます。今日の日付は最初から選ばれているので、「この日を追加」からすぐ登録できます。</p>
+          <div class="flex flex-col gap-2 sm:flex-row">
+            <label for="seekerAvailableDate" class="sr-only">働ける日を選択</label>
+            <input id="seekerAvailableDate" type="date" class="min-h-11 flex-1 rounded-lg border border-emerald-200 bg-white px-3 py-2 text-base">
+            <button type="button" onclick="addSeekerAvailableDate()" class="min-h-11 rounded-lg bg-emerald-700 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-800">この日を追加</button>
+          </div>
+          <div id="seekerAvailableDates" class="mt-3 flex flex-wrap gap-2" aria-live="polite"></div>
+          <p class="mt-2 text-xs text-emerald-900">登録した日付は、プロフィール公開に同意した場合だけ掲載者の検索結果に表示されます。氏名や電話番号は表示されません。</p>
+        </fieldset>
+
         <div class="bg-blue-50 p-3 rounded border border-blue-100 space-y-3">
           <p class="text-sm font-bold text-gray-700">希望給与条件（任意）</p>
           <div class="grid grid-cols-2 gap-3">
@@ -593,7 +588,6 @@
                 <option value="">指定なし</option>
                 <option value="hourly">時給</option>
                 <option value="daily">日給</option>
-                <option value="monthly">月給</option>
               </select>
             </label>
             <label class="text-sm">
@@ -673,7 +667,7 @@
           <legend class="px-1 text-sm font-bold text-amber-950">掲載者へのプロフィール公開（任意）</legend>
           <label class="flex items-start gap-2 text-sm text-amber-950">
             <input id="seekerProfilePublic" type="checkbox" class="mt-0.5 h-4 w-4 shrink-0">
-            <span><span class="font-bold">お仕事をお願いする方に匿名プロフィールを公開する</span><br>チェックを入れてプロフィールを保存すると、希望する仕事・地域・報酬・資格・経験・体力自信度・希望する働き方が掲載者に表示されます。名前と電話番号は表示されず、一般公開もされません。</span>
+            <span><span class="font-bold">お仕事をお願いする方に匿名プロフィールを公開する</span><br>チェックを入れてプロフィールを保存すると、希望する仕事・地域・報酬・資格・経験・体力自信度・希望する働き方・働ける日が掲載者に表示されます。名前と電話番号は表示されず、一般公開もされません。</span>
           </label>
           <p class="mt-3 border-t border-amber-200 pt-3 text-xs leading-5 text-amber-900">公開は任意です。チェックを外して保存すると非公開になります。お仕事をお願いする方は本人確認されているとは限らないため、公開する情報に個人を特定できる内容を含めないでください。勤務地は市区町村までにしてください。</p>
         </fieldset>
@@ -736,6 +730,14 @@
           <span class="text-base">⚠️</span> 掲載者の本人確認は行っていません。応募前に作業内容・場所・報酬をご確認ください。連絡は応募後にサイト内で行えます。
         </p>
         <p id="jobListDescription" class="mt-3 text-xs text-gray-500 hidden leading-relaxed">希望する仕事・地域・報酬条件の一致度を目安にお仕事をおすすめ順で表示します。検索条件は以下のパネルから変更できます。</p>
+        <fieldset class="mt-4 border-t border-gray-100 pt-4">
+          <legend class="mb-2 text-sm font-bold text-gray-700">作業日から探す</legend>
+          <div class="flex flex-wrap gap-2" aria-label="作業日の絞り込み">
+            <button type="button" data-work-date-filter="all" aria-pressed="true" onclick="setWorkDateFilter('all')" class="min-h-10 rounded-full border border-blue-600 bg-blue-600 px-4 py-2 text-sm font-bold text-white">すべて</button>
+            <button type="button" data-work-date-filter="today" aria-pressed="false" onclick="setWorkDateFilter('today')" class="min-h-10 rounded-full border border-blue-200 bg-white px-4 py-2 text-sm font-bold text-blue-900">今日の仕事</button>
+            <button type="button" data-work-date-filter="weekend" aria-pressed="false" onclick="setWorkDateFilter('weekend')" class="min-h-10 rounded-full border border-blue-200 bg-white px-4 py-2 text-sm font-bold text-blue-900">今週末の仕事</button>
+          </div>
+        </fieldset>
       </div>
         <section id="employerSeekerSearch" class="hidden mt-5 mb-8 rounded-2xl border border-blue-200 bg-blue-50 p-4 shadow-sm sm:p-5">
           <div class="mb-4">
@@ -749,6 +751,16 @@
           <p class="mb-4 text-xs leading-relaxed text-gray-600">希望する仕事・地域・報酬条件の一致度を目安として並べます。経験・資格は参考情報として表示し、順位の判定には使いません。</p>
           <label for="seekerSearchKeyword" class="mb-2 block text-sm font-bold text-gray-700">キーワード</label>
           <input type="search" id="seekerSearchKeyword" oninput="renderEmployerSeekerSearch(true)" placeholder="希望する仕事・地域・資格・経験などで検索" class="mb-4 w-full rounded-xl border border-blue-300 bg-white px-4 py-3 text-base shadow-sm outline-none focus:ring-2 focus:ring-blue-500">
+          <div class="mb-4 rounded-xl border border-emerald-200 bg-white p-3">
+            <label for="seekerSearchAvailabilityDate" class="mb-2 block text-sm font-bold text-gray-700">働ける日で絞り込む</label>
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <input type="date" id="seekerSearchAvailabilityDate" onchange="renderEmployerSeekerSearch(true)" class="min-h-11 flex-1 rounded-lg border border-gray-300 px-3 py-2 text-base">
+              <label class="flex min-h-11 items-center gap-2 text-sm font-bold text-emerald-900">
+                <input type="checkbox" id="seekerSearchAvailableOnly" onchange="renderEmployerSeekerSearch(true)" class="h-4 w-4 rounded text-emerald-700 focus:ring-emerald-600">
+                この日に働ける方だけ表示
+              </label>
+            </div>
+          </div>
           <label for="seekerSearchSort" class="mb-2 block text-sm font-bold text-gray-700"><span data-line-icon="sort"></span>並び替え</label>
           <select id="seekerSearchSort" onchange="renderEmployerSeekerSearch(true)" class="mb-4 w-full rounded-xl border border-blue-300 bg-white px-4 py-3 text-base shadow-sm outline-none focus:ring-2 focus:ring-blue-500">
             <option value="match">マッチ度が高い順</option>
@@ -787,7 +799,6 @@
                   <option value="">すべて</option>
                   <option value="hourly">時給</option>
                   <option value="daily">日給</option>
-                  <option value="monthly">月給</option>
                 </select>
               </label>
             </div>
@@ -808,15 +819,6 @@
         <label for="searchKeyword" class="mb-2 block text-sm font-bold text-gray-700">キーワード</label>
         <input type="search" id="searchKeyword" oninput="renderJobList(true)" placeholder="タイトル・作業内容・地域・報酬などで検索（例: 受付、収穫、横浜）" class="mb-4 w-full rounded-xl border border-blue-300 bg-white px-4 py-3 text-base shadow-sm outline-none focus:ring-2 focus:ring-blue-500">
 
-        <fieldset class="mb-4">
-          <legend class="mb-2 text-sm font-bold text-gray-700">作業日から探す</legend>
-          <div class="flex flex-wrap gap-2" aria-label="作業日の絞り込み">
-            <button type="button" data-work-date-filter="all" aria-pressed="true" onclick="setWorkDateFilter('all')" class="min-h-10 rounded-full border border-blue-600 bg-blue-600 px-4 py-2 text-sm font-bold text-white">すべて</button>
-            <button type="button" data-work-date-filter="today" aria-pressed="false" onclick="setWorkDateFilter('today')" class="min-h-10 rounded-full border border-blue-200 bg-white px-4 py-2 text-sm font-bold text-blue-900">今日できる仕事</button>
-            <button type="button" data-work-date-filter="weekend" aria-pressed="false" onclick="setWorkDateFilter('weekend')" class="min-h-10 rounded-full border border-blue-200 bg-white px-4 py-2 text-sm font-bold text-blue-900">今週末の仕事</button>
-          </div>
-        </fieldset>
-
         <div class="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
           <label class="text-sm font-bold text-gray-700">
             <span class="mb-1 block"><span data-line-icon="sort"></span>並び替え</span>
@@ -835,7 +837,7 @@
           <div class="flex flex-wrap gap-2">
             <button type="button" data-quick-job-tag="未経験歓迎" aria-pressed="false" onclick="toggleQuickJobTag('未経験歓迎')" class="min-h-10 rounded-full border border-blue-200 bg-white px-3 py-2 text-sm font-medium text-blue-900 hover:bg-blue-100">未経験歓迎</button>
             <button type="button" data-quick-job-tag="交通費支給" aria-pressed="false" onclick="toggleQuickJobTag('交通費支給')" class="min-h-10 rounded-full border border-blue-200 bg-white px-3 py-2 text-sm font-medium text-blue-900 hover:bg-blue-100">交通費支給</button>
-            <button type="button" data-quick-job-tag="週1日〜OK" aria-pressed="false" onclick="toggleQuickJobTag('週1日〜OK')" class="min-h-10 rounded-full border border-blue-200 bg-white px-3 py-2 text-sm font-medium text-blue-900 hover:bg-blue-100">週1日〜OK</button>
+            <button type="button" data-quick-job-tag="まかないあり" aria-pressed="false" onclick="toggleQuickJobTag('まかないあり')" class="min-h-10 rounded-full border border-blue-200 bg-white px-3 py-2 text-sm font-medium text-blue-900 hover:bg-blue-100">まかないあり</button>
           </div>
         </fieldset>
 
@@ -902,7 +904,6 @@
             <option value="">すべて</option>
             <option value="hourly">時給</option>
             <option value="daily">日給</option>
-            <option value="monthly">月給</option>
           </select>
         </label>
         <label class="text-sm text-gray-700">

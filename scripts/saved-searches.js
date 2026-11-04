@@ -28,26 +28,26 @@ function getCurrentJobFilters() {
 function hasJobFilters(filters) {
   return Boolean(filters.keyword || filters.openJobsOnly || filters.category ||
     (filters.workDate && filters.workDate !== "all") || filters.location || filters.capacity ||
-    filters.salaryType || filters.minimumSalary || (filters.tags && filters.tags.length));
+    filters.salaryType || filters.minimumSalary || getNormalizedJobTags(filters.tags).length);
 }
 
 function describeJobFilters(filters) {
   return [
     filters.keyword && `「${filters.keyword}」`,
     filters.category && getWorkCategoryLabel(filters.category),
-    filters.workDate && filters.workDate !== "all" && (filters.workDate === "today" ? "今日できる仕事" : "今週末の仕事"),
+    filters.workDate && filters.workDate !== "all" && (filters.workDate === "today" ? "今日の仕事" : "今週末の仕事"),
     filters.location,
     filters.salaryType && { hourly: "時給", daily: "日給", monthly: "月給" }[filters.salaryType],
     filters.minimumSalary && `${Number(filters.minimumSalary).toLocaleString()}円以上`,
     filters.capacity && "募集人数指定",
     filters.openJobsOnly && "募集中のみ",
-    ...(filters.tags || [])
+    ...getNormalizedJobTags(filters.tags)
   ].filter(Boolean).join(" / ") || "条件なし";
 }
 
 function jobMatchesSavedFilters(job, filters) {
   const keyword = String(filters.keyword || "").toLowerCase();
-  const tags = Array.isArray(filters.tags) ? filters.tags : [];
+  const tags = getNormalizedJobTags(filters.tags);
   const jobTags = getNormalizedJobTags(job.tags);
   return (!keyword ||
       (job.title || "").toLowerCase().includes(keyword) ||
@@ -154,13 +154,13 @@ function renderSavedSearches() {
     const items = [
       filters.keyword && `キーワード: ${filters.keyword}`,
       filters.category && `作業カテゴリ: ${getWorkCategoryLabel(filters.category)}`,
-      filters.workDate && filters.workDate !== "all" && (filters.workDate === "today" ? "今日できる仕事" : "今週末の仕事"),
+      filters.workDate && filters.workDate !== "all" && (filters.workDate === "today" ? "今日の仕事" : "今週末の仕事"),
       filters.location && `勤務地: ${filters.location}`,
       filters.salaryType && `給与区分: ${{ hourly: "時給", daily: "日給", monthly: "月給" }[filters.salaryType]}`,
       filters.minimumSalary && `最低給与: ${Number(filters.minimumSalary).toLocaleString()}円以上`,
       filters.capacity && `募集人数: ${filters.capacity}`,
       filters.openJobsOnly && "募集中のみ",
-      (filters.tags || []).length && `タグ: ${filters.tags.join("、")}`
+      getNormalizedJobTags(filters.tags).length && `タグ: ${getNormalizedJobTags(filters.tags).join("、")}`
     ].filter(Boolean);
     (items.length ? items : ["条件なし"]).forEach(text => {
       const li = document.createElement("li");
@@ -240,7 +240,7 @@ async function applySavedSearch(id) {
   document.getElementById("salaryTypeFilter").value = filters.salaryType || "";
   document.getElementById("minimumSalary").value = filters.minimumSalary || "";
   document.querySelectorAll('input[name="tagFilter"]').forEach(input => {
-    input.checked = (filters.tags || []).includes(input.value);
+    input.checked = getNormalizedJobTags(filters.tags).includes(input.value);
   });
   updateJobFilterOptions();
   document.getElementById("locationFilter").value = filters.location || "";
