@@ -109,7 +109,7 @@ function getVisibleNotifications() {
   container.innerHTML = notificationError
     ? ""
     : notifications.length
-    ? `<p class="mb-4 text-xs text-gray-500">通知を確認したかどうかの表示です。応募の「確認済み」とは別の状態です。</p>
+    ? `<p class="mb-4 text-xs text-gray-500">通知を確認したかどうかの表示です。応募のお仕事確定とは別の状態です。</p>
       ${renderNotificationGroup("未読のお知らせ", unreadNotifications, false)}
       ${renderNotificationGroup("既読のお知らせ", readNotifications, true)}`
     : '<div class="text-center py-10 bg-gray-50 rounded-2xl border border-dashed border-gray-200"><p class="text-xs text-gray-400">新しい通知はありません。</p></div>';

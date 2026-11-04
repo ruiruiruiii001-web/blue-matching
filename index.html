@@ -4,12 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="cloudflare-turnstile-sitekey" content="0x4AAAAAAFmKntPFXSdCMP-V">
-  <title>現場の仕事探し・人探しマッチング</title>
-  <meta name="description" content="建設・解体・設備などの現場のお仕事を、職人と親方がサイト内で直接やり取りできるマッチングサイト。勤務地・給与・資格で探して応募できます。">
+  <title>地域密着の単発・お助けスキマ仕事掲示板 | 現場の仕事探し・人探しマッチング</title>
+  <meta name="description" content="現場・イベント・農作業・飲食店など、地域の単発のお手伝いを探す・募集する掲示板です。作業日や支払い条件を見て、応募後はサイト内でやり取りできます。">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="現場の仕事探し・人探しマッチング">
   <meta property="og:title" content="現場の仕事探し・人探しマッチング">
-  <meta property="og:description" content="建設・解体・設備などの現場のお仕事を、勤務地・給与・資格で探して応募できます。">
+  <meta property="og:description" content="地域の単発・お助け仕事を、作業日や支払い条件を見て探せます。">
   <meta property="og:url" content="https://blue-matching-pi.vercel.app/">
   <meta property="og:image" content="https://blue-matching-pi.vercel.app/icons/icon-512.png">
   <meta name="twitter:card" content="summary">
@@ -33,7 +33,7 @@
     <div class="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
       <div>
         <h1 class="text-xl font-bold tracking-wide">👷 現場の仕事探し・人探し</h1>
-        <p class="text-xs text-blue-100">クラウド同期・現場特化型</p>
+        <p class="text-xs text-blue-100">地域密着の単発・お助けスキマ仕事掲示板</p>
       </div>
       <div class="flex items-center gap-2">
         <button id="headerAccountButton" type="button" aria-haspopup="dialog" aria-controls="myPageOverlay loginOverlay" aria-expanded="false" onclick="openAccountPanel()" class="rounded-lg bg-white px-3 py-2 text-xs font-bold text-blue-700">ログイン</button>
@@ -227,8 +227,8 @@
       </section>
 
       <div id="employerJobForm" class="hidden rounded-xl border border-blue-100 bg-white p-4 shadow-sm sm:p-5">
-        <h2 id="jobFormHeading" class="mb-4 border-b border-gray-100 pb-3 text-lg font-bold text-blue-600">現場のお仕事のクラウド投稿</h2>
-        <p class="mb-4 rounded-lg border border-blue-100 bg-blue-50 p-3 text-xs leading-relaxed text-blue-900">赤い「*」は必須項目です。詳細情報は入力できる範囲で構いません。応募者との連絡は「応募・メッセージ」から行えます。</p>
+        <h2 id="jobFormHeading" class="mb-4 border-b border-gray-100 pb-3 text-lg font-bold text-blue-600">地域のお手伝いを募集</h2>
+        <p class="mb-4 rounded-lg border border-blue-100 bg-blue-50 p-3 text-xs leading-relaxed text-blue-900">作業カテゴリ・支払い方法を選び、単発のお手伝いは作業日を入力してください。投稿内容は運営の確認後に公開されます。支払いはアプリ外で行います。</p>
         <div class="space-y-4">
           <div class="flex items-center gap-2 border-b border-blue-100 pb-2"><span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-black text-white">1</span><h3 class="text-base font-black text-gray-900">基本情報</h3><span class="rounded-full bg-red-50 px-2 py-0.5 text-xs font-bold text-red-700">必須あり</span></div>
           <div>
@@ -236,9 +236,36 @@
             <input type="text" id="jobTitle" maxlength="80" required placeholder="例: 解体現場の作業員・ダンプ運転手" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
           </div>
 
+          <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <label class="block text-sm font-medium">作業カテゴリ <span class="text-red-500">*</span>
+              <select id="jobWorkCategory" required class="mt-1 w-full rounded border px-3 py-2.5 text-base focus:ring-2 focus:ring-blue-500">
+                <option value="">選択してください</option>
+                <option value="construction_help">現場の手伝い</option>
+                <option value="event_setup">イベント搬入・設営</option>
+                <option value="farm_work">農作業</option>
+                <option value="neighborhood_help">ご近所のお手伝い</option>
+                <option value="restaurant_help">飲食店のヘルプ</option>
+                <option value="other">その他・継続案件</option>
+              </select>
+            </label>
+            <label class="block text-sm font-medium">作業日
+              <input id="jobWorkDate" type="date" class="mt-1 min-h-11 w-full rounded border px-3 py-2.5 text-base focus:ring-2 focus:ring-blue-500">
+              <span class="mt-1 block text-xs font-normal text-gray-500">単発のお手伝いは作業日を入力してください。</span>
+            </label>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <label class="block text-sm font-medium">開始時間
+              <input id="jobStartTime" type="time" aria-label="開始時間" class="mt-1 h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-base text-gray-900 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
+            </label>
+            <label class="block text-sm font-medium">終了時間
+              <input id="jobEndTime" type="time" aria-label="終了時間" class="mt-1 h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-base text-gray-900 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
+            </label>
+          </div>
+
           <details id="jobLocationPreferences" data-selection-name="jobLocationPrefecture" data-location-input-name="jobLocationPrefecture" data-location-other-input="jobLocation" data-location-count-label="勤務地" class="rounded-xl border border-blue-100 bg-blue-50">
             <summary class="flex flex-wrap cursor-pointer list-none items-center justify-between gap-2 p-4 text-sm font-bold text-gray-800">
-              <span class="min-w-0">勤務地（複数選択可・任意）</span>
+              <span class="min-w-0">勤務地（単発の募集では必須） <span class="text-red-600">*</span></span>
               <span class="flex min-w-0 max-w-full flex-wrap items-center justify-end gap-x-2 gap-y-1 text-xs font-normal">
                 <span data-selected-count class="text-gray-600">勤務地 0件</span>
                 <span class="rounded-full bg-white px-2 py-1 font-bold text-blue-700 shadow-sm" data-toggle-label>選択肢を開く</span>
@@ -246,7 +273,7 @@
               </span>
             </summary>
             <div class="space-y-3 px-4 pb-4">
-              <p class="text-xs leading-5 text-gray-600">地方を開いて都道府県を選び、市区町村を入力してください。複数現場は複数の都道府県・市区町村を登録できます。番地・建物名など、個人宅を特定できる情報は入力しないでください。</p>
+              <p class="text-xs leading-5 text-gray-600">地方を開いて都道府県を選び、市区町村も入力してください。複数の勤務地を登録できます。番地・建物名など、個人宅を特定できる情報は入力しないでください。</p>
               <div id="jobLocationPrefectureOptions" class="space-y-2"></div>
               <p id="jobLocationLegacyNotice" class="hidden rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs leading-relaxed text-amber-900">このお仕事の勤務地は、都道府県を選ぶ前の古い形式で保存されています。都道府県で探しているお仕事探しの方に見つけてもらいやすくするため、上で都道府県を選び直して保存してください（入力済みの内容は「その他の勤務地」に残っています）。</p>
               <label class="block text-sm">その他の勤務地・現場の補足（任意）
@@ -272,19 +299,40 @@
             </div>
           </div>
 
+          <label class="block text-sm font-medium">支払い方法 <span class="text-red-500">*</span>
+            <select id="jobPaymentMethod" required class="mt-1 w-full rounded border px-3 py-2.5 text-base focus:ring-2 focus:ring-blue-500">
+              <option value="">選択してください</option>
+              <option value="cash_on_site">当日現金手渡し</option>
+              <option value="bank_transfer">後日振込</option>
+              <option value="undecided">条件を相談</option>
+            </select>
+            <span class="mt-1 block text-xs font-normal text-gray-500">この掲示板では決済を行いません。応募前に金額・支払日を確認してください。</span>
+          </label>
+
+          <div>
+            <div class="mb-1 flex items-center justify-between gap-2">
+              <label for="jobDuties" class="block text-sm font-medium">作業内容・補足</label>
+              <button type="button" onclick="generateAIDuties()" class="rounded bg-blue-50 px-2 py-1 text-xs font-bold text-blue-600 hover:text-blue-800">✨ AIで作成</button>
+            </div>
+            <textarea id="jobDuties" rows="2" maxlength="2000" placeholder="例: 資材の運び出しを手伝ってください。作業内容、集合場所、持ち物などを記入。" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
+            <p id="aiStatus" class="hidden text-[10px] text-blue-500 mt-1 animate-pulse font-medium"></p>
+          </div>
+
           <div>
             <label for="jobDurationDays" class="block text-sm font-medium mb-1">掲載期間</label>
             <select id="jobDurationDays" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
               <option value="keep" hidden disabled>現在の掲載期限のまま</option>
-              <option value="14">14日間</option>
-              <option value="30" selected>30日間（おすすめ）</option>
-              <option value="60">60日間</option>
-              <option value="90">90日間</option>
+              <option value="7">7日間</option>
+              <option value="14" selected>14日間（おすすめ）</option>
+              <option value="30">30日間</option>
             </select>
-            <p class="mt-1 text-xs text-gray-500">掲載期限を過ぎると、お仕事は自動的に一覧から非表示になり応募も受け付けなくなります。期限の3日前からマイページで警告が表示され、ワンタップで延長できます。編集時に期間を選ぶと、今日からの日数で期限が更新されます。</p>
+            <p class="mt-1 text-xs text-gray-500">掲載期限を過ぎると一覧から非表示になり、応募も受け付けなくなります。期限の3日前からマイページで警告が表示され、期間を選んで延長できます。</p>
             <p id="jobDurationNote" class="mt-1 text-xs font-bold text-gray-500"></p>
           </div>
 
+          <details id="jobAdvancedDetails" class="rounded-xl border border-blue-100 bg-white">
+            <summary class="cursor-pointer rounded-xl px-4 py-3 text-sm font-bold text-blue-900 hover:bg-blue-50">詳しい条件を追加（必要な場合のみ）</summary>
+            <div class="space-y-4 border-t border-blue-100 p-4">
           <div class="mt-2 flex items-center gap-2 border-b border-blue-100 pb-2 pt-4"><span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-black text-white">2</span><h3 class="text-base font-black text-gray-900">働き方・勤務条件</h3><span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-bold text-gray-700">任意</span></div>
           <details data-selection-name="jobWorkPreference" class="rounded-xl border border-blue-100 bg-blue-50">
             <summary class="flex flex-wrap cursor-pointer list-none items-center justify-between gap-2 p-4 text-sm font-bold text-gray-800">
@@ -304,12 +352,6 @@
           <fieldset class="min-w-0 max-w-full overflow-hidden rounded-xl border border-gray-200 p-4">
             <legend class="px-1 text-sm font-bold text-gray-800">勤務時間・手当（任意）</legend>
             <div class="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2">
-              <label class="block min-w-0 text-sm font-medium">始業時間（開始）
-                <input id="jobStartTime" type="time" aria-label="始業時間（開始）" class="mt-1 block h-12 min-w-0 max-w-full w-full rounded-lg border border-gray-300 bg-white px-3 text-base text-gray-900 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
-              </label>
-              <label class="block min-w-0 text-sm font-medium">終業時間（終了）
-                <input id="jobEndTime" type="time" aria-label="終業時間（終了）" class="mt-1 block h-12 min-w-0 max-w-full w-full rounded-lg border border-gray-300 bg-white px-3 text-base text-gray-900 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
-              </label>
               <label class="min-w-0 text-sm">休憩時間（分）
                 <input id="jobBreakMinutes" type="number" min="0" max="1440" step="1" placeholder="例: 60" class="mt-1 w-full rounded border px-3 py-2.5">
               </label>
@@ -440,19 +482,10 @@
             </div>
           </details>
 
-                    <div>
-            <div class="flex justify-between items-center mb-1">
-              <label class="block text-sm font-medium">仕事内容の補足</label>
-              <button type="button" onclick="generateAIDuties()" class="text-xs font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1 bg-blue-50 px-2 py-1 rounded transition-colors">
-                <span>✨ AIで作成</span>
-              </button>
             </div>
-            <textarea id="jobDuties" rows="2" maxlength="2000" placeholder="例: 都内の木造解体現場。資材の運び出しと簡単な手元作業です。" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
-            <p id="aiStatus" class="hidden text-[10px] text-blue-500 mt-1 animate-pulse font-medium"></p>
-          </div>
-
+          </details>
           <button id="jobSubmitButton" onclick="publishJob()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-lg transition shadow text-base">
-            🔥 クラウドにお仕事を今すぐ掲載する
+            審査に出す
           </button>
           <button id="cancelEditButton" onclick="cancelJobEdit()" class="w-full border border-gray-300 text-gray-700 font-bold py-2.5 rounded-lg hover:bg-gray-50 hidden">
             編集をキャンセル
@@ -666,7 +699,7 @@
             </section>
                         <section id="dashboardView-applications" class="hidden rounded border p-3">
               <h3 class="font-bold text-sm mb-2">応募履歴・応募者</h3>
-              <p class="mb-3 text-xs text-gray-600">応募後の進捗はこの画面で確認できます。企業から連絡が届いた場合は「連絡・通知」をご確認ください。</p>
+              <p class="mb-3 text-xs text-gray-600">応募後すぐに掲載者とチャットできます。条件を確認し、掲載者がお仕事を確定するまで作業を始めないでください。</p>
               <p id="dashboardApplicationsStatus" role="status" aria-live="polite" class="mb-3 hidden text-sm"></p>
               <p id="seekerApplicationMessagesStatus" role="status" aria-live="polite" class="mb-3 hidden text-sm text-red-700"></p>
               <div id="dashboardApplications" class="space-y-2 text-sm"></div>
@@ -772,12 +805,22 @@
         <label for="searchKeyword" class="mb-2 block text-sm font-bold text-gray-700">キーワード</label>
         <input type="text" id="searchKeyword" oninput="renderJobList(true)" placeholder="職種・勤務地・タグで検索（例: 横浜、日払い）" class="mb-4 w-full rounded-xl border border-blue-300 bg-white px-4 py-3 text-base shadow-sm outline-none focus:ring-2 focus:ring-blue-500">
 
+        <fieldset class="mb-4">
+          <legend class="mb-2 text-sm font-bold text-gray-700">作業日から探す</legend>
+          <div class="flex flex-wrap gap-2" aria-label="作業日の絞り込み">
+            <button type="button" data-work-date-filter="all" aria-pressed="true" onclick="setWorkDateFilter('all')" class="min-h-10 rounded-full border border-blue-600 bg-blue-600 px-4 py-2 text-sm font-bold text-white">すべて</button>
+            <button type="button" data-work-date-filter="today" aria-pressed="false" onclick="setWorkDateFilter('today')" class="min-h-10 rounded-full border border-blue-200 bg-white px-4 py-2 text-sm font-bold text-blue-900">今日できる仕事</button>
+            <button type="button" data-work-date-filter="weekend" aria-pressed="false" onclick="setWorkDateFilter('weekend')" class="min-h-10 rounded-full border border-blue-200 bg-white px-4 py-2 text-sm font-bold text-blue-900">今週末の仕事</button>
+          </div>
+        </fieldset>
+
         <div class="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
           <label class="text-sm font-bold text-gray-700">
             <span class="mb-1 block"><span data-line-icon="sort"></span>並び替え</span>
             <select id="jobSort" onchange="renderJobList(true)" class="w-full rounded-lg border border-blue-300 bg-white px-3 py-2.5 text-base font-normal shadow-sm focus:ring-2 focus:ring-blue-500 outline-none">
               <option value="recommended">おすすめ順</option>
               <option value="newest" selected>新着順</option>
+              <option value="work_date">作業日が近い順</option>
               <option value="salary">給与額が高い順</option>
               <option value="capacity">募集人数が少ない順</option>
             </select>
@@ -815,6 +858,18 @@
         <details id="advancedJobFilters" class="rounded-xl border border-blue-200 bg-white">
           <summary class="cursor-pointer select-none rounded-xl px-4 py-3 text-sm font-bold text-blue-900 hover:bg-blue-100">絞り込み条件・並び替え</summary>
                     <div class="grid grid-cols-1 gap-3 border-t border-blue-100 p-4 sm:grid-cols-2">
+        <label class="text-sm text-gray-700">
+          <span class="block mb-1">作業カテゴリ</span>
+          <select id="jobCategoryFilter" onchange="renderJobList(true)" class="w-full rounded-lg border px-3 py-2.5 text-base focus:ring-2 focus:ring-blue-500 outline-none">
+            <option value="">すべて</option>
+            <option value="construction_help">現場の手伝い</option>
+            <option value="event_setup">イベント搬入・設営</option>
+            <option value="farm_work">農作業</option>
+            <option value="neighborhood_help">ご近所のお手伝い</option>
+            <option value="restaurant_help">飲食店のヘルプ</option>
+            <option value="other">その他・継続案件</option>
+          </select>
+        </label>
         <label class="text-sm text-gray-700">
           <span class="block mb-1">勤務地</span>
           <select id="locationFilter" onchange="renderJobList(true)" class="w-full rounded-lg border px-3 py-2.5 text-base focus:ring-2 focus:ring-blue-500 outline-none">
@@ -954,7 +1009,7 @@
       </div>
 
       <section id="modalWorkConditions" class="mb-6 hidden rounded-lg border border-gray-200 bg-gray-50 p-4">
-        <h3 class="mb-2 text-sm font-bold text-gray-900">勤務時間・給与条件・手当</h3>
+        <h3 class="mb-2 text-sm font-bold text-gray-900">作業日時・支払い条件・手当</h3>
         <div id="modalWorkConditionsContent" class="space-y-2 text-sm leading-6 text-gray-700"></div>
       </section>
 

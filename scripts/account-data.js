@@ -82,13 +82,42 @@ async function loadAccountData(user) {
       await fetchAvgRatings();
       renderAccountDashboard();
       renderEmployerDashboard();
+      const applicationChatId = new URLSearchParams(window.location.search).get("applicationChat");
+      if (applicationChatId && accountType === "seeker" && !appsResult.error) {
+        const chatOpened = openApplicationChat(applicationChatId);
+        const redirectUrl = new URL(window.location.href);
+        redirectUrl.searchParams.delete("applicationChat");
+        window.history.replaceState(
+          window.history.state,
+          "",
+          `${redirectUrl.pathname}${redirectUrl.search}${redirectUrl.hash}`
+        );
+
+        let notificationWarning = "";
+        try {
+          const warningKey = `applicationNotificationWarning:${applicationChatId}`;
+          notificationWarning = sessionStorage.getItem(warningKey) || "";
+          sessionStorage.removeItem(warningKey);
+        } catch (error) {
+          console.error("応募通知の警告を読み込めませんでした:", error);
+        }
+
+        const applicationsStatus = document.getElementById("dashboardApplicationsStatus");
+        if (applicationsStatus) {
+          const message = chatOpened
+            ? "応募を受け付けました。掲載者とのチャットを開始できます。"
+            : "応募は受け付けましたが、チャットを開けませんでした。応募履歴を確認してください。";
+          applicationsStatus.innerText = [message, notificationWarning].filter(Boolean).join(" ");
+          applicationsStatus.className = `mb-3 text-sm ${notificationWarning ? "text-amber-800" : chatOpened ? "text-emerald-700" : "text-red-700"}`;
+        }
+      }
       renderJobList();
       if (savedSearchesUserId !== userId) loadSavedSearches();
       if (accountType === "employer") loadJobViewCounts();
     }
 
 function renderApplicationConversation(application) {
-  const canSend = application.status === "reviewed";
+  const canSend = ["pending", "reviewed"].includes(application.status);
   const messages = applicationMessages.filter(message =>
     String(message.application_id) === String(application.id)
   );
@@ -105,6 +134,9 @@ function renderApplicationConversation(application) {
                 <span class="text-xs font-bold text-gray-700">${message.sender_id === currentUser?.id ? "あなた" : otherParticipant}</span>
                 <time class="text-[10px] text-gray-500">${formatDashboardDate(message.created_at)}</time>
               </div>
+              ${getSuspiciousContentWarnings(message.body).length
+                ? `<p role="alert" class="mb-2 rounded-lg border border-amber-300 bg-amber-50 p-2 text-xs font-bold text-amber-900">⚠️ 注意が必要な表現: ${escapeHtml(getSuspiciousContentWarnings(message.body).join("・"))}。口座の貸し借りや外部連絡先への誘導には応じないでください。不安な場合は運営に通報してください。</p>`
+                : ""}
               <p class="whitespace-pre-wrap break-words text-sm text-gray-800">${escapeHtml(String(message.body || ""))}</p>
               ${message.sender_id !== currentUser?.id ? `
                 <details class="mt-2 text-xs">
@@ -130,12 +162,10 @@ function renderApplicationConversation(application) {
         ? `<label class="mt-3 block text-sm font-medium">メッセージを送る
             <textarea data-application-message-input maxlength="2000" rows="3" class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm" placeholder="応募に関する連絡を入力（2,000文字以内）"></textarea>
           </label>
-          <p class="mt-1 text-xs text-gray-600">電話番号・メールアドレスなどの連絡先は入力しないでください。</p>
+          <p class="mt-1 text-xs text-gray-600">応募後すぐにチャットできます。お仕事の確定前に日時・作業内容・支払い条件を確認してください。電話番号・メールアドレス・口座情報は送らないでください。</p>
           <button type="button" onclick="sendApplicationMessage('${escapeHtml(String(application.id))}', this)" class="mt-3 min-h-11 w-full rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white hover:bg-blue-700">メッセージを送信</button>
           <p data-application-message-status role="status" aria-live="polite" class="mt-2 hidden text-sm"></p>`
-        : `<p class="mt-3 text-xs text-gray-600">${application.status === "pending"
-          ? "企業が応募を確認済みにすると、メッセージを送信できます。"
-          : "この応募は終了しているため、メッセージを送信できません。"}</p>`}
+        : '<p class="mt-3 text-xs text-gray-600">この応募は終了しているため、メッセージを送信できません。</p>'}
     </section>
   `;
 }
@@ -171,7 +201,7 @@ async function sendApplicationMessage(applicationId, button) {
       ? item.applicant_id === userId
       : cachedJobs.some(job => job.owner_id === userId && String(job.id) === String(item.job_id)))
   );
-  if (!application || application.status !== "reviewed") return;
+  if (!application || !["pending", "reviewed"].includes(application.status)) return;
 
   const thread = button.closest("[data-application-thread]");
   const input = thread?.querySelector("[data-application-message-input]");
@@ -188,6 +218,11 @@ async function sendApplicationMessage(applicationId, button) {
     status.innerText = "メッセージは2,000文字以内で入力してください。";
     status.className = "mt-2 text-sm text-red-700";
     input.focus();
+    return;
+  }
+  const safetyWarnings = getSuspiciousContentWarnings(body);
+  if (safetyWarnings.length &&
+      !window.confirm(`注意が必要な表現（${safetyWarnings.join("・")}）が含まれています。個人情報・口座情報は送らず、外部連絡先や送金の要求に応じないでください。それでも送信しますか？`)) {
     return;
   }
 

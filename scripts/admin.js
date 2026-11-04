@@ -10,6 +10,7 @@ const REPORT_STATUS_LABELS = { pending: "未対応", reviewed: "確認済み", d
 const adminStatus = document.getElementById("adminStatus");
 const adminPanel = document.getElementById("adminPanel");
 const adminReports = document.getElementById("adminReports");
+const adminPendingJobs = document.getElementById("adminPendingJobs");
 const adminReportFilter = document.getElementById("adminReportFilter");
 let adminJobsById = new Map();
 let adminSuspendedIds = new Set();
@@ -63,7 +64,116 @@ async function initializeAdmin() {
   adminPanel.classList.remove("hidden");
   setAdminStatus("");
   await loadReports();
+  await loadPendingJobs();
   if (typeof loadAdminExtras === "function") loadAdminExtras();
+}
+
+async function loadPendingJobs() {
+  adminPendingJobs.replaceChildren(createElement("p", "text-sm text-gray-600", "審査待ちを読み込んでいます…"));
+  const { data: jobs, error } = await supabaseClient
+    .from("published_jobs")
+    .select("id, title, category, work_date, start_time, end_time, location, salary, duties, payment_method, pay_condition_details, break_minutes, overtime_details, allowance_details, work_preferences, required_licenses, preferred_licenses, experience_requirement_details, tags, image_url, image_urls, created_at")
+    .eq("moderation_status", "pending")
+    .order("created_at", { ascending: true })
+    .limit(100);
+  if (error) {
+    adminPendingJobs.replaceChildren(createElement("p", "rounded-lg bg-red-50 p-4 text-sm text-red-800", `審査待ちを読み込めませんでした。移行SQL（20261114）を実行済みか確認してください: ${error.message}`));
+    return;
+  }
+  adminPendingJobs.replaceChildren();
+  if (!jobs?.length) {
+    adminPendingJobs.append(createElement("p", "rounded-lg border border-dashed border-gray-300 bg-white p-6 text-center text-sm text-gray-500", "審査待ちのお仕事はありません。"));
+    return;
+  }
+
+  jobs.forEach(job => {
+    const card = createElement("article", "rounded-2xl border border-gray-200 bg-white p-4 shadow-sm");
+    card.append(createElement("h2", "break-words text-base font-bold text-gray-900", job.title));
+    const dateTime = [
+      job.work_date ? formatWorkDate(job.work_date) : "作業日未設定（その他・継続案件）",
+      job.start_time || job.end_time
+        ? `${String(job.start_time || "未設定").slice(0, 5)}〜${String(job.end_time || "未設定").slice(0, 5)}`
+        : ""
+    ].filter(Boolean).join(" ");
+    const details = [
+      `カテゴリ: ${getWorkCategoryLabel(job.category)}`,
+      `作業日時: ${dateTime}`,
+      `場所: ${job.location || "未設定"}`,
+      `報酬: ${job.salary || "未設定"}`,
+      `支払い: ${getPaymentMethodLabel(job.payment_method)}`,
+      `受付: ${job.created_at ? new Date(job.created_at).toLocaleString("ja-JP") : "日時不明"}`
+    ];
+    card.append(createElement("p", "mt-2 text-sm text-gray-700", details.join(" ／ ")));
+    card.append(createElement("p", "mt-3 whitespace-pre-wrap break-words rounded-lg bg-gray-50 p-3 text-sm text-gray-800", job.duties || "仕事内容の記載なし"));
+    const additionalDetails = [
+      job.pay_condition_details && `給与条件: ${job.pay_condition_details}`,
+      job.break_minutes !== null && job.break_minutes !== undefined && `休憩: ${job.break_minutes}分`,
+      job.overtime_details && `残業: ${job.overtime_details}`,
+      job.allowance_details && `手当・待遇: ${job.allowance_details}`,
+      job.work_preferences?.length && `勤務形態: ${getWorkPreferenceLabels(job.work_preferences).join("、")}`,
+      job.required_licenses?.length && `必須資格: ${job.required_licenses.join("、")}`,
+      job.preferred_licenses?.length && `歓迎資格: ${job.preferred_licenses.join("、")}`,
+      job.experience_requirement_details && `経験: ${job.experience_requirement_details}`,
+      job.tags?.length && `タグ: ${job.tags.join("、")}`
+    ].filter(Boolean);
+    if (additionalDetails.length) {
+      card.append(createElement("p", "mt-3 whitespace-pre-wrap break-words text-sm text-gray-700", additionalDetails.join("\n")));
+    }
+
+    const imageUrls = Array.isArray(job.image_urls) ? job.image_urls : job.image_url ? [job.image_url] : [];
+    if (imageUrls.length) {
+      const gallery = createElement("div", "mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3");
+      imageUrls.forEach(source => {
+        try {
+          const imageUrl = new URL(source);
+          if (imageUrl.origin !== new URL(SUPABASE_URL).origin) return;
+          const image = document.createElement("img");
+          image.src = imageUrl.href;
+          image.alt = "審査中のお仕事の写真";
+          image.loading = "lazy";
+          image.className = "aspect-video w-full rounded-lg bg-gray-100 object-cover";
+          gallery.append(image);
+        } catch (error) {
+          console.warn("審査画面で読み込めない写真URLをスキップしました:", error);
+        }
+      });
+      if (gallery.childElementCount) card.append(gallery);
+    }
+    const actions = createElement("div", "mt-4 flex flex-wrap gap-2");
+    actions.append(
+      createActionButton("承認して公開", "bg-emerald-600 text-white hover:bg-emerald-700", () => reviewJob(job.id, "approved")),
+      createActionButton("却下", "bg-red-700 text-white hover:bg-red-800", () => reviewJob(job.id, "rejected"))
+    );
+    card.append(actions);
+    adminPendingJobs.append(card);
+  });
+}
+
+async function reviewJob(jobId, decision) {
+  let note = null;
+  if (decision === "approved") {
+    if (!window.confirm("このお仕事を承認して公開しますか？")) return;
+  } else {
+    note = window.prompt("却下理由（投稿者に表示・200文字以内）を入力してください。", "");
+    if (note === null) return;
+    if (!note.trim() || note.length > 200) {
+      setAdminStatus("却下理由を1〜200文字で入力してください。", true);
+      return;
+    }
+  }
+
+  const { error } = await supabaseClient.rpc("admin_review_job", {
+    p_job_id: jobId,
+    p_decision: decision,
+    p_note: note
+  });
+  if (error) {
+    setAdminStatus(`審査結果を保存できませんでした: ${error.message}`, true);
+    return;
+  }
+  setAdminStatus(decision === "approved" ? "お仕事を承認して公開しました。" : "お仕事を却下しました。");
+  await loadPendingJobs();
+  await loadReports();
 }
 
 async function loadReports() {
@@ -248,4 +358,5 @@ document.getElementById("adminLoginForm").addEventListener("submit", async event
 });
 adminReportFilter.addEventListener("change", renderReports);
 document.getElementById("adminReloadButton").addEventListener("click", loadReports);
+document.getElementById("adminJobsReloadButton").addEventListener("click", loadPendingJobs);
 initializeAdmin();

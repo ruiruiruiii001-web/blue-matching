@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="styles/tailwind.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="scripts/supabase-client.js"></script>
+  <script src="scripts/shared.js"></script>
   <script src="scripts/admin.js" defer></script>
   <script src="scripts/admin-extra.js" defer></script>
 </head>
@@ -32,9 +33,15 @@
     </form>
     <section id="adminPanel" class="hidden">
       <div role="tablist" aria-label="管理メニュー" class="mb-4 flex flex-wrap gap-2">
+        <button type="button" role="tab" data-admin-tab="jobs" aria-selected="false" class="admin-tab min-h-10 rounded-lg bg-white px-4 py-2 text-sm font-bold text-gray-800 border border-gray-300">掲載審査</button>
         <button type="button" role="tab" data-admin-tab="reports" aria-selected="true" class="admin-tab min-h-10 rounded-lg bg-gray-900 px-4 py-2 text-sm font-bold text-white">お仕事の通報</button>
         <button type="button" role="tab" data-admin-tab="messages" aria-selected="false" class="admin-tab min-h-10 rounded-lg bg-white px-4 py-2 text-sm font-bold text-gray-800 border border-gray-300">メッセージの通報</button>
         <button type="button" role="tab" data-admin-tab="users" aria-selected="false" class="admin-tab min-h-10 rounded-lg bg-white px-4 py-2 text-sm font-bold text-gray-800 border border-gray-300">ユーザー</button>
+      </div>
+      <div id="adminTabJobs" data-admin-panel="jobs" class="hidden">
+        <p class="mb-4 text-sm leading-6 text-gray-600">新規掲載と内容を編集したお仕事は、承認後に一覧へ公開されます。作業内容・場所・報酬・支払い条件を確認してください。</p>
+        <button id="adminJobsReloadButton" type="button" class="mb-4 min-h-10 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-bold">審査待ちを再読み込み</button>
+        <div id="adminPendingJobs" class="space-y-4"></div>
       </div>
       <div id="adminTabReports" data-admin-panel="reports">
         <div class="mb-4 flex flex-wrap items-center gap-2">

@@ -1,3 +1,5 @@
+const warnedJobSafetyIds = new Set();
+
 function renderJobList(resetLimit = false) {
   if (resetLimit === true) displayLimitJobs = 10;
   const jobList = document.getElementById("jobList");
@@ -8,6 +10,8 @@ function renderJobList(resetLimit = false) {
   const followedOnly = document.getElementById("followedOnly").checked;
   const hideApplied = document.getElementById("hideAppliedJobs").checked;
   const capacityFilter = document.getElementById("capacityFilter").value;
+  const categoryFilter = document.getElementById("jobCategoryFilter").value;
+  const workDateFilter = document.querySelector('[data-work-date-filter][aria-pressed="true"]')?.dataset.workDateFilter || "all";
   updateJobFilterOptions();
   const locationFilter = document.getElementById("locationFilter").value;
   const selectedTags = Array.from(document.querySelectorAll('input[name="tagFilter"]:checked')).map(input => input.value);
@@ -53,6 +57,8 @@ function renderJobList(resetLimit = false) {
       (!keyword ||
         (job.title || "").toLowerCase().includes(keyword) ||
         (job.location || "").toLowerCase().includes(keyword) ||
+        getWorkCategoryLabel(job.category).toLocaleLowerCase().includes(keyword) ||
+        String(job.work_date || "").includes(keyword) ||
         getWorkPreferenceLabels(job.work_preferences).some(value => value.toLocaleLowerCase().includes(keyword)) ||
         getNormalizedJobTags(job.tags).some(tag => tag.toLocaleLowerCase().includes(keyword))) &&
       (!openJobsOnly || !isJobClosed(job)) &&
@@ -60,6 +66,8 @@ function renderJobList(resetLimit = false) {
         (!followedOnly || isFollowingEmployer(job.owner_id)) &&
         (!hideApplied || !getSeekerApplication(job.id)) &&
         (!capacityFilter || getCapacityOptionValue(job.capacity) === capacityFilter) &&
+        (!categoryFilter || (job.category || "other") === categoryFilter) &&
+        matchesWorkDateFilter(job.work_date, workDateFilter) &&
         (!locationFilter || jobMatchesLocationFilter(job.location, locationFilter)) &&
         (!salaryTypeFilter || getJobPayType(job) === salaryTypeFilter) &&
         (!minimumSalary || (salaryTypeFilter && getJobPayAmount(job) >= minimumSalary)) &&
@@ -76,6 +84,10 @@ function renderJobList(resetLimit = false) {
       if (sortBy === "capacity") {
         const capacityDifference = getCapacitySortValue(a.capacity) - getCapacitySortValue(b.capacity);
         if (capacityDifference !== 0) return capacityDifference;
+      }
+      if (sortBy === "work_date") {
+        const dateDifference = (a.work_date || "9999-12-31").localeCompare(b.work_date || "9999-12-31");
+        if (dateDifference !== 0) return dateDifference;
       }
       if (sortBy === "salary") {
         const salaryDifference = getJobPayAmount(b) - getJobPayAmount(a);
@@ -102,6 +114,8 @@ function renderJobList(resetLimit = false) {
     followedOnly && "フォロー中の企業",
     hideApplied && "応募済みを隠す",
     locationFilter && `勤務地: ${locationFilter}`,
+    categoryFilter && `カテゴリ: ${getWorkCategoryLabel(categoryFilter)}`,
+    workDateFilter !== "all" && (workDateFilter === "today" ? "今日できる仕事" : "今週末の仕事"),
     capacityFilter && `募集人数: ${document.getElementById("capacityFilter").selectedOptions[0].text}`,
     salaryTypeFilter && `給与: ${document.getElementById("salaryTypeFilter").selectedOptions[0].text}`,
     minimumSalary && `最低給与: ${minimumSalary.toLocaleString()}円`,
@@ -153,6 +167,10 @@ function renderJobList(resetLimit = false) {
         <div class="min-w-0 flex-1">
                         <div class="mb-3 flex flex-wrap gap-2">
             <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-wider uppercase ${isJobClosed(job) ? 'bg-gray-100 text-gray-500' : 'bg-emerald-50 text-emerald-700'}">${isJobClosed(job) ? '⛔ 募集終了' : '🟢 募集中'}</span>
+            <span class="inline-flex items-center rounded-full bg-indigo-50 px-2.5 py-0.5 text-[10px] font-bold text-indigo-800">${escapeHtml(getWorkCategoryLabel(job.category))}</span>
+            ${job.work_date ? `<span class="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 text-[10px] font-bold text-amber-900">📅 ${escapeHtml(formatWorkDate(job.work_date))}</span>` : ""}
+            ${job.moderation_status === "pending" ? '<span class="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-[10px] font-bold text-amber-900">審査中・本人のみ表示</span>' : ""}
+            ${job.moderation_status === "rejected" ? '<span class="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-[10px] font-bold text-red-800">審査結果を確認してください</span>' : ""}
             ${job.is_hidden ? '<span class="inline-flex items-center rounded-full bg-red-50 px-2.5 py-0.5 text-[10px] font-bold text-red-700">運営により非表示中</span>' : ''}
             ${renderAppliedBadge(job.id)}
 
@@ -160,6 +178,7 @@ function renderJobList(resetLimit = false) {
           </div>
                                       <h3 class="break-words text-lg font-extrabold leading-tight text-gray-900 sm:text-xl group-hover:text-blue-700 transition-colors">${escapeHtml(job.title)}</h3>
           ${renderEmployerProfileSummary(job.owner_id)}
+          ${job.moderation_status === "rejected" && job.owner_id === currentUser?.id && job.moderation_note ? `<p class="mt-2 text-xs text-red-700">審査メモ: ${escapeHtml(job.moderation_note)}</p>` : ""}
           <div class="flex items-center gap-2 mt-1">
             <p class="text-[10px] font-medium text-gray-400 uppercase tracking-widest">${escapeHtml(formatJobFreshness(job))}</p>
             ${renderRatingBadge(job.owner_id)}
@@ -224,7 +243,7 @@ function getSeekerApplication(jobId) {
 function renderAppliedBadge(jobId) {
   const application = getSeekerApplication(jobId);
   if (!application) return "";
-  const label = application.status === "reviewed" ? "✅ 応募済み・確認済み"
+  const label = application.status === "reviewed" ? "✅ 応募済み・お仕事確定"
     : application.status === "dismissed" ? "➖ 応募済み・見送り"
     : "📨 応募済み";
   return `<span class="inline-flex items-center rounded-full bg-sky-100 px-2.5 py-0.5 text-[10px] font-bold text-sky-800">${label}</span>`;
@@ -239,13 +258,45 @@ function resetJobFilters() {
   document.getElementById("hideAppliedJobs").checked = false;
   document.getElementById("locationFilter").value = "";
   document.getElementById("capacityFilter").value = "";
+  document.getElementById("jobCategoryFilter").value = "";
   document.getElementById("salaryTypeFilter").value = "";
   document.getElementById("minimumSalary").value = "";
   document.querySelectorAll('input[name="tagFilter"]').forEach(input => {
     input.checked = false;
   });
   document.getElementById("advancedJobFilters").open = false;
+  setWorkDateFilter("all", false);
   renderJobList();
+}
+
+function setWorkDateFilter(filter, render = true) {
+  const selectedFilter = ["today", "weekend"].includes(filter) ? filter : "all";
+  document.querySelectorAll("[data-work-date-filter]").forEach(button => {
+    const active = button.dataset.workDateFilter === selectedFilter;
+    button.setAttribute("aria-pressed", String(active));
+    button.classList.toggle("bg-blue-600", active);
+    button.classList.toggle("text-white", active);
+    button.classList.toggle("border-blue-600", active);
+    button.classList.toggle("bg-white", !active);
+    button.classList.toggle("text-blue-900", !active);
+    button.classList.toggle("border-blue-200", !active);
+  });
+  if (render) renderJobList(true);
+}
+
+function matchesWorkDateFilter(workDate, filter) {
+  if (filter === "all") return true;
+  if (!workDate) return false;
+  const today = new Date();
+  const formatLocalDate = date => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+  const todayText = formatLocalDate(today);
+  if (filter === "today") return workDate === todayText;
+  if (filter !== "weekend") return true;
+  if (today.getDay() === 0) return workDate === todayText;
+  const saturday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  saturday.setDate(saturday.getDate() + ((6 - today.getDay() + 7) % 7));
+  const sunday = new Date(saturday.getFullYear(), saturday.getMonth(), saturday.getDate() + 1);
+  return workDate === formatLocalDate(saturday) || workDate === formatLocalDate(sunday);
 }
 
 function toggleQuickJobTag(tag) {
@@ -340,6 +391,21 @@ function openModal(id) {
   selectedJob = cachedJobs.find(j => String(j.id) === String(id));
   if (!selectedJob) return;
 
+  const riskyContent = [
+    selectedJob.title,
+    selectedJob.location,
+    selectedJob.salary,
+    selectedJob.duties,
+    selectedJob.pay_condition_details,
+    selectedJob.allowance_details
+  ].join("\n");
+  const safetyWarnings = getSuspiciousContentWarnings(riskyContent);
+  const safetyKey = String(selectedJob.id);
+  if (safetyWarnings.length && !warnedJobSafetyIds.has(safetyKey)) {
+    warnedJobSafetyIds.add(safetyKey);
+    window.alert(`安全確認: ${safetyWarnings.join("・")}に関する表現があります。口座の貸し借りや外部連絡先への誘導には応じず、条件に不安があれば応募せず運営へ通報してください。`);
+  }
+
   clearJobReportWidget();
   recordJobView(selectedJob);
   const alreadyApplied = Boolean(currentUser && accountApplications.some(application =>
@@ -348,6 +414,7 @@ function openModal(id) {
   const selectedJobIsClosed = isJobClosed(selectedJob);
   const isSeekerAccount = Boolean(currentUser && accountType === "seeker");
   const canApply = Boolean(isSeekerAccount && !selectedJobIsClosed &&
+    (!selectedJob.moderation_status || selectedJob.moderation_status === "approved") &&
     selectedJob.owner_id !== currentUser.id && !alreadyApplied);
   const continueButton = document.getElementById("applicationContinueButton");
   continueButton.classList.toggle("hidden", !canApply);
@@ -367,6 +434,10 @@ function openModal(id) {
     document.getElementById("applicationLoginPrompt").innerText = "自分が投稿したお仕事には応募できません。";
   } else if (selectedJobIsClosed) {
     document.getElementById("applicationLoginPrompt").innerText = "募集が終了しているため、サイトから応募できません。";
+  } else if (selectedJob.moderation_status === "pending") {
+    document.getElementById("applicationLoginPrompt").innerText = "このお仕事は審査中のため、公開・応募を受け付けていません。";
+  } else if (selectedJob.moderation_status === "rejected") {
+    document.getElementById("applicationLoginPrompt").innerText = "このお仕事は公開されていません。";
   } else if (alreadyApplied) {
     document.getElementById("applicationLoginPrompt").innerText = "このお仕事にはすでにサイトから応募済みです。応募履歴はマイページで確認できます。";
   }
@@ -389,6 +460,11 @@ function openModal(id) {
   document.getElementById("modalCapacity").classList.toggle("hidden", selectedJob.capacity <= 0);
   document.getElementById("modalDuties").innerText = selectedJob.duties || "特記事項なし";
   const workConditions = [];
+  workConditions.push(`<p><span class="font-bold">作業カテゴリ:</span> ${escapeHtml(getWorkCategoryLabel(selectedJob.category))}</p>`);
+  if (selectedJob.work_date) {
+    workConditions.push(`<p><span class="font-bold">作業日:</span> ${escapeHtml(formatWorkDate(selectedJob.work_date))}</p>`);
+  }
+  workConditions.push(`<p><span class="font-bold">支払い方法:</span> ${escapeHtml(getPaymentMethodLabel(selectedJob.payment_method))}</p>`);
   const startTime = selectedJob.start_time ? String(selectedJob.start_time).slice(0, 5) : "";
   const endTime = selectedJob.end_time ? String(selectedJob.end_time).slice(0, 5) : "";
   if (startTime || endTime) {

@@ -19,7 +19,7 @@ function renderEmployerDashboard() {
 
   const expiringJobs = ownedJobs.filter(job => !job.is_closed && getJobExpiryStatus(job)?.warning);
   const expiryBanner = expiringJobs.length
-    ? `<p role="alert" class="mb-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-bold text-red-800">⚠️ 掲載期限が近い、または切れたお仕事が${expiringJobs.length}件あります。「掲載を30日延長」で公開を続けられます。</p>`
+    ? `<p role="alert" class="mb-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-bold text-red-800">⚠️ 掲載期限が近い、または切れたお仕事が${expiringJobs.length}件あります。必要なら掲載を延長できます。</p>`
     : "";
 
   container.innerHTML = expiryBanner + (ownedJobs.length
@@ -38,12 +38,19 @@ function renderEmployerDashboard() {
                 <h4 class="break-words font-black text-gray-800 text-lg leading-tight group-hover:text-blue-600 transition-colors">${escapeHtml(String(job.title || ""))}</h4>
                 <div class="flex flex-wrap gap-2 mt-2">
                   <span class="px-2 py-0.5 rounded-full bg-gray-50 border border-gray-100 text-[10px] font-bold text-gray-500">📍 ${escapeHtml(String(job.location || "未設定"))}</span>
+                  <span class="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-800 text-[10px] font-bold">${escapeHtml(getWorkCategoryLabel(job.category))}</span>
+                  ${job.work_date ? `<span class="px-2 py-0.5 rounded-full bg-amber-50 text-amber-900 text-[10px] font-bold">📅 ${escapeHtml(formatWorkDate(job.work_date))}</span>` : ""}
+                  <span class="px-2 py-0.5 rounded-full bg-violet-50 text-violet-800 text-[10px] font-bold">支払い: ${escapeHtml(getPaymentMethodLabel(job.payment_method))}</span>
                   <span class="px-2 py-0.5 rounded-full ${isJobClosed(job) ? "bg-gray-100 text-gray-400" : "bg-emerald-50 text-emerald-600"} text-[10px] font-bold border border-current/10 uppercase">${isJobClosed(job) ? "募集終了" : "募集中"}</span>
+                  ${job.moderation_status === "pending" ? '<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[10px] font-bold">運営の審査待ち</span>' : ""}
+                  ${job.moderation_status === "rejected" ? '<span class="px-2 py-0.5 rounded-full bg-red-100 text-red-800 text-[10px] font-bold">審査で非公開</span>' : ""}
                   ${job.is_hidden ? '<span class="px-2 py-0.5 rounded-full bg-red-50 text-red-700 text-[10px] font-bold">運営により非表示中</span>' : ""}
                   <span class="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-[10px] font-bold">👁 閲覧 ${(jobViewCounts.get(String(job.id)) || 0).toLocaleString()}回</span>
                   <span class="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-[10px] font-bold">📨 応募 ${receivedApplications.filter(application => String(application.job_id) === String(job.id)).length}件</span>
                 </div>
                 ${job.is_hidden ? `<p class="mt-2 rounded-lg bg-red-50 p-2 text-xs font-bold text-red-800">このお仕事は運営の確認により非公開になっています${job.hidden_reason ? `（理由: ${escapeHtml(String(job.hidden_reason))}）` : ""}。内容を見直したい場合はお問い合わせください。</p>` : ""}
+                ${job.moderation_status === "pending" ? '<p class="mt-2 rounded-lg bg-amber-50 p-2 text-xs font-bold text-amber-900">審査が完了するまで、ほかの利用者には表示されません。</p>' : ""}
+                ${job.moderation_status === "rejected" ? `<p class="mt-2 rounded-lg bg-red-50 p-2 text-xs font-bold text-red-800">審査結果: ${escapeHtml(job.moderation_note || "内容を修正して再投稿してください。")}。編集して保存すると再審査に出せます。</p>` : ""}
                 ${(() => {
                   const expiry = getJobExpiryStatus(job);
                   return expiry ? `<p class="mt-2 break-words rounded-lg ${expiry.warning ? "bg-red-50 text-red-800" : "bg-gray-50 text-gray-600"} p-2 text-xs font-bold">${expiry.warning ? "⚠️ " : ""}${escapeHtml(expiry.text)}</p>` : "";
@@ -54,7 +61,7 @@ function renderEmployerDashboard() {
                 <button type="button" onclick="duplicateJob(${job.id})" class="min-h-10 rounded-lg bg-blue-50 px-3 py-2 text-xs font-bold text-blue-700 hover:bg-blue-100 transition-colors">複製</button>
                 <div class="flex items-center gap-1">
                   <select id="extendDays-${job.id}" aria-label="延長する日数" class="min-h-10 rounded-lg border border-gray-200 bg-white px-2 text-xs font-bold text-gray-700">
-                    ${[7, 14, 30, 60, 90].map(days => `<option value="${days}"${days === 30 ? " selected" : ""}>+${days}日</option>`).join("")}
+                    ${[7, 14, 30].map(days => `<option value="${days}"${days === 14 ? " selected" : ""}>+${days}日</option>`).join("")}
                   </select>
                   <button type="button" onclick="extendJob(${job.id})" class="min-h-10 rounded-lg ${getJobExpiryStatus(job)?.warning ? "bg-red-600 text-white hover:bg-red-700" : "bg-blue-50 text-blue-700 hover:bg-blue-100"} px-3 py-2 text-xs font-bold transition-colors">掲載を延長</button>
                 </div>
@@ -91,7 +98,7 @@ function renderEmployerApplicationDetails(application) {
   const statusActions = application.status === "pending"
     ? `
       <div class="mt-5 flex gap-3">
-        <button type="button" onclick="updateApplicationStatus('${applicationId}', 'reviewed')" class="flex-1 h-11 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-black text-white hover:bg-emerald-700 transition-all shadow-md shadow-emerald-100">確認済みにする</button>
+        <button type="button" onclick="updateApplicationStatus('${applicationId}', 'reviewed')" class="flex-1 h-11 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-black text-white hover:bg-emerald-700 transition-all shadow-md shadow-emerald-100">お仕事を確定する</button>
         <button type="button" onclick="openApplicationDismissalForm('${applicationId}')" class="flex-1 h-11 rounded-xl border border-gray-200 bg-white px-4 py-2 text-xs font-black text-gray-500 hover:bg-gray-50 transition-all">対応不要</button>
       </div>
     `

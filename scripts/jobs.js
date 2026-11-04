@@ -1,6 +1,6 @@
 // Supabaseからお仕事一覧を取得
 async function fetchJobs() {
-  const jobColumns = 'id, title, location, salary, duties, capacity, work_style, work_preferences, start_time, end_time, break_minutes, overtime_details, allowance_details, pay_type, pay_amount, pay_amount_max, pay_condition_details, required_licenses, preferred_licenses, experience_requirement, experience_requirement_details, tags, image_url, image_urls, owner_id, is_closed, is_hidden, hidden_reason, expires_at, created_at, updated_at';
+  const jobColumns = 'id, title, location, salary, duties, capacity, work_style, work_preferences, start_time, end_time, break_minutes, overtime_details, allowance_details, pay_type, pay_amount, pay_amount_max, pay_condition_details, required_licenses, preferred_licenses, experience_requirement, experience_requirement_details, tags, image_url, image_urls, category, work_date, payment_method, moderation_status, moderation_note, owner_id, is_closed, is_hidden, hidden_reason, expires_at, created_at, updated_at';
   const legacyJobColumns = jobColumns.replace(", image_urls", "");
   const pageSize = 1000;
   const loadPages = async columns => {
@@ -30,7 +30,16 @@ async function fetchJobs() {
 
   if (result.error) {
     console.error("データ取得エラー:", result.error);
-    return;
+    cachedJobs = [];
+    const list = document.getElementById("jobList");
+    const message = document.createElement("p");
+    message.className = "rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800";
+    message.setAttribute("role", "alert");
+    message.textContent = ["42703", "PGRST204"].includes(result.error.code)
+      ? "お仕事一覧を読み込めません。最新のDB移行SQLをSupabaseで実行済みか確認してください。"
+      : `お仕事一覧を読み込めませんでした: ${result.error.message}`;
+    list.replaceChildren(message);
+    return false;
   }
   cachedJobs = result.rows.map(job => ({
     ...job,
@@ -41,6 +50,7 @@ async function fetchJobs() {
   renderEmployerDashboard();
   renderAccountDashboard();
   openSharedJobFromUrl();
+  return true;
 }
 
 let sharedJobHandled = false;
@@ -64,6 +74,9 @@ async function publishJob() {
   }
 
   const title = document.getElementById("jobTitle").value.trim();
+  const workCategory = document.getElementById("jobWorkCategory").value;
+  const workDate = document.getElementById("jobWorkDate").value || null;
+  const paymentMethod = document.getElementById("jobPaymentMethod").value;
   const location = getLocationPreferencesFromForm("jobLocationPrefecture", "jobLocation").trim();
   const salary = document.getElementById("jobSalary").value.trim();
   const duties = document.getElementById("jobDuties").value.trim();
@@ -95,6 +108,38 @@ async function publishJob() {
 
   if (!title) {
     alert("「職種・現場名」は必須項目です。");
+    return;
+  }
+
+  if (!Object.prototype.hasOwnProperty.call(WORK_CATEGORY_LABELS, workCategory)) {
+    alert("作業カテゴリを選択してください。");
+    return;
+  }
+
+  if (workCategory !== "other" && !workDate) {
+    alert("単発のお手伝いは作業日を入力してください。");
+    return;
+  }
+
+  if (workCategory !== "other" && !location) {
+    alert("単発のお手伝いは勤務地を入力してください。番地など個人宅を特定できる情報は入力しないでください。");
+    return;
+  }
+
+  if (workDate) {
+    const today = new Date();
+    const localToday = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+    const existingWorkDate = editingJobId === null
+      ? null
+      : cachedJobs.find(job => String(job.id) === String(editingJobId))?.work_date;
+    if (workDate < localToday && workDate !== existingWorkDate) {
+      alert("作業日は今日以降の日付を選択してください。");
+      return;
+    }
+  }
+
+  if (!Object.prototype.hasOwnProperty.call(PAYMENT_METHOD_LABELS, paymentMethod)) {
+    alert("支払い方法を選択してください。");
     return;
   }
 
@@ -150,6 +195,9 @@ async function publishJob() {
 
   const jobData = {
     title, location, salary, duties, capacity,
+    category: workCategory,
+    work_date: workDate,
+    payment_method: paymentMethod,
     work_style: workPreferences.some(value => ["employment:spot", "employment:short_term"].includes(value)) ? "short" : "regular",
     work_preferences: workPreferences,
     start_time: document.getElementById("jobStartTime").value || null,
@@ -192,7 +240,16 @@ async function publishJob() {
   const cleanupFailures = await deleteUnreferencedJobImages(removedImages, wasEditing ? editingJobId : null);
   cancelJobEdit();
 
-  alert(`${wasEditing ? "お仕事情報を更新しました！" : "クラウド上にお仕事を掲載しました！"}${cleanupFailures.length ? "\n一部の不要な写真を整理できませんでした。時間をおいて再度お試しください。" : ""}`);
+  const refreshed = await fetchJobs();
+  const savedJob = cachedJobs.find(job => String(job.id) === String(result.data.id));
+  const saveMessage = !refreshed
+    ? "保存しましたが、状態を確認できませんでした。画面を再読み込みしてください。"
+    : savedJob?.moderation_status === "pending"
+      ? "審査申請を受け付けました。確認後に一覧へ公開されます。"
+      : savedJob?.moderation_status === "rejected"
+        ? "保存しました。再審査に出すには、却下理由を確認して内容を修正してください。"
+        : "お仕事情報を保存しました。";
+  alert(`${saveMessage}${cleanupFailures.length ? "\n一部の不要な写真を整理できませんでした。時間をおいて再度お試しください。" : ""}`);
   if (!wasEditing) {
     confetti({
       particleCount: 150,
@@ -201,7 +258,6 @@ async function publishJob() {
       colors: ['#2563eb', '#3b82f6', '#60a5fa', '#ffffff']
     });
   }
-  await fetchJobs();
   document.getElementById("myPageOverlayContent").scrollTop = 0;
   window.scrollTo({ top: 0, behavior: "instant" });
 }
@@ -212,8 +268,13 @@ function editJob(id) {
 
   if (!dashboardOpen) openAccountPanel();
   showEmployerDashboardView("job-editor");
+  document.getElementById("jobAdvancedDetails").open = true;
+  document.getElementById("jobLocationPreferences").open = true;
   editingJobId = id;
   document.getElementById("jobTitle").value = job.title || "";
+  document.getElementById("jobWorkCategory").value = job.category || "other";
+  document.getElementById("jobWorkDate").value = job.work_date || "";
+  document.getElementById("jobPaymentMethod").value = job.payment_method || "undecided";
   setCheckedValues("jobWorkPreference", job.work_preferences);
   setJobImagesForEdit(job);
 
@@ -251,7 +312,7 @@ function editJob(id) {
   const jobTags = getNormalizedJobTags(job.tags);
   setCheckedValues("jobTag", jobTags);
   document.getElementById("jobFormHeading").innerText = "お仕事情報を編集";
-  document.getElementById("jobSubmitButton").innerText = "変更を保存";
+  document.getElementById("jobSubmitButton").innerText = "再審査に出す";
   document.getElementById("cancelEditButton").classList.remove("hidden");
   document.getElementById("cancelEditButton").innerText = "編集をキャンセル";
   document.getElementById("employerJobForm").classList.remove("hidden");
@@ -275,6 +336,7 @@ function openEmployerJobForm() {
   if (!dashboardOpen) openAccountPanel();
   cancelJobEdit();
   showEmployerDashboardView("job-editor");
+  document.getElementById("jobLocationPreferences").open = true;
   document.getElementById("cancelEditButton").classList.remove("hidden");
   document.getElementById("cancelEditButton").innerText = "キャンセル";
   document.getElementById("employerJobForm").classList.remove("hidden");
@@ -287,6 +349,9 @@ function cancelJobEdit() {
   document.getElementById("employerJobForm").classList.add("hidden");
   document.getElementById("cancelEditButton").classList.add("hidden");
   document.getElementById("jobTitle").value = "";
+  document.getElementById("jobWorkCategory").value = "";
+  document.getElementById("jobWorkDate").value = "";
+  document.getElementById("jobPaymentMethod").value = "";
   setCheckedValues("jobWorkPreference", []);
   resetJobImages();
 
@@ -316,8 +381,10 @@ function cancelJobEdit() {
   setJobDurationControl(false);
   document.getElementById("jobLocationLegacyNotice").classList.add("hidden");
   document.querySelectorAll('input[name="jobTag"]').forEach(cb => cb.checked = false);
-  document.getElementById("jobFormHeading").innerText = "現場のお仕事のクラウド投稿";
-  document.getElementById("jobSubmitButton").innerText = "🔥 クラウドにお仕事を今すぐ掲載する";
+  document.getElementById("jobFormHeading").innerText = "地域のお手伝いを募集";
+  document.getElementById("jobSubmitButton").innerText = "審査に出す";
+  document.getElementById("jobAdvancedDetails").open = false;
+  document.getElementById("jobLocationPreferences").open = false;
   if (dashboardOpen) showEmployerDashboardView("jobs");
 }
 
@@ -334,13 +401,17 @@ function setJobDurationControl(editing, job = null) {
   note.classList.toggle("text-gray-500", !status?.warning);
 }
 
-const MAX_JOB_LISTING_DAYS_AHEAD = 90;
+const MAX_JOB_LISTING_DAYS_AHEAD = 30;
 
 async function extendJob(id, days = null) {
   const job = cachedJobs.find(item => item.id === id);
   if (!currentUser || accountType !== "employer" || !job || job.owner_id !== currentUser.id) return;
   const select = document.getElementById(`extendDays-${id}`);
   days = days ?? (Number(select?.value) || DEFAULT_JOB_DURATION_DAYS);
+  if (!JOB_DURATION_OPTIONS.includes(days)) {
+    alert("掲載期間は7日・14日・30日から選択してください。");
+    return;
+  }
 
   // 期限が残っていれば残り日数に加算し、切れていれば今日から数える
   const currentExpiry = Date.parse(job.expires_at || "");

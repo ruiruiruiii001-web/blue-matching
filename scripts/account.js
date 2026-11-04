@@ -221,6 +221,28 @@ function openAccountNotifications() {
   else if (accountType === "employer") showEmployerDashboardView("messages");
 }
 
+function openApplicationChat(applicationId) {
+  const application = accountApplications.find(item =>
+    String(item.id) === String(applicationId) &&
+    item.applicant_id === currentUser?.id &&
+    ["pending", "reviewed"].includes(item.status)
+  );
+  if (!application || accountType !== "seeker") return false;
+
+  if (!dashboardOpen) openAccountPanel();
+  if (!dashboardOpen) return false;
+  showDashboardView("applications");
+
+  requestAnimationFrame(() => {
+    const thread = Array.from(document.querySelectorAll("[data-application-thread]"))
+      .find(element => element.dataset.applicationThread === String(application.id));
+    if (!thread) return;
+    thread.scrollIntoView({ behavior: "smooth", block: "center" });
+    thread.querySelector("[data-application-message-input]")?.focus();
+  });
+  return true;
+}
+
 function openLoginPanel(toggle = true) {
   if (loginPanelOpen) {
     if (toggle) closeLoginPanel();

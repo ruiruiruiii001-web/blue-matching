@@ -152,13 +152,13 @@ Deno.serve(async request => {
     job_application: "求人に新しい応募が届きました",
     contact_request: "企業から連絡リクエストが届きました",
     contact_reply: "連絡リクエストの状況が更新されました",
-    application_reviewed: "応募状況が「確認済み」になりました"
+    application_reviewed: "お仕事が確定しました"
   };
   const messageByEvent = {
     job_application: "企業マイページを開き、新しい応募内容をご確認ください。",
     contact_request: "求職者マイページを開き、企業からの連絡をご確認ください。",
     contact_reply: "企業向け画面を開き、連絡リクエストの状況をご確認ください。",
-    application_reviewed: "マイページの応募履歴を確認してください。企業があなたの応募内容を確認しました。"
+    application_reviewed: "マイページの応募履歴で、掲載者とのチャットと確定内容を確認してください。"
   };
 
   const subject = subjectByEvent[notification.event_type as keyof typeof subjectByEvent];

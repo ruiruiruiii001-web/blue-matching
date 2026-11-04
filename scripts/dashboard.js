@@ -38,7 +38,7 @@ function renderAccountDashboard() {
   applicationsContainer.innerHTML = accountApplicationsError
     ? `<p class="text-sm text-red-700">${escapeHtml(accountApplicationsError)}</p>`
     : `
-    <p class="mb-4 rounded-lg border border-blue-100 bg-blue-50 p-3 text-xs leading-relaxed text-blue-900">応募後の進捗や企業とのメッセージをこの画面で確認できます。電話番号は応募先へ共有されません。</p>
+    <p class="mb-4 rounded-lg border border-blue-100 bg-blue-50 p-3 text-xs leading-relaxed text-blue-900">応募後すぐに掲載者とチャットできます。進捗と会話はこの画面で確認できます。電話番号は応募先へ共有されません。</p>
     ${submitted.length
       ? submitted.map(application => `
       <article class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm mb-4 transition-all hover:shadow-md">

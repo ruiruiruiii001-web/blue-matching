@@ -38,6 +38,54 @@ function getNormalizedJobTags(values) {
   return [...new Set(tags.flatMap(tag => LEGACY_JOB_TAG_ALIASES[tag] || [tag]))];
 }
 
+const WORK_CATEGORY_LABELS = Object.freeze({
+  construction_help: "現場の手伝い",
+  event_setup: "イベント搬入・設営",
+  farm_work: "農作業",
+  neighborhood_help: "ご近所のお手伝い",
+  restaurant_help: "飲食店のヘルプ",
+  other: "その他・継続案件"
+});
+
+const PAYMENT_METHOD_LABELS = Object.freeze({
+  cash_on_site: "当日現金手渡し",
+  bank_transfer: "後日振込",
+  undecided: "条件を相談"
+});
+
+function getWorkCategoryLabel(category) {
+  return WORK_CATEGORY_LABELS[category] || WORK_CATEGORY_LABELS.other;
+}
+
+function getPaymentMethodLabel(method) {
+  return PAYMENT_METHOD_LABELS[method] || PAYMENT_METHOD_LABELS.undecided;
+}
+
+function getSuspiciousContentWarnings(value) {
+  const text = String(value || "").normalize("NFKC").toLocaleLowerCase();
+  const patterns = [
+    [/(\bline\b|ライン|telegram|テレグラム|外部(?:の)?(?:sns|アプリ)|別(?:の)?アプリ)/i, "外部連絡先への誘導"],
+    [/(口座(?:を|の)?(?:貸|売|譲|使わせ)|名義貸し)/i, "口座や名義の貸し借り"],
+    [/(高額.{0,8}(?:手渡|現金)|(?:手渡|現金).{0,8}高額|即日(?:高額|現金))/i, "高額・即金の強調"]
+  ];
+  return patterns.filter(([pattern]) => pattern.test(text)).map(([, label]) => label);
+}
+
+function formatWorkDate(value) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(value || ""));
+  if (!match) return "";
+  const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+  if (date.getFullYear() !== Number(match[1]) ||
+      date.getMonth() !== Number(match[2]) - 1 ||
+      date.getDate() !== Number(match[3])) return "";
+  return new Intl.DateTimeFormat("ja-JP", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    weekday: "short"
+  }).format(date);
+}
+
 const WORK_PREFERENCE_GROUPS = [
   {
     key: "employment",
@@ -437,8 +485,8 @@ function formatJobFreshness(job) {
 }
 
 const JOB_EXPIRY_WARNING_DAYS = 3;
-const JOB_DURATION_OPTIONS = [14, 30, 60, 90];
-const DEFAULT_JOB_DURATION_DAYS = 30;
+const JOB_DURATION_OPTIONS = [7, 14, 30];
+const DEFAULT_JOB_DURATION_DAYS = 14;
 
 function isJobExpired(job) {
   const expiresAt = Date.parse(job.expires_at || "");
@@ -468,7 +516,7 @@ function getJobExpiryDateFromDays(days) {
 }
 
 function formatApplicationStatus(status) {
-  return { pending: "⏳ 未確認", reviewed: "✅ 確認済み", dismissed: "➖ 対応不要" }[status] || "⏳ 未確認";
+  return { pending: "⏳ 未確認", reviewed: "✅ お仕事確定", dismissed: "➖ 対応不要" }[status] || "⏳ 未確認";
 }
 
 function formatApplicationStatusClass(status) {
@@ -481,8 +529,8 @@ function formatApplicationStatusClass(status) {
 
 function formatApplicationStatusDescription(status) {
   return {
-    pending: "応募を受け付けました。企業の確認後にメッセージを送信できます。進捗はマイページの応募履歴で確認できます。",
-    reviewed: "企業が応募を確認しました。メッセージで連絡できます。",
+    pending: "応募を受け付けました。掲載者とすぐにチャットできます。お仕事の確定前に条件を確認してください。",
+    reviewed: "掲載者がお仕事を確定しました。チャットで最終確認できます。",
     dismissed: "企業が今回は選考を見送りました。理由を応募履歴で確認できます。"
   }[status] || "応募状況を確認できません。";
 }
