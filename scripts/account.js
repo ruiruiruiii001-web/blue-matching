@@ -205,7 +205,6 @@ function openAccountPanel() {
     overlay.classList.remove("hidden");
     overlay.classList.add("flex");
     document.getElementById("myPageOverlayClose").focus();
-    if (accountType === "seeker" && activeDashboardView === "profile") openSeekerAvailabilityDialog();
     return;
   }
   if (!currentUser) {

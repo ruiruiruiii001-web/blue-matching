@@ -119,6 +119,5 @@ function showDashboardView(view) {
     button.classList.toggle("text-gray-700", !isActive);
     button.setAttribute("aria-selected", String(isActive));
   });
-  if (view === "profile") openSeekerAvailabilityDialog();
   renderAccountDashboard();
 }
