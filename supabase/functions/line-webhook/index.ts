@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { APP_URL, json, lineRequest, verifyLineSignature } from "../_shared/line.ts";
+import { notifyLineLinkCompletion } from "../_shared/line-link-completion.ts";
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
 const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
@@ -43,13 +44,33 @@ Deno.serve(async request => {
     const userId = event.source?.userId || "";
     if (event.source?.type !== "user" || !/^U[0-9a-f]{32}$/.test(userId)) continue;
     if (event.type === "accountLink" && event.link?.result === "ok" && event.link.nonce) {
-      const { error } = await admin.rpc("complete_line_link", {
+      const { data: linked, error } = await admin.rpc("complete_line_link", {
         p_nonce: event.link.nonce,
         p_line_user_id: userId
       });
       if (error) {
         console.error("LINE account linking failed:", error.message);
         return json(500, { error: "Could not complete account linking" });
+      }
+      if (linked && !event.replyToken) {
+        console.error("LINE account link event has no reply token");
+        return json(500, { error: "Could not send link confirmation" });
+      }
+      try {
+        const result = await notifyLineLinkCompletion(
+          linked === true,
+          message => lineRequest("/v2/bot/message/reply", lineToken, {
+            replyToken: event.replyToken,
+            messages: [{ type: "text", text: message }]
+          }),
+        );
+        if (result === "reply_failed") {
+          console.error("LINE account link confirmation reply failed");
+          return json(502, { error: "Could not send link confirmation" });
+        }
+      } catch (replyError) {
+        console.error("LINE account link confirmation request failed:", replyError);
+        return json(502, { error: "Could not send link confirmation" });
       }
     } else if (event.type === "message" && event.message?.type === "text" &&
         event.message.text?.trim() === "連携" && event.replyToken) {

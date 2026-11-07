@@ -4,6 +4,8 @@
 
 掲載者は公式LINEに「連携」と送り、届いたリンクでログイン中の掲載者アカウントと連携できます。連携後の新しい応募だけを通知し、応募者名・応募本文・連絡先は送信しません。「応募・チャット」で連携状態の確認・解除ができます。LINEをブロックすると通知は届かず、ブロック解除後は未解除の連携による通知が再開します。サイト内の通知も確認してください。LINEログイン・LINE内表示・チャット通知は対象外です。
 
+連携完了時には、LINEのトークにサイトのURLを返信します。トーク画面の常設リンクは、LINE Official Account ManagerのリッチメニューでURL `https://blue-matching-pi.vercel.app/` を設定します。既存のメニューがある場合は上書きに注意してください。リッチメニューはPC版LINEには表示されません。
+
 解除すると通知先のLINEユーザー識別子とLINE送信履歴を削除します。ただし解除と同時に送信処理が既に始まっていた場合、最後の通知が届くことがあります。同じLINEアカウントを別の掲載者アカウントへ変更するには、元の掲載者アカウントで先に解除してください。
 
 利用前に `supabase/migrations/20261118_add_line_application_notifications.sql` を適用し、Edge Functionsの `LINE_CHANNEL_SECRET` と `LINE_CHANNEL_ACCESS_TOKEN` を設定します。`line-webhook`、`line-link`、`line-delivery` をデプロイし、Webhookと配送ワーカーはJWT検証を無効にします。WebhookはLINE署名、配送ワーカーはVaultの専用秘密値を検証します。最後に `supabase/line-application-schedule.sql` を実行して毎分の配送を有効化します。Vaultの専用秘密値はSQL内で自動生成し、ソースには記録しません。LINE DevelopersのWebhook URLは `https://qefqlbkqewvahtqzqmfp.supabase.co/functions/v1/line-webhook` です。Webhookの検証と利用を有効化し、公式アカウントの応答設定でWebhookを利用します。LINEの通数制限や障害時には通知が失敗する場合があり、サイト内通知は常に確認してください。
