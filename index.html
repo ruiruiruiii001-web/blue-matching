@@ -222,6 +222,17 @@
 
         <section id="employerDashboardView-messages" class="hidden rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
           <h3 class="mb-3 border-b border-gray-100 pb-3 text-lg font-bold text-blue-600">応募・メッセージ</h3>
+          <section class="mb-6 rounded-lg border border-emerald-200 bg-emerald-50 p-4">
+            <h4 class="font-bold text-sm">LINE応募通知（テスト中）</h4>
+            <p class="mt-2 text-xs leading-5">公式LINEを友だち追加し、トークで「連携」と送ると連携用リンクが届きます。新しい応募をお知らせしますが、応募者名・本文・連絡先は送信しません。いつでも解除できます。LINEをブロック中は通知が届かないため、サイト内の通知も確認してください。別のアカウントへ変更する場合は、先に元のアカウントで解除してください。</p>
+            <p id="lineNotificationStatus" role="status" aria-live="polite" class="mt-2 text-sm">連携状態は「状態を確認」から確認できます。</p>
+            <div class="mt-3 flex flex-wrap gap-2">
+              <a href="https://lin.ee/9pqJLwl" target="_blank" rel="noopener noreferrer" class="min-h-11 rounded-lg bg-emerald-700 px-3 py-2 text-sm font-bold text-white">LINE公式アカウントを開く</a>
+              <a href="line-link.html" class="min-h-11 rounded-lg border border-emerald-700 px-3 py-2 text-sm font-bold text-emerald-900">LINE通知の連携に戻る</a>
+              <button type="button" onclick="updateLineNotificationStatus()" class="min-h-11 rounded-lg border border-emerald-700 px-3 py-2 text-sm font-bold text-emerald-900">状態を確認</button>
+              <button id="lineNotificationUnlink" type="button" onclick="unlinkLineNotifications()" class="hidden min-h-11 rounded-lg border border-red-300 px-3 py-2 text-sm font-bold text-red-700">連携を解除</button>
+            </div>
+          </section>
           <section class="mb-6 border-b border-gray-100 pb-5">
             <h4 class="mb-2 font-bold text-sm">通知</h4>
             <p id="employerNotificationsStatus" role="status" aria-live="polite" class="hidden text-sm text-red-700"></p>
@@ -1073,6 +1084,7 @@
 
   <!-- Feature modules rely on the shared state declared above. -->
   <script src="scripts/account.js"></script>
+  <script src="scripts/line-notifications.js"></script>
   <script src="scripts/job-images.js"></script>
   <script src="scripts/jobs.js"></script>
   <script src="scripts/listings.js"></script>
