@@ -129,6 +129,7 @@ function updateStars(rating) {
   }, 1500);
 }
 async function fetchAvgRatings() {
+      if (PILOT_MODE) return;
       const { data, error } = await supabaseClient
         .from("job_reviews")
         .select("reviewee_id, rating");
@@ -151,6 +152,7 @@ async function fetchAvgRatings() {
     }
 
     function renderRatingBadge(userId) {
+      if (PILOT_MODE) return "";
       const rating = avgRatings[userId];
       if (!rating) return '';
       return `

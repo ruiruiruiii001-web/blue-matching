@@ -79,6 +79,7 @@ function countNewJobsForSavedSearch(search) {
 }
 
 async function loadSavedSearches() {
+  if (PILOT_MODE) return;
   if (!currentUser) return;
   const userId = currentUser.id;
   const { data, error } = await supabaseClient
@@ -99,6 +100,12 @@ function renderSavedSearches() {
   const container = document.getElementById("savedSearches");
   const saveButton = document.getElementById("saveSearchButton");
   if (!container || !saveButton) return;
+  if (PILOT_MODE) {
+    saveButton.classList.add("hidden");
+    container.classList.add("hidden");
+    container.classList.remove("flex");
+    return;
+  }
   const loggedIn = Boolean(currentUser);
   saveButton.classList.toggle("hidden", !loggedIn || !hasJobFilters(getCurrentJobFilters()));
   container.replaceChildren();

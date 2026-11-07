@@ -66,6 +66,7 @@ async function initializeAdmin() {
   await loadReports();
   await loadPendingJobs();
   if (typeof loadAdminExtras === "function") loadAdminExtras();
+  if (typeof loadAdminPilotOverview === "function") loadAdminPilotOverview();
 }
 
 async function loadPendingJobs() {

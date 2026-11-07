@@ -35,7 +35,9 @@ function updateAccountSearchSurface() {
     jobListTitle.innerText = canSearchSeekers ? "働ける人" : "アカウント情報を確認しています";
     jobListDescription?.classList.toggle("hidden", !isPeopleSearch);
     if (jobListDescription && isPeopleSearch) {
-      jobListDescription.innerText = "プロフィール公開に同意した方だけが表示されます。今日働ける人は検索欄の絞り込みから探せます。";
+      jobListDescription.innerText = PILOT_MODE
+        ? "プロフィール公開に同意した方だけが表示されます。"
+        : "プロフィール公開に同意した方だけが表示されます。今日働ける人は検索欄の絞り込みから探せます。";
     }
     if (isPeopleSearch) renderEmployerSeekerSearch();
     return;
@@ -104,7 +106,7 @@ async function loadPublicSeekerProfiles(user) {
     const availabilityColumns = `${profileColumns}, available_dates`;
     let result = await supabaseClient
       .from("seeker_public_profiles")
-      .select(employerPublicSeekersAvailabilitySchemaReady === false ? profileColumns : availabilityColumns)
+      .select(PILOT_MODE || employerPublicSeekersAvailabilitySchemaReady === false ? profileColumns : availabilityColumns)
       .order("updated_at", { ascending: false })
       .range(offset, offset + pageSize - 1);
     if (result.error &&
@@ -319,7 +321,7 @@ function renderEmployerSeekerSearch(resetLimit = false) {
         <div class="sm:col-span-2"><dt class="text-xs font-bold text-gray-500">経験した作業・できること</dt><dd class="mt-1 whitespace-pre-wrap font-medium text-gray-800">${escapeHtml(String(profile.experience_details || "未登録"))}</dd></div>
         <div><dt class="text-xs font-bold text-gray-500">希望給与</dt><dd class="mt-1 font-medium text-gray-800">${escapeHtml(pay)}</dd></div>
         <div><dt class="text-xs font-bold text-gray-500">体を使う作業への自信</dt><dd class="mt-1 font-medium text-gray-800">${escapeHtml(getSeekerStaminaLabel(profile.stamina))}</dd></div>
-        <div class="sm:col-span-2"><dt class="text-xs font-bold text-gray-500">今日の状況</dt><dd class="mt-1 flex flex-wrap gap-1.5">${availableTodayBadge}</dd></div>
+        ${!PILOT_MODE ? `<div class="sm:col-span-2"><dt class="text-xs font-bold text-gray-500">今日の状況</dt><dd class="mt-1 flex flex-wrap gap-1.5">${availableTodayBadge}</dd></div>` : ""}
         <div><dt class="text-xs font-bold text-gray-500">資格</dt><dd class="mt-1 flex flex-wrap gap-1.5">${licenses}</dd></div>
       </dl>
       <div class="mt-4">

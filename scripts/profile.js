@@ -105,7 +105,7 @@ async function saveSeekerProfile() {
     experience_details: profile.experienceDetails,
     stamina: profile.stamina,
     work_preferences: profile.workPreferences,
-    available_dates: profile.availableDates,
+    ...(!PILOT_MODE && { available_dates: profile.availableDates }),
     updated_at: new Date().toISOString()
   };
   let publicProfileResult = isPublic
@@ -205,6 +205,10 @@ async function saveSeekerAvailability() {
 }
 
 function syncSeekerAvailabilityControl() {
+  if (PILOT_MODE) {
+    document.getElementById("seekerAvailabilityLauncher")?.classList.add("hidden");
+    return;
+  }
   const availableToday = Boolean(
     Array.isArray(seekerProfileData?.availableDates) &&
     seekerProfileData.availableDates.includes(getLocalDateISO())

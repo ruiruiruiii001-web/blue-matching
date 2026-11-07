@@ -1,5 +1,13 @@
 # blue-matching
 
+## テスト運用の制限と再開方法
+
+`PILOT_MODE` は画面表示の切り替えです。画面だけでは直接操作を防げないため、公開前に対応するデータベースの制限も適用・検証する必要があります。`20261121_pilot_restrict_feature_writes.sql` はお気に入り、フォロー、レビュー、検索条件保存、応募管理メモの利用者による読み書きを停止します。元に戻すには、各対象テーブルの `pilot_no_select`、`pilot_no_insert`、`pilot_no_update`、`pilot_no_delete` ポリシーと、レビューの `pilot_no_anon_select` ポリシーを削除します。既存データは削除しません。
+
+`20261122_pilot_restrict_availability.sql` は働ける日の新規登録・変更と公開プロフィールからの日付の取得を停止します。再開時は `seeker_profiles` と `seeker_public_profiles` の `pilot_restrict_availability` トリガーを削除し、同名の関数を削除したうえ、`GRANT SELECT ON public.seeker_public_profiles TO authenticated;` を実行します。
+
+募集の共有ボタンと複製ボタンは非表示にしますが、公開URLを手動でコピーすることや、同じ内容を手入力で再投稿することは防げません。
+
 ## LINE応募通知（テスト）
 
 掲載者は公式LINEに「連携」と送り、届いたリンクでログイン中の掲載者アカウントと連携できます。連携後の新しい応募だけを通知し、応募者名・応募本文・連絡先は送信しません。「応募・チャット」で連携状態の確認・解除ができます。LINEをブロックすると通知は届かず、ブロック解除後は未解除の連携による通知が再開します。サイト内の通知も確認してください。LINEログイン・LINE内表示・チャット通知は対象外です。
@@ -57,6 +65,8 @@ pg_netの送信待ちキューにはワーカーの秘密値が一時的に平�
 お仕事を探す方でログイン中は、一覧の各カードに応募状況（応募済み・お仕事確定・見送り）が出ます。お気に入りは★で表示され、一覧から追加・解除できます。「お気に入りのみ表示」「応募済みを隠す」で絞り込めます。新しいSQLは不要です。
 
 ## 作業・相談日時の調整
+
+テスト運用中は候補日時の新規提示・削除・選択を停止し、確定済み日時のみ応募の画面に表示します。変更はチャットで相談してください。`20261119_pilot_readonly_interview_slots.sql` を適用すると、画面だけでなく直接の変更も停止します。再開時は `PILOT_MODE` を無効にし、管理者が `DROP POLICY pilot_selected_interview_only ON public.interview_slots; GRANT SELECT, DELETE ON public.interview_slots TO authenticated; GRANT INSERT (application_id, employer_id, starts_at) ON public.interview_slots TO authenticated; GRANT EXECUTE ON FUNCTION public.select_interview_slot(uuid) TO authenticated;` を実行します。
 
 お仕事をお願いする方は、応募の画面で作業や事前相談の候補日時を最大5件まで提示できます（未来の日時のみ）。応募した方は候補から1つ選んで確定します。確定後は変更できないため、変更はメッセージで相談します。メールでの通知はResend独自ドメインの設定後に対応します。利用には `supabase/migrations/20261113_add_interview_slots.sql` をSupabase SQL Editorで実行してください。
 

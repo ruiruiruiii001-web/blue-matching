@@ -91,6 +91,7 @@ function updateEmployerAuth(session) {
   loggedInPanel.classList.toggle("flex", Boolean(currentUser));
   document.getElementById("employerAccountEmail").innerText = currentUser?.email || "";
   if (previousUserId !== (currentUser?.id || null)) {
+    document.getElementById("pilotLinePrompt").classList.add("hidden");
     if (dashboardOpen) closeAccountPanel();
     if (loginPanelOpen) closeLoginPanel(false);
     accountType = null;
@@ -154,7 +155,9 @@ function updateAccountTypeUI() {
   document.getElementById("seekerAccountPrompt").classList.toggle("hidden", hasUser && isSeeker);
   document.getElementById("seekerAccountPromptText").innerText = hasUser
     ? "プロフィールはお仕事探しアカウントで利用できます。"
-    : "プロフィール・お気に入り・応募履歴をアカウントに保存するにはログインしてください。";
+    : PILOT_MODE
+      ? "プロフィールや応募履歴をアカウントに保存するにはログインしてください。"
+      : "プロフィール・お気に入り・応募履歴をアカウントに保存するにはログインしてください。";
   updateAccountSearchSurface();
 }
 

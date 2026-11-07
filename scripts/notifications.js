@@ -199,7 +199,7 @@ function renderApplicationNotificationView(application, messageStatus) {
       ${application.status === "pending"
         ? `<button type="button" onclick="withdrawApplication('${escapeHtml(String(application.id))}')" class="mb-4 min-h-11 w-full rounded-xl border border-rose-200 bg-white px-4 py-2 text-sm font-bold text-rose-700 hover:bg-rose-50">応募を取り消す</button>`
         : ""}
-      ${application.status === "reviewed" && employerId
+      ${!PILOT_MODE && application.status === "reviewed" && employerId
         ? `<button type="button" onclick="openReviewModal('${escapeHtml(String(application.id))}', '${escapeHtml(String(employerId))}', 'employer')" class="mb-4 rounded-lg border border-amber-100 bg-amber-50 px-3 py-2 text-xs font-black text-amber-600 hover:bg-amber-100">⭐ 掲載者を評価する</button>`
         : ""}
       ${renderApplicationConversation(application)}

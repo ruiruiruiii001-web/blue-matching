@@ -58,7 +58,7 @@ function renderEmployerDashboard() {
               </div>
               <div class="flex flex-wrap gap-2 sm:shrink-0 sm:justify-end">
                 <button type="button" onclick="editJob(${job.id})" class="min-h-10 rounded-lg bg-blue-50 px-3 py-2 text-xs font-bold text-blue-700 hover:bg-blue-100 transition-colors">編集</button>
-                <button type="button" onclick="duplicateJob(${job.id})" class="min-h-10 rounded-lg bg-blue-50 px-3 py-2 text-xs font-bold text-blue-700 hover:bg-blue-100 transition-colors">複製</button>
+                ${!PILOT_MODE ? `<button type="button" onclick="duplicateJob(${job.id})" class="min-h-10 rounded-lg bg-blue-50 px-3 py-2 text-xs font-bold text-blue-700 hover:bg-blue-100 transition-colors">複製</button>` : ""}
                 <div class="flex items-center gap-1">
                   <select id="extendDays-${job.id}" aria-label="延長する日数" class="min-h-10 rounded-lg border border-gray-200 bg-white px-2 text-xs font-bold text-gray-700">
                     ${[7, 14, 30].map(days => `<option value="${days}"${days === 14 ? " selected" : ""}>+${days}日</option>`).join("")}
@@ -107,7 +107,7 @@ function renderEmployerApplicationDetails(application) {
       : `
         <div class="mt-5 border-t border-gray-50 pt-4 flex justify-between items-center">
           <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Status: ${escapeHtml(formatApplicationStatus(application.status))}</p>
-          <button type="button" onclick="openReviewModal('${applicationId}', '${escapeHtml(String(application.applicant_id))}', 'seeker')" class="px-4 py-2 bg-amber-50 text-amber-600 text-xs font-black rounded-xl border border-amber-100 hover:bg-amber-100 transition-all">⭐ お仕事を探す方を評価する</button>
+          ${!PILOT_MODE ? `<button type="button" onclick="openReviewModal('${applicationId}', '${escapeHtml(String(application.applicant_id))}', 'seeker')" class="px-4 py-2 bg-amber-50 text-amber-600 text-xs font-black rounded-xl border border-amber-100 hover:bg-amber-100 transition-all">⭐ お仕事を探す方を評価する</button>` : ""}
         </div>
       `;
   return `
@@ -148,7 +148,7 @@ function renderEmployerApplicationDetails(application) {
           ? `<p class="mt-4 whitespace-pre-wrap rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700"><span class="mb-1 block text-xs font-bold text-gray-500">対応不要の理由</span>${escapeHtml(String(application.dismissal_reason))}</p>`
           : ""}
         ${renderApplicationConversation(application)}
-        ${application.status === "withdrawn" ? "" : `<div data-tracking-box data-application-id="${applicationId}"></div>`}
+        ${PILOT_MODE || application.status === "withdrawn" ? "" : `<div data-tracking-box data-application-id="${applicationId}"></div>`}
         ${statusActions}
       </div>
     </article>

@@ -1,3 +1,4 @@
+const PILOT_MODE = true;
 let cachedJobs = [];
 let selectedJob = null;
 let favoriteJobIds = [];
@@ -49,6 +50,21 @@ let accountReviews = []; // 自分が書いたレビュー
 
 
 document.addEventListener("DOMContentLoaded", () => {
+  if (PILOT_MODE) {
+    [
+      '[data-dashboard-view="favorites"]',
+      '#favoritesOnly',
+      '#followedOnly',
+      '#seekerSearchAvailableOnly'
+    ].forEach(selector => {
+      const element = document.querySelector(selector);
+      if (element) (element.matches("input") ? element.closest("label") : element).style.display = "none";
+    });
+    document.getElementById("modalFavoriteButton").style.display = "none";
+    document.getElementById("modalCopyLinkButton").parentElement.style.display = "none";
+    document.getElementById("seekerAccountPromptText").textContent =
+      "プロフィールや応募履歴をアカウントに保存するにはログインしてください。";
+  }
   initializeProfileOptionControls();
   document.getElementById("employerDashboardJobFormSlot").append(
     document.getElementById("employerJobForm")

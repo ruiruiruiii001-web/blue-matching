@@ -8,6 +8,17 @@ function formatInterviewSlot(value) {
 }
 
 function renderInterviewBox(box, slots, message = "", isError = false) {
+  if (PILOT_MODE) {
+    const selected = slots.find(slot => slot.is_selected);
+    box.innerHTML = selected
+      ? `<section class="mt-5 rounded-xl border border-emerald-100 bg-emerald-50/40 p-4">
+          <h5 class="text-sm font-bold text-gray-800">確定済みの作業・相談日時</h5>
+          <p class="mt-2 text-sm text-gray-800">${escapeHtml(formatInterviewSlot(selected.starts_at))}</p>
+          <p class="mt-1 text-xs text-gray-600">変更が必要な場合はメッセージで相談してください。</p>
+        </section>`
+      : "";
+    return;
+  }
   const applicationId = box.dataset.applicationId;
   const isEmployer = accountType === "employer";
   const selected = slots.find(slot => slot.is_selected);

@@ -246,6 +246,7 @@ async function publishJob() {
         : "お仕事情報を保存しました。";
   alert(`${saveMessage}${cleanupFailures.length ? "\n一部の不要な写真を整理できませんでした。時間をおいて再度お試しください。" : ""}`);
   if (!wasEditing) {
+    if (PILOT_MODE) await showPilotLinePrompt();
     confetti({
       particleCount: 150,
       spread: 70,
@@ -322,6 +323,10 @@ function editJob(id) {
 }
 
 function duplicateJob(id) {
+  if (PILOT_MODE) {
+    alert("テスト運用中は募集の複製を利用できません。");
+    return;
+  }
   const job = cachedJobs.find(item => item.id === id);
   if (!currentUser || accountType !== "employer" || !job || job.owner_id !== currentUser.id) return;
   editJob(id);

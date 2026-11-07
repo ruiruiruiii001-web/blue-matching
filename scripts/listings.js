@@ -213,7 +213,7 @@ function renderJobList(resetLimit = false) {
         </div>
 
 
-        <button type="button" aria-label="${isFavorite(job.id) ? 'お気に入りから削除' : 'お気に入りに追加'}" aria-pressed="${isFavorite(job.id)}" onclick="event.stopPropagation(); toggleFavorite(${job.id})" class="z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-amber-100 bg-amber-50/50 text-xl text-amber-500 hover:bg-amber-100 hover:text-amber-600 transition-all" title="${isFavorite(job.id) ? 'お気に入りから削除' : 'お気に入りに追加'}">${isFavorite(job.id) ? '★' : '☆'}</button>
+        ${!PILOT_MODE ? `<button type="button" aria-label="${isFavorite(job.id) ? 'お気に入りから削除' : 'お気に入りに追加'}" aria-pressed="${isFavorite(job.id)}" onclick="event.stopPropagation(); toggleFavorite(${job.id})" class="z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-amber-100 bg-amber-50/50 text-xl text-amber-500 hover:bg-amber-100 hover:text-amber-600 transition-all" title="${isFavorite(job.id) ? 'お気に入りから削除' : 'お気に入りに追加'}">${isFavorite(job.id) ? '★' : '☆'}</button>` : ""}
       </div>
       <div class="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div class="flex items-center gap-3">
@@ -573,12 +573,20 @@ function getJobShareUrl(job) {
 }
 
 function shareJobToLine() {
+  if (PILOT_MODE) {
+    alert("テスト運用中は募集の共有ボタンを利用できません。");
+    return;
+  }
   if (!selectedJob) return;
   const text = `${selectedJob.title}${selectedJob.location ? `（${selectedJob.location}）` : ""}\n${getJobShareUrl(selectedJob)}`;
   window.open(`https://line.me/R/share?text=${encodeURIComponent(text)}`, "_blank", "noopener");
 }
 
 async function copyJobLink() {
+  if (PILOT_MODE) {
+    alert("テスト運用中は募集の共有ボタンを利用できません。");
+    return;
+  }
   if (!selectedJob) return;
   const button = document.getElementById("modalCopyLinkButton");
   try {
@@ -707,7 +715,7 @@ async function toggleFollowEmployer(employerId) {
 function updateModalFollowButton() {
   const button = document.getElementById("modalFollowButton");
   if (!button) return;
-  const visible = Boolean(selectedJob && currentUser && accountType === "seeker" && selectedJob.owner_id !== currentUser.id);
+  const visible = Boolean(!PILOT_MODE && selectedJob && currentUser && accountType === "seeker" && selectedJob.owner_id !== currentUser.id);
   button.classList.toggle("hidden", !visible);
   if (!visible) return;
   const following = isFollowingEmployer(selectedJob.owner_id);

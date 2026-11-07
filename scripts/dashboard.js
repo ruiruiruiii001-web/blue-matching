@@ -45,7 +45,7 @@ function renderAccountDashboard() {
         <div class="flex flex-wrap items-center justify-between gap-3 mb-4 pb-4 border-b border-gray-50">
           <p class="font-black text-gray-900 text-lg leading-tight">${escapeHtml(application.job_title)}</p>
           <div class="flex items-center gap-2">
-            ${application.status === 'reviewed' && employerIdsByJobId.get(String(application.job_id)) ? `
+            ${!PILOT_MODE && application.status === 'reviewed' && employerIdsByJobId.get(String(application.job_id)) ? `
               <button type="button" onclick="openReviewModal('${application.id}', '${employerIdsByJobId.get(String(application.job_id))}', 'employer')" class="px-3 py-1 bg-amber-50 text-amber-600 text-[10px] font-black rounded-lg border border-amber-100 hover:bg-amber-100 transition-colors uppercase tracking-widest">
               ⭐ 評価する
               </button>

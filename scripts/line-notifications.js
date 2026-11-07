@@ -19,6 +19,29 @@ async function updateLineNotificationStatus() {
   unlink.classList.toggle("hidden", !data.linked);
 }
 
+async function showPilotLinePrompt() {
+  if (!currentUser || accountType !== "employer") return;
+  const userId = currentUser.id;
+  document.getElementById("pilotLinePrompt").classList.add("hidden");
+  let data;
+  let error;
+  try {
+    ({ data, error } = await supabaseClient.functions.invoke("line-link", { body: { action: "status" } }));
+  } catch (requestError) {
+    error = requestError;
+  }
+  if (currentUser?.id !== userId || accountType !== "employer") return;
+  if (error || typeof data?.linked !== "boolean") {
+    console.error("LINE連携状態の取得に失敗しました:", error);
+    const status = document.getElementById("employerDashboardStatus");
+    status.textContent = "LINE連携状態を確認できませんでした。「応募・チャット」から状態を確認してください。";
+    status.classList.remove("hidden");
+    return;
+  }
+  document.getElementById("pilotLinePromptStatus").textContent = "新しい応募をLINEで受け取れます。連携は任意です。";
+  document.getElementById("pilotLinePrompt").classList.toggle("hidden", data.linked);
+}
+
 async function unlinkLineNotifications() {
   if (!currentUser || accountType !== "employer") return;
   if (!window.confirm("LINE応募通知の連携を解除しますか？")) return;
