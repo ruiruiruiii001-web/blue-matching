@@ -48,7 +48,8 @@ async function initializeAdmin() {
   const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
   if (sessionError || !session) {
     loginForm.classList.remove("hidden");
-    setAdminStatus("運営者アカウントでログインしてください。", true);
+    setAdminStatus(sessionError ? `ログイン状態を確認できませんでした: ${sessionError.message}` : "運営者アカウントでログインしてください。", true);
+    initializeAdminTurnstile();
     return;
   }
   loginForm.classList.add("hidden");
@@ -344,19 +345,7 @@ async function hideJob(report, job) {
   }
 }
 
-document.getElementById("adminLoginForm").addEventListener("submit", async event => {
-  event.preventDefault();
-  setAdminStatus("ログインしています…");
-  const { error } = await supabaseClient.auth.signInWithPassword({
-    email: document.getElementById("adminEmail").value.trim(),
-    password: document.getElementById("adminPassword").value
-  });
-  if (error) {
-    setAdminStatus("ログインできませんでした。メールアドレスとパスワードを確認してください。", true);
-    return;
-  }
-  await initializeAdmin();
-});
+document.getElementById("adminLoginForm").addEventListener("submit", submitAdminLogin);
 adminReportFilter.addEventListener("change", renderReports);
 document.getElementById("adminReloadButton").addEventListener("click", loadReports);
 document.getElementById("adminJobsReloadButton").addEventListener("click", loadPendingJobs);

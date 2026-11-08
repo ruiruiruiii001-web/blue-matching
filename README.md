@@ -80,6 +80,7 @@ pg_netの送信待ちキューにはワーカーの秘密値が一時的に平�
 
 `/admin.html` は「求人の通報」「メッセージの通報」「ユーザー」の3つのタブがあります。求人通報には運営メモを残せます。ユーザータブはメールの一部で検索でき、停止・解除と停止履歴を確認できます。応募のメッセージは、受け取った側が各メッセージの「このメッセージを通報」から通報でき（1日20件まで）、通報時の本文が運営に保存されます。事前に `supabase/migrations/20261108_admin_tools_and_message_reports.sql` をSupabase SQL Editorで実行してください。
 
+運営管理画面から直接ログインする場合はCAPTCHAの確認が必要です。通常のサイトでログイン済みの場合は、運営者権限の確認後にそのまま管理画面を利用できます。
 ## リリース前の仕上げ（保留中）
 
 ### 他の作業が済んでから実装する機能（依存先つき）
@@ -166,7 +167,7 @@ pg_netの送信待ちキューにはワーカーの秘密値が一時的に平�
 ### 新規登録のCAPTCHA（Cloudflare Turnstile）
 
 1. CloudflareでTurnstileウィジェットを作成し、ドメインに `blue-matching-pi.vercel.app` を登録します。
-2. 発行されたSitekeyを `index.html` の `cloudflare-turnstile-sitekey` メタタグの `content` に設定してサイトを再デプロイします。Sitekeyは公開用ですが、Secret keyはソースコードやGitHubに置かないでください。
+2. 発行されたSitekeyを `index.html`、`signup.html`、`admin.html` の `cloudflare-turnstile-sitekey` メタタグの `content` に設定してサイトを再デプロイします。Sitekeyは公開用ですが、Secret keyはソースコードやGitHubに置かないでください。
 3. Supabase Dashboardの **Authentication → Bot and Abuse Protection** でCAPTCHAを有効にし、Cloudflare Turnstileを選択してSecret keyを登録・保存します。サイト側のデプロイが完了する前にSupabase側を有効化すると、新規登録できなくなるため順番を守ってください。
 4. 公開サイトでTurnstileが表示されることを確認し、CAPTCHAを完了してから新規登録できることをテストします。Turnstile確認に成功して新規登録を送信すると、Supabase AuthがSecret keyを使ってCloudflare Siteverifyをサーバー側で呼び出します。アプリのブラウザーコードからSiteverifyを直接呼び出したり、Secret keyを配置したりしないでください。
 

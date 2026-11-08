@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="cloudflare-turnstile-sitekey" content="0x4AAAAAAFmKntPFXSdCMP-V">
   <meta name="robots" content="noindex, nofollow">
   <title>運営管理 | 地域のお助け仕事掲示板</title>
   <link rel="manifest" href="manifest.webmanifest">
@@ -12,6 +13,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="scripts/supabase-client.js"></script>
   <script src="scripts/shared.js"></script>
+  <script src="scripts/admin-auth.js" defer></script>
   <script src="scripts/admin.js" defer></script>
   <script src="scripts/admin-extra.js" defer></script>
   <script src="scripts/admin-pilot.js" defer></script>
@@ -30,7 +32,9 @@
       <p class="text-sm font-bold">運営者アカウントでログイン</p>
       <input id="adminEmail" type="email" autocomplete="email" required placeholder="メールアドレス" class="w-full rounded-lg border border-gray-300 px-3 py-3 text-sm">
       <input id="adminPassword" type="password" autocomplete="current-password" required placeholder="パスワード" class="w-full rounded-lg border border-gray-300 px-3 py-3 text-sm">
-      <button type="submit" class="min-h-11 w-full rounded-lg bg-gray-900 px-4 py-2 text-sm font-bold text-white">ログイン</button>
+      <div id="adminTurnstile"></div>
+      <p id="adminTurnstileStatus" role="status" aria-live="polite" class="text-xs text-gray-600">ログインにはCAPTCHA確認が必要です。</p>
+      <button id="adminLoginSubmit" type="submit" class="min-h-11 w-full rounded-lg bg-gray-900 px-4 py-2 text-sm font-bold text-white">ログイン</button>
     </form>
     <section id="adminPanel" class="hidden">
       <div role="tablist" aria-label="管理メニュー" class="mb-4 flex flex-wrap gap-2">
