@@ -121,3 +121,22 @@ test("pilot contact replies skip email, while normal mode reports delivery failu
     assert.equal(status.innerText, pilot ? "" : "メール送信失敗");
   }
 });
+
+test("reviewed notification opens the application for the seeker", () => {
+  const script = fs.readFileSync(path.join(root, "scripts", "notifications.js"), "utf8");
+  const container = { innerHTML: "" };
+  const status = { innerText: "", classList: { toggle() {} } };
+  const context = vm.createContext({
+    accountType: "seeker", currentUser: { id: "seeker" }, appNotificationsError: "",
+    seekerContactRequestsError: "", employerContactRequestsError: "",
+    appNotifications: [{ id: "notice", event_type: "application_reviewed", related_id: "application", title: "お仕事が確定しました", created_at: "2030-01-01" }],
+    accountApplications: [{ id: "application", job_title: "Test", applicant_id: "seeker" }],
+    document: { getElementById: id => id === "container" ? container : status },
+    escapeHtml: value => value, formatDashboardDate: value => value
+  });
+  vm.runInContext(script, context);
+  context.renderNotifications("container", "status");
+  assert.match(container.innerHTML, /お仕事が確定しました/);
+  assert.match(container.innerHTML, /openApplicationNotification\('application', 'notice', this\)/);
+  assert.match(container.innerHTML, /Test/);
+});

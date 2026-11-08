@@ -4,7 +4,7 @@
 
 `PILOT_MODE` は画面表示の切り替えです。画面だけでは直接操作を防げないため、公開前に対応するデータベースの制限も適用・検証する必要があります。`20261121_pilot_restrict_feature_writes.sql` はお気に入り、フォロー、レビュー、検索条件保存、応募管理メモの利用者による読み書きを停止します。元に戻すには、各対象テーブルの `pilot_no_select`、`pilot_no_insert`、`pilot_no_update`、`pilot_no_delete` ポリシーと、レビューの `pilot_no_anon_select` ポリシーを削除します。既存データは削除しません。
 
-`scripts/shared.js` の `PILOT_MODE` が有効な間は、応募・お仕事の確定・連絡リクエストへの返信による通知メールの送信を画面から実行しません。アカウント認証やパスワード再設定のメール設定は変更しません。新しい応募とチャットはサイト内通知と、連携済み掲載者への応募LINE通知を利用し、お仕事の確定結果は応募履歴で確認します。メール再開時は `PILOT_MODE` を無効にする前に送信設定と各通知の動作を確認してください。古い画面や直接のAPI呼び出しによるメール送信自体をサーバー側で禁止する設定ではありません。
+`scripts/shared.js` の `PILOT_MODE` が有効な間は、応募・お仕事の確定・連絡リクエストへの返信による通知メールの送信を画面から実行しません。アカウント認証やパスワード再設定のメール設定は変更しません。新しい応募とチャットはサイト内通知と、連携済み掲載者への応募LINE通知を利用します。`20261123_application_reviewed_notification.sql` の適用後、新たに確定されたお仕事は応募者にサイト内通知されます。確定結果は応募履歴でも確認できます。メール再開時は `PILOT_MODE` を無効にする前に送信設定と各通知の動作を確認してください。古い画面や直接のAPI呼び出しによるメール送信自体をサーバー側で禁止する設定ではありません。
 
 運営者は募集の審査、通報、公式LINEとお問い合わせメールを原則1日1回確認します。通報は内容を確認して必要に応じて掲載の非表示やアカウント制限を行い、LINEやメールへの返信は手動で行います。確認頻度は目安であり、即時対応や個別の回答を保証するものではありません。協力店舗への連絡や参加者への説明を行い、テスト応募と実際の募集を区別して運用してください。
 
@@ -139,7 +139,7 @@ pg_netの送信待ちキューにはワーカーの秘密値が一時的に平�
 
 求人の更新日時を表示するには、既存の求人・通知用SQL移行の後に `supabase/migrations/20261027_add_job_updated_at.sql` をSupabase SQL Editorで実行してください。求人を編集・募集終了にすると更新日時が記録されます。
 
-登録メール通知を有効にするには、Resendで送信元ドメインを検証し、Supabase DashboardのEdge Function Secretsに `RESEND_API_KEY`、`RESEND_FROM_EMAIL`、`APP_URL` を登録してください。独自ドメインを使う場合は、そのオリジンを `APP_ORIGIN` にも設定します。その後、Supabase CLIで `supabase functions deploy send-notification --project-ref qefqlbkqewvahtqzqmfp` を実行してください。APIキーはHTMLやGitHubへ登録しないでください。テスト中は送信を停止しており、再開前に応募・確定・連絡への返信それぞれの通知レコードとメール配信を実環境で確認してください。特に確定通知は、テストで通知レコードが見つからずメール送信が失敗したため、再開前に対応が必要です。サイト内通知はデータベース移行後に利用できます。
+登録メール通知を有効にするには、Resendで送信元ドメインを検証し、Supabase DashboardのEdge Function Secretsに `RESEND_API_KEY`、`RESEND_FROM_EMAIL`、`APP_URL` を登録してください。独自ドメインを使う場合は、そのオリジンを `APP_ORIGIN` にも設定します。その後、Supabase CLIで `supabase functions deploy send-notification --project-ref qefqlbkqewvahtqzqmfp` を実行してください。APIキーはHTMLやGitHubへ登録しないでください。テスト中は送信を停止しており、再開前に応募・確定・連絡への返信それぞれの通知レコードとメール配信を実環境で確認してください。確定通知には `20261123_application_reviewed_notification.sql` の適用が必要です。サイト内通知はデータベース移行後に利用できます。
 
 ## 募集する方のアカウントと掲載権限
 

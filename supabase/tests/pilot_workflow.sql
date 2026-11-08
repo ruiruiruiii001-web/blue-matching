@@ -40,6 +40,18 @@ END;
 $$;
 UPDATE public.job_applications SET status = 'reviewed'
 WHERE id = 'cd918fe0-2b82-42cc-97e2-745e0e95d8ad';
+SELECT set_config('request.jwt.claim.sub', '39ad2a7e-552b-46c9-b33e-a341db6f0ee9', true);
+DO $$
+BEGIN
+  IF (SELECT count(*) FROM public.app_notifications
+      WHERE event_type = 'application_reviewed'
+        AND related_id = 'cd918fe0-2b82-42cc-97e2-745e0e95d8ad'
+        AND recipient_id = auth.uid()) <> 1 THEN
+    RAISE EXCEPTION 'Applicant did not receive confirmation notification';
+  END IF;
+END;
+$$;
+SELECT set_config('request.jwt.claim.sub', 'e2434fd6-1c77-4669-8908-a971c38b024a', true);
 INSERT INTO public.application_messages (application_id, sender_id, body)
 VALUES ('cd918fe0-2b82-42cc-97e2-745e0e95d8ad', 'e2434fd6-1c77-4669-8908-a971c38b024a', 'Test reply');
 
@@ -58,6 +70,18 @@ BEGIN
   END IF;
 END;
 $$;
+RESET ROLE;
+DELETE FROM public.job_applications WHERE id = 'cd918fe0-2b82-42cc-97e2-745e0e95d8ad';
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM public.app_notifications
+      WHERE related_id = 'cd918fe0-2b82-42cc-97e2-745e0e95d8ad'
+         OR context_id = 'cd918fe0-2b82-42cc-97e2-745e0e95d8ad') THEN
+    RAISE EXCEPTION 'Application notifications were not cleaned up';
+  END IF;
+END;
+$$;
+SET LOCAL ROLE authenticated;
 SELECT set_config('request.jwt.claim.sub', '39ad2a7e-552b-46c9-b33e-a341db6f0ee9', true);
 SELECT public.delete_my_account();
 SELECT set_config('request.jwt.claim.sub', 'e2434fd6-1c77-4669-8908-a971c38b024a', true);

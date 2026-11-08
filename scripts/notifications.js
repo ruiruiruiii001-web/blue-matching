@@ -86,17 +86,17 @@ function getVisibleNotifications() {
               <p class="font-black text-gray-900">${escapeHtml(String(notification.title || "通知"))}</p>
               <span class="rounded-full px-2 py-0.5 text-[10px] font-bold ${notification.read_at ? "bg-gray-100 text-gray-600" : "bg-blue-100 text-blue-800"}">${notification.read_at ? "通知既読" : "通知未読"}</span>
             </div>
-            ${["job_application", "application_message"].includes(notification.event_type)
+            ${["job_application", "application_message", "application_reviewed"].includes(notification.event_type)
               ? renderApplicationNotificationDetails(notification)
               : `<p class="mt-1 text-sm text-gray-600 leading-relaxed">${escapeHtml(notification.event_type === "contact_reply" ? "応募者から届いた連絡への返信です。" : String(notification.body || ""))}</p>`}
             <p class="mt-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest">${formatDashboardDate(notification.created_at)}</p>
             ${notification.event_type === "contact_request" ? renderContactRequestNotification(notification.related_id) : ""}
             ${notification.event_type === "contact_reply" ? renderContactReplyNotification(notification.related_id) : ""}
-            ${["job_application", "application_message"].includes(notification.event_type)
+            ${["job_application", "application_message", "application_reviewed"].includes(notification.event_type)
               ? `<button type="button" data-application-notification-id="${escapeHtml(String(notification.event_type === "application_message" ? notification.context_id || "" : notification.related_id || ""))}" onclick="openApplicationNotification('${escapeHtml(String(notification.event_type === "application_message" ? notification.context_id || "" : notification.related_id || ""))}', '${escapeHtml(String(notification.id))}', this)" class="mt-3 min-h-10 rounded-lg bg-blue-600 px-3 py-2 text-xs font-bold text-white hover:bg-blue-700">応募内容とメッセージを見る</button>`
               : ""}
           </div>
-          ${["job_application", "application_message"].includes(notification.event_type)
+          ${["job_application", "application_message", "application_reviewed"].includes(notification.event_type)
             ? ""
             : notification.read_at
             ? ""
