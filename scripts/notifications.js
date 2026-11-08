@@ -29,7 +29,7 @@ function renderLoginNotificationBanner() {
   if (unreadCount) messages.push(`新しいお知らせが${unreadCount}件あります。`);
   if (expiringJobCount) messages.push(`掲載期限が近いお仕事が${expiringJobCount}件あります。`);
   document.getElementById("loginNotificationMessage").innerText =
-    `${messages.join("")}メールが届かない場合があるため、マイページでもご確認ください。`;
+    `${messages.join("")}${PILOT_MODE ? "テスト運用中は通知メールを送信しません。マイページでご確認ください。" : "メールが届かない場合があるため、マイページでもご確認ください。"}`;
   banner.classList.remove("hidden");
 }
 
@@ -508,7 +508,7 @@ async function respondToContactRequest(requestId, status) {
       ? { ...notification, read_at: notification.read_at || new Date().toISOString() }
       : notification
   );
-  const emailWarning = await sendNotificationEmail("contact_reply", requestId);
+  const emailWarning = PILOT_MODE ? "" : await sendNotificationEmail("contact_reply", requestId);
   if (currentUser?.id !== seekerId || accountType !== "seeker") return;
   seekerContactRequests = seekerContactRequests.map(item => item.id === data.id ? data : item);
   renderAccountDashboard();

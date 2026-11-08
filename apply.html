@@ -30,7 +30,7 @@
         <a href="index.html" class="mt-3 inline-flex min-h-11 items-center rounded-lg bg-blue-600 px-4 py-2 font-bold text-white">ログイン画面へ</a>
       </div>
       <form id="applicationForm" class="mt-6 hidden space-y-5" novalidate>
-        <p class="rounded-lg border border-blue-100 bg-blue-50 p-3 text-xs leading-relaxed text-blue-900">このフォームから送る応募は、このサイト内でお仕事を掲載した方に届きます。外部サイトには移動しません。</p>
+        <p id="applicationNotice" class="rounded-lg border border-blue-100 bg-blue-50 p-3 text-xs leading-relaxed text-blue-900">このフォームから送る応募は、このサイト内でお仕事を掲載した方に届きます。外部サイトには移動しません。</p>
         <label class="block text-sm font-bold text-gray-700">お名前
           <input id="applicantName" maxlength="100" required autocomplete="name" class="mt-1 w-full rounded-xl border border-gray-300 px-3 py-3 text-base outline-none focus:ring-2 focus:ring-blue-500">
         </label>
@@ -65,6 +65,10 @@
     let applicationJob = null;
     let profile = null;
     let applicantId = null;
+
+    if (PILOT_MODE) {
+      document.getElementById("applicationNotice").textContent += " テスト運用中は通知メールを送信しません。応募後の進捗はマイページで確認してください。";
+    }
 
     function showStatus(message, isError = false) {
       statusElement.textContent = message;
@@ -248,7 +252,7 @@
           return;
         }
 
-        const warning = await sendApplicationNotification(data.id);
+        const warning = PILOT_MODE ? "" : await sendApplicationNotification(data.id);
         form.classList.add("hidden");
         statusElement.classList.add("hidden");
         if (warning) {

@@ -285,7 +285,7 @@ async function updateApplicationStatus(applicationId, status, dismissalReason = 
     return;
   }
 
-  const notificationWarning = status === "reviewed"
+  const notificationWarning = !PILOT_MODE && status === "reviewed"
     ? await sendNotificationEmail("application_reviewed", applicationId)
     : "";
   if (currentUser?.id !== employerId || accountType !== "employer") return;

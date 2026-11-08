@@ -1,4 +1,3 @@
-const PILOT_MODE = true;
 let cachedJobs = [];
 let selectedJob = null;
 let favoriteJobIds = [];
@@ -51,6 +50,8 @@ let accountReviews = []; // 自分が書いたレビュー
 
 document.addEventListener("DOMContentLoaded", () => {
   if (PILOT_MODE) {
+    document.getElementById("pilotEmailNotice").classList.remove("hidden");
+    document.getElementById("pilotApplicationStatusNotice").classList.remove("hidden");
     [
       '[data-dashboard-view="favorites"]',
       '#favoritesOnly',
