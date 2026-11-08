@@ -67,7 +67,9 @@
     let applicantId = null;
 
     if (PILOT_MODE) {
-      document.getElementById("applicationNotice").textContent += " テスト運用中は通知メールを送信しません。応募後の進捗はマイページで確認してください。";
+      document.getElementById("applicationNotice").textContent += PILOT_APPLICATION_EMAILS_ENABLED
+        ? " チャットの通知メールは送信しません。応募後の進捗はマイページで確認してください。"
+        : " テスト運用中は通知メールを送信しません。応募後の進捗はマイページで確認してください。";
     }
 
     function showStatus(message, isError = false) {
@@ -252,7 +254,8 @@
           return;
         }
 
-        const warning = PILOT_MODE ? "" : await sendApplicationNotification(data.id);
+        const warning = !PILOT_MODE || PILOT_APPLICATION_EMAILS_ENABLED
+          ? await sendApplicationNotification(data.id) : "";
         form.classList.add("hidden");
         statusElement.classList.add("hidden");
         if (warning) {

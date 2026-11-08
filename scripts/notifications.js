@@ -29,7 +29,7 @@ function renderLoginNotificationBanner() {
   if (unreadCount) messages.push(`新しいお知らせが${unreadCount}件あります。`);
   if (expiringJobCount) messages.push(`掲載期限が近いお仕事が${expiringJobCount}件あります。`);
   document.getElementById("loginNotificationMessage").innerText =
-    `${messages.join("")}${PILOT_MODE ? "テスト運用中は通知メールを送信しません。マイページでご確認ください。" : "メールが届かない場合があるため、マイページでもご確認ください。"}`;
+    `${messages.join("")}${PILOT_MODE && !PILOT_APPLICATION_EMAILS_ENABLED ? "テスト運用中は通知メールを送信しません。マイページでご確認ください。" : "メールが届かない場合があるため、マイページでもご確認ください。"}`;
   banner.classList.remove("hidden");
 }
 

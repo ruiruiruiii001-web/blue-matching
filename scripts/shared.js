@@ -1,4 +1,5 @@
 const PILOT_MODE = true;
+const PILOT_APPLICATION_EMAILS_ENABLED = true;
 
 const JOB_TYPE_OPTIONS = [
   "イベントスタッフ・案内", "設営・撤去", "農作業・収穫", "飲食店・調理補助",

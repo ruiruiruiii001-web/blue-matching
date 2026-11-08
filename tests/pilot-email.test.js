@@ -6,7 +6,7 @@ const vm = require("node:vm");
 
 const root = path.join(__dirname, "..");
 
-async function submitApplication(pilot, mailError = null) {
+async function submitApplication(pilot, mailError = null, pilotApplicationEmailsEnabled = false) {
   const html = fs.readFileSync(path.join(root, "apply.html"), "utf8");
   const script = html.match(/<script>\s*([\s\S]*?)<\/script>/)[1];
   const nodes = new Map();
@@ -45,7 +45,8 @@ async function submitApplication(pilot, mailError = null) {
     }
   };
   const context = vm.createContext({
-    PILOT_MODE: pilot, document, URL, URLSearchParams, console: { error() {} },
+    PILOT_MODE: pilot, PILOT_APPLICATION_EMAILS_ENABLED: pilotApplicationEmailsEnabled,
+    document, URL, URLSearchParams, console: { error() {} },
     window: { supabase: { createClient: () => client }, location: {
       search: "?jobId=32", origin: "https://example.test", replace: url => { redirected = url; }
     } },
@@ -73,9 +74,51 @@ test("outside pilot application sends email and preserves delivery failures", as
   assert.match(result.redirected, /applicationChat=application/);
 });
 
-test("pilot status updates skip email, while normal mode calls it and displays failures", async () => {
+test("pilot application can send email without claiming chat emails are enabled", async () => {
+  const result = await submitApplication(true, null, true);
+  assert.equal(result.calls, 1);
+  assert.match(result.notice, /チャットの通知メールは送信しません/);
+  assert.match(result.redirected, /applicationChat=application/);
+  const failed = await submitApplication(true, { message: "delivery failed" }, true);
+  assert.match(failed.stored.get("applicationNotificationWarning:application"), /delivery failed/);
+});
+
+test("pilot notices reflect whether application emails are enabled", () => {
+  const script = fs.readFileSync(path.join(root, "scripts", "app.js"), "utf8");
+  for (const enabled of [false, true]) {
+    const nodes = new Map();
+    let onReady;
+    const node = id => {
+      if (!nodes.has(id)) nodes.set(id, {
+        textContent: id === "pilotEmailNotice" ? "通知メールを送信しません" : "",
+        classList: { remove() {} },
+        style: {}, parentElement: { style: {} }
+      });
+      return nodes.get(id);
+    };
+    const context = vm.createContext({
+      PILOT_MODE: true, PILOT_APPLICATION_EMAILS_ENABLED: enabled,
+      document: {
+        addEventListener(type, handler) { if (type === "DOMContentLoaded") onReady = handler; },
+        getElementById: node, querySelector: () => null
+      },
+      initializeProfileOptionControls() { throw new Error("initialization stopped"); }
+    });
+    vm.runInContext(script, context);
+    assert.throws(() => onReady(), /initialization stopped/);
+    if (enabled) {
+      assert.match(node("pilotEmailNotice").textContent, /応募と仕事確定の通知メールを送信します/);
+      assert.match(node("pilotEmailNotice").textContent, /チャットの通知メールは送信しない/);
+      assert.match(node("pilotApplicationStatusNotice").textContent, /チャットの通知メールは送信しません/);
+    } else {
+      assert.match(node("pilotEmailNotice").textContent, /通知メールを送信しません/);
+    }
+  }
+});
+
+test("status updates send email only when enabled and display failures", async () => {
   const script = fs.readFileSync(path.join(root, "scripts", "account-data.js"), "utf8");
-  for (const pilot of [true, false]) {
+  for (const [pilot, enabled] of [[true, false], [true, true], [false, false]]) {
     let calls = 0;
     const alerts = [];
     const query = {
@@ -83,7 +126,8 @@ test("pilot status updates skip email, while normal mode calls it and displays f
       async maybeSingle() { return { data: { id: "application" }, error: null }; }
     };
     const context = vm.createContext({
-      PILOT_MODE: pilot, currentUser: { id: "employer" }, accountType: "employer",
+      PILOT_MODE: pilot, PILOT_APPLICATION_EMAILS_ENABLED: enabled,
+      currentUser: { id: "employer" }, accountType: "employer",
       supabaseClient: { from: () => query },
       sendNotificationEmail: async () => { calls++; return "メール送信失敗"; },
       loadAccountData: async () => {}, refreshApplicationNotificationView() {},
@@ -93,8 +137,8 @@ test("pilot status updates skip email, while normal mode calls it and displays f
     context.loadAccountData = async () => {};
     context.refreshApplicationNotificationView = () => {};
     await context.updateApplicationStatus("application", "reviewed");
-    assert.equal(calls, pilot ? 0 : 1);
-    assert.deepEqual(alerts, pilot ? [] : ["メール送信失敗"]);
+    assert.equal(calls, !pilot || enabled ? 1 : 0);
+    assert.deepEqual(alerts, !pilot || enabled ? ["メール送信失敗"] : []);
   }
 });
 

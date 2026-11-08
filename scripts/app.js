@@ -51,8 +51,14 @@ let accountReviews = []; // 自分が書いたレビュー
 
 document.addEventListener("DOMContentLoaded", () => {
   if (PILOT_MODE) {
-    document.getElementById("pilotEmailNotice").classList.remove("hidden");
-    document.getElementById("pilotApplicationStatusNotice").classList.remove("hidden");
+    const emailNotice = document.getElementById("pilotEmailNotice");
+    const applicationStatusNotice = document.getElementById("pilotApplicationStatusNotice");
+    if (PILOT_APPLICATION_EMAILS_ENABLED) {
+      emailNotice.textContent = "応募と仕事確定の通知メールを送信します。チャットの通知メールは送信しないため、進捗はマイページで確認してください。";
+      applicationStatusNotice.textContent = "チャットの通知メールは送信しません。応募の進捗はこの画面で確認してください。";
+    }
+    emailNotice.classList.remove("hidden");
+    applicationStatusNotice.classList.remove("hidden");
     [
       '[data-dashboard-view="favorites"]',
       '#favoritesOnly',
