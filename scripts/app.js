@@ -25,6 +25,7 @@ let dashboardOpen = false;
 let loginNotificationBannerDismissed = false;
 let headerUnreadNotificationCount = 0;
 let loginPanelOpen = false;
+let passwordRecoveryActive = false;
 let dashboardReturnPlaceholder = null;
 let dashboardNavigationReturnPlaceholder = null;
 let loginPanelReturnPlaceholder = null;

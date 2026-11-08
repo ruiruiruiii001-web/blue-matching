@@ -68,9 +68,16 @@ function resetEmployerTurnstile(message = "CAPTCHAをもう一度確認してく
 
 async function initializeEmployerAuth() {
   supabaseClient.auth.onAuthStateChange((_event, session) => {
+    if (_event === "PASSWORD_RECOVERY") passwordRecoveryActive = true;
+    if (_event === "SIGNED_OUT") {
+      passwordRecoveryActive = false;
+      document.getElementById("passwordRecoveryPanel").classList.add("hidden");
+    }
     updateEmployerAuth(session);
     if (_event === "PASSWORD_RECOVERY") {
       document.getElementById("passwordRecoveryPanel").classList.remove("hidden");
+      openLoginPanel(false);
+      updateAccountTypeUI();
       document.getElementById("newPassword").focus();
     }
   });
@@ -147,7 +154,9 @@ function updateAccountTypeUI() {
   const isEmployer = accountType === "employer";
   const isSeeker = accountType === "seeker";
   updateHeaderAccountButton();
-  document.getElementById("employerAuthPanel").classList.toggle("hidden", hasUser && Boolean(accountType));
+  document.getElementById("employerAuthPanel").classList.toggle(
+    "hidden", hasUser && Boolean(accountType) && !passwordRecoveryActive && !loginPanelOpen
+  );
   document.getElementById("accountTypeSetup").classList.toggle("hidden", !hasUser || Boolean(accountType) || accountTypeLoading);
   document.getElementById("employerDashboard").classList.toggle("hidden", !hasUser || !isEmployer || !dashboardOpen);
   document.getElementById("accountTypeMismatch").classList.toggle("hidden", !hasUser || !accountType || isEmployer);
@@ -179,6 +188,10 @@ function updateHeaderAccountButton(unreadCount = headerUnreadNotificationCount) 
 }
 
 function openAccountPanel() {
+  if (passwordRecoveryActive) {
+    openLoginPanel();
+    return;
+  }
   if (currentUser?.id && (accountType === "seeker" || accountType === "employer")) {
     if (dashboardOpen) {
       closeAccountPanel();
@@ -282,6 +295,7 @@ function closeLoginPanel(returnFocus = true) {
   document.body.style.overflow = loginPanelPreviousBodyOverflow;
   window.scrollTo({ top: loginPanelScrollPosition, behavior: "instant" });
   updateHeaderAccountButton();
+  authPanel.classList.toggle("hidden", Boolean(currentUser && accountType) && !passwordRecoveryActive);
   if (returnFocus) document.getElementById("headerAccountButton").focus();
 }
 
@@ -479,6 +493,7 @@ async function saveNewPassword() {
     return;
   }
   document.getElementById("passwordRecoveryPanel").classList.add("hidden");
+  passwordRecoveryActive = false;
   document.getElementById("newPassword").value = "";
   document.getElementById("confirmNewPassword").value = "";
   setAuthMessage("パスワードを変更しました。このままログインして利用できます。");

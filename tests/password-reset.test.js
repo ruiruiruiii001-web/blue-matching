@@ -74,3 +74,52 @@ test("password reset reports API and network errors and permits retry", async ()
     assert.match(state.nodes.authMessage.innerText, /送れませんでした/);
   }
 });
+
+test("recovery event opens the password panel and keeps it visible after account loading", async () => {
+  const script = fs.readFileSync(path.join(__dirname, "..", "scripts", "account.js"), "utf8");
+  const nodes = new Map();
+  function node(id) {
+    if (!nodes.has(id)) {
+      const classes = new Set(["hidden"]);
+      nodes.set(id, {
+        classList: {
+          add: name => classes.add(name),
+          remove: name => classes.delete(name),
+          contains: name => classes.has(name),
+          toggle(name, force) { if (force) classes.add(name); else classes.delete(name); }
+        },
+        focus() { this.focused = true; }
+      });
+    }
+    return nodes.get(id);
+  }
+  let handler;
+  const context = vm.createContext({
+    document: { getElementById: node },
+    supabaseClient: {
+      auth: {
+        onAuthStateChange: callback => { handler = callback; },
+        getSession: async () => ({ data: { session: null }, error: null })
+      }
+    },
+    currentUser: null, accountType: null, accountTypeLoading: false, dashboardOpen: false,
+    loginPanelOpen: false, passwordRecoveryActive: false, PILOT_MODE: true
+  });
+  vm.runInContext(script, context);
+  context.updateEmployerAuth = session => { context.currentUser = session?.user || null; };
+  context.openLoginPanel = () => { context.loginPanelOpen = true; };
+  context.updateHeaderAccountButton = () => {};
+  context.updateAccountSearchSurface = () => {};
+  await context.initializeEmployerAuth();
+  handler("PASSWORD_RECOVERY", { user: { id: "user" } });
+  assert.equal(context.passwordRecoveryActive, true);
+  assert.equal(context.loginPanelOpen, true);
+  assert.equal(node("passwordRecoveryPanel").classList.contains("hidden"), false);
+  assert.equal(node("newPassword").focused, true);
+  context.accountType = "employer";
+  context.updateAccountTypeUI();
+  assert.equal(node("employerAuthPanel").classList.contains("hidden"), false);
+  handler("SIGNED_OUT", null);
+  assert.equal(context.passwordRecoveryActive, false);
+  assert.equal(node("passwordRecoveryPanel").classList.contains("hidden"), true);
+});
