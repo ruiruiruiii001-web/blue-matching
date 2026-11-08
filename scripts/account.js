@@ -47,7 +47,7 @@ function renderEmployerTurnstile() {
       return true;
     }
   });
-  setTurnstileStatus("CAPTCHAを確認してからログインしてください。");
+  setTurnstileStatus("ログインまたは再設定メールの送信前にCAPTCHAを確認してください。");
 }
 
 function setTurnstileStatus(message, isError = false) {
@@ -435,18 +435,30 @@ async function sendPasswordReset() {
     document.getElementById("employerEmail").focus();
     return;
   }
+  if (!turnstileToken) {
+    setAuthMessage("再設定メールの送信前にCAPTCHA確認を完了してください。", true);
+    return;
+  }
 
   const button = document.querySelector("#passwordResetRequestPanel button[onclick='sendPasswordReset()']");
   button.disabled = true;
-  const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
-    redirectTo: `${window.location.origin}${window.location.pathname}`
-  });
-  button.disabled = false;
-  if (error) {
-    setAuthMessage(`再設定メールを送れませんでした: ${error.message}`, true);
-    return;
+  try {
+    const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}${window.location.pathname}`,
+      captchaToken: turnstileToken
+    });
+    if (error) {
+      setAuthMessage(`再設定メールを送れませんでした: ${error.message}`, true);
+      return;
+    }
+    setAuthMessage("再設定メールを送信しました。受信箱と迷惑メールを確認し、メール内のリンクを開いてください。");
+  } catch (error) {
+    console.error("再設定メール送信エラー:", error);
+    setAuthMessage("再設定メールを送れませんでした。通信状態を確認してもう一度お試しください。", true);
+  } finally {
+    button.disabled = false;
+    resetEmployerTurnstile();
   }
-  setAuthMessage("再設定メールを送信しました。受信箱と迷惑メールを確認し、メール内のリンクを開いてください。");
 }
 
 async function saveNewPassword() {
