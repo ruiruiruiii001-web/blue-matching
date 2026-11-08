@@ -11,6 +11,10 @@ Deno.test("successful linking replies with a permanent website link", async () =
     },
   );
   if (result !== "completed" || !message.includes(APP_URL)) throw new Error("Missing completion link");
+  if (!message.includes("このトークから") || !message.includes("原則1日1回") ||
+      !message.includes("パスワードや電話番号は送らない")) {
+    throw new Error("Missing inquiry instructions");
+  }
 });
 
 Deno.test("expired or replayed links do not send a completion message", async () => {
