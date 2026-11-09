@@ -15,6 +15,7 @@ function setup({ token = "captcha-token", email = "user@example.test", outcome =
   const calls = [];
   let resets = 0;
   const context = vm.createContext({
+    URLSearchParams,
     document: {
       getElementById: id => nodes[id],
       querySelector: () => button
@@ -95,7 +96,9 @@ test("recovery event opens the password panel and keeps it visible after account
   }
   let handler;
   const context = vm.createContext({
+    URLSearchParams,
     document: { getElementById: node },
+    window: { location: { search: "", replace() {} } },
     supabaseClient: {
       auth: {
         onAuthStateChange: callback => { handler = callback; },

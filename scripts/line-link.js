@@ -42,9 +42,10 @@ async function initializeLineLink() {
     if (!tokenStored) {
       setLineLinkStatus("連携情報を保存できませんでした。先にサイトへログインしてから、LINEで「連携」と送り直してください。", true);
     } else {
-      setLineLinkStatus("お仕事をお願いする方のアカウントでログイン後、マイページの「LINE通知の連携に戻る」を開いてください。リンクの有効期間は10分です。");
+      setLineLinkStatus("お仕事をお願いする方のアカウントでサイトにログインしてください。ログイン後、自動的にこの連携画面へ戻ります。リンクの有効期間は10分です。");
     }
     const login = document.getElementById("lineLinkLogin");
+    login.href = "index.html?lineLink=resume";
     login.classList.remove("hidden");
     login.classList.add("inline-flex");
     return;

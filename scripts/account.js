@@ -66,6 +66,10 @@ function resetEmployerTurnstile(message = "CAPTCHAをもう一度確認してく
   setTurnstileStatus(message);
 }
 
+function shouldResumeLineLinkAfterLogin() {
+  return new URLSearchParams(window.location.search).get("lineLink") === "resume";
+}
+
 async function initializeEmployerAuth() {
   supabaseClient.auth.onAuthStateChange((_event, session) => {
     if (_event === "PASSWORD_RECOVERY") passwordRecoveryActive = true;
@@ -87,6 +91,13 @@ async function initializeEmployerAuth() {
     return;
   }
   updateEmployerAuth(data.session);
+  if (shouldResumeLineLinkAfterLogin()) {
+    if (data.session?.user) {
+      window.location.replace("line-link.html");
+    } else {
+      openAccountPanel();
+    }
+  }
 }
 
 function updateEmployerAuth(session) {
@@ -519,6 +530,10 @@ async function signInEmployer() {
   resetEmployerTurnstile();
   if (error) {
     setAuthMessage(`ログインに失敗しました: ${error.message}`, true);
+    return;
+  }
+  if (shouldResumeLineLinkAfterLogin()) {
+    window.location.replace("line-link.html");
     return;
   }
   setAuthMessage("ログインしました。");
