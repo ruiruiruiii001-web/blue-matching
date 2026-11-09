@@ -339,6 +339,12 @@ function jobMatchesLocationFilter(jobLocation, selectedLocation) {
   const selectedArea = selectedLocation.replace(/\s+/g, "").toLocaleLowerCase();
   const selectedPrefecture = getPrefecture(selectedLocation);
   return getLocationPreferenceEntries(jobLocation).some(jobArea => {
+    const selectedLocal = getLocalLocation(selectedLocation);
+    const jobLocal = getLocalLocation(jobArea);
+    if (selectedLocal && jobLocal) {
+      return selectedLocal.city === jobLocal.city &&
+        (!selectedLocal.area || !jobLocal.area || selectedLocal.area === jobLocal.area);
+    }
     const normalizedJobArea = jobArea.replace(/\s+/g, "").toLocaleLowerCase();
     if (normalizedJobArea === selectedArea ||
         normalizedJobArea.includes(selectedArea) ||
@@ -362,11 +368,8 @@ function jobMatchesLocationFilter(jobLocation, selectedLocation) {
 function updateJobFilterOptions() {
   const locationSelect = document.getElementById("locationFilter");
   const previousLocation = locationSelect.value;
-  const locations = [...new Set(cachedJobs.flatMap(job => getLocationPreferenceEntries(job.location)))]
-    .sort((a, b) => a.localeCompare(b, "ja"));
-  locationSelect.replaceChildren(new Option("すべての勤務地", ""));
-  locations.forEach(location => locationSelect.add(new Option(location, location)));
-  locationSelect.value = locations.includes(previousLocation) ? previousLocation : "";
+  const locations = cachedJobs.flatMap(job => getLocationPreferenceEntries(job.location));
+  populateLocationFilter(locationSelect, locations, previousLocation);
 
   const tagOptions = document.getElementById("tagFilterOptions");
   const previousTags = new Set(

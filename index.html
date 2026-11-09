@@ -335,11 +335,11 @@
               </span>
             </summary>
             <div class="space-y-3 px-4 pb-4">
-              <p class="text-xs leading-5 text-gray-600">地方を開いて都道府県を選び、市区町村やエリアも入力してください。複数の勤務地を登録できます。町田市は市内全域またはエリアを選べます。番地・建物名など、個人宅を特定できる情報は入力しないでください。</p>
+              <p class="text-xs leading-5 text-gray-600">市を開き、市全域または地区を選んでください。複数選択できます。候補にない地域は下の欄に入力してください。番地・建物名など、個人宅を特定できる情報は入力しないでください。</p>
               <div id="jobLocationPrefectureOptions" class="space-y-2"></div>
-              <p id="jobLocationLegacyNotice" class="hidden rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs leading-relaxed text-amber-900">この募集の地域情報は旧形式で保存されています。地域で検索する方に見つけてもらいやすくするため、都道府県を選び直して保存してください（入力済みの内容は「作業場所の補足」に残っています）。</p>
-              <label class="block text-sm">作業場所の補足（任意）
-                <input type="text" id="jobLocation" maxlength="500" placeholder="例: 東京都内、関東一円" class="mt-1 h-11 w-full rounded border px-3 py-2.5 text-sm font-normal focus:ring-2 focus:ring-blue-500 outline-none">
+              <p id="jobLocationLegacyNotice" class="hidden rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs leading-relaxed text-amber-900">以前の地域情報は下の欄に残しています。必要に応じて内容を確認してください。</p>
+              <label class="block text-sm">その他の地域・作業場所の補足（任意）
+                <input type="text" id="jobLocation" maxlength="500" placeholder="例: 東京都 町田市 森野" class="mt-1 h-11 w-full rounded border px-3 py-2.5 text-sm font-normal focus:ring-2 focus:ring-blue-500 outline-none">
               </label>
             </div>
           </details>
@@ -603,10 +603,10 @@
             </span>
           </summary>
           <div class="space-y-3 px-4 pb-4">
-            <p class="text-xs leading-5 text-gray-600">地方を開いて都道府県を選び、必要なら市区町村やエリアを入力してください。町田市は市内全域またはエリアを選べます。希望地のいずれかに合うお仕事をおすすめ順で優先します。番地・建物名は入力しないでください。</p>
+            <p class="text-xs leading-5 text-gray-600">市を開き、市全域または地区を選んでください。複数選択できます。候補にない地域は下の欄に入力してください。番地・建物名は入力しないでください。</p>
             <div id="seekerLocationPrefectureOptions" class="space-y-2"></div>
             <label class="block text-sm">その他の希望地域（任意）
-              <input type="text" id="seekerLocation" maxlength="500" placeholder="例: 横浜市周辺、東京都内" class="mt-1 h-11 w-full rounded border px-3 py-2.5 text-sm font-normal focus:ring-2 focus:ring-blue-500 outline-none">
+              <input type="text" id="seekerLocation" maxlength="500" placeholder="例: 東京都 町田市 森野" class="mt-1 h-11 w-full rounded border px-3 py-2.5 text-sm font-normal focus:ring-2 focus:ring-blue-500 outline-none">
             </label>
           </div>
         </details>
@@ -752,6 +752,21 @@
               <span id="jobCount" class="text-xs bg-blue-600 text-white px-3 py-1 rounded-full font-bold shadow-sm shadow-blue-100">0件</span>
             </div>
           </div>
+          <details class="mb-4 rounded-xl border border-blue-200 bg-white">
+            <summary class="cursor-pointer px-4 py-3 text-sm font-bold text-blue-800">使い方・お知らせ</summary>
+            <div class="border-t border-blue-100 p-4">
+              <p class="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">現在テスト運用中のため、不具合が起こる場合があります。ご質問・ご感想や不具合は<a href="contact.html" class="font-bold underline">公式LINEからお問い合わせください</a>。</p>
+              <p id="pilotEmailNotice" class="mb-4 hidden text-sm text-gray-700">テスト運用中は応募やチャットなどの通知メールを送信しません。進捗はマイページで確認してください。登録確認・パスワード再設定のメールは送信します。</p>
+              <button id="showOnboardingGuide" type="button" onclick="showOnboardingGuide()" class="mb-4 hidden min-h-10 rounded-lg border border-blue-200 bg-white px-3 py-2 text-sm font-bold text-blue-800">はじめての方向けの案内を見る</button>
+              <section id="onboardingGuide" aria-label="はじめての方へ" class="mb-6 hidden rounded-2xl border border-blue-200 bg-blue-50 p-4 shadow-sm sm:p-5">
+                <div class="flex items-start justify-between gap-3">
+                  <h2 class="text-base font-black text-blue-900">はじめての方へ</h2>
+                  <button type="button" onclick="dismissOnboardingGuide()" class="min-h-10 shrink-0 rounded-lg border border-blue-200 bg-white px-3 py-2 text-xs font-bold text-blue-800 hover:bg-blue-100">閉じる（次回から表示しない）</button>
+                </div>
+                <div data-guide-body class="mt-3"></div>
+              </section>
+            </div>
+          </details>
           <div id="jobSearchPanel" role="search" class="mb-4 rounded-2xl border border-blue-200 bg-blue-50 p-4 shadow-sm sm:p-5">
         <section id="employerSeekerSearch" class="hidden rounded-xl border border-blue-200 bg-white p-4 sm:p-5">
           <div class="mb-4">
@@ -765,6 +780,12 @@
           <p class="mb-4 text-xs leading-relaxed text-gray-600">希望する仕事・地域・報酬条件の一致度を目安として並べます。経験・資格は参考情報として表示し、順位の判定には使いません。</p>
           <label for="seekerSearchKeyword" class="mb-2 block text-sm font-bold text-gray-700">キーワード</label>
           <input type="search" id="seekerSearchKeyword" oninput="renderEmployerSeekerSearch(true)" placeholder="希望する仕事・地域・資格・経験などで検索" class="mb-4 w-full rounded-xl border border-blue-300 bg-white px-4 py-3 text-base shadow-sm outline-none focus:ring-2 focus:ring-blue-500">
+          <label class="mb-4 block text-sm font-bold text-gray-700">
+            <span class="mb-1 block">希望勤務地</span>
+            <select id="seekerSearchLocation" onchange="renderEmployerSeekerSearch(true)" class="w-full rounded-lg border px-3 py-2.5 text-base font-normal focus:ring-2 focus:ring-blue-500 outline-none">
+              <option value="">すべての勤務地</option>
+            </select>
+          </label>
           <label class="mb-4 flex min-h-14 items-center gap-3 rounded-xl border-2 border-emerald-300 bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-950">
             <input type="checkbox" id="seekerSearchAvailableOnly" onchange="renderEmployerSeekerSearch(true)" class="h-5 w-5 shrink-0 rounded text-emerald-700 focus:ring-emerald-600">
             <span><span class="block">今日働ける人だけ表示</span><span class="mt-0.5 block text-xs font-normal text-emerald-800">マイページで「今日は働けます」を設定した方が対象です。</span></span>
@@ -778,12 +799,6 @@
           <details class="rounded-xl border border-blue-200 bg-white">
             <summary class="cursor-pointer select-none rounded-xl px-4 py-3 text-sm font-bold text-blue-900 hover:bg-blue-100">絞り込み条件・並び替え</summary>
             <div class="grid grid-cols-1 gap-3 border-t border-blue-100 p-4 sm:grid-cols-2">
-              <label class="text-sm text-gray-700">
-                <span class="mb-1 block">希望勤務地</span>
-                <select id="seekerSearchLocation" onchange="renderEmployerSeekerSearch(true)" class="w-full rounded-lg border px-3 py-2.5 text-base focus:ring-2 focus:ring-blue-500 outline-none">
-                  <option value="">すべての勤務地</option>
-                </select>
-              </label>
               <fieldset class="text-sm text-gray-700">
                 <legend class="mb-1">保有資格（複数選択可）</legend>
                 <p class="mb-2 text-xs text-gray-500">選んだ資格のいずれかを持つお仕事探しの方を表示します。</p>
@@ -828,6 +843,12 @@
 
         <label for="searchKeyword" class="mb-2 block text-sm font-bold text-gray-700">キーワード</label>
         <input type="search" id="searchKeyword" oninput="renderJobList(true)" placeholder="タイトル・作業内容・地域・報酬などで検索（例: 受付、収穫、横浜）" class="mb-4 w-full rounded-xl border border-blue-300 bg-white px-4 py-3 text-base shadow-sm outline-none focus:ring-2 focus:ring-blue-500">
+        <label class="mb-4 block text-sm font-bold text-gray-700">
+          <span class="mb-1 block">勤務地</span>
+          <select id="locationFilter" onchange="renderJobList(true)" class="w-full rounded-lg border px-3 py-2.5 text-base font-normal focus:ring-2 focus:ring-blue-500 outline-none">
+            <option value="">すべての勤務地</option>
+          </select>
+        </label>
 
         <div class="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
           <label class="text-sm font-bold text-gray-700">
@@ -889,12 +910,6 @@
             <option value="other">その他のお手伝い</option>
           </select>
         </label>
-        <label class="text-sm text-gray-700">
-          <span class="block mb-1">勤務地</span>
-          <select id="locationFilter" onchange="renderJobList(true)" class="w-full rounded-lg border px-3 py-2.5 text-base focus:ring-2 focus:ring-blue-500 outline-none">
-            <option value="">すべての勤務地</option>
-          </select>
-        </label>
         <fieldset class="text-sm text-gray-700">
           <legend class="mb-1">タグ（複数選択可）</legend>
           <p class="text-xs text-gray-500 mb-2">選んだタグのいずれかを含むお仕事を表示します。</p>
@@ -943,18 +958,6 @@
       <p id="jobListDescription" class="mt-3 text-xs text-gray-500 hidden leading-relaxed">希望する仕事・地域・報酬条件の一致度を目安にお仕事をおすすめ順で表示します。</p>
             <div id="jobList" class="mt-6 space-y-4 pr-0" aria-live="polite">
         <!-- お仕事カード -->
-      </div>
-      <div class="mt-6">
-        <p class="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">現在テスト運用中のため、不具合が起こる場合があります。ご質問・ご感想や不具合は<a href="contact.html" class="font-bold underline">公式LINEからお問い合わせください</a>。</p>
-        <p id="pilotEmailNotice" class="mb-4 hidden text-sm text-gray-700">テスト運用中は応募やチャットなどの通知メールを送信しません。進捗はマイページで確認してください。登録確認・パスワード再設定のメールは送信します。</p>
-        <button id="showOnboardingGuide" type="button" onclick="showOnboardingGuide()" class="mb-4 hidden min-h-10 rounded-lg border border-blue-200 bg-white px-3 py-2 text-sm font-bold text-blue-800">はじめての方向けの案内を見る</button>
-        <section id="onboardingGuide" aria-label="はじめての方へ" class="mb-6 hidden rounded-2xl border border-blue-200 bg-blue-50 p-4 shadow-sm sm:p-5">
-          <div class="flex items-start justify-between gap-3">
-            <h2 class="text-base font-black text-blue-900">はじめての方へ</h2>
-            <button type="button" onclick="dismissOnboardingGuide()" class="min-h-10 shrink-0 rounded-lg border border-blue-200 bg-white px-3 py-2 text-xs font-bold text-blue-800 hover:bg-blue-100">閉じる（次回から表示しない）</button>
-          </div>
-          <div data-guide-body class="mt-3"></div>
-        </section>
       </div>
     </section>
 

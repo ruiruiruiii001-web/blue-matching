@@ -60,16 +60,57 @@ const PREFECTURE_GROUPS = [
 ];
 
 const PREFECTURES = PREFECTURE_GROUPS.flatMap(([, prefectures]) => prefectures);
-const MACHIDA_AREA_OPTIONS = [
-  "町田市",
-  "町田市 町田駅周辺",
-  "町田市 鶴川",
-  "町田市 玉川学園",
-  "町田市 成瀬",
-  "町田市 南町田",
-  "町田市 忠生",
-  "町田市 相原"
+const LOCAL_LOCATION_OPTIONS = [
+  { prefecture: "東京都", city: "町田市", areas: ["町田駅周辺", "鶴川", "玉川学園", "成瀬", "南町田", "忠生", "相原"] },
+  { prefecture: "神奈川県", city: "相模原市", areas: ["緑区", "中央区", "南区", "橋本", "相模原", "相模大野", "古淵", "小田急相模原"] },
+  { prefecture: "神奈川県", city: "大和市", areas: ["大和", "中央林間", "南林間", "鶴間", "桜ヶ丘", "高座渋谷"] },
+  { prefecture: "神奈川県", city: "座間市", areas: ["座間", "相武台前", "入谷", "さがみ野"] },
+  { prefecture: "神奈川県", city: "横浜市", areas: ["青葉区", "緑区", "瀬谷区", "旭区", "都筑区", "港北区", "鶴見区", "神奈川区", "西区", "中区", "南区", "港南区", "保土ケ谷区", "磯子区", "金沢区", "戸塚区", "栄区", "泉区"] },
+  { prefecture: "神奈川県", city: "川崎市", areas: ["麻生区", "多摩区", "宮前区", "高津区", "中原区", "幸区", "川崎区"] },
+  { prefecture: "東京都", city: "多摩市", areas: ["多摩センター", "聖蹟桜ヶ丘", "永山", "唐木田"] },
+  { prefecture: "東京都", city: "稲城市", areas: ["稲城", "稲城長沼", "矢野口", "若葉台", "南多摩"] },
+  { prefecture: "東京都", city: "八王子市", areas: ["八王子", "西八王子", "高尾", "南大沢", "京王堀之内", "北野", "めじろ台"] }
 ];
+
+function getLocalLocationValues(group) {
+  const city = `${group.prefecture} ${group.city}`;
+  return [city, ...group.areas.map(area => `${city} ${area}`)];
+}
+
+function getLocalLocation(value) {
+  const normalized = String(value).replace(/\s+/g, "");
+  for (const group of LOCAL_LOCATION_OPTIONS) {
+    const index = getLocalLocationValues(group).findIndex(option => {
+      const full = option.replace(/\s+/g, "");
+      return full === normalized || full.slice(group.prefecture.length) === normalized;
+    });
+    if (index !== -1) return { city: group.city, area: index === 0 ? "" : group.areas[index - 1] };
+  }
+  return null;
+}
+
+function populateLocationFilter(select, entries, selectedValue = "") {
+  select.replaceChildren(new Option("すべての勤務地", ""));
+  const known = new Set();
+  LOCAL_LOCATION_OPTIONS.forEach(group => {
+    const options = document.createElement("optgroup");
+    options.label = group.city;
+    getLocalLocationValues(group).forEach((value, index) => {
+      known.add(value);
+      options.append(new Option(index === 0 ? `${group.city}全域` : `${group.city} ${group.areas[index - 1]}`, value));
+    });
+    select.append(options);
+  });
+  const additional = [...new Set(entries)].filter(value => value && !known.has(value))
+    .sort((a, b) => a.localeCompare(b, "ja"));
+  if (additional.length) {
+    const options = document.createElement("optgroup");
+    options.label = "その他・登録済みの地域";
+    additional.forEach(value => options.append(new Option(value, value)));
+    select.append(options);
+  }
+  select.value = known.has(selectedValue) || additional.includes(selectedValue) ? selectedValue : "";
+}
 
 function getNormalizedJobTags(values) {
   const tags = Array.isArray(values) ? values : [];
@@ -269,117 +310,40 @@ function renderLocationPreferenceOptions(
 ) {
   const container = document.getElementById(containerId);
   if (!container) return;
-  container.replaceChildren(...PREFECTURE_GROUPS.map(([region, prefectures], regionIndex) => {
+  container.replaceChildren(...LOCAL_LOCATION_OPTIONS.map(group => {
     const regionDetails = document.createElement("details");
-    regionDetails.dataset.prefectureRegion = "";
     regionDetails.className = "rounded-lg border border-blue-100 bg-white";
     const summary = document.createElement("summary");
-    summary.className = "flex cursor-pointer list-none items-center justify-between px-3 py-2 text-sm font-bold text-gray-700";
-    const regionLabel = document.createElement("span");
-    regionLabel.textContent = region;
-    const icon = document.createElement("span");
-    icon.dataset.regionIcon = "";
-    icon.className = "text-blue-700";
-    icon.setAttribute("aria-hidden", "true");
-    icon.textContent = "▼";
-    summary.append(regionLabel, icon);
-
+    summary.className = "cursor-pointer px-3 py-2 text-sm font-bold text-gray-700";
+    summary.textContent = `${group.city}（${group.prefecture}）`;
     const options = document.createElement("div");
     options.className = "grid grid-cols-1 gap-2 p-3 sm:grid-cols-2";
-    prefectures.forEach((prefecture, prefectureIndex) => {
-      const option = document.createElement("div");
-      option.dataset.locationOption = "";
-      option.className = "rounded-lg border border-gray-100 bg-gray-50 p-2";
+    getLocalLocationValues(group).forEach((value, index) => {
       const label = document.createElement("label");
-      label.className = "flex min-h-9 items-center gap-2 text-sm";
+      label.className = "flex min-h-10 items-center gap-2 rounded-lg border border-gray-100 bg-gray-50 px-3 py-2 text-sm";
       const checkbox = document.createElement("input");
       checkbox.type = "checkbox";
       checkbox.name = inputName;
-      checkbox.value = prefecture;
-      checkbox.dataset.prefecture = prefecture;
-      checkbox.id = `${inputName}-${regionIndex}-${prefectureIndex}`;
+      checkbox.value = value;
       checkbox.className = "h-4 w-4 shrink-0 rounded text-blue-600 focus:ring-blue-500";
       const text = document.createElement("span");
-      text.textContent = prefecture;
-      label.htmlFor = checkbox.id;
+      text.textContent = index === 0 ? `${group.city}全域` : group.areas[index - 1];
       label.append(checkbox, text);
-
-      const cityContainer = document.createElement("div");
-      cityContainer.dataset.cityContainer = "";
-      cityContainer.className = "mt-2 hidden";
-      const cityLabel = document.createElement("label");
-      cityLabel.className = "block text-xs text-gray-600";
-      cityLabel.textContent = "市区町村（任意・複数は「、」区切り）";
-      const cityInput = document.createElement("input");
-      cityInput.type = "text";
-      cityInput.maxLength = 100;
-      cityInput.dataset.prefectureCity = prefecture;
-      cityInput.placeholder = "例: 横浜市、川崎市";
-      cityInput.className = "mt-1 h-10 w-full rounded border px-3 py-2 text-sm text-gray-900";
-      cityLabel.append(cityInput);
-      cityContainer.append(cityLabel);
-      if (prefecture === "東京都") {
-        const areaSuggestions = document.createElement("div");
-        areaSuggestions.className = "mt-2";
-        const areaHint = document.createElement("p");
-        areaHint.className = "mb-1 text-[11px] text-gray-500";
-        areaHint.textContent = "町田市のエリア候補（複数選択可）";
-        const areaButtons = document.createElement("div");
-        areaButtons.className = "flex flex-wrap gap-1.5";
-        MACHIDA_AREA_OPTIONS.forEach(area => {
-          const button = document.createElement("button");
-          button.type = "button";
-          button.textContent = area === "町田市" ? "町田市全域" : area.replace("町田市 ", "");
-          button.dataset.machidaArea = area;
-          button.setAttribute("aria-pressed", "false");
-          button.className = "rounded-full border border-blue-200 bg-white px-2.5 py-1 text-xs text-blue-800 hover:bg-blue-50";
-          button.addEventListener("click", () => {
-            let selectedAreas = getLocationPreferenceEntries(cityInput.value);
-            if (area === "町田市") {
-              selectedAreas = selectedAreas.includes(area) ? [] : [area];
-            } else {
-              selectedAreas = selectedAreas.filter(value => value !== "町田市");
-              selectedAreas = selectedAreas.includes(area)
-                ? selectedAreas.filter(value => value !== area)
-                : [...selectedAreas, area];
-            }
-            cityInput.value = selectedAreas.join("、");
-            updateMachidaAreaButtons(cityInput);
-            updateSelectionDetails(selectionName);
-          });
-          areaButtons.append(button);
-        });
-        areaSuggestions.append(areaHint, areaButtons);
-        cityContainer.append(areaSuggestions);
-        cityInput.addEventListener("input", () => updateMachidaAreaButtons(cityInput));
-      }
-      option.append(label, cityContainer);
-      options.append(option);
-
+      options.append(label);
       checkbox.addEventListener("change", () => {
-        cityContainer.classList.toggle("hidden", !checkbox.checked);
-        if (!checkbox.checked) cityInput.value = "";
-        updateMachidaAreaButtons(cityInput);
+        if (checkbox.checked) {
+          options.querySelectorAll(`input[name="${inputName}"]`).forEach(other => {
+            if (other !== checkbox && (index === 0 || other.value === getLocalLocationValues(group)[0])) {
+              other.checked = false;
+            }
+          });
+        }
         updateSelectionDetails(selectionName);
       });
-      cityInput.addEventListener("input", () => updateSelectionDetails(selectionName));
     });
     regionDetails.append(summary, options);
-    regionDetails.addEventListener("toggle", () => {
-      icon.textContent = regionDetails.open ? "▲" : "▼";
-    });
     return regionDetails;
   }));
-}
-
-function updateMachidaAreaButtons(cityInput) {
-  const selectedAreas = getLocationPreferenceEntries(cityInput.value);
-  cityInput.closest("[data-city-container]")?.querySelectorAll("[data-machida-area]").forEach(button => {
-    const isSelected = selectedAreas.includes(button.dataset.machidaArea);
-    button.setAttribute("aria-pressed", String(isSelected));
-    button.classList.toggle("bg-blue-100", isSelected);
-    button.classList.toggle("font-bold", isSelected);
-  });
 }
 
 function getLocationPreferenceEntries(location) {
@@ -410,17 +374,8 @@ function getLocationPreferencesFromForm(
   inputName = "seekerLocationPrefecture",
   otherLocationId = "seekerLocation"
 ) {
-  const entries = [];
-  document.querySelectorAll(`input[name="${inputName}"]:checked`).forEach(checkbox => {
-    const prefecture = checkbox.value;
-    const cityInput = checkbox.closest("[data-location-option]")?.querySelector("[data-prefecture-city]");
-    const cities = cityInput ? getLocationPreferenceEntries(cityInput.value) : [];
-    if (cities.length) {
-      cities.forEach(city => entries.push(`${prefecture} ${city}`));
-    } else {
-      entries.push(prefecture);
-    }
-  });
+  const entries = [...document.querySelectorAll(`input[name="${inputName}"]:checked`)]
+    .map(checkbox => checkbox.value);
   entries.push(...getLocationPreferenceEntries(document.getElementById(otherLocationId).value));
   return [...new Set(entries)].join("、");
 }
@@ -432,27 +387,18 @@ function setLocationPreferences(
   containerId = "seekerLocationPrefectureOptions",
   selectionName = inputName
 ) {
-  const { preferences, otherLocations } = parseLocationPreferences(location);
+  const entries = getLocationPreferenceEntries(location);
   const container = document.getElementById(containerId);
+  const matched = new Set();
   container.querySelectorAll(`input[name="${inputName}"]`).forEach(checkbox => {
-    const cities = preferences.get(checkbox.value);
-    checkbox.checked = Boolean(cities);
-    const cityContainer = checkbox.closest("[data-location-option]").querySelector("[data-city-container]");
-    const cityInput = cityContainer.querySelector("[data-prefecture-city]");
-    cityInput.value = cities ? [...new Set(cities)].join("、") : "";
-    updateMachidaAreaButtons(cityInput);
-    cityContainer.classList.toggle("hidden", !checkbox.checked);
-    const regionDetails = checkbox.closest("details[data-prefecture-region]");
-    if (checkbox.checked) regionDetails.open = true;
-    regionDetails.querySelector("[data-region-icon]").textContent = regionDetails.open ? "▲" : "▼";
+    const entry = entries.find(value => value.replace(/\s+/g, "") === checkbox.value.replace(/\s+/g, ""));
+    checkbox.checked = Boolean(entry);
+    if (entry) matched.add(entry);
   });
-  if (!preferences.size) {
-    container.querySelectorAll("details[data-prefecture-region]").forEach(details => {
-      details.open = false;
-      details.querySelector("[data-region-icon]").textContent = "▼";
-    });
-  }
-  document.getElementById(otherLocationId).value = otherLocations.join("、");
+  container.querySelectorAll("details").forEach(details => {
+    details.open = Boolean(details.querySelector('input:checked'));
+  });
+  document.getElementById(otherLocationId).value = entries.filter(entry => !matched.has(entry)).join("、");
   updateSelectionDetails(selectionName, true);
 }
 
@@ -482,12 +428,8 @@ function updateSelectionDetails(inputName, expandSelected = false) {
   document.querySelectorAll("details[data-selection-name]").forEach(details => {
     if (details.dataset.selectionName !== inputName) return;
     if (details.dataset.locationInputName === inputName) {
-      const areas = [];
-      details.querySelectorAll(`input[name="${inputName}"]:checked`).forEach(checkbox => {
-        const cityInput = checkbox.closest("[data-location-option]")?.querySelector("[data-prefecture-city]");
-        const cities = cityInput ? getLocationPreferenceEntries(cityInput.value) : [];
-        areas.push(...(cities.length ? cities.map(city => `${checkbox.value} ${city}`) : [checkbox.value]));
-      });
+      const areas = [...details.querySelectorAll(`input[name="${inputName}"]:checked`)]
+        .map(checkbox => checkbox.value);
       const otherLocationId = details.dataset.locationOtherInput;
       areas.push(...getLocationPreferenceEntries(document.getElementById(otherLocationId).value));
       const count = details.querySelector("[data-selected-count]");
