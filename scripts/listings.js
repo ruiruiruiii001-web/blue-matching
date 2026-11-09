@@ -131,7 +131,7 @@ function renderJobList(resetLimit = false) {
       return compareJobsByNewest(a, b);
     });
 
-  jobCount.innerText = `${filteredJobs.length}件`;
+  jobCount.innerText = `求人 ${filteredJobs.length}件`;
   const activeFilters = [
     keyword && `キーワード: ${keyword}`,
     openJobsOnly && "募集中のみ",

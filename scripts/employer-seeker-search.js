@@ -150,7 +150,7 @@ function renderEmployerSeekerSearch(resetLimit = false) {
 
   if (!currentUser || accountType !== "employer") {
     results.innerHTML = "";
-    count.innerText = "0件";
+    count.innerText = "公開プロフィール 0人";
     return;
   }
 
@@ -250,7 +250,7 @@ function renderEmployerSeekerSearch(resetLimit = false) {
       return new Date(right.updated_at).getTime() - new Date(left.updated_at).getTime();
     });
 
-  count.innerText = `${filteredProfiles.length}件`;
+  count.innerText = `公開プロフィール ${filteredProfiles.length}人`;
   const activeFilters = [
     keyword && `キーワード: ${keyword}`,
     location && `勤務地: ${location}`,

@@ -5,9 +5,10 @@ const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
 const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const resendApiKey = Deno.env.get("RESEND_API_KEY") || Deno.env.get("blue-matching Email key");
 const fromEmail = Deno.env.get("RESEND_FROM_EMAIL");
-const appUrl = Deno.env.get("APP_URL") || "https://blue-matching-pi.vercel.app";
+const appUrl = Deno.env.get("APP_URL") || "https://suki-machi.com";
 const allowedOrigins = new Set([
   "https://blue-matching-pi.vercel.app",
+  "https://suki-machi.com",
   ...(Deno.env.get("APP_ORIGIN") ? [Deno.env.get("APP_ORIGIN")!] : [])
 ]);
 
@@ -23,7 +24,7 @@ function response(status: number, body: Record<string, unknown>, corsHeaders: Re
 Deno.serve(async request => {
   const origin = request.headers.get("Origin") || "";
   const corsHeaders = {
-    "Access-Control-Allow-Origin": allowedOrigins.has(origin) ? origin : "https://blue-matching-pi.vercel.app",
+    "Access-Control-Allow-Origin": allowedOrigins.has(origin) ? origin : appUrl,
     "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Vary": "Origin"

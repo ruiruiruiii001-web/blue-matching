@@ -1,9 +1,16 @@
-export const APP_URL = "https://blue-matching-pi.vercel.app";
+export const APP_URL = "https://suki-machi.com";
+const LEGACY_APP_URL = "https://blue-matching-pi.vercel.app";
 
-export function json(status: number, body: Record<string, unknown>, cors = false): Response {
+export function json(
+  status: number,
+  body: Record<string, unknown>,
+  cors = false,
+  origin = APP_URL
+): Response {
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   if (cors) {
-    headers["Access-Control-Allow-Origin"] = APP_URL;
+    headers["Access-Control-Allow-Origin"] =
+      origin === APP_URL || origin === LEGACY_APP_URL ? origin : APP_URL;
     headers["Access-Control-Allow-Headers"] = "authorization, x-client-info, apikey, content-type";
     headers["Access-Control-Allow-Methods"] = "POST, OPTIONS";
     headers["Vary"] = "Origin";

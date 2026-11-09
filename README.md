@@ -20,7 +20,7 @@
 
 掲載者は公式LINEに「連携」と送り、届いたリンクでログイン中の掲載者アカウントと連携できます。連携後の新しい応募だけを通知し、応募者名・応募本文・連絡先は送信しません。「応募・チャット」で連携状態の確認・解除ができます。LINEをブロックすると通知は届かず、ブロック解除後は未解除の連携による通知が再開します。サイト内の通知も確認してください。LINEログイン・LINE内表示・チャット通知は対象外です。
 
-連携完了時には、LINEのトークにサイトのURLと問い合わせ方法を返信します。友だち追加時の案内はLINE Official Account Managerの既存のあいさつメッセージに追加します（Webhookは友だち追加への自動返信を行いません）。トーク画面の常設リンクは、LINE Official Account ManagerのリッチメニューでURL `https://blue-matching-pi.vercel.app/` を設定します。既存のメニューがある場合は上書きに注意してください。リッチメニューはPC版LINEには表示されません。
+連携完了時には、LINEのトークにサイトのURLと問い合わせ方法を返信します。友だち追加時の案内はLINE Official Account Managerの既存のあいさつメッセージに追加します（Webhookは友だち追加への自動返信を行いません）。トーク画面の常設リンクは、LINE Official Account ManagerのリッチメニューでURL `https://suki-machi.com/` を設定します。既存のメニューがある場合は上書きに注意してください。リッチメニューはPC版LINEには表示されません。
 
 解除すると通知先のLINEユーザー識別子とLINE送信履歴を削除します。ただし解除と同時に送信処理が既に始まっていた場合、最後の通知が届くことがあります。同じLINEアカウントを別の掲載者アカウントへ変更するには、元の掲載者アカウントで先に解除してください。
 
@@ -64,6 +64,8 @@ pg_netの送信待ちキューにはワーカーの秘密値が一時的に平�
 
 ログイン中は、絞り込み条件を「この条件を保存」で5件まで保存できます。保存した条件は一覧の上に表示され、前回その条件を開いた後に掲載された求人があると「新着N件」と出ます。条件を押すと、その条件で絞り込み、新着の確認日時を更新します。事前に `supabase/migrations/20261104_add_saved_searches.sql` を実行してください。新着のメール通知は、メール設定（Resend独自ドメイン）と一緒に仕上げで対応します。
 
+勤務地・希望勤務地では町田市全域または町田駅周辺・鶴川・玉川学園・成瀬・南町田・忠生・相原を選べます。掲載者はエリアを複数選択でき、求職者は希望するエリアを複数登録できます。検索結果数は求職者側で「求人 N件」、掲載者側で「公開プロフィール N人」と表示します。掲載者が求人を基準に選ぶと、プロフィールは一致度順に並びますが、表示人数は検索条件に一致した公開プロフィールの総数です。
+
 ## 閲覧数・応募数の表示
 
 募集管理画面の掲載カードに、閲覧数と応募数が出ます。閲覧は詳細を開いたときに同じ画面の読み込み中は1回だけ数えます（投稿者本人の閲覧は対象外）。閲覧数は投稿者だけが読めます。事前に `supabase/migrations/20261105_add_job_view_counts.sql` を実行してください。募集の取得は1000件ずつに分けて行うため、件数が増えても欠けません。一覧は10件ずつ「もっと見る」で表示します。
@@ -101,11 +103,15 @@ pg_netの送信待ちキューにはワーカーの秘密値が一時的に平�
 実行済みのSQL（Supabaseで一度だけ実行）: `20261106_block_admin_self_deletion.sql`（運営者は退会不可）、`20261107_block_suspended_reregistration.sql`（停止中に退会したメールのハッシュを記録し、再登録時は停止状態で開始）。
 
 - 保存した検索条件の新着メール通知（メール設定の完了後）
-- サイトのURLを独自ドメインにする場合はVercel（Settings → Domains）への追加
+- サイトURLを `https://suki-machi.com` に切り替える（Vercel・DNS・Supabase Auth・Turnstile・LINEの設定）
 - テスト用アカウント・求人の削除と、運営者パスワードの運用用への変更
 - SMSによる電話番号確認と、同意に基づく電話番号共有
 - 規約・プライバシー・お問い合わせの仮表記（運営者名・連絡先・制定日）の差し替え
 - 公開前に、利用規約・プライバシーポリシーなどの法的文面を専門家（弁護士など）に確認してもらう
+
+### 独自ドメイン
+
+本番サイトには既存の `suki-machi.com` を使い、メール送信用の `mail.suki-machi.com` のDNSレコードは維持します。VercelのProject Settings → Domainsで `suki-machi.com` を追加し、Vercelに表示された値をムームーDNSに設定します。DNSの値はVercel画面で確認し、メール用サブドメインのレコードは変更しません。切替後はSupabase AuthのSite URLとRedirect URLs、Turnstileの許可ドメイン、Supabase Edge Functionの `APP_URL`・`APP_ORIGIN`、LINE公式アカウントのリンクも更新します。移行中は `blue-matching-pi.vercel.app` も認証リダイレクトとCORSで利用できる状態を保ちます。
 
 ## 募集の編集・公開状態
 
@@ -151,7 +157,7 @@ pg_netの送信待ちキューにはワーカーの秘密値が一時的に平�
 
 お仕事の検索条件は一覧と背景色・枠線・余白で分けて表示します。お仕事をお願いする方は募集を管理し、「応募・チャット」から応募内容・通知・応募した方とのメッセージを確認します。
 
-ログイン画面の「パスワードを忘れた場合」から再設定メールを送信できます。再設定リンクは同じサイトへ戻るため、Supabase Dashboard の **Authentication → URL Configuration → Redirect URLs** に `https://blue-matching-pi.vercel.app/**` を登録してください。メール内のリンクをスマートフォンで開き、新しいパスワードを2回入力して保存します。
+ログイン画面の「パスワードを忘れた場合」から再設定メールを送信できます。再設定リンクは同じサイトへ戻るため、Supabase Dashboard の **Authentication → URL Configuration** で Site URL を `https://suki-machi.com` に設定し、Redirect URLs に `https://suki-machi.com/**` を登録してください。既存URLからの移行中は `https://blue-matching-pi.vercel.app/**` も残します。メール内のリンクをスマートフォンで開き、新しいパスワードを2回入力して保存します。
 
 他の求人スキーマ移行（募集状態・勤務地・給与条件）をまだ実行していない場合は、先に「Supabase の準備」のSQLを実行し、その後に次のファイルを実行してください。この移行は `published_jobs` の既存RLSポリシーをすべて置き換え、公開読み取りと、投稿者本人に限定した作成・更新・削除を設定します。既存求人の `owner_id` は空のまま公開閲覧でき、投稿者に紐付けられないため管理操作はできません。既存求人のデータは削除されません。
 
@@ -165,7 +171,7 @@ pg_netの送信待ちキューにはワーカーの秘密値が一時的に平�
 
 ### 新規登録のCAPTCHA（Cloudflare Turnstile）
 
-1. CloudflareでTurnstileウィジェットを作成し、ドメインに `blue-matching-pi.vercel.app` を登録します。
+1. Cloudflare Turnstileウィジェットに `suki-machi.com` と、移行中は `blue-matching-pi.vercel.app` も登録します。
 2. 発行されたSitekeyを `index.html`、`signup.html`、`admin.html` の `cloudflare-turnstile-sitekey` メタタグの `content` に設定してサイトを再デプロイします。Sitekeyは公開用ですが、Secret keyはソースコードやGitHubに置かないでください。
 3. Supabase Dashboardの **Authentication → Bot and Abuse Protection** でCAPTCHAを有効にし、Cloudflare Turnstileを選択してSecret keyを登録・保存します。サイト側のデプロイが完了する前にSupabase側を有効化すると、新規登録できなくなるため順番を守ってください。
 4. 公開サイトでTurnstileが表示されることを確認し、CAPTCHAを完了してから新規登録できることをテストします。Turnstile確認に成功して新規登録を送信すると、Supabase AuthがSecret keyを使ってCloudflare Siteverifyをサーバー側で呼び出します。アプリのブラウザーコードからSiteverifyを直接呼び出したり、Secret keyを配置したりしないでください。

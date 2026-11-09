@@ -60,6 +60,16 @@ const PREFECTURE_GROUPS = [
 ];
 
 const PREFECTURES = PREFECTURE_GROUPS.flatMap(([, prefectures]) => prefectures);
+const MACHIDA_AREA_OPTIONS = [
+  "町田市",
+  "町田市 町田駅周辺",
+  "町田市 鶴川",
+  "町田市 玉川学園",
+  "町田市 成瀬",
+  "町田市 南町田",
+  "町田市 忠生",
+  "町田市 相原"
+];
 
 function getNormalizedJobTags(values) {
   const tags = Array.isArray(values) ? values : [];
@@ -308,12 +318,48 @@ function renderLocationPreferenceOptions(
       cityInput.className = "mt-1 h-10 w-full rounded border px-3 py-2 text-sm text-gray-900";
       cityLabel.append(cityInput);
       cityContainer.append(cityLabel);
+      if (prefecture === "東京都") {
+        const areaSuggestions = document.createElement("div");
+        areaSuggestions.className = "mt-2";
+        const areaHint = document.createElement("p");
+        areaHint.className = "mb-1 text-[11px] text-gray-500";
+        areaHint.textContent = "町田市のエリア候補（複数選択可）";
+        const areaButtons = document.createElement("div");
+        areaButtons.className = "flex flex-wrap gap-1.5";
+        MACHIDA_AREA_OPTIONS.forEach(area => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.textContent = area === "町田市" ? "町田市全域" : area.replace("町田市 ", "");
+          button.dataset.machidaArea = area;
+          button.setAttribute("aria-pressed", "false");
+          button.className = "rounded-full border border-blue-200 bg-white px-2.5 py-1 text-xs text-blue-800 hover:bg-blue-50";
+          button.addEventListener("click", () => {
+            let selectedAreas = getLocationPreferenceEntries(cityInput.value);
+            if (area === "町田市") {
+              selectedAreas = selectedAreas.includes(area) ? [] : [area];
+            } else {
+              selectedAreas = selectedAreas.filter(value => value !== "町田市");
+              selectedAreas = selectedAreas.includes(area)
+                ? selectedAreas.filter(value => value !== area)
+                : [...selectedAreas, area];
+            }
+            cityInput.value = selectedAreas.join("、");
+            updateMachidaAreaButtons(cityInput);
+            updateSelectionDetails(selectionName);
+          });
+          areaButtons.append(button);
+        });
+        areaSuggestions.append(areaHint, areaButtons);
+        cityContainer.append(areaSuggestions);
+        cityInput.addEventListener("input", () => updateMachidaAreaButtons(cityInput));
+      }
       option.append(label, cityContainer);
       options.append(option);
 
       checkbox.addEventListener("change", () => {
         cityContainer.classList.toggle("hidden", !checkbox.checked);
         if (!checkbox.checked) cityInput.value = "";
+        updateMachidaAreaButtons(cityInput);
         updateSelectionDetails(selectionName);
       });
       cityInput.addEventListener("input", () => updateSelectionDetails(selectionName));
@@ -324,6 +370,16 @@ function renderLocationPreferenceOptions(
     });
     return regionDetails;
   }));
+}
+
+function updateMachidaAreaButtons(cityInput) {
+  const selectedAreas = getLocationPreferenceEntries(cityInput.value);
+  cityInput.closest("[data-city-container]")?.querySelectorAll("[data-machida-area]").forEach(button => {
+    const isSelected = selectedAreas.includes(button.dataset.machidaArea);
+    button.setAttribute("aria-pressed", String(isSelected));
+    button.classList.toggle("bg-blue-100", isSelected);
+    button.classList.toggle("font-bold", isSelected);
+  });
 }
 
 function getLocationPreferenceEntries(location) {
@@ -384,6 +440,7 @@ function setLocationPreferences(
     const cityContainer = checkbox.closest("[data-location-option]").querySelector("[data-city-container]");
     const cityInput = cityContainer.querySelector("[data-prefecture-city]");
     cityInput.value = cities ? [...new Set(cities)].join("、") : "";
+    updateMachidaAreaButtons(cityInput);
     cityContainer.classList.toggle("hidden", !checkbox.checked);
     const regionDetails = checkbox.closest("details[data-prefecture-region]");
     if (checkbox.checked) regionDetails.open = true;
