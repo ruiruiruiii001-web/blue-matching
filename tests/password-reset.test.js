@@ -8,10 +8,12 @@ function setup({ token = "captcha-token", email = "user@example.test", outcome =
   const script = fs.readFileSync(path.join(__dirname, "..", "scripts", "account.js"), "utf8");
   const nodes = {
     employerEmail: { value: email, focus() {} },
+    passwordResetEmail: { value: email, focus() {} },
+    sendPasswordResetButton: { disabled: false },
     authMessage: { innerText: "", classList: { add() {}, remove() {} } },
     turnstileStatus: { innerText: "", classList: { toggle() {} } }
   };
-  const button = { disabled: false };
+  const button = nodes.sendPasswordResetButton;
   const calls = [];
   let resets = 0;
   const context = vm.createContext({
@@ -52,6 +54,38 @@ test("password reset sends CAPTCHA and resets it after success", async () => {
   assert.equal(state.getResets(), 1);
   assert.equal(state.button.disabled, false);
   assert.match(state.nodes.authMessage.innerText, /送信しました/);
+});
+
+test("password reset opens a dedicated view, carries email and returns to login", () => {
+  const state = setup();
+  const classes = new Map();
+  for (const id of ["loginFields", "loginActions", "passwordResetRequestPanel", "passwordResetRequestActions"]) {
+    const values = new Set(id.startsWith("passwordReset") ? ["hidden"] : []);
+    classes.set(id, values);
+    state.nodes[id] = {
+      classList: {
+        add: value => values.add(value),
+        remove: value => values.delete(value)
+      }
+    };
+  }
+  state.nodes.loginOverlayTitle = { textContent: "ログイン" };
+  let focused = false;
+  state.nodes.passwordResetEmail.focus = () => { focused = true; };
+  state.context.showPasswordResetRequest();
+  assert.equal(state.nodes.passwordResetEmail.value, "user@example.test");
+  assert.equal(state.nodes.loginOverlayTitle.textContent, "パスワード再設定メールの送信");
+  assert.equal(classes.get("loginFields").has("hidden"), true);
+  assert.equal(classes.get("loginActions").has("hidden"), true);
+  assert.equal(classes.get("passwordResetRequestPanel").has("hidden"), false);
+  assert.equal(classes.get("passwordResetRequestActions").has("hidden"), false);
+  assert.equal(focused, true);
+  state.context.hidePasswordResetRequest();
+  assert.equal(state.nodes.loginOverlayTitle.textContent, "ログイン");
+  assert.equal(classes.get("loginFields").has("hidden"), false);
+  assert.equal(classes.get("loginActions").has("hidden"), false);
+  assert.equal(classes.get("passwordResetRequestPanel").has("hidden"), true);
+  assert.equal(classes.get("passwordResetRequestActions").has("hidden"), true);
 });
 
 test("password reset requires a valid email and CAPTCHA", async () => {

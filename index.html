@@ -156,26 +156,34 @@
     <!-- お仕事をお願いする方向け：募集作成 -->
     <section id="employerSection" class="space-y-6 hidden">
       <div id="employerAuthPanel" class="bg-white p-6 rounded-lg shadow-md">
-        <p class="text-sm text-gray-600 mb-4">プロフィールの保存や、お仕事の投稿・応募への返信にはログインが必要です。</p>
         <div id="employerLoggedOut" class="space-y-3">
-          <div>
-            <label for="employerEmail" class="block text-sm font-medium mb-1">メールアドレス</label>
-            <input type="email" id="employerEmail" autocomplete="email" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+          <div id="loginFields" class="space-y-3">
+            <p class="text-sm text-gray-600">プロフィールの保存や、お仕事の投稿・応募への返信にはログインが必要です。</p>
+            <div>
+              <label for="employerEmail" class="block text-sm font-medium mb-1">メールアドレス</label>
+              <input type="email" id="employerEmail" autocomplete="email" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+            <div>
+              <label for="employerPassword" class="block text-sm font-medium mb-1">パスワード（8文字以上）</label>
+              <input type="password" id="employerPassword" autocomplete="current-password" minlength="8" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
           </div>
-          <div>
-            <label for="employerPassword" class="block text-sm font-medium mb-1">パスワード（8文字以上）</label>
-            <input type="password" id="employerPassword" autocomplete="current-password" minlength="8" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-          </div>
-          <button type="button" onclick="signInEmployer()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg transition">ログイン</button>
-          <a href="signup.html" class="block text-center text-sm font-bold text-blue-700 underline">新規登録はこちら</a>
-          <button type="button" onclick="showPasswordResetRequest()" class="text-sm text-blue-700 underline">パスワードを忘れた場合</button>
-          <div id="passwordResetRequestPanel" class="hidden border-t pt-3 space-y-2">
-            <p class="text-sm font-medium">登録したメールアドレスに再設定リンクを送ります。</p>
-            <button type="button" onclick="sendPasswordReset()" class="w-full border border-blue-600 text-blue-700 font-bold py-2 rounded-lg">再設定メールを送る</button>
-            <button type="button" onclick="hidePasswordResetRequest()" class="text-sm text-gray-600 underline">ログインに戻る</button>
+          <div id="passwordResetRequestPanel" class="hidden space-y-3">
+            <p class="text-sm leading-6 text-gray-700">登録したメールアドレスに、パスワードを再設定するためのリンクを送ります。</p>
+            <label for="passwordResetEmail" class="block text-sm font-medium">登録したメールアドレス</label>
+            <input type="email" id="passwordResetEmail" autocomplete="email" class="w-full border rounded px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
           </div>
           <div id="employerTurnstile" class="min-h-4"></div>
           <p id="turnstileStatus" role="status" aria-live="polite" class="text-xs text-gray-500">ログインと再設定メールの送信にはCAPTCHA確認が必要です。現在、設定準備中です。</p>
+          <div id="loginActions" class="space-y-3">
+            <button type="button" onclick="signInEmployer()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg transition">ログイン</button>
+            <a href="signup.html" class="block text-center text-sm font-bold text-blue-700 underline">新規登録はこちら</a>
+            <button type="button" onclick="showPasswordResetRequest()" class="text-sm text-blue-700 underline">パスワードを忘れた場合</button>
+          </div>
+          <div id="passwordResetRequestActions" class="hidden space-y-3">
+            <button id="sendPasswordResetButton" type="button" onclick="sendPasswordReset()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg">再設定メールを送る</button>
+            <button type="button" onclick="hidePasswordResetRequest()" class="text-sm text-gray-600 underline">ログインに戻る</button>
+          </div>
         </div>
         <div id="employerLoggedIn" class="hidden items-center justify-between gap-3">
           <p class="text-sm text-gray-700">ログイン中: <span id="employerAccountEmail" class="font-medium"></span></p>
@@ -737,28 +745,14 @@
     </section>
 
         <!-- お仕事一覧 -->
-    <section id="jobListSection" class="h-fit order-first md:col-span-2">
-      <p class="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">現在テスト運用中のため、不具合が起こる場合があります。ご質問・ご感想や不具合は<a href="contact.html" class="font-bold underline">公式LINEからお問い合わせください</a>。</p>
-      <p id="pilotEmailNotice" class="mb-4 hidden text-sm text-gray-700">テスト運用中は応募やチャットなどの通知メールを送信しません。進捗はマイページで確認してください。登録確認・パスワード再設定のメールは送信します。</p>
-      <button id="showOnboardingGuide" type="button" onclick="showOnboardingGuide()" class="mb-4 hidden min-h-10 rounded-lg border border-blue-200 bg-white px-3 py-2 text-sm font-bold text-blue-800">はじめての方向けの案内を見る</button>
-      <section id="onboardingGuide" aria-label="はじめての方へ" class="mb-6 hidden rounded-2xl border border-blue-200 bg-blue-50 p-4 shadow-sm sm:p-5">
-        <div class="flex items-start justify-between gap-3">
-          <h2 class="text-base font-black text-blue-900">はじめての方へ</h2>
-          <button type="button" onclick="dismissOnboardingGuide()" class="min-h-10 shrink-0 rounded-lg border border-blue-200 bg-white px-3 py-2 text-xs font-bold text-blue-800 hover:bg-blue-100">閉じる（次回から表示しない）</button>
-        </div>
-        <div data-guide-body class="mt-3"></div>
-      </section>
-      <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-6">
-        <div class="flex justify-between items-center gap-3 border-b border-gray-50 pb-3">
-          <h2 id="jobListTitle" class="text-xl font-black text-gray-800">お仕事一覧</h2>
-          <span id="jobCount" class="text-xs bg-blue-600 text-white px-3 py-1 rounded-full font-bold shadow-sm shadow-blue-100">0件</span>
-        </div>
-        <p id="jobTrustNotice" class="mt-3 text-[11px] font-medium text-amber-700 flex items-center gap-1.5">
-          <span class="text-base">⚠️</span> 掲載者の本人確認は行っていません。応募前に作業内容・場所・報酬をご確認ください。連絡は応募後にサイト内で行えます。
-        </p>
-        <p id="jobListDescription" class="mt-3 text-xs text-gray-500 hidden leading-relaxed">希望する仕事・地域・報酬条件の一致度を目安にお仕事をおすすめ順で表示します。検索条件は以下のパネルから変更できます。</p>
-      </div>
-      <div id="jobSearchPanel" role="search" class="mt-5 mb-8 rounded-2xl border border-blue-200 bg-blue-50 p-4 shadow-sm sm:p-5">
+        <section id="jobListSection" class="h-fit order-first md:col-span-2">
+          <div class="mb-3">
+            <div class="flex justify-between items-center gap-3">
+              <h2 id="jobListTitle" class="text-xl font-black text-gray-800">お仕事一覧</h2>
+              <span id="jobCount" class="text-xs bg-blue-600 text-white px-3 py-1 rounded-full font-bold shadow-sm shadow-blue-100">0件</span>
+            </div>
+          </div>
+          <div id="jobSearchPanel" role="search" class="mb-4 rounded-2xl border border-blue-200 bg-blue-50 p-4 shadow-sm sm:p-5">
         <section id="employerSeekerSearch" class="hidden rounded-xl border border-blue-200 bg-white p-4 sm:p-5">
           <div class="mb-4">
             <h3 class="text-base font-bold text-blue-900">プロフィールから働ける人を探す</h3>
@@ -943,8 +937,24 @@
       </div>
       </div>
 
+      <p id="jobTrustNotice" class="text-xs font-medium text-amber-700 flex items-center gap-1.5">
+        <span class="text-base">⚠️</span> 掲載者の本人確認は行っていません。応募前に作業内容・場所・報酬をご確認ください。連絡は応募後にサイト内で行えます。
+      </p>
+      <p id="jobListDescription" class="mt-3 text-xs text-gray-500 hidden leading-relaxed">希望する仕事・地域・報酬条件の一致度を目安にお仕事をおすすめ順で表示します。</p>
             <div id="jobList" class="mt-6 space-y-4 pr-0" aria-live="polite">
         <!-- お仕事カード -->
+      </div>
+      <div class="mt-6">
+        <p class="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">現在テスト運用中のため、不具合が起こる場合があります。ご質問・ご感想や不具合は<a href="contact.html" class="font-bold underline">公式LINEからお問い合わせください</a>。</p>
+        <p id="pilotEmailNotice" class="mb-4 hidden text-sm text-gray-700">テスト運用中は応募やチャットなどの通知メールを送信しません。進捗はマイページで確認してください。登録確認・パスワード再設定のメールは送信します。</p>
+        <button id="showOnboardingGuide" type="button" onclick="showOnboardingGuide()" class="mb-4 hidden min-h-10 rounded-lg border border-blue-200 bg-white px-3 py-2 text-sm font-bold text-blue-800">はじめての方向けの案内を見る</button>
+        <section id="onboardingGuide" aria-label="はじめての方へ" class="mb-6 hidden rounded-2xl border border-blue-200 bg-blue-50 p-4 shadow-sm sm:p-5">
+          <div class="flex items-start justify-between gap-3">
+            <h2 class="text-base font-black text-blue-900">はじめての方へ</h2>
+            <button type="button" onclick="dismissOnboardingGuide()" class="min-h-10 shrink-0 rounded-lg border border-blue-200 bg-white px-3 py-2 text-xs font-bold text-blue-800 hover:bg-blue-100">閉じる（次回から表示しない）</button>
+          </div>
+          <div data-guide-body class="mt-3"></div>
+        </section>
       </div>
     </section>
 

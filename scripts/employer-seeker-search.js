@@ -46,7 +46,7 @@ function updateAccountSearchSurface() {
   jobListTitle.innerText = activeTab === "seeker" ? "あなたに合う仕事を探す" : "お仕事一覧";
   jobListDescription?.classList.toggle("hidden", activeTab !== "seeker");
   if (jobListDescription && activeTab === "seeker") {
-    jobListDescription.innerText = "希望する仕事・地域・報酬条件の一致度を目安にお仕事を表示します。検索条件は以下のパネルから変更できます。";
+    jobListDescription.innerText = "希望する仕事・地域・報酬条件の一致度を目安にお仕事を表示します。検索条件は上のパネルから変更できます。";
   }
 }
 

@@ -294,6 +294,7 @@ function openLoginPanel(toggle = true) {
 
 function closeLoginPanel(returnFocus = true) {
   if (!loginPanelOpen) return;
+  hidePasswordResetRequest(false);
   const authPanel = document.getElementById("employerAuthPanel");
   if (loginPanelReturnPlaceholder?.parentNode) {
     loginPanelReturnPlaceholder.replaceWith(authPanel);
@@ -439,25 +440,31 @@ function setAuthMessage(message, isError = false) {
 }
 
 function showPasswordResetRequest() {
-  const email = document.getElementById("employerEmail").value.trim();
+  document.getElementById("passwordResetEmail").value = document.getElementById("employerEmail").value.trim();
+  document.getElementById("loginFields").classList.add("hidden");
+  document.getElementById("loginActions").classList.add("hidden");
   document.getElementById("passwordResetRequestPanel").classList.remove("hidden");
-  if (!email) {
-    document.getElementById("employerEmail").focus();
-    setAuthMessage("登録したメールアドレスを入力してから、再設定メールを送ってください。", true);
-    return;
-  }
-  setAuthMessage("登録したメールアドレスを確認し、「再設定メールを送る」を押してください。");
+  document.getElementById("passwordResetRequestActions").classList.remove("hidden");
+  document.getElementById("loginOverlayTitle").textContent = "パスワード再設定メールの送信";
+  document.getElementById("authMessage").classList.add("hidden");
+  document.getElementById("passwordResetEmail").focus();
 }
 
-function hidePasswordResetRequest() {
+function hidePasswordResetRequest(returnFocus = true) {
   document.getElementById("passwordResetRequestPanel").classList.add("hidden");
+  document.getElementById("passwordResetRequestActions").classList.add("hidden");
+  document.getElementById("loginFields").classList.remove("hidden");
+  document.getElementById("loginActions").classList.remove("hidden");
+  document.getElementById("loginOverlayTitle").textContent = "ログイン";
+  document.getElementById("authMessage").classList.add("hidden");
+  if (returnFocus) document.getElementById("employerEmail").focus();
 }
 
 async function sendPasswordReset() {
-  const email = document.getElementById("employerEmail").value.trim();
+  const email = document.getElementById("passwordResetEmail").value.trim();
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     setAuthMessage("登録したメールアドレスを正しく入力してください。", true);
-    document.getElementById("employerEmail").focus();
+    document.getElementById("passwordResetEmail").focus();
     return;
   }
   if (!turnstileToken) {
@@ -465,7 +472,7 @@ async function sendPasswordReset() {
     return;
   }
 
-  const button = document.querySelector("#passwordResetRequestPanel button[onclick='sendPasswordReset()']");
+  const button = document.getElementById("sendPasswordResetButton");
   button.disabled = true;
   try {
     const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
